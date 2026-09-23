@@ -13,6 +13,6 @@ I write these notes in English to organize course material and work through the 
 
 | Course | Notes | Status |
 | --- | --- | --- |
-| Fundamentals of Statistical Learning | [Read the PDF](Fundamentals%20of%20Statistical%20Learning/appunti.pdf) | In progress |
+| Fundamentals of Statistical Learning | [Read the PDF](First%20year/First%20semester/Fundamentals%20of%20Statistical%20Learning/appunti.pdf) | In progress |
 
 The Fundamentals of Statistical Learning notes begin with a crash course in probability. If you spot an error, feel free to [open an issue](https://github.com/teoang/msc-data-science/issues).
