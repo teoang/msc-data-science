@@ -10,7 +10,7 @@
 
 | Course | Notes | Status |
 | --- | --- | --- |
-| Fundamentals of Statistical Learning | [📖 Open PDF](First%20year/First%20semester/Fundamentals%20of%20Statistical%20Learning/appunti.pdf) | 🟡 In progress |
+| Fundamentals of Statistical Learning | [📖 Open PDF](First%20year/First%20semester/Fundamentals%20of%20Statistical%20Learning/Fundamentals_of_Statistical_Learning_Notes.pdf) | 🟡 In progress |
 
 ## About
 
