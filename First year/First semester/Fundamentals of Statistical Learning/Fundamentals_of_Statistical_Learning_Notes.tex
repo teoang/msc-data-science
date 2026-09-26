@@ -1061,4 +1061,90 @@ function} (PDF), such that, for every $a\leq b$,
 \end{enumerate}
 \end{frameddefn}
 
+\Needspace{22\baselineskip}
+\begin{framedexample}{Waiting for a bus}
+Suppose a bus arrives every $10$ minutes and you reach the stop
+at a uniformly random time between two arrivals. Let $X$ be your
+waiting time in minutes. Intervals of the same length have the
+same probability, so the density is constant on $[0,10]$.
+Its height is $1/10$, since the total area must be $1$.
+
+Its \emph{probability density function} (PDF) is:
+\[
+  f_X(x)=
+  \begin{cases}
+    1/10, & 0\leq x\leq10,\\
+    0, & \text{otherwise}.
+  \end{cases}
+\]
+It satisfies $f_X(x)\geq0$ for every $x$, and
+$\int_{\mathbb R}f_X(x)\,dx=\int_0^{10}(1/10)\,dx=1$.
+
+Its \emph{support}, using the convention above, is $[0,10]$.
+
+Let's see an example that shows how to use the PDF to calculate
+the probability of an event. The probability of waiting between
+$2$ and $5$ minutes is:
+\[
+  P(2\leq X\leq5)=\int_2^5\frac1{10}\,dx
+    =\frac{5-2}{10}=0.30.
+\]
+\end{framedexample}
+
+\Needspace{25\baselineskip}
+\begin{framedexample}{The PDF of the distance in darts}
+Return to the example above of a dart hitting a disc uniformly over
+its area, now with radius $10$ cm. Let $X$ be the distance from the centre in centimetres.
+Here the PDF is not given: we want to find it from the assumption
+that regions of equal area have equal probability.
+
+Recall the result obtained above using areas: for $0\leq x\leq10$,
+\[
+  P(X\leq x)=\frac{\pi x^2}{\pi\cdot10^2}=\frac{x^2}{100}.
+\]
+
+\textbf{Next, find the density that reproduces these probabilities.}
+By the definition of a PDF, we need
+\[
+  \int_0^x f_X(t)\,dt=\frac{x^2}{100}.
+\]
+Differentiating both sides for $0<x<10$ gives
+\[
+  f_X(x)=\frac{d}{dx}\left(\frac{x^2}{100}\right)
+    =\frac{2x}{100}=\frac{x}{50}.
+\]
+Thus we have derived the density from the model, rather than
+chosen it arbitrarily.
+
+Its \emph{probability density function} (PDF) is:
+\[
+  f_X(x)=
+  \begin{cases}
+    x/50, & 0\leq x\leq10,\\
+    0, & \text{otherwise}.
+  \end{cases}
+\]
+It satisfies $f_X(x)\geq0$ for every $x$, and
+\[
+  \int_{\mathbb R}f_X(x)\,dx
+    =\int_0^{10}\frac{x}{50}\,dx
+    =\left[\frac{x^2}{100}\right]_0^{10}=1.
+\]
+Its \emph{support}, using the convention above and this choice
+of density, is $(0,10]$.
+
+Now that we have derived the PDF, we can use it, for example, to
+calculate the probability that the dart lands between $5$ and $8$ cm
+from the centre:
+\[
+  P(5\leq X\leq8)=\int_5^8\frac{x}{50}\,dx
+    =\frac{8^2-5^2}{100}=\frac{64-25}{100}=0.39.
+\]
+We can check the result directly with the area of the ring:
+\[
+  \frac{\pi\cdot8^2-\pi\cdot5^2}{\pi\cdot10^2}
+    =\frac{39}{100}=0.39.
+\]
+\end{framedexample}
+
 \end{document}
