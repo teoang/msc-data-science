@@ -16,4 +16,6 @@
 
 I write these notes in English to organize what I learn and work through the material in my own words. They are works in progress and may contain mistakes or omissions; use them alongside the lectures and recommended textbooks.
 
+The LaTeX sources are available, but the custom style package `learningnotes.sty` is not included. To compile the sources, replace the package and its custom environments with your own definitions.
+
 🐛 Found an error? [Open an issue](https://github.com/teoang/msc-data-science/issues).
