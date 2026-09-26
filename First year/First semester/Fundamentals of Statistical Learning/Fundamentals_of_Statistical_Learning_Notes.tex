@@ -978,4 +978,62 @@ For the target of radius $10$ cm,
 \]
 \end{framedexample}
 
+\clearpage
+\section{Discrete random variables}
+
+\begin{frameddefn}{Discrete random variable and PMF}
+\label{def:discrete-pmf}
+A random variable $X$ is \emph{discrete} if there is a finite or
+countably infinite set\begingroup\renewcommand{\thefootnote}{\fnsymbol{footnote}}\footnotemark[1]\endgroup
+$\mathcal X=\{x_1,x_2,\ldots\}$ such that
+$P(X\in\mathcal X)=1$.
+
+Its \emph{probability mass function} (PMF) is
+\[
+  p_X(x)=P(X=x),\qquad x\in\mathbb R.
+\]
+It satisfies
+\[
+  p_X(x)\geq0\quad\text{for every }x,
+  \qquad \sum_{x\in\mathcal X}p_X(x)=1.
+\]
+The \emph{support}, in the discrete sense used here, is
+\[
+  \operatorname{supp}(X)=\{x\in\mathbb R:p_X(x)>0\}.
+\]
+Thus the support lists the values that have positive probability;
+values outside it have probability zero. For any set $E$,
+\[
+  P(X\in E)=\sum_{x\in E\cap\operatorname{supp}(X)}p_X(x).
+\]
+\end{frameddefn}
+
+\begingroup
+\renewcommand{\thefootnote}{\fnsymbol{footnote}}
+\footnotetext[1]{A finite set has finitely many elements. A set $A$ is countably infinite if there exists a bijection $f:\mathbb N\to A$.}
+\endgroup
+
+\Needspace{17\baselineskip}
+\begin{framedexample}{The PMF of a fair die}
+Roll a fair six-sided die and let $X$ be the number shown. Then
+\[
+  p_X(x)=
+  \begin{cases}
+    1/6, & x\in\{1,2,3,4,5,6\},\\
+    0, & \text{otherwise}.
+  \end{cases}
+\]
+The support is $\operatorname{supp}(X)=\{1,2,3,4,5,6\}$, since each
+of these values has positive probability. For example,
+$p_X(3)=1/6$, whereas $p_X(7)=0$ and $7$ is outside the support.
+The six probabilities add up to $6\cdot(1/6)=1$.
+
+To find the probability of an even result, add the masses of the
+three corresponding values:
+\[
+  P(X\in\{2,4,6\})=p_X(2)+p_X(4)+p_X(6)
+    =\frac16+\frac16+\frac16=\frac12.
+\]
+\end{framedexample}
+
 \end{document}
