@@ -992,20 +992,14 @@ Its \emph{probability mass function} (PMF) is
 \[
   p_X(x)=P(X=x),\qquad x\in\mathbb R.
 \]
-It satisfies
-\[
-  p_X(x)\geq0\quad\text{for every }x,
-  \qquad \sum_{x\in\mathcal X}p_X(x)=1.
-\]
-The \emph{support}, in the discrete sense used here, is
-\[
-  \operatorname{supp}(X)=\{x\in\mathbb R:p_X(x)>0\}.
-\]
-Thus the support lists the values that have positive probability;
-values outside it have probability zero. For any set $E$,
-\[
-  P(X\in E)=\sum_{x\in E\cap\operatorname{supp}(X)}p_X(x).
-\]
+\begin{enumerate}
+  \item $p_X(x)\geq0$ for every $x\in\mathbb R$.
+  \item The \emph{support}, in the discrete sense used here, is
+    $\operatorname{supp}(X)=\{x\in\mathbb R:p_X(x)>0\}$.
+    Thus the support lists the values that have positive probability;
+    values outside it have probability zero.
+  \item $\displaystyle\sum_{x\in\mathcal X}p_X(x)=1$.
+\end{enumerate}
 \end{frameddefn}
 
 \begingroup
@@ -1013,9 +1007,18 @@ values outside it have probability zero. For any set $E$,
 \footnotetext[1]{A finite set has finitely many elements. A set $A$ is countably infinite if there exists a bijection $f:\mathbb N\to A$.}
 \endgroup
 
+By countable additivity, for any set $E$,
+\[
+  P(X\in E)=\sum_{x\in E\cap\operatorname{supp}(X)}p_X(x).
+\]
+
 \Needspace{17\baselineskip}
 \begin{framedexample}{The PMF of a fair die}
-Roll a fair six-sided die and let $X$ be the number shown. Then
+Roll a fair six-sided die and let $X$ be the number shown.
+The random variable $X$ is discrete because the finite set
+$\mathcal X=\{1,2,3,4,5,6\}$ satisfies $P(X\in\mathcal X)=1$.
+
+Its \emph{probability mass function} (PMF) is:
 \[
   p_X(x)=
   \begin{cases}
@@ -1023,10 +1026,12 @@ Roll a fair six-sided die and let $X$ be the number shown. Then
     0, & \text{otherwise}.
   \end{cases}
 \]
-The support is $\operatorname{supp}(X)=\{1,2,3,4,5,6\}$, since each
-of these values has positive probability. For example,
+It satisfies $p_X(x)\geq0$ for every $x$, and
+$\sum_{x\in\mathcal X}p_X(x)=6\cdot(1/6)=1$.
+
+Its \emph{support} is $\operatorname{supp}(X)=\{1,2,3,4,5,6\}$,
+since each of these values has positive probability. For example,
 $p_X(3)=1/6$, whereas $p_X(7)=0$ and $7$ is outside the support.
-The six probabilities add up to $6\cdot(1/6)=1$.
 
 Let's see an example that shows how to use the PMF to calculate
 the probability of an event. To find the probability of rolling
@@ -1036,5 +1041,24 @@ an even number, we add the probabilities of rolling $2$, $4$, or $6$:
     =\frac16+\frac16+\frac16=\frac12.
 \]
 \end{framedexample}
+
+\clearpage
+\section{Continuous random variables}
+
+\begin{frameddefn}{Continuous random variable and PDF}
+\label{def:continuous-pdf}
+A random variable $X$ is \emph{continuous} (in the sense used here)
+if there exists a function $f_X$, called its \emph{probability density
+function} (PDF), such that, for every $a\leq b$,
+\[
+  P(a\leq X\leq b)=\int_a^b f_X(x)\,dx.
+\]
+\begin{enumerate}
+  \item $f_X(x)\geq0$ for every $x\in\mathbb R$.
+  \item Following the convention in the slides, the \emph{support} is
+    $\operatorname{supp}(X)=\{x\in\mathbb R:f_X(x)>0\}$.
+  \item $\displaystyle\int_{\mathbb R}f_X(x)\,dx=1$.
+\end{enumerate}
+\end{frameddefn}
 
 \end{document}
