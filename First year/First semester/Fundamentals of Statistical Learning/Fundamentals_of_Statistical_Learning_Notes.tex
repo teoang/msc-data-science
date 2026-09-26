@@ -865,8 +865,117 @@ To get exactly one head, we need either $HT$ or $TH$. Therefore
   X^{-1}(\{1\})=\{HT,TH\},
   \qquad P(X=1)=P(\{HT,TH\})=\frac24=\frac12.
 \]
-The number $1$ is a value of $X$; $HT$ and $TH$ are the outcomes
-that produce it.
+\end{framedexample}
+
+\clearpage
+\begin{framedexample}{Counting tails in five coin tosses}
+Toss a fair coin five times, with independent tosses. Write $H$ for
+heads and $T$ for tails. The sample space is $\Omega=\{H,T\}^5$,
+containing $2^5=32$ sequences. Let $X$ count the tails in a sequence,
+so its possible values are $0,1,2,3,4,5$.
+
+Each particular sequence has probability $(1/2)^5=1/32$. For example,
+$HHHHH$ and $TTHHH$ are equally likely, although they give different
+values of $X$.
+
+\textbf{No tails.} Only $HHHHH$ gives zero tails:
+\begin{flalign*}
+  P(X=0)
+    &=P\bigl(X^{-1}(\{0\})\bigr) &&\\
+    &=P(\{HHHHH\}) &&\\
+    &=\binom50\left(\frac12\right)^5=\frac1{32}. &&
+\end{flalign*}
+\textbf{One tail.} The tail can occupy any of the five positions:
+\begin{flalign*}
+  P(X=1)
+    &=P\bigl(X^{-1}(\{1\})\bigr) &&\\
+    &=P(\{THHHH,HTHHH,HHTHH,HHHTH,HHHHT\}) &&\\
+    &=\binom51\left(\frac12\right)^5=\frac5{32}. &&
+\end{flalign*}
+\textbf{Two tails.} Choose which two of the five positions contain
+tails. The corresponding event contains $\binom52=10$ sequences:
+\begin{flalign*}
+  P(X=2)
+    &=P\bigl(X^{-1}(\{2\})\bigr) &&\\
+    &=P(\{TTHHH,THTHH,\ldots,HHHTT\}) &&\\
+    &=\binom52\left(\frac12\right)^5=\frac{10}{32}. &&
+\end{flalign*}
+In general, exactly $x$ tails can occur in $\binom5x$ sequences.
+Summing their probabilities gives
+\[
+  \boxed{P(X=x)=P\bigl(X^{-1}(\{x\})\bigr)
+    =\binom5x\left(\frac12\right)^5},
+  \qquad x\in\{0,1,2,3,4,5\},
+\]
+The two factors are the number of
+sequences with $x$ tails and the probability of each sequence.
+\end{framedexample}
+
+\clearpage
+\begin{framedexample}{Darts: distance from the centre}
+Throw a dart at a circular target of radius $r>0$. Assume that the dart
+always hits the disc and that its hitting point is uniform over the
+surface: regions with the same area have the same probability of being hit.
+
+Place the centre at the origin. An outcome is the hitting point
+$\omega=(u,v)$, so the sample space is
+\[
+  \Omega=\{(u,v)\in\mathbb R^2:u^2+v^2\leq r^2\}.
+\]
+Let $X$ measure the distance from that point to the centre:
+\[
+  X:\Omega\to\mathbb R,
+  \qquad X(u,v)=\sqrt{u^2+v^2}.
+\]
+For a target of radius $10$ cm, some possible outcomes and their distances
+are:
+\[
+  \begin{array}{c|c}
+    \text{Hitting point }\omega & \text{Distance }X(\omega)\text{ (cm)}\\
+    \hline
+    (0,0) & 0\\
+    (3,4) & \sqrt{3^2+4^2}=5\\
+    (-3,4) & \sqrt{(-3)^2+4^2}=5\\
+    (0,10) & 10
+  \end{array}
+\]
+In general, the possible values of $X$ fill the
+interval $[0,r]$: zero at the centre, $r$ on the boundary, and any
+distance in between.
+
+For the $10$ cm target, asking for a distance of at most $5$ cm selects
+the outcomes
+\[
+  X^{-1}([0,5])
+    =\{(u,v)\in\Omega:u^2+v^2\leq25\}.
+\]
+This is the smaller disc of radius $5$ cm around the centre.
+
+Now choose a distance threshold $x$. For $0\leq x\leq r$, the event
+$X\leq x$ means that the dart hits the inner disc of radius $x$.
+Since the hitting point is uniform over the target, its probability
+is the ratio of the two areas:
+\[
+  P(X\leq x)
+    =\frac{\text{area of the inner disc}}{\text{area of the target}}
+    =\frac{\pi x^2}{\pi r^2}
+    =\frac{x^2}{r^2}.
+\]
+A negative threshold is impossible for a distance, while a threshold
+larger than $r$ includes the entire target. Thus
+\[
+  \boxed{P(X\leq x)=
+    \begin{cases}
+      0, & x<0,\\[2pt]
+      x^2/r^2, & 0\leq x\leq r,\\[2pt]
+      1, & x>r.
+    \end{cases}}
+\]
+For the target of radius $10$ cm,
+\[
+  P(X\leq5)=\frac{\pi\cdot5^2}{\pi\cdot10^2}
+    =\frac{25}{100}=\frac14.
+\]
 \end{framedexample}
 
 \end{document}
