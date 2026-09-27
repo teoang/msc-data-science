@@ -692,6 +692,12 @@ The second positive result raises the probability from about $16.53\%$
 to about $79.51\%$ under the conditional independence assumption.
 \chapter{Random variables}
 
+\begin{tcolorbox}[colback=yellow!20,colframe=yellow!60!black,
+  boxrule=0.4pt,arc=1mm,left=5pt,right=5pt,top=3pt,bottom=3pt,
+  before skip=0pt,after skip=0pt]
+\small\textbf{Start of lecture 25 September}
+\end{tcolorbox}
+
 \section{From outcomes to data}
 
 Imagine picking one student at random from a class. Before the draw, we do
@@ -713,6 +719,11 @@ where $\mathcal T$ is a suitable space of observations for our
 data-collection process.
 \end{tcolorbox}
 
+\begingroup
+\renewcommand{\thefootnote}{\fnsymbol{footnote}}
+\footnotetext[1]{A rigorous definition of measurability is beyond the scope of this course.}
+\endgroup
+
 \begin{frameddefn}{Random object}\label{def:random-object}
 A \emph{random object} is a measurable\begingroup\renewcommand{\thefootnote}{\fnsymbol{footnote}}\footnotemark[1]\endgroup\ map from outcomes to possible
 observations:
@@ -724,11 +735,6 @@ The set $\mathcal T$ says what kind of thing we record. It could contain
 numbers, vectors, images, or text messages. Once $\omega$ is known,
 $Z(\omega)$ is the observation we get.
 \end{frameddefn}
-
-\begingroup
-\renewcommand{\thefootnote}{\fnsymbol{footnote}}
-\footnotetext[1]{A rigorous definition of measurability is beyond the scope of this course.}
-\endgroup
 
 Think of $Z$ as the rule that turns the outcome into a piece of data.
 ``Measurable'' is the technical condition that lets us assign a probability
@@ -1194,7 +1200,7 @@ The \hyperref[def:cdf]{CDF} answers:
 \Needspace{17\baselineskip}
 \subsection{Properties of the CDF}
 
-\begin{framedprop}{Properties of the CDF (I)}
+\begin{framedprop}{Properties of the CDF (I)}\label{prop:cdf-properties-i}
 A function $F(\cdot)$ mapping the real line to $[0,1]$ is a CDF
 for some probability measure $P(\cdot)$ if and only if:
 \begin{enumerate}
@@ -1340,12 +1346,15 @@ adding the probabilities of all values at most $x$:
 open points are excluded.}
 \end{center}
 
-The graph displays the three properties in \emph{Properties of the CDF (I)}:
+The graph displays the three properties in
+\hyperref[prop:cdf-properties-i]{\emph{Properties of the CDF (I)}}:
 \begin{enumerate}
   \item \emph{Non-decreasing}: each jump adds a positive probability.
   \item \emph{Normalized}: $F_X(x)=0$ for $x<0$ and $F_X(x)=1$ for $x\geq5$.
-  \item \emph{Right-continuous}: $F_X(2)=16/32=1/2$, and the same
-    value holds for $2\leq x<3$. The left limit is $F_X(2^-)=6/32$,
+  \item \emph{Right-continuous}: for example, consider $x=2$.
+    We have $F_X(2)=16/32=1/2$, and the same value holds for
+    $2\leq x<3$. Thus the right limit equals $F_X(2)$.
+    The left limit is $F_X(2^-)=6/32$,
     so the jump is $16/32-6/32=10/32=p_X(2)$.
 \end{enumerate}
 \end{framedexample}
