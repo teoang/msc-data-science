@@ -951,7 +951,7 @@ sequences with $x$ tails and the probability of each sequence.
 \end{framedexample}
 
 \clearpage
-\begin{framedexample}{Darts: distance from the centre}
+\begin{framedexample}{Darts: distance from the centre}\label{ex:darts-areas}
 Throw a dart at a circular target of radius $r>0$. Assume that the dart
 always hits the disc and that its hitting point is uniform over the
 surface: regions with the same area have the same probability of being hit.
@@ -1354,9 +1354,79 @@ The graph displays the three properties in
   \item \emph{Right-continuous}: for example, consider $x=2$.
     We have $F_X(2)=16/32=1/2$, and the same value holds for
     $2\leq x<3$. Thus the right limit equals $F_X(2)$.
-    The left limit is $F_X(2^-)=6/32$,
-    so the jump is $16/32-6/32=10/32=p_X(2)$.
 \end{enumerate}
 \end{framedexample}
+
+\clearpage
+\begin{framedexample}{Darts: from areas to the CDF and PDF}
+Return to the \hyperref[ex:darts-areas]{earlier darts example}, with
+a disc of radius $10$ cm and a hitting point uniform over its area.
+Let $X$ be the distance from the centre in centimetres.
+Earlier, we obtained $P(X\leq x)$ using areas. Now we recognise
+this function as the CDF, differentiate it to find a PDF, and use
+that PDF to calculate probabilities of intervals.
+
+\textbf{1. Recognise the CDF.}
+The function calculated earlier is the CDF:
+\[
+  F_X(x)=P(X\leq x)=
+  \begin{cases}
+    0, & x<0,\\
+    x^2/100, & 0\leq x\leq10,\\
+    1, & x>10.
+  \end{cases}
+\]
+
+\textbf{2. Derive the PDF.}
+The PDF is not given. We find it by differentiating the CDF for
+$0<x<10$:
+\[
+  f_X(x)=F_X'(x)
+    =\frac{d}{dx}\left(\frac{x^2}{100}\right)
+    =\frac{2x}{100}=\frac{x}{50}.
+\]
+Its PDF is:
+\[
+  f_X(x)=
+  \begin{cases}
+    x/50, & 0\leq x\leq10,\\
+    0, & \text{otherwise}.
+  \end{cases}
+\]
+This PDF reproduces the probabilities of the model. It is non-negative
+and satisfies
+\[
+  \int_{\mathbb R}f_X(x)\,dx
+    =\int_0^{10}\frac{x}{50}\,dx
+    =\left[\frac{x^2}{100}\right]_0^{10}=1.
+\]
+Its support, with the convention used above and this choice of PDF,
+is $(0,10]$.
+
+\textbf{3. Use the PDF to calculate an interval probability.}
+Now that we have derived the PDF, we can, for example, calculate the
+probability that the dart lands between $5$ and $8$ cm from the centre:
+\[
+  P(5\leq X\leq8)
+    =\int_5^8\frac{x}{50}\,dx
+    =\left[\frac{x^2}{100}\right]_5^8
+    =\frac{64-25}{100}=0.39.
+\]
+The CDF gives the same result:
+$F_X(8)-F_X(5)=0.64-0.25=0.39$.
+
+For the two intervals used in the slides, the same method gives
+\[
+  P(0<X\leq5)=\int_0^5\frac{x}{50}\,dx=\frac14,
+  \qquad
+  P(5<X\leq10)=\int_5^{10}\frac{x}{50}\,dx=\frac34.
+\]
+\end{framedexample}
+
+\begin{tcolorbox}[colback=yellow!20,colframe=yellow!60!black,
+  boxrule=0.4pt,arc=1mm,left=5pt,right=5pt,top=3pt,bottom=3pt,
+  before skip=6pt,after skip=0pt]
+\small\textbf{Fine lezione 25 settembre}
+\end{tcolorbox}
 
 \end{document}
