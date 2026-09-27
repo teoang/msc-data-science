@@ -13,3 +13,7 @@ nostro template. Per rimuovere il logo dalla copertina usare `\noteslogo{}`.
 `random-variable-map.png` è un'immagine delle slide di Pierpaolo Brutti,
 Topic 04a, Fundamentals of Statistical Learning (Part I), Sapienza.
 Rappresenta una variabile aleatoria come mappa da $\Omega$ a $\mathbb R$.
+
+`preimage-probability-map.png` è l'immagine delle slide di Pierpaolo Brutti
+fornita dall'utente. Illustra la preimmagine di un insieme e l'uguaglianza
+tra la probabilità dei valori in quell'insieme e quella degli esiti nella preimmagine.

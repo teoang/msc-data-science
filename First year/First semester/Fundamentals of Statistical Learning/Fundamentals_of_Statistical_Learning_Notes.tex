@@ -743,15 +743,21 @@ It assigns one real number $X(\omega)$ to each outcome $\omega$.
 \begin{frameddefn}{Random vector}\label{def:random-vector}
 A \emph{$p$-dimensional random vector} is a measurable map
 \[
-  \mathbf X:\Omega\longrightarrow\mathbb R^p,
+  \underline{X}:\Omega\longrightarrow\mathbb R^p,
   \qquad
-  \mathbf X(\omega)
+  \underline{X}(\omega)
     =\bigl(X_1(\omega),\ldots,X_p(\omega)\bigr).
 \]
 Each coordinate $X_j$ is a real-valued random variable. Thus one
 outcome gives us $p$ numbers collected into a vector. These measurements
 can be related; they do not have to be independent.
 \end{frameddefn}
+
+\begin{notebox}[Notation]
+In these notes, we denote a random vector by $\underline{X}$
+($X$ with a bar underneath): $\underline{X}=(X_1,\ldots,X_p)$.
+\end{notebox}
+
 
 \Needspace{17\baselineskip}
 \begin{framedexample}{One student, one number or three}
@@ -762,16 +768,16 @@ For a student who is $178$ cm tall, $H(\omega)=178$.
 Now record height $H$, weight $W$ in kilograms, and age $A$ in years for
 that \emph{same} student:
 \[
-  \mathbf X(\omega)
+  \underline{X}(\omega)
     =\begin{pmatrix}H(\omega)\\W(\omega)\\A(\omega)\end{pmatrix}
     =\begin{pmatrix}178\\72\\21\end{pmatrix}\in\mathbb R^3.
 \]
 The draw gives us one student, not three. We simply take three
-measurements of that student. Before the draw, $H$ and $\mathbf X$ are
+measurements of that student. Before the draw, $H$ and $\underline{X}$ are
 uncertain; for the selected student, their values are fixed.
 \end{framedexample}
 
-In supervised learning, each sampled item gives us an input $\mathbf X$
+In supervised learning, each sampled item gives us an input $\underline{X}$
 (the features) and a target $Y$ (the label or quantity of interest).
 Before we see the item, both are uncertain; for an observed item, their
 values are fixed.
@@ -781,7 +787,7 @@ Choose a house at random. Use its floor area in square metres, number of
 rooms, and age in years as features. For a particular house with $85$ m$^2$,
 $3$ rooms, and an age of $10$ years, the data look like this:
 \[
-  \mathbf X(\omega)=(85,3,10),
+  \underline{X}(\omega)=(85,3,10),
   \qquad Y(\omega)=240{,}000\ \text{euros}.
 \]
 The three features make a random vector; the sale price is one random
@@ -791,11 +797,11 @@ variable.
 \begin{framedexample}{Image labels}
 Take a randomly chosen $64\times64$ grayscale photo. Each pixel is one
 number from $0$ (black) to $255$ (white). Putting the pixels in a fixed
-order gives $\mathbf X(\omega)\in\mathbb R^{4096}$: one vector with
+order gives $\underline{X}(\omega)\in\mathbb R^{4096}$: one vector with
 $4096$ entries for one photo. If we set $Y(\omega)=1$ for a cat and
 $Y(\omega)=0$ for a dog, then a cat photo gives one feature vector and
 the single label $1$. The pixels can be related even though they are
-separate coordinates of $\mathbf X$.
+separate coordinates of $\underline{X}$.
 \end{framedexample}
 
 \clearpage
@@ -829,6 +835,12 @@ The set $E$ contains values; $X^{-1}(E)$ contains the outcomes that
 give those values. In our finite examples, every subset of $\Omega$
 is an event.
 
+\begin{center}
+  \includegraphics[width=0.72\textwidth]{assets/preimage-probability-map.png}
+  \par\smallskip
+  {\small A preimage and its probability. Illustration from Brutti's slides.}
+\end{center}
+
 \Needspace{18\baselineskip}
 \begin{framedexample}{Which students have heights in an interval?}
 Choose one student uniformly from
@@ -851,6 +863,8 @@ The same two students also give the exact value $178$:
 $X^{-1}(\{178\})=\{\text{Luca},\text{Sara}\}$, so
 $P(X=178)=1/2$. One value can correspond to several outcomes.
 \end{framedexample}
+
+
 
 \Needspace{14\baselineskip}
 \begin{framedexample}{Counting heads in two coin tosses}
@@ -1066,10 +1080,10 @@ function} (PDF), such that, for every $a\leq b$,
 Suppose a bus arrives every $10$ minutes and you reach the stop
 at a uniformly random time between two arrivals. Let $X$ be your
 waiting time in minutes. Intervals of the same length have the
-same probability, so the density is constant on $[0,10]$.
+same probability, so the PDF is constant on $[0,10]$.
 Its height is $1/10$, since the total area must be $1$.
 
-Its \emph{probability density function} (PDF) is:
+Its PDF is:
 \[
   f_X(x)=
   \begin{cases}
@@ -1091,60 +1105,71 @@ $2$ and $5$ minutes is:
 \]
 \end{framedexample}
 
-\Needspace{25\baselineskip}
-\begin{framedexample}{The PDF of the distance in darts}
-Return to the example above of a dart hitting a disc uniformly over
-its area, now with radius $10$ cm. Let $X$ be the distance from the centre in centimetres.
-Here the PDF is not given: we want to find it from the assumption
-that regions of equal area have equal probability.
+\clearpage
+\section{Cumulative distribution function (CDF)}
 
-Recall the result obtained above using areas: for $0\leq x\leq10$,
+\begin{frameddefn}{Cumulative distribution function}
+\label{def:cdf}
+Given a random variable $X$, its \emph{cumulative distribution
+function} (CDF) is the function $F_X:\mathbb R\to[0,1]$ defined by
 \[
-  P(X\leq x)=\frac{\pi x^2}{\pi\cdot10^2}=\frac{x^2}{100}.
+  F_X(x)=P(X\leq x)=P\bigl(X\in(-\infty,x]\bigr),
+  \qquad x\in\mathbb R.
 \]
+It gives the probability accumulated up to and including the
+threshold $x$. It is defined for both
+\hyperref[def:discrete-pmf]{discrete} and
+\hyperref[def:continuous-pdf]{continuous} random variables.
+\end{frameddefn}
 
-\textbf{Next, find the density that reproduces these probabilities.}
-By the definition of a PDF, we need
+\begin{tcolorbox}[notesbox,colframe=red!45,colback=red!3,boxed title style={colback=red!25,colframe=red!45},title={Note: Heads-up}]
+The CDF contains all the information about the \emph{distribution}
+of a random variable. If $F_X(t)=F_Y(t)$ for every $t\in\mathbb R$,
+then $X$ and $Y$ have the same distribution: for any set of values
+$E$ defining an event,
 \[
-  \int_0^x f_X(t)\,dt=\frac{x^2}{100}.
+  P(X\in E)=P(Y\in E).
 \]
-Differentiating both sides for $0<x<10$ gives
-\[
-  f_X(x)=\frac{d}{dx}\left(\frac{x^2}{100}\right)
-    =\frac{2x}{100}=\frac{x}{50}.
-\]
-Thus we have derived the density from the model, rather than
-chosen it arbitrarily.
+This does not mean that $X$ and $Y$ must produce the same outcome
+in an experiment.
+\end{tcolorbox}
 
-Its \emph{probability density function} (PDF) is:
-\[
-  f_X(x)=
-  \begin{cases}
-    x/50, & 0\leq x\leq10,\\
-    0, & \text{otherwise}.
-  \end{cases}
-\]
-It satisfies $f_X(x)\geq0$ for every $x$, and
-\[
-  \int_{\mathbb R}f_X(x)\,dx
-    =\int_0^{10}\frac{x}{50}\,dx
-    =\left[\frac{x^2}{100}\right]_0^{10}=1.
-\]
-Its \emph{support}, using the convention above and this choice
-of density, is $(0,10]$.
+\begin{proof}
+We prove only a special case of this statement: we show that it
+holds for intervals $E=(a,b]$. The full result also holds for any
+set $E$ defining an event, but we do not prove that general case here.
 
-Now that we have derived the PDF, we can use it, for example, to
-calculate the probability that the dart lands between $5$ and $8$ cm
-from the centre:
+Suppose $F_X(t)=F_Y(t)$ for every $t\in\mathbb R$, and let $a<b$.
+Since
 \[
-  P(5\leq X\leq8)=\int_5^8\frac{x}{50}\,dx
-    =\frac{8^2-5^2}{100}=\frac{64-25}{100}=0.39.
+  \{X\leq b\}=\{X\leq a\}\cup\{a<X\leq b\},
 \]
-We can check the result directly with the area of the ring:
+and the two events on the right are disjoint, additivity gives
 \[
-  \frac{\pi\cdot8^2-\pi\cdot5^2}{\pi\cdot10^2}
-    =\frac{39}{100}=0.39.
+  P(a<X\leq b)=P(X\leq b)-P(X\leq a)=F_X(b)-F_X(a).
 \]
-\end{framedexample}
+Applying the same reasoning to $Y$ and using the equality of the
+two CDFs, we obtain
+\[
+  \begin{aligned}
+    P(X\in E)&=F_X(b)-F_X(a)\\
+              &=F_Y(b)-F_Y(a)\\
+              &=P(Y\in E).
+  \end{aligned}
+\]
+\end{proof}
+
+\begin{notebox}[PMF and CDF]
+The \hyperref[def:discrete-pmf]{PMF} answers:
+\emph{``What is the probability that $X$ is exactly $x$?''}
+\[
+  p_X(x)=P(X=x).
+\]
+The \hyperref[def:cdf]{CDF} answers:
+\emph{``What is the probability that $X$ is at most $x$?''}
+\[
+  F_X(x)=P(X\leq x).
+\]
+\end{notebox}
 
 \end{document}
