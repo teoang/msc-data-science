@@ -1,6 +1,7 @@
 \documentclass[a4paper,12pt,oneside]{report}
 \usepackage[english]{learningnotes}
 \usepackage{needspace}
+\hypersetup{linktoc=all}
 \newcommand{\exerciseheading}[1]{%
   \par\Needspace{5\baselineskip}\noindent\textbf{#1}\par\nobreak}
 \newcommand{\solutionheading}[1]{%
@@ -60,18 +61,18 @@ let us describe new events in terms of $A$ and $B$:
 
 \begin{itemize}
   \item \textbf{Union:}
-  $A\cup B=\{\omega\in\Omega:\omega\in A\text{ or }\omega\in B\}$.
+  $A\cup B:=\{\omega\in\Omega:\omega\in A\text{ or }\omega\in B\}$.
   This event occurs when at least one of $A$ and $B$ occurs;
   ``or'' includes the case in which both occur.
   In particular, $A\cup\varnothing=A$ and $A\cup\Omega=\Omega$.
 
   \item \textbf{Intersection:}
-  $A\cap B=\{\omega\in\Omega:\omega\in A\text{ and }\omega\in B\}$.
+  $A\cap B:=\{\omega\in\Omega:\omega\in A\text{ and }\omega\in B\}$.
   This event occurs when both $A$ and $B$ occur.
   In particular, $A\cap\Omega=A$ and $A\cap\varnothing=\varnothing$.
 
   \item \textbf{Complement:}
-  $A^c=\Omega\setminus A
+  $A^c:=\Omega\setminus A
        =\{\omega\in\Omega:\omega\notin A\}$.
   This event occurs when $A$ does not occur.
   In particular, $A\cup A^c=\Omega$ and $A\cap A^c=\varnothing$.
@@ -350,7 +351,7 @@ identity.
 
 For an event $A$ with $P(A)<1$, its \emph{odds in favor} are
 \[
-  O(A)=\frac{P(A)}{P(A^c)}
+  O(A):=\frac{P(A)}{P(A^c)}
       =\frac{P(A)}{1-P(A)}.
 \]
 Conversely, $P(A)=O(A)/(1+O(A))$. For a fair die, the odds in
@@ -703,8 +704,17 @@ that actually occurs. We write $(\Omega,\mathcal F,P)$ for the probability
 space: $\mathcal F$ contains the events to which $P$ assigns probabilities.
 For a finite $\Omega$, as in Chapter 1, every subset can be an event.
 
+\begin{tcolorbox}[definitionbox,title={Definition (informal): Random object}]
+Given a probability space, a \emph{random object} is a map
+\[
+  Z:\Omega\longrightarrow\mathcal T,
+\]
+where $\mathcal T$ is a suitable space of observations for our
+data-collection process.
+\end{tcolorbox}
+
 \begin{frameddefn}{Random object}\label{def:random-object}
-A \emph{random object} is a measurable map from outcomes to possible
+A \emph{random object} is a measurable\begingroup\renewcommand{\thefootnote}{\fnsymbol{footnote}}\footnotemark[1]\endgroup\ map from outcomes to possible
 observations:
 \[
   Z:\Omega\longrightarrow\mathcal T,
@@ -715,10 +725,15 @@ numbers, vectors, images, or text messages. Once $\omega$ is known,
 $Z(\omega)$ is the observation we get.
 \end{frameddefn}
 
+\begingroup
+\renewcommand{\thefootnote}{\fnsymbol{footnote}}
+\footnotetext[1]{A rigorous definition of measurability is beyond the scope of this course.}
+\endgroup
+
 Think of $Z$ as the rule that turns the outcome into a piece of data.
 ``Measurable'' is the technical condition that lets us assign a probability
 to questions about that data, such as ``is the selected student taller
-than $180$ cm?'' It is automatic in our finite examples.
+than $180$ cm?''
 
 \Needspace{13\baselineskip}
 \section{Random variables and random vectors}
@@ -746,7 +761,7 @@ A \emph{$p$-dimensional random vector} is a measurable map
   \underline{X}:\Omega\longrightarrow\mathbb R^p,
   \qquad
   \underline{X}(\omega)
-    =\bigl(X_1(\omega),\ldots,X_p(\omega)\bigr).
+    :=\bigl(X_1(\omega),\ldots,X_p(\omega)\bigr).
 \]
 Each coordinate $X_j$ is a real-valued random variable. Thus one
 outcome gives us $p$ numbers collected into a vector. These measurements
@@ -755,7 +770,10 @@ can be related; they do not have to be independent.
 
 \begin{notebox}[Notation]
 In these notes, we denote a random vector by $\underline{X}$
-($X$ with a bar underneath): $\underline{X}=(X_1,\ldots,X_p)$.
+($X$ with a bar underneath):
+\[
+  \underline{X}=(X_1,\ldots,X_p).
+\]
 \end{notebox}
 
 
@@ -815,18 +833,19 @@ For a random variable $X:\Omega\to\mathbb R$ and a set
 $E\subseteq\mathbb R$, the \emph{preimage} (or \emph{inverse image}) of
 $E$ is
 \[
-  X^{-1}(E)=\{\omega\in\Omega:X(\omega)\in E\}\subseteq\Omega.
+  X^{-1}(E):=\{\omega\in\Omega:X(\omega)\in E\}\subseteq\Omega.
 \]
 To find this event, we collect the outcomes whose outputs fall in $E$.
-Whenever this set is an event, we write
+Whenever $X^{-1}(E)$ is an event, we define
 \[
-  P(X\in E)
-    =P\bigl(\{\omega\in\Omega:X(\omega)\in E\}\bigr)
-    =P\bigl(X^{-1}(E)\bigr).
+  \begin{aligned}
+    P(X\in E)&:=P\bigl(X^{-1}(E)\bigr)\\
+              &=P\bigl(\{\omega\in\Omega:X(\omega)\in E\}\bigr).
+  \end{aligned}
 \]
 In particular, for a single value $x$,
 \[
-  P(X=x)=P\bigl(X^{-1}(\{x\})\bigr).
+  P(X=x):=P\bigl(X^{-1}(\{x\})\bigr).
 \]
 Here $X$ is the random variable, while $x$ is a particular real number.
 \end{frameddefn}
@@ -1004,12 +1023,12 @@ $P(X\in\mathcal X)=1$.
 
 Its \emph{probability mass function} (PMF) is
 \[
-  p_X(x)=P(X=x),\qquad x\in\mathbb R.
+  p_X(x):=P(X=x),\qquad x\in\mathbb R.
 \]
 \begin{enumerate}
   \item $p_X(x)\geq0$ for every $x\in\mathbb R$.
   \item The \emph{support}, in the discrete sense used here, is
-    $\operatorname{supp}(X)=\{x\in\mathbb R:p_X(x)>0\}$.
+    $\operatorname{supp}(X):=\{x\in\mathbb R:p_X(x)>0\}$.
     Thus the support lists the values that have positive probability;
     values outside it have probability zero.
   \item $\displaystyle\sum_{x\in\mathcal X}p_X(x)=1$.
@@ -1070,7 +1089,7 @@ function} (PDF), such that, for every $a\leq b$,
 \begin{enumerate}
   \item $f_X(x)\geq0$ for every $x\in\mathbb R$.
   \item Following the convention in the slides, the \emph{support} is
-    $\operatorname{supp}(X)=\{x\in\mathbb R:f_X(x)>0\}$.
+    $\operatorname{supp}(X):=\{x\in\mathbb R:f_X(x)>0\}$.
   \item $\displaystyle\int_{\mathbb R}f_X(x)\,dx=1$.
 \end{enumerate}
 \end{frameddefn}
@@ -1113,7 +1132,7 @@ $2$ and $5$ minutes is:
 Given a random variable $X$, its \emph{cumulative distribution
 function} (CDF) is the function $F_X:\mathbb R\to[0,1]$ defined by
 \[
-  F_X(x)=P(X\leq x)=P\bigl(X\in(-\infty,x]\bigr),
+  F_X(x):=P(X\leq x)=P\bigl(X\in(-\infty,x]\bigr),
   \qquad x\in\mathbb R.
 \]
 It gives the probability accumulated up to and including the
@@ -1122,7 +1141,7 @@ threshold $x$. It is defined for both
 \hyperref[def:continuous-pdf]{continuous} random variables.
 \end{frameddefn}
 
-\begin{tcolorbox}[notesbox,colframe=red!45,colback=red!3,boxed title style={colback=red!25,colframe=red!45},title={Note: Heads-up}]
+\begin{tcolorbox}[notesbox,colframe=red!45,colback=red!3,boxed title style={colback=red!25,colframe=red!45},title={Proposition: The CDF determines the distribution}]
 The CDF contains all the information about the \emph{distribution}
 of a random variable. If $F_X(t)=F_Y(t)$ for every $t\in\mathbb R$,
 then $X$ and $Y$ have the same distribution: for any set of values
@@ -1171,5 +1190,164 @@ The \hyperref[def:cdf]{CDF} answers:
   F_X(x)=P(X\leq x).
 \]
 \end{notebox}
+
+\Needspace{17\baselineskip}
+\subsection{Properties of the CDF}
+
+\begin{framedprop}{Properties of the CDF (I)}
+A function $F(\cdot)$ mapping the real line to $[0,1]$ is a CDF
+for some probability measure $P(\cdot)$ if and only if:
+\begin{enumerate}
+  \item $F(\cdot)$ is \emph{non-decreasing}: $x_1<x_2$ implies that
+    $F(x_1)\leq F(x_2)$.
+  \item $F(\cdot)$ is \emph{normalized}:
+    \[
+      \lim_{x\to-\infty}F(x)=0,
+      \qquad
+      \lim_{x\to+\infty}F(x)=1.
+    \]
+  \item $F(\cdot)$ is \emph{right-continuous}: for all $x$ we have
+    \[
+      F(x)=F(x^+),
+      \qquad F(x^+):=\lim_{t\downarrow x}F(t).
+    \]
+\end{enumerate}
+\end{framedprop}
+
+\Needspace{19\baselineskip}
+\begin{framedprop}{Properties of the CDF (II/a)}
+Let $F_X(\cdot)$ be the CDF of a random variable $X$. Then:
+\begin{enumerate}
+  \item For $x_1<x_2$,
+    \[
+      P(x_1<X\leq x_2)=P\bigl(X\in(x_1,x_2]\bigr)
+        =F_X(x_2)-F_X(x_1).
+    \]
+    In the discrete case, be careful with the strict and non-strict
+    inequalities.
+  \item
+    \[
+      P(X>x)=P\bigl(X\in(x,+\infty)\bigr)=1-F_X(x).
+    \]
+  \item If $X$ is continuous with PDF $f_X(\cdot)$, then
+    \[
+      F_X(x)=\int_{-\infty}^{x}f_X(t)\,dt.
+    \]
+    A PDF can be recovered from the CDF as
+    \[
+      f_X(x)=F_X'(x)
+    \]
+    at points where $F_X$ is differentiable.
+\end{enumerate}
+\end{framedprop}
+
+\Needspace{20\baselineskip}
+\begin{framedprop}{Properties of the CDF (II/b)}
+Let $F_X(\cdot)$ be the CDF of a random variable $X$. Then:
+\begin{enumerate}
+  \item
+    \[
+      P(x_1<X\leq x_2)=P\bigl(X\in(x_1,x_2]\bigr)
+        =F_X(x_2)-F_X(x_1),\qquad x_1<x_2.
+    \]
+  \item
+    \[
+      P(X>x)=P\bigl(X\in(x,+\infty)\bigr)=1-F_X(x).
+    \]
+  \item If $X$ is discrete with PMF $p_X(\cdot)$ and support
+    $\mathcal X=\{x_1,x_2,\ldots\}$, then
+    \[
+      F_X(x)=\sum_{x_i\leq x}p_X(x_i)=P(X<x)+p_X(x).
+    \]
+    Hence
+    \[
+      p_X(x)=F_X(x)-F_X(x^-),
+      \qquad F_X(x^-):=\lim_{t\uparrow x}F_X(t).
+    \]
+\end{enumerate}
+\end{framedprop}
+
+\Needspace{15\baselineskip}
+Let $F_X(\cdot)$ be the CDF of a continuous random variable with PDF
+$f_X(\cdot)$. The following informal observations motivate later
+nonparametric statistical developments:
+\begin{enumerate}
+  \item Roughly speaking, $F_X(\cdot)$ is ``simpler'' than $f_X(\cdot)$.
+  \item It must be non-decreasing, so its shape is more constrained
+    than that of a PDF.
+  \item Integration accumulates and smooths the PDF, making the CDF
+    more regular.
+  \item This suggests that estimating the CDF is easier than estimating
+    the PDF: fewer observations may be needed to reach the same
+    statistical accuracy.
+\end{enumerate}
+
+\clearpage
+\begin{framedexample}{Five coin tosses: PMF and CDF}
+Return to five independent flips of a balanced coin, and let $X$
+count the tails. Its possible values are $0,1,2,3,4,5$.
+
+Its \emph{probability mass function} (PMF) is:
+\[
+  p_X(x)=P(X=x)=\binom5x\left(\frac12\right)^5,
+  \qquad x\in\{0,1,2,3,4,5\},
+\]
+and $p_X(x)=0$ otherwise. The probabilities are:
+\[
+  \begin{array}{c|cccccc}
+    x & 0 & 1 & 2 & 3 & 4 & 5\\
+    \hline
+    p_X(x) & 1/32 & 5/32 & 10/32 & 10/32 & 5/32 & 1/32
+  \end{array}
+\]
+
+Its \emph{cumulative distribution function} (CDF) is obtained by
+adding the probabilities of all values at most $x$:
+\[
+  F_X(x)=\sum_{k\leq x}p_X(k)=
+  \begin{cases}
+    0, & x<0,\\
+    1/32, & 0\leq x<1,\\
+    6/32, & 1\leq x<2,\\
+    16/32, & 2\leq x<3,\\
+    26/32, & 3\leq x<4,\\
+    31/32, & 4\leq x<5,\\
+    1, & x\geq5.
+  \end{cases}
+\]
+
+\begin{center}
+\begin{tikzpicture}[x=1.05cm,y=3.0cm]
+  \draw[->] (-0.8,0) -- (6.0,0) node[right] {$x$};
+  \draw[->] (-0.65,-0.05) -- (-0.65,1.13) node[above] {$F_X(x)$};
+  \foreach \k in {0,1,2,3,4,5}
+    \draw (\k,0.014) -- (\k,-0.014) node[below] {\small $\k$};
+  \foreach \h/\lab in {0.5/{1/2},1/{1}}
+    \draw (-0.70,\h) -- (-0.60,\h) node[left=3pt] {\small $\lab$};
+  \draw[gray!35,dashed] (-0.65,0.5) -- (2,0.5);
+  \draw[gray!35,dashed] (-0.65,1) -- (5,1);
+  \draw[thick,blue!65!black] (-0.55,0) -- (0,0);
+  \foreach \k/\h/\prev in
+    {0/0.03125/0,1/0.1875/0.03125,2/0.5/0.1875,
+     3/0.8125/0.5,4/0.96875/0.8125,5/1/0.96875} {
+    \draw[thick,blue!65!black] (\k,\h) -- ({\k+1},\h);
+    \filldraw[fill=white,draw=blue!65!black] (\k,\prev) circle (1.2pt);
+    \fill[blue!65!black] (\k,\h) circle (1.2pt);
+  }
+\end{tikzpicture}
+
+{\small Filled points give the value of the CDF at each jump;
+open points are excluded.}
+\end{center}
+
+The graph displays the three properties in \emph{Properties of the CDF (I)}:
+\begin{enumerate}
+  \item \emph{Non-decreasing}: each jump adds a positive probability.
+  \item \emph{Normalized}: $F_X(x)=0$ for $x<0$ and $F_X(x)=1$ for $x\geq5$.
+  \item \emph{Right-continuous}: $F_X(2)=16/32=1/2$, and the same
+    value holds for $2\leq x<3$. The left limit is $F_X(2^-)=6/32$,
+    so the jump is $16/32-6/32=10/32=p_X(2)$.
+\end{enumerate}
+\end{framedexample}
 
 \end{document}
