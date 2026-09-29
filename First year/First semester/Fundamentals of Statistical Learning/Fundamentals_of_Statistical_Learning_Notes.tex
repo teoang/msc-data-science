@@ -690,6 +690,7 @@ We seek $P(D\mid T_1\cap T_2)$.
 \end{enumerate}
 The second positive result raises the probability from about $16.53\%$
 to about $79.51\%$ under the conditional independence assumption.
+\setcounter{chapter}{3}
 \chapter{Random variables}
 
 \begin{tcolorbox}[colback=yellow!20,colframe=yellow!60!black,
@@ -1428,5 +1429,140 @@ For the two intervals used in the slides, the same method gives
   before skip=6pt,after skip=0pt]
 \small\textbf{Fine lezione 25 settembre}
 \end{tcolorbox}
+
+\chapter*{Chapter 4 (exercises)}
+\markboth{Chapter 4 (exercises)}{}
+\addcontentsline{toc}{chapter}{Chapter 4 (exercises)}
+
+\begin{tcolorbox}[colback=white,colframe=black!45,boxrule=0.5pt,arc=2mm]
+\textbf{Exercise 4.1 --- Two throws of a die}\par\smallskip
+\textit{Source: Dekking et al., A Modern Introduction to Probability
+and Statistics, Section 4.6, p. 51.}
+
+Throw a fair die twice, independently. Let $Z$ count the number of
+times a $6$ appears. For an outcome $\omega=(\omega_1,\omega_2)$,
+define
+\[
+  S(\omega_1,\omega_2)=\omega_1+\omega_2,
+  \qquad M(\omega_1,\omega_2)=\max\{\omega_1,\omega_2\}.
+\]
+\begin{enumerate}[label=(\alph*)]
+  \item Describe the distribution of $Z$ by giving either its PMF
+    $p_Z$ or its CDF $F_Z$. Identify the distribution family and its
+    parameters.
+  \item List the outcomes in $\{M=2,Z=0\}$, $\{S=5,Z=1\}$, and
+    $\{S=8,Z=1\}$, and calculate their probabilities.
+  \item Determine whether $\{M=2\}$ and $\{Z=0\}$ are independent.
+\end{enumerate}
+\end{tcolorbox}
+
+\solutionheading{Part (a): the PMF of $Z$}
+Since $Z$ counts the number of sixes in two throws, $Z$ takes values
+in $\{0,1,2\}$. Formally, it is the random variable
+\[
+  Z:\{1,\ldots,6\}^2\longrightarrow\mathbb R,
+  \qquad
+  Z(\omega_1,\omega_2)
+  =\mathbf 1_{\{\omega_1=6\}}+\mathbf 1_{\{\omega_2=6\}}.
+\]
+Here each indicator is $1$ if the corresponding throw is $6$, and
+$0$ otherwise.
+
+To calculate the PMF, we proceed in two steps.
+\begin{enumerate}
+  \item \textbf{First, show that $Z$ is discrete.}
+    Choose the finite set $\mathcal X=\{0,1,2\}$. Every outcome
+    produces one of these values, so
+    \[
+      P(Z\in\mathcal X)=P(\Omega)=1.
+    \]
+    Therefore, $Z$ is discrete.
+  \item \textbf{Next, calculate its PMF.}
+    By definition, $p_Z(x)=P(Z=x)$ for $x\in\mathbb R$.
+    There are $36$ equally likely ordered outcomes.
+
+    If $x=0$, neither throw is $6$: each throw has $5$ possible values.
+    \[
+      P(Z=0)=\frac{5\cdot5}{36}=\frac{25}{36}.
+    \]
+    If $x=1$, exactly one throw is $6$: it can be the first or the second.
+    \[
+      P(Z=1)=\frac{1\cdot5+5\cdot1}{36}=\frac{10}{36}.
+    \]
+    If $x=2$, both throws are $6$: the only outcome is $(6,6)$.
+    \[
+      P(Z=2)=\frac{1}{36}.
+    \]
+    Hence its probability mass function (PMF) is:
+    \[
+      p_Z(x)=
+      \begin{cases}
+        25/36, & x=0,\\
+        10/36, & x=1,\\
+        1/36, & x=2,\\
+        0, & \text{otherwise}.
+      \end{cases}
+    \]
+\end{enumerate}
+
+\solutionheading{Part (a): calculating the CDF}
+Alternatively, we can use the cumulative distribution function,
+\[
+  F_Z(x):=P(Z\leq x).
+\]
+Here $\{Z\leq x\}=\{\omega\in\Omega:Z(\omega)\leq x\}$:
+we collect the outcomes for which the number of sixes is at most $x$.
+
+Since $Z$ takes only the values $0,1,2$, the included values change
+only when $x$ reaches one of these numbers. We therefore distinguish
+$x<0$, $0\leq x<1$, $1\leq x<2$, and $x\geq2$.
+
+For $x<0$, no possible value of $Z$ is included, so
+\[
+  F_Z(x)=P(Z\leq x)=P(\varnothing)=0.
+\]
+
+For $0\leq x<1$, only $Z=0$ is included:
+\[
+  F_Z(x)=P(Z\leq x)=P(Z=0)=\frac{25}{36}.
+\]
+In particular, $F_Z(0)=25/36$.
+
+For $1\leq x<2$, the included values are $Z=0$ and $Z=1$:
+\[
+  \{Z\leq x\}=\{Z=0\}\cup\{Z=1\}.
+\]
+These events are disjoint: $Z$ cannot equal both $0$ and $1$ in the
+same outcome. By additivity of probability for disjoint events,
+\[
+  F_Z(x)=P(Z\leq x)=P(Z=0)+P(Z=1)
+  =\frac{25}{36}+\frac{10}{36}=\frac{35}{36}.
+\]
+In particular, $F_Z(1)=35/36$.
+
+\Needspace{10\baselineskip}
+For $x\geq2$, all three possible values are included:
+\[
+  \{Z\leq x\}=\{Z=0\}\cup\{Z=1\}\cup\{Z=2\}=\Omega.
+\]
+These three events are pairwise disjoint. Therefore,
+\[
+  \begin{aligned}
+    F_Z(x)=P(Z\leq x)
+      &=P(Z=0)+P(Z=1)+P(Z=2)\\
+      &=\frac{25}{36}+\frac{10}{36}+\frac{1}{36}
+        =\frac{36}{36}=1,\qquad x\geq2.
+  \end{aligned}
+\]
+Putting the cases together, its CDF is:
+\[
+  F_Z(x)=
+  \begin{cases}
+    0, & x<0,\\
+    25/36, & 0\leq x<1,\\
+    35/36, & 1\leq x<2,\\
+    1, & x\geq2.
+  \end{cases}
+\]
 
 \end{document}
