@@ -1,0 +1,150 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[english]{babel}
+\usepackage[T1]{fontenc}
+\usepackage[margin=18mm]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{enumitem}
+\usepackage[most]{tcolorbox}
+\usepackage[colorlinks=true,linkcolor=blue]{hyperref}
+\setlength{\parindent}{0pt}
+\setlist{topsep=0.5\baselineskip,itemsep=0.5\baselineskip,parsep=0pt,leftmargin=2.45em}
+\newcounter{definition}
+\setcounter{definition}{4}
+\renewcommand{\thedefinition}{4.\arabic{definition}}
+\definecolor{NotesDefinition}{rgb}{0.70,0.94,0.70}
+\definecolor{NotesPaper}{gray}{0.95}
+\tcbset{notesbox/.style={enhanced,breakable,
+  colback=NotesPaper,coltitle=black,fonttitle=\bfseries,
+  boxrule=0.5mm,arc=1mm,boxsep=1mm,left=1mm,right=1mm,top=1mm,bottom=1mm,
+  before skip=7mm,after skip=4mm,
+  attach boxed title to top left={xshift=12.5mm,yshift=-0.5mm},
+  boxed title style={enhanced,boxrule=0.4mm,arc=0.75mm,
+    boxsep=1mm,left=2mm,right=2mm,top=0mm,bottom=0mm,
+    frame code={%
+      \path[fill=tcbcolframe,draw=tcbcolframe]
+        (frame.north west) -- (frame.north east)
+        .. controls ([xshift=4mm]frame.north east) and
+                    ([xshift=7mm]frame.south east) ..
+                    ([xshift=11mm]frame.south east)
+        -- ([xshift=-11mm]frame.south west)
+        .. controls ([xshift=-7mm]frame.south west) and
+                    ([xshift=-4mm]frame.north west) .. (frame.north west) -- cycle;
+    }},
+  before upper={\setlength{\parskip}{0.5\baselineskip}}},
+  definitionbox/.style={notesbox,colframe=NotesDefinition,
+    boxed title style={colback=NotesDefinition,colframe=NotesDefinition}}}
+\newtcolorbox[use counter=definition]{frameddefn}[1]{definitionbox,
+  title={Definition \thedefinition:\enspace #1}}
+\renewcommand{\thedefinition}{4.\arabic{definition}}
+\begin{document}
+\begin{center}
+  {\Large\bfseries Fundamentals of Statistical Learning}\par
+  \smallskip
+  {\large Definitions cheatsheet}
+\end{center}
+
+\setcounter{definition}{1}
+\begin{frameddefn}{Random variable}\label{def:random-variable}
+A \emph{random variable} is a measurable map
+\[
+  X:\Omega\longrightarrow\mathbb R.
+\]
+It assigns one real number $X(\omega)$ to each outcome $\omega$.
+\end{frameddefn}
+
+\setcounter{definition}{3}
+\begin{frameddefn}{Preimage}\label{def:preimage}
+For a random variable $X:\Omega\to\mathbb R$ and a set
+$E\subseteq\mathbb R$, the \emph{preimage} (or \emph{inverse image}) of
+$E$ is
+\[
+  X^{-1}(E):=\{\omega\in\Omega:X(\omega)\in E\}\subseteq\Omega.
+\]
+To find this event, we collect the outcomes whose outputs fall in $E$.
+Whenever $X^{-1}(E)$ is an event, we define
+\[
+  \begin{aligned}
+    P(X\in E)&:=P\bigl(X^{-1}(E)\bigr)\\
+              &=P\bigl(\{\omega\in\Omega:X(\omega)\in E\}\bigr).
+  \end{aligned}
+\]
+In particular, for a single value $x$,
+\[
+  P(X=x):=P\bigl(X^{-1}(\{x\})\bigr).
+\]
+Here $X$ is the random variable, while $x$ is a particular real number.
+\end{frameddefn}
+
+\setcounter{definition}{4}
+\begin{frameddefn}{Discrete random variable and PMF}
+\label{def:discrete-pmf}
+A random variable $X$ is \emph{discrete} if there is a finite or
+countably infinite set\begingroup\renewcommand{\thefootnote}{\fnsymbol{footnote}}\footnotemark[1]\endgroup
+$\mathcal X=\{x_1,x_2,\ldots\}$ such that
+$P(X\in\mathcal X)=1$.
+
+Its \emph{probability mass function} (PMF) is
+\[
+  p_X(x):=P(X=x),\qquad x\in\mathbb R.
+\]
+\begin{enumerate}
+  \item $p_X(x)\geq0$ for every $x\in\mathbb R$.
+  \item The \emph{support}, in the discrete sense used here, is
+    $\operatorname{supp}(X):=\{x\in\mathbb R:p_X(x)>0\}$.
+    Thus the support lists the values that have positive probability;
+    values outside it have probability zero.
+  \item $\displaystyle\sum_{x\in\mathcal X}p_X(x)=1$.
+\end{enumerate}
+\end{frameddefn}
+
+\begingroup
+\renewcommand{\thefootnote}{\fnsymbol{footnote}}
+\footnotetext[1]{A finite set has finitely many elements. A set $A$ is countably infinite if there exists a bijection $f:\mathbb N\to A$.}
+\endgroup
+
+\newpage
+\setcounter{definition}{5}
+\begin{frameddefn}{Continuous random variable and PDF}
+\label{def:continuous-pdf}
+A random variable $X$ is \emph{continuous} (in the sense used here)
+if there exists a function $f_X$, called its \emph{probability density
+function} (PDF), such that, for every $a\leq b$,
+\[
+  P(a\leq X\leq b)=\int_a^b f_X(x)\,dx.
+\]
+\begin{enumerate}
+  \item $f_X(x)\geq0$ for every $x\in\mathbb R$.
+  \item Following the convention in the slides, the \emph{support} is
+    $\operatorname{supp}(X):=\{x\in\mathbb R:f_X(x)>0\}$.
+  \item $\displaystyle\int_{\mathbb R}f_X(x)\,dx=1$.
+\end{enumerate}
+\end{frameddefn}
+
+\setcounter{definition}{6}
+\begin{frameddefn}{Cumulative distribution function}
+\label{def:cdf}
+Given a random variable $X$, its \emph{cumulative distribution
+function} (CDF) is the function $F_X:\mathbb R\to[0,1]$ defined by
+\[
+  F_X(x):=P(X\leq x)=P\bigl(X\in(-\infty,x]\bigr),
+  \qquad x\in\mathbb R.
+\]
+It gives the probability accumulated up to and including the
+threshold $x$. It is defined for both
+\hyperref[def:discrete-pmf]{discrete} and
+\hyperref[def:continuous-pdf]{continuous} random variables.
+\end{frameddefn}
+
+\setcounter{definition}{8}
+\begin{frameddefn}{Quantile function: general case}
+\label{def:quantile-general}
+Let $X$ be any random variable, discrete or continuous, with CDF
+$F_X$. For a probability level $0<p<1$, its \emph{quantile function} is
+\[
+  Q(p):=\inf\{x\in\mathbb R:F_X(x)\geq p\}.
+\]
+It gives the smallest threshold $x$ such that
+$P(X\leq x)$ is at least $p$. We also write $q_p$ instead of $Q(p)$.
+\end{frameddefn}
+
+\end{document}

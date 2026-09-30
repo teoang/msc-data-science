@@ -1487,6 +1487,7 @@ pairwise disjoint, so we add their probabilities:
     \qquad x\in\mathbb R.}
 \]
 \subsection{From the PDF to the CDF}
+\label{rel:pdf-to-cdf}
 \begin{tcolorbox}[colback=blue!3,colframe=blue!30!black,
   boxrule=0.4pt,arc=1mm,title={What we are trying to answer},
   colbacktitle=blue!10,coltitle=black,fonttitle=\bfseries]
@@ -1615,13 +1616,308 @@ In this continuous CDF, every threshold in $[a,b]$ gives the same
 probability $p$. Thus $\{x:F_X(x)=p\}=[a,b]$ and $Q(p)=a$.
 
 When the CDF is strictly increasing between probability levels
-$0$ and $1$, each level corresponds to a unique threshold, so
+$0$ and $1$, each level corresponds to a unique threshold. The CDF
+is therefore invertible on this range, so
 \[
   \boxed{Q(p)=F_X^{-1}(p).}
 \]
 An inverse may exist without a simple explicit formula. In that
-case, quantiles can be calculated numerically, as for the normal
-distribution.
+case, quantiles can be calculated numerically.
+
+\Needspace{18\baselineskip}
+\textbf{A more general definition.}
+If the CDF has a jump, it may skip the level $p$, so the equation
+$F_X(x)=p$ may have no solution. We therefore replace equality
+with $F_X(x)\geq p$.
+
+\begin{frameddefn}{Quantile function: general case}
+\label{def:quantile-general}
+Let $X$ be any random variable, discrete or continuous, with CDF
+$F_X$. For a probability level $0<p<1$, its \emph{quantile function} is
+\[
+  Q(p):=\inf\{x\in\mathbb R:F_X(x)\geq p\}.
+\]
+It gives the smallest threshold $x$ such that
+$P(X\leq x)$ is at least $p$. We also write $q_p$ instead of $Q(p)$.
+\end{frameddefn}
+
+At a jump, the quantile is the first threshold where the CDF
+reaches or exceeds $p$; the probability there may be greater than $p$.
+If the CDF has a plateau at level $p$, this definition chooses its
+left endpoint. This is the lower-quantile convention used here.
+If the CDF is invertible, $Q(p)=F_X^{-1}(p)$ (see
+\hyperref[def:quantile-continuous]{Definition~\ref*{def:quantile-continuous}}).
+
+\begin{framedexample}{Reading a quantile across a jump}
+\label{ex:quantile-jump}
+Let $X$ take the values $-1,0,1$ with probabilities $0.4,0.2,0.4$,
+respectively. Its CDF is
+\[
+  F_X(x)=
+  \begin{cases}
+    0, & x<-1,\\
+    0.4, & -1\leq x<0,\\
+    0.6, & 0\leq x<1,\\
+    1, & x\geq1.
+  \end{cases}
+\]
+We want the median, $Q(0.5)$.
+\begin{center}
+\begin{tikzpicture}[x=1.65cm,y=3.6cm]
+  \draw[->] (-2,0) -- (2.2,0) node[right] {$x$};
+  \draw[->] (-1.8,-0.05) -- (-1.8,1.15) node[above] {$F_X(x)$};
+  \foreach \h/\lab in {0.4/{0.4},0.6/{0.6},1/{1}}
+    \draw (-1.84,\h) -- (-1.76,\h)
+      node[left=4pt] {\small $\lab$};
+  \draw[thick,blue!65!black] (-1.7,0) -- (-1,0);
+  \draw[thick,blue!65!black] (-1,0.4) -- (0,0.4);
+  \draw[thick,blue!65!black] (0,0.6) -- (1,0.6);
+  \draw[thick,blue!65!black] (1,1) -- (2,1);
+  \foreach \k/\h/\prev in {-1/0.4/0,0/0.6/0.4,1/1/0.6} {
+    \filldraw[fill=white,draw=blue!65!black]
+      (\k,\prev) circle (1.8pt);
+    \fill[blue!65!black] (\k,\h) circle (1.8pt);
+  }
+  \draw[->,red!70!black,dashed,thick] (-1.8,0.5) -- (-0.04,0.5);
+  \node[above,red!70!black] at (-1.2,0.5) {\small $p=0.5$};
+  \draw[red!70!black,densely dotted] (0,0.4) -- (0,0.6);
+  \draw[->,red!70!black,dashed,thick] (0,0.49) -- (0,0.02);
+  \draw (-1,0.014) -- (-1,-0.014) node[below] {$-1$};
+  \draw (0,0.014) -- (0,-0.014)
+    node[below,red!70!black] {$Q(0.5)=0$};
+  \draw (1,0.014) -- (1,-0.014) node[below] {$1$};
+\end{tikzpicture}
+\end{center}
+Start at height $0.5$ and move to the right. Before $x=0$, the
+CDF is below $0.5$. At $x=0$, the filled point gives
+$F_X(0)=0.6\geq0.5$: this is the first threshold that qualifies.
+Therefore,
+\[
+  \{x:F_X(x)\geq0.5\}=[0,+\infty),
+  \qquad \boxed{Q(0.5)=\inf[0,+\infty)=0.}
+\]
+Here $P(X\leq Q(0.5))=0.6$, which exceeds the requested level $0.5$.
+\end{framedexample}
+
+\begin{notebox}[Quantiles as areas under the PDF]
+\label{note:quantile-pdf-area}
+\textbf{What we are trying to answer.}
+We know the PDF and choose a probability $p$. Where should we stop
+so that the area under the PDF to the left is $p$?
+
+For a continuous random variable with a PDF, we already know the
+\hyperref[rel:pdf-to-cdf]{relation between the PDF and the CDF}:
+\[
+  F_X(x)=P(X\leq x)=\int_{-\infty}^{x}f_X(t)\,dt.
+\]
+Previously, we fixed the threshold $x$ and calculated the probability.
+Now we fix the probability $p$ and look for the threshold $q_p=Q(p)$.
+Since the CDF is continuous, $F_X(q_p)=p$, so
+\[
+  \underbrace{p}_{\text{chosen probability}}
+  =F_X(q_p)
+  =\int_{-\infty}^{\underbrace{q_p}_{\text{threshold: to find}}}
+    \underbrace{f_X(t)}_{\text{PDF: known}}\,dt.
+\]
+Thus we find $q_p$ by solving this equation. If several thresholds
+give the same area, the
+\hyperref[def:quantile-general]{general quantile definition}
+chooses the smallest one.
+
+For the median, $p=0.5$: we look for the threshold that leaves
+half of the total area under the PDF to its left.
+\end{notebox}
+
+\clearpage
+\begin{framedexample}{Quantiles of a Pareto distribution}
+\label{ex:pareto-quantiles}
+The slides give a continuous random variable with CDF
+\[
+  F_X(x)=
+  \begin{cases}
+    0, & x<1,\\
+    1-x^{-\alpha}, & x\geq1,
+  \end{cases}
+  \qquad \alpha>0.
+\]
+This is a Pareto distribution with shape parameter $\alpha$ and
+scale parameter $1$. For example, if $\alpha=1/2$, suppose we want
+to find the $20$th percentile and the median.
+
+\textbf{1. Recover the PDF.}
+For $x>1$, we differentiate the given CDF:
+\[
+  f_X(x)=F_X'(x)=\alpha x^{-\alpha-1}.
+\]
+We may therefore choose
+\[
+  f_X(x)=
+  \begin{cases}
+    \alpha/x^{\alpha+1}, & x\geq1,\\
+    0, & x<1.
+  \end{cases}
+\]
+
+\textbf{2. Find the quantile function.}
+The CDF is strictly increasing for $x\geq1$. For $0<p<1$,
+we find the unique threshold $q_p$ by solving $F_X(q_p)=p$:
+\[
+  \begin{aligned}
+    p&=1-q_p^{-\alpha},\\
+    q_p^{-\alpha}&=1-p,\\
+    q_p^{\alpha}&=\frac{1}{1-p},\\
+    q_p&=\left(\frac{1}{1-p}\right)^{1/\alpha}.
+  \end{aligned}
+\]
+Thus the whole quantile function is
+\[
+  \boxed{Q(p)=F_X^{-1}(p)=(1-p)^{-1/\alpha},\qquad 0<p<1.}
+\]
+
+\textbf{3. Calculate the requested quantiles with $\alpha=1/2$.}
+Here $1/\alpha=2$, so $Q(p)=(1-p)^{-2}$.
+For the $20$th percentile, we choose $p=0.20$:
+\[
+  \boxed{q_{0.20}=(1-0.20)^{-2}
+    =\frac{1}{0.8^2}=1.5625\approx1.56.}
+\]
+Hence $P(X\leq1.5625)=0.20$.
+For the median (the second quartile), we choose $p=0.50$:
+\[
+  \boxed{q_{0.50}=(1-0.50)^{-2}
+    =\frac{1}{0.5^2}=4.}
+\]
+Hence $P(X\leq4)=0.50$: the threshold $4$ leaves half of the
+probability to its left.
+\end{framedexample}
+
+\begin{notebox}[Reading the Pareto quantiles geometrically]
+For the Pareto example with $\alpha=1/2$, the two graphs show the
+same median. On the CDF, height $0.5$ corresponds to $x=4$.
+Under the PDF, the area from $1$ to $4$ is $0.5$.
+\begin{center}
+\begin{tikzpicture}[x=0.55cm,y=3.1cm]
+  \draw[->] (0,0) -- (9.6,0) node[right] {$x$};
+  \draw[->] (0,0) -- (0,1.12) node[above] {$F_X(x)$};
+  \draw[gray,dotted] (0,1) -- (9,1);
+  \node[left] at (0,1) {$1$};
+  \draw[blue!65!black,thick] (0,0) -- (1,0);
+  \draw[blue!65!black,thick,domain=1:9,samples=90]
+    plot (\x,{1-1/sqrt(\x)});
+  \draw[red!70!black,dashed] (0,0.2) -- (1.5625,0.2) -- (1.5625,0);
+  \draw[red!70!black,dashed] (0,0.5) -- (4,0.5) -- (4,0);
+  \node[left,red!70!black] at (0,0.2) {$0.2$};
+  \node[left,red!70!black] at (0,0.5) {$0.5$};
+  \fill[red!70!black] (1.5625,0.2) circle (1.5pt);
+  \fill[red!70!black] (4,0.5) circle (1.5pt);
+  \node[below] at (1,0) {$1$};
+  \node[below,red!70!black] at (4,0) {$4$};
+\end{tikzpicture}
+\hspace{5mm}
+\begin{tikzpicture}[x=0.55cm,y=5.3cm]
+  \draw[->] (0,0) -- (9.6,0) node[right] {$x$};
+  \draw[->] (0,0) -- (0,0.66) node[above] {$f_X(x)$};
+  \path[fill=blue!18] (1,0)
+    -- plot[domain=1:4,samples=60] (\x,{0.5/(\x^1.5)})
+    -- (4,0) -- cycle;
+  \draw[blue!65!black,thick] (0,0) -- (1,0);
+  \draw[blue!65!black,thick,domain=1:9,samples=90]
+    plot (\x,{0.5/(\x^1.5)});
+  \draw[red!70!black,dashed] (4,0) -- (4,0.0625);
+  \draw (0.06,0.5) -- (-0.06,0.5) node[left] {$0.5$};
+  \node[below] at (1,0) {$1$};
+  \node[below,red!70!black] at (4,0) {$4$};
+  \node[blue!65!black] at (2.2,0.08) {\small $0.5$};
+\end{tikzpicture}
+\end{center}
+The area calculation confirms the median:
+\[
+  \int_1^4\frac{1}{2t^{3/2}}\,dt
+    =\left[-\frac{1}{\sqrt t}\right]_1^4
+    =-\frac12+1=\frac12.
+\]
+\end{notebox}
+
+\clearpage
+\begin{framedexample}{Quantiles of a discrete distribution}
+\label{ex:discrete-quantiles}
+The second slide example uses the same variable as
+\hyperref[ex:quantile-jump]{the earlier geometric example}:
+\[
+  \begin{array}{c|ccc}
+    x & -1 & 0 & 1\\ \hline
+    p_X(x) & 2/5 & 1/5 & 2/5
+  \end{array}
+\]
+We want the median, the $90$th percentile, and the third quartile.
+
+\textbf{1. Build the CDF by adding the masses.}
+At $-1$ we have $2/5$; at $0$ we have $2/5+1/5=3/5$;
+at $1$ we have $2/5+1/5+2/5=1$. Therefore,
+\[
+  F_X(x)=
+  \begin{cases}
+    0, & x<-1,\\
+    2/5=0.4, & -1\leq x<0,\\
+    3/5=0.6, & 0\leq x<1,\\
+    1, & x\geq1.
+  \end{cases}
+\]
+
+\textbf{2. Find the first threshold whose CDF reaches each level.}
+We use $q_p=\inf\{x:F_X(x)\geq p\}$.
+\begin{itemize}
+  \item \textbf{Median: $p=0.50$.}
+    For $x<0$, $F_X(x)\leq0.4<0.5$, whereas $F_X(0)=0.6\geq0.5$.
+    Thus
+    \[
+      \{x:F_X(x)\geq0.5\}=[0,+\infty),
+      \qquad \boxed{q_{0.50}=0.}
+    \]
+  \item \textbf{$90$th percentile: $p=0.90$.}
+    For $x<1$, $F_X(x)\leq0.6<0.9$, whereas $F_X(1)=1\geq0.9$.
+    Thus
+    \[
+      \{x:F_X(x)\geq0.9\}=[1,+\infty),
+      \qquad \boxed{q_{0.90}=1.}
+    \]
+  \item \textbf{Third quartile: $p=0.75$.}
+    For $x<1$, $F_X(x)\leq0.6<0.75$, whereas $F_X(1)=1\geq0.75$.
+    Thus
+    \[
+      \{x:F_X(x)\geq0.75\}=[1,+\infty),
+      \qquad \boxed{q_{0.75}=1.}
+    \]
+\end{itemize}
+\end{framedexample}
+
+\begin{center}
+\begin{tikzpicture}[x=1.65cm,y=3.9cm]
+  \draw[->] (-2,0) -- (2.2,0) node[right] {$x$};
+  \draw[->] (-1.8,-0.05) -- (-1.8,1.14) node[above] {$F_X(x)$};
+  \draw[thick,blue!65!black] (-1.7,0) -- (-1,0);
+  \draw[thick,blue!65!black] (-1,0.4) -- (0,0.4);
+  \draw[thick,blue!65!black] (0,0.6) -- (1,0.6);
+  \draw[thick,blue!65!black] (1,1) -- (2,1);
+  \foreach \k/\h/\prev in {-1/0.4/0,0/0.6/0.4,1/1/0.6} {
+    \filldraw[fill=white,draw=blue!65!black] (\k,\prev) circle (1.8pt);
+    \fill[blue!65!black] (\k,\h) circle (1.8pt);
+  }
+  \foreach \p/\q in {0.5/0,0.75/1,0.9/1} {
+    \draw[red!70!black,dashed] (-1.8,\p) -- (\q,\p);
+    \node[left,red!70!black] at (-1.8,\p) {\small $\p$};
+  }
+  \draw[red!70!black,dashed] (0,0.5) -- (0,0);
+  \draw[red!70!black,dashed] (1,0.9) -- (1,0);
+  \node[below] at (-1,0) {$-1$};
+  \node[below,red!70!black] at (0,0) {$0$};
+  \node[below,red!70!black] at (1,0) {$1$};
+  \node[left] at (-1.8,1) {$1$};
+\end{tikzpicture}
+\end{center}
+The median is $0$, while both the $90$th percentile and the third
+quartile are $1$: different probability levels can give the same
+quantile when the CDF has jumps.
 
 \chapter*{Chapter 4 (exercises)}
 \markboth{Chapter 4 (exercises)}{}
