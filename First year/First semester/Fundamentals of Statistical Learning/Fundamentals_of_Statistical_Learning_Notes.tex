@@ -342,6 +342,15 @@ difference is at most $1/100$. The possible error is \emph{one-sided}:
 identity.
 
 \section{Independent events}
+\begin{frameddefn}{Independent events}
+\label{def:independent-events}
+Two events $A$ and $B$ are independent if
+\[
+  P(A\cap B)=P(A)P(B).
+\]
+\end{frameddefn}
+When $P(B)>0$, this is equivalent to $P(A\mid B)=P(A)$:
+knowing that $B$ occurred does not change the probability of $A$.
 
 \section{Conditional probability}
 
@@ -1101,6 +1110,29 @@ function} (PDF), such that, for every $a\leq b$,
 \end{enumerate}
 \end{frameddefn}
 
+\begin{tcolorbox}[notesbox,colframe=red!45,colback=red!3,
+  boxed title style={colback=red!25,colframe=red!45},
+  title={Note: Heads-up}]
+\textbf{A PDF cannot concentrate probability on a countable set.}
+First, setting $a=b=x_i$ in the definition gives
+\[
+  P(X=x_i)=\int_{x_i}^{x_i}f_X(t)\,dt=0:
+\]
+an interval of zero length has zero area under the PDF.
+
+Now let $A=\{x_1,x_2,\ldots\}$ be any finite or countably infinite
+set, listing its elements without repetitions. The event $X\in A$
+is the union of the pairwise disjoint events $\{X=x_i\}$. By
+countable additivity,
+\[
+  P(X\in A)=\sum_i P(X=x_i)=\sum_i0=0.
+\]
+Thus no finite or countably infinite set can contain $X$ with
+probability $1$. The existence of a PDF already implies this;
+having an uncountable set of possible values alone does not
+guarantee that a PDF exists.
+\end{tcolorbox}
+
 \Needspace{22\baselineskip}
 \begin{framedexample}{Waiting for a bus}
 Suppose a bus arrives every $10$ minutes and you reach the stop
@@ -1427,8 +1459,169 @@ For the two intervals used in the slides, the same method gives
 \begin{tcolorbox}[colback=yellow!20,colframe=yellow!60!black,
   boxrule=0.4pt,arc=1mm,left=5pt,right=5pt,top=3pt,bottom=3pt,
   before skip=6pt,after skip=0pt]
-\small\textbf{Fine lezione 25 settembre}
+\small\textbf{End of lecture 25 September}
 \end{tcolorbox}
+
+\clearpage
+\begin{tcolorbox}[colback=yellow!20,colframe=yellow!60!black,
+  boxrule=0.4pt,arc=1mm,left=5pt,right=5pt,top=3pt,bottom=3pt,
+  before skip=6pt,after skip=6pt]
+\small\textbf{Start of lecture 30 September}
+\end{tcolorbox}
+\section{Relations}
+\subsection{From the PMF to the CDF}
+\begin{tcolorbox}[colback=blue!3,colframe=blue!30!black,
+  boxrule=0.4pt,arc=1mm,title={What we are trying to answer},
+  colbacktitle=blue!10,coltitle=black,fonttitle=\bfseries]
+If we know the probability of each individual
+value of $X$, how do we calculate the probability that $X$ is at most $x$?
+\end{tcolorbox}
+
+For a discrete random variable, the event $X\leq x$ includes every
+possible value $k$ that is at most $x$. These events $\{X=k\}$ are
+pairwise disjoint, so we add their probabilities:
+\[
+  \boxed{\underbrace{F_X(x)}_{\text{CDF: to find}}=P(X\leq x)
+    =\sum_{\substack{k\in\operatorname{supp}(X)\\k\leq x}}
+      \underbrace{p_X(k)}_{\text{PMF: known}},
+    \qquad x\in\mathbb R.}
+\]
+\subsection{From the PDF to the CDF}
+\begin{tcolorbox}[colback=blue!3,colframe=blue!30!black,
+  boxrule=0.4pt,arc=1mm,title={What we are trying to answer},
+  colbacktitle=blue!10,coltitle=black,fonttitle=\bfseries]
+We know how probability is spread over the possible values of $X$
+(its PDF). How do we calculate the probability of getting a value
+less than or equal to $x$?
+\end{tcolorbox}
+For a continuous random variable with PDF $f_X$, we calculate
+$P(X\leq x)$ by integrating the PDF over $(-\infty,x]$:
+\[
+  \boxed{\underbrace{F_X(x)}_{\text{CDF: to find}}=P(X\leq x)
+    =\int_{-\infty}^{x}\underbrace{f_X(t)}_{\text{PDF: known}}\,dt,
+    \qquad x\in\mathbb R.}
+\]
+\Needspace{27\baselineskip}
+\subsection{From the CDF to the PMF and PDF}
+\begin{tcolorbox}[colback=blue!3,colframe=blue!30!black,
+  boxrule=0.4pt,arc=1mm,title={What we are trying to answer},
+  colbacktitle=blue!10,coltitle=black,fonttitle=\bfseries]
+We know the CDF $F_X$. How do we recover the PMF $p_X$ if $X$ is
+discrete, or the PDF $f_X$ if $X$ is continuous?
+\end{tcolorbox}
+
+\textbf{What we know.} The CDF is defined by
+\[
+  F_X(x):=P(X\leq x).
+\]
+For every threshold $x$, it gives the probability of obtaining a
+value less than or equal to $x$. We want to recover the PMF or the
+PDF, depending on the type of $X$.
+
+\textbf{Discrete case: recover the PMF.}
+The PMF is defined by
+\[
+  p_X(x):=P(X=x).
+\]
+The CDF includes all values up to $x$. To isolate the probability
+of the single value $x$, we subtract the probability of values
+strictly less than $x$:
+\[
+  P(X=x)=P(X\leq x)-P(X<x).
+\]
+Since the left limit satisfies
+\[
+  F_X(x^-):=\lim_{t\uparrow x}F_X(t)=P(X<x),
+\]
+we obtain
+\[
+  \boxed{\underbrace{p_X(x)}_{\text{PMF: to find}}
+    =\underbrace{F_X(x)-F_X(x^-)}_{\text{CDF: known}}.}
+\]
+Thus the PMF at $x$ is the size of the jump of the CDF at $x$.
+
+\textbf{Continuous case: recover the PDF.}
+A PDF is a non-negative function $f_X$ such that
+\[
+  P(a\leq X\leq b)=\int_a^b f_X(t)\,dt,
+  \qquad \int_{\mathbb R}f_X(t)\,dt=1.
+\]
+In particular,
+\[
+  F_X(x)=P(X\leq x)=\int_{-\infty}^{x}f_X(t)\,dt.
+\]
+The CDF is therefore the integral of the PDF. To recover a PDF,
+we differentiate the CDF:
+\[
+  \boxed{\underbrace{f_X(x)}_{\text{PDF: to find}}
+    =\frac{d}{dx}\underbrace{F_X(x)}_{\text{CDF: known}}.}
+\]
+This recovers a PDF at points where the derivative exists, by the
+fundamental theorem of calculus.
+
+\clearpage
+\section{The quantile function}
+\begin{tcolorbox}[colback=blue!3,colframe=blue!30!black,
+  boxrule=0.4pt,arc=1mm,title={What we are trying to answer},
+  colbacktitle=blue!10,coltitle=black,fonttitle=\bfseries]
+Given a probability $p$, which threshold $x$ satisfies
+$P(X\leq x)=p$?
+\end{tcolorbox}
+The CDF starts with a threshold and returns a probability. The
+quantile function starts with a probability and returns a threshold.
+For example, the $90$th percentile is a threshold below which
+$90\%$ of the probability lies; the median is the quantile at level $0.5$.
+
+\begin{frameddefn}{Quantile function: continuous case}
+\label{def:quantile-continuous}
+Let $X$ be a continuous random variable with CDF $F_X$. For a
+probability level $0<p<1$, its \emph{quantile function} is
+\[
+  Q(p):=\inf\{x\in\mathbb R:F_X(x)=p\}.
+\]
+It gives the smallest value $x$ such that $F_X(x)=P(X\leq x)=p$.
+We also write $q_p$ instead of $Q(p)$.
+\end{frameddefn}
+The symbol $\inf$ denotes the infimum (greatest lower bound);
+when the set has a minimum, the infimum is its smallest element.
+Here we consider levels strictly between $0$ and $1$; endpoint
+levels may require separate conventions.
+
+\textbf{Geometric interpretation.}
+Start at height $p$ on the vertical axis, move horizontally to the
+CDF, and then read the corresponding threshold on the horizontal
+axis. If several thresholds give the same probability, choose
+the smallest one.
+\begin{center}
+\begin{tikzpicture}[x=1.1cm,y=3.3cm]
+  \draw[->] (-0.4,0) -- (6.7,0) node[right] {$x$};
+  \draw[->] (0,-0.05) -- (0,1.16) node[above] {$F_X(x)$};
+  \draw (-0.05,1) -- (0.05,1) node[left=5pt] {$1$};
+  \draw[thick,blue!65!black] (-0.25,0) -- (0,0)
+    -- (2,0.5) -- (4,0.5) -- (6,1) -- (6.5,1);
+  \node[blue!65!black,above left] at (5.8,0.95) {CDF};
+  \draw[->,red!70!black,dashed,thick] (0,0.5) -- (1.9,0.5);
+  \node[left,red!70!black] at (0,0.5) {$p$};
+  \draw[very thick,red!70!black] (2,0.5) -- (4,0.5);
+  \fill[red!70!black] (2,0.5) circle (2pt);
+  \draw[->,red!70!black,dashed,thick] (2,0.48) -- (2,0.02);
+  \draw[gray,dashed] (4,0.49) -- (4,0);
+  \draw (2,0.014) -- (2,-0.014)
+    node[below,red!70!black] {$a=Q(p)$};
+  \draw (4,0.014) -- (4,-0.014) node[below] {$b$};
+\end{tikzpicture}
+\end{center}
+In this continuous CDF, every threshold in $[a,b]$ gives the same
+probability $p$. Thus $\{x:F_X(x)=p\}=[a,b]$ and $Q(p)=a$.
+
+When the CDF is strictly increasing between probability levels
+$0$ and $1$, each level corresponds to a unique threshold, so
+\[
+  \boxed{Q(p)=F_X^{-1}(p).}
+\]
+An inverse may exist without a simple explicit formula. In that
+case, quantiles can be calculated numerically, as for the normal
+distribution.
 
 \chapter*{Chapter 4 (exercises)}
 \markboth{Chapter 4 (exercises)}{}
@@ -1563,6 +1756,60 @@ Putting the cases together, its CDF is:
     35/36, & 1\leq x<2,\\
     1, & x\geq2.
   \end{cases}
+\]
+
+\solutionheading{Part (b): outcomes and probabilities}
+Both conditions in each event must hold for the same ordered pair.
+Each of the $36$ ordered outcomes has probability $1/36$.
+\begin{enumerate}
+  \item \textbf{$\{M=2,Z=0\}$.}
+    If the maximum is $2$, both throws are at most $2$ and at least
+    one is $2$. All these outcomes also give $Z=0$:
+    \[
+      \{M=2,Z=0\}=\{(1,2),(2,1),(2,2)\}.
+    \]
+    Therefore,
+    \[
+      P(M=2,Z=0)=\frac3{36}=\frac1{12}.
+    \]
+  \item \textbf{$\{S=5,Z=1\}$.}
+    Exactly one throw must be $6$. The other is at least $1$, so
+    the sum is at least $7$ and cannot be $5$:
+    \[
+      \{S=5,Z=1\}=\varnothing,
+      \qquad P(S=5,Z=1)=0.
+    \]
+  \item \textbf{$\{S=8,Z=1\}$.}
+    One throw is $6$ and the other must be $2$:
+    \[
+      \{S=8,Z=1\}=\{(6,2),(2,6)\}.
+    \]
+    Therefore,
+    \[
+      P(S=8,Z=1)=\frac2{36}=\frac1{18}.
+    \]
+\end{enumerate}
+
+\Needspace{20\baselineskip}
+\solutionheading{Part (c): independence}
+Let $A=\{M=2\}$ and $B=\{Z=0\}$. By the
+\hyperref[def:independent-events]{definition of independence},
+we must check whether $P(A\cap B)=P(A)P(B)$.
+
+If $M=2$, neither throw can be $6$, so $Z=0$. Thus $A\subseteq B$
+and $A\cap B=A$. Using the counts above,
+\[
+  P(A\cap B)=P(A)=\frac3{36}=\frac1{12}.
+\]
+On the other hand,
+\[
+  P(A)P(B)=\frac3{36}\cdot\frac{25}{36}
+  =\frac{25}{432}\neq\frac1{12}.
+\]
+Therefore, $\{M=2\}$ and $\{Z=0\}$ are \textbf{not independent}.
+Equivalently, knowing that $M=2$ guarantees that $Z=0$:
+\[
+  P(Z=0\mid M=2)=1\neq\frac{25}{36}=P(Z=0).
 \]
 
 \end{document}
