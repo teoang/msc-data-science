@@ -2116,6 +2116,121 @@ Equivalently, knowing that $M=2$ guarantees that $Z=0$:
   P(Z=0\mid M=2)=1\neq\frac{25}{36}=P(Z=0).
 \]
 
+\chapter{A tour of well-known distributions}
+
+\section{The uniform distribution}
+\label{sec:uniform-distribution}
+A \textbf{uniform distribution} assigns the same probability to
+intervals of the same length within its support. Its parameters
+$a$ and $b$ specify the ends of that support.
+
+\begin{frameddefn}{Uniform distribution}
+\label{def:uniform-distribution}
+A continuous random variable $X$ has a \emph{uniform distribution}
+with parameters $a<b$, where $a,b\in\mathbb R$, if its PDF and CDF
+are
+\[
+  f_X(x)=\frac{1}{b-a}\mathbf 1_{[a,b]}(x),
+\]
+\[
+  F_X(x)=
+  \begin{cases}
+    0, & x<a,\\
+    \dfrac{x-a}{b-a}, & a\leq x\leq b,\\
+    1, & x>b.
+  \end{cases}
+\]
+We denote this distribution by $\operatorname{Unif}(a,b)$ and write
+$X\sim\operatorname{Unif}(a,b)$. Here $\operatorname{Unif}$
+abbreviates \emph{uniform}, and $\sim$ means \emph{has distribution}.
+\end{frameddefn}
+
+\textbf{Why is the density a rectangle?} Uniformity means that
+intervals of the same length within $[a,b]$ have the same
+probability, hence the same area under the PDF. If the density
+were higher in one region, a small interval there would have
+more probability than an equally long interval in a lower region.
+The density is therefore constant on $[a,b]$ and zero outside it.
+Its graph is horizontal on the support, so the region beneath it
+is a rectangle: the rectangular shape follows from uniformity,
+before we calculate its height.
+
+\textbf{Why is the height $1/(b-a)$?} Let $h$ be the constant
+height. The rectangle has width $b-a$, and the total area under
+a PDF must be $1$:
+\[
+  h(b-a)=1\qquad\Longrightarrow\qquad h=\frac{1}{b-a}.
+\]
+For $a\leq c\leq d\leq b$,
+\[
+  P(c\leq X\leq d)=\int_c^d\frac{1}{b-a}\,dx
+    =\frac{d-c}{b-a}.
+\]
+The numerator is the length of the selected interval; the
+denominator is the length of the full support.\newline
+For $a\leq x\leq b$, the same calculation gives the CDF:
+\[
+  F_X(x)=\int_a^x\frac{1}{b-a}\,dt=\frac{x-a}{b-a}.
+\]
+
+\subsection{The standard uniform distribution: $\operatorname{Unif}(0,1)$}
+\label{sec:uniform-standard}
+The \textbf{standard uniform distribution}, written
+$U\sim\operatorname{Unif}(0,1)$, is the \textbf{special case} of
+the general $\operatorname{Unif}(a,b)$ distribution in
+Section~\ref{sec:uniform-distribution} obtained by setting $a=0$
+and $b=1$.\newline
+Its support is therefore $[0,1]$, and substituting
+these endpoints gives the constant density
+$1/(b-a)=1/(1-0)=1$. Its PDF is
+\[
+  f_U(u)=
+  \begin{cases}
+    1, & 0\leq u\leq1,\\
+    0, & \text{otherwise}.
+  \end{cases}
+\]
+For $0\leq c\leq d\leq1$,
+\[
+  P(c\leq U\leq d)=\int_c^d1\,du=d-c.
+\]
+
+\textbf{Find the CDF.} By the
+\hyperref[def:cdf]{definition of a CDF}, $F_U(t)=P(U\leq t)$.
+For $0\leq t\leq1$, integrate the PDF up to $t$:
+\[
+  \boxed{F_U(t)=P(U\leq t)=\int_0^t1\,du=t.}
+\]
+This also follows directly from the general CDF formula:
+$(t-a)/(b-a)=(t-0)/(1-0)=t$ for $0\leq t\leq1$.
+The full CDF is therefore
+\[
+  F_U(t)=
+  \begin{cases}
+    0, & t<0,\\
+    t, & 0\leq t\leq1,\\
+    1, & t>1.
+  \end{cases}
+\]
+For example, $P(U\leq0.3)=0.3$: the interval from $0$ to $0.3$
+contains $30\%$ of the probability. Geometrically, this is a
+rectangle with width $0.3$ and height $1$, so its area is $0.3$.
+\begin{center}
+\begin{tikzpicture}[x=6cm,y=1.6cm]
+  \fill[blue!20] (0,0) rectangle (0.3,1);
+  \draw[->] (-0.05,0) -- (1.12,0) node[right] {$u$};
+  \draw[->] (0,0) -- (0,1.3) node[above] {$f_U(u)$};
+  \draw[thick,blue!65!black] (0,1) -- (1,1);
+  \draw[dashed] (0.3,0) -- (0.3,1);
+  \draw[dashed] (1,0) -- (1,1);
+  \node[left] at (0,1) {$1$};
+  \node[below] at (0,0) {$0$};
+  \node[below] at (0.3,0) {$0.3$};
+  \node[below] at (1,0) {$1$};
+  \node[blue!65!black] at (0.15,0.5) {$0.3$};
+\end{tikzpicture}
+\end{center}
+
 \chapter{Simulation}
 \label{sec:simulation}
 
@@ -2507,5 +2622,183 @@ Original reference:
 \href{https://epubs.siam.org/doi/10.1137/1004061}{Hull and Dobell,
 \textit{Random Number Generators} (1962)}.
 \end{notebox}
+
+\clearpage
+\begin{tcolorbox}[colback=yellow!20,colframe=yellow!60!black,
+  boxrule=0.4pt,arc=1mm,left=5pt,right=5pt,top=3pt,bottom=3pt,
+  before skip=6pt,after skip=6pt]
+\small\textbf{Start of lecture 2 October}
+\end{tcolorbox}
+
+\section{The quantile transform method}
+\label{sec:quantile-transform}
+We now have a way to generate numbers that imitate independent
+uniform draws. How can we use them to simulate a different
+distribution? The link is the
+\hyperref[def:quantile-general]{quantile function}.
+
+Previously, we chose a probability level $p$ and found the
+corresponding threshold $Q(p)$. Now we draw that level at random:
+we generate $U$ uniformly between $0$ and $1$ and return $Q(U)$.
+This is the \textbf{quantile transform method}, also called the
+\textbf{inverse transform method}.
+
+\begin{framedprop}{Quantile transform}
+\label{prop:quantile-transform}
+Let $F$ be any CDF and let
+\[
+  Q(p)=\inf\{x\in\mathbb R:F(x)\geq p\},\qquad 0<p<1,
+\]
+be its quantile function. If $U\sim\operatorname{Unif}(0,1)$ and
+$Y=Q(U)$, then $Y$ has CDF $F$:
+\[
+  F_Y(y)=P(Y\leq y)=F(y),\qquad y\in\mathbb R.
+\]
+\end{framedprop}
+
+\textbf{Proof in the continuous, strictly increasing case.}
+In this case $Q=F^{-1}$. Since $F$ is increasing,
+$F^{-1}(U)\leq y$ is equivalent to $U\leq F(y)$. Therefore,
+\begin{align*}
+  F_Y(y)&=P(Y\leq y)\\
+        &=P\bigl(F^{-1}(U)\leq y\bigr)\\
+        &=P\bigl(U\leq F(y)\bigr)\\
+        &=F(y).
+\end{align*}
+The last step uses the
+\hyperref[sec:uniform-standard]{standard uniform distribution's CDF}:
+$P(U\leq t)=t$ for $0\leq t\leq1$. Here the threshold is
+$t=F(y)$, which lies in $[0,1]$ because $F$ is a CDF.
+Thus the generated variable has exactly the CDF we wanted.
+The result also holds for CDFs with jumps or flat parts, using the
+general quantile definition; the proof above covers the invertible
+case.
+
+To generate a sample, draw independent $U_1,\ldots,U_n$ and set
+$Y_i=Q(U_i)$ for each $i$. Applying the same function separately
+to independent draws preserves independence, and every $Y_i$ has
+CDF $F$.
+
+\clearpage
+\subsection{A continuous example}
+\begin{framedexample}{Generating values with density $3x^2$}
+Suppose we want to simulate a variable $X$ with PDF
+\[
+  f_X(x)=
+  \begin{cases}
+    3x^2, & 0\leq x\leq1,\\
+    0, & \text{otherwise}.
+  \end{cases}
+\]
+\textbf{Find the CDF.} For $0\leq x<1$,
+\[
+  F_X(x)=\int_0^x3t^2\,dt=[t^3]_0^x=x^3.
+\]
+The complete CDF is
+\[
+  F_X(x)=
+  \begin{cases}
+    0, & x<0,\\
+    x^3, & 0\leq x<1,\\
+    1, & x\geq1.
+  \end{cases}
+\]
+\textbf{Find the quantile.} For $0<p<1$, solve $x^3=p$:
+\[
+  Q(p)=p^{1/3}.
+\]
+\textbf{Generate a value.} Draw $U\sim\operatorname{Unif}(0,1)$
+and return
+\[
+  \boxed{Y=U^{1/3}.}
+\]
+For example, the uniform value $u=0.125$ becomes
+$y=0.125^{1/3}=0.5$.
+
+\begin{center}
+\begin{tikzpicture}[x=4.3cm,y=2.4cm]
+  \draw[->] (0,0) -- (1.12,0) node[right] {$x$};
+  \draw[->] (0,0) -- (0,1.15) node[above] {$F_X(x)$};
+  \draw[thick,blue!65!black,domain=0:1,samples=80] plot (\x,{\x^3});
+  \draw[red!70!black,dashed,->] (0,0.125) -- (0.5,0.125);
+  \draw[red!70!black,dashed,->] (0.5,0.125) -- (0.5,0);
+  \fill[red!70!black] (0.5,0.125) circle (1.7pt);
+  \node[left,red!70!black] at (0,0.125) {\small $u=0.125$};
+  \node[below,red!70!black] at (0.5,0) {\small $Q(u)=0.5$};
+  \node[below] at (1,0) {$1$};
+  \node[left] at (0,1) {$1$};
+  \node[blue!65!black,right] at (0.78,0.475) {$F_X(x)=x^3$};
+\end{tikzpicture}
+\end{center}
+Geometrically, start at the randomly chosen height $u$, move right
+to the CDF, and read the corresponding value on the horizontal axis.
+
+As a check, for $0\leq y\leq1$,
+\[
+  P(Y\leq y)=P(U^{1/3}\leq y)=P(U\leq y^3)=y^3=F_X(y).
+\]
+\end{framedexample}
+
+\clearpage
+\subsection{A discrete example}
+\begin{framedexample}{Generating a Bernoulli variable}
+Suppose we want $X\sim\operatorname{Ber}(0.4)$, so
+\[
+  P(X=0)=0.6,\qquad P(X=1)=0.4.
+\]
+Its CDF is
+\[
+  F_X(x)=
+  \begin{cases}
+    0, & x<0,\\
+    0.6, & 0\leq x<1,\\
+    1, & x\geq1.
+  \end{cases}
+\]
+\textbf{Find the quantile.} This CDF has jumps. We use the smallest
+threshold where the CDF reaches or exceeds the chosen probability
+level:
+\[
+  Q(p)=
+  \begin{cases}
+    0, & 0<p\leq0.6,\\
+    1, & 0.6<p<1.
+  \end{cases}
+\]
+\textbf{Generate a value.} Draw $U\sim\operatorname{Unif}(0,1)$
+and return
+\[
+  Y=Q(U)=
+  \begin{cases}
+    0, & U\leq0.6,\\
+    1, & U>0.6.
+  \end{cases}
+\]
+The interval for output $0$ has length $0.6$; the interval for
+output $1$ has length $0.4$.
+\begin{center}
+\begin{tikzpicture}[x=8cm,y=1cm]
+  \draw[line width=3pt,blue!65!black] (0,0) -- (0.6,0);
+  \draw[line width=3pt,red!70!black] (0.6,0) -- (1,0);
+  \foreach \x/\lab in {0/0,0.6/0.6,1/1} {
+    \draw (\x,-0.09) -- (\x,0.09);
+    \node[below] at (\x,-0.09) {$\lab$};
+  }
+  \node[above,blue!65!black] at (0.3,0.12) {$Y=0$};
+  \node[above,red!70!black] at (0.8,0.12) {$Y=1$};
+\end{tikzpicture}
+\end{center}
+For example, $u=0.25$ gives $y=0$, whereas $u=0.8$ gives $y=1$.
+At $u=0.6$, the general quantile definition gives $y=0$.
+
+\textbf{Check the probabilities.} Since $U$ is uniform,
+\[
+  P(Y=0)=P(U\leq0.6)=0.6,\qquad
+  P(Y=1)=P(U>0.6)=1-0.6=0.4.
+\]
+Thus $Y$ has the same distribution as $X$. Equivalently,
+$Y=\mathbf 1_{(0.6,1)}(U)$: the indicator is $1$ when $U$ falls
+above $0.6$, and $0$ otherwise.
+\end{framedexample}
 
 \end{document}
