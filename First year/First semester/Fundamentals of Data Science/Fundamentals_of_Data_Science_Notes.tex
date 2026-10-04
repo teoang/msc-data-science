@@ -96,4 +96,30 @@ from a finite set of classes. For example, predicting whether a flower
 is setosa, versicolor, or virginica is a classification task.
 \end{frameddefn}
 
+\chapter{Data Representation}
+
+\begin{tcolorbox}[colback=yellow!20,colframe=yellow!60!black,
+  boxrule=0.4pt,arc=1mm,left=5pt,right=5pt,top=3pt,bottom=3pt,
+  before skip=0pt,after skip=0pt]
+\small\textbf{Start of lecture 2 October 2026 (Spinelli)}
+\end{tcolorbox}
+
+\section{The Iris dataset}
+
+The Iris dataset contains 150 flowers, divided into three species:
+50 setosa, 50 versicolor, and 50 virginica. The goal is to predict a
+flower's species from its measurements.
+
+\begin{framedexample}{Iris as a supervised classification task}
+Each \textbf{observation} is one flower, described by four
+\textbf{features}, all measured in centimetres:
+\begin{itemize}
+  \item sepal length and sepal width;
+  \item petal length and petal width.
+\end{itemize}
+The \textbf{target} is the flower's species. This is supervised learning
+because the species is known for the training examples, and
+classification because the target is a category.
+\end{framedexample}
+
 \end{document}
