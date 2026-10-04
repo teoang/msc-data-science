@@ -73,4 +73,27 @@ The main learning settings are:
 \emph{Deep learning} uses neural networks with multiple layers and can
 be applied in each of these settings.
 
+\clearpage
+\section{Supervised models and prediction tasks}
+
+\begin{frameddefn}{Supervised learning model}\label{def:supervised-model}
+A supervised learning model is a function
+$f:\mathcal{X}\to\mathcal{Y}$ that maps an input $x$ to a predicted
+output $\hat{y}=f(x)$. Here, $\mathcal{X}$ is the input space and
+$\mathcal{Y}$ is the output space. Training means choosing or adjusting
+$f$ using examples of inputs paired with their known outputs.
+\end{frameddefn}
+
+\begin{frameddefn}{Regression}\label{def:regression}
+Regression is a supervised learning task whose target is a real-valued
+number or vector. For example, predicting a person's height from their
+age is a regression task.
+\end{frameddefn}
+
+\begin{frameddefn}{Classification}\label{def:classification}
+Classification is a supervised learning task whose target is a category
+from a finite set of classes. For example, predicting whether a flower
+is setosa, versicolor, or virginica is a classification task.
+\end{frameddefn}
+
 \end{document}
