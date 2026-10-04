@@ -21,25 +21,56 @@
 
 \chapter{Introduction}
 
-% Add notes here as we work through the course slides.
-% Local slide folder:
-% /Users/teoang/Documents/msc/Data Science Sapienza/FDS (Spinelli)
-%
-% Reuse the FSL environments when needed:
-% \section{Topic}
-% \begin{frameddefn}{Title}\label{def:label}
-%   Definition.
-% \end{frameddefn}
-% \begin{framedexample}{Title}
-%   Worked example.
-% \end{framedexample}
-% \begin{framedprop}{Title}
-%   Proposition.
-% \end{framedprop}
-% \begin{proof}
-%   Proof.
-% \end{proof}
-% \exerciseheading{Exercise}
-% \solutionheading{Solution}
+\section{What is Data Science?}
+
+\begin{frameddefn}{Data Science}\label{def:data-science}
+Data Science is an interdisciplinary field that extracts knowledge from
+data to support decisions. It combines statistics, mathematics, computer
+science, and domain expertise to collect, clean, manage, and analyse data.
+\end{frameddefn}
+
+\section{The Data Science lifecycle}
+
+A project moves through business understanding, data engineering,
+model engineering, deployment, and monitoring. This cycle can repeat
+when new data or retraining is needed.
+
+\begin{center}
+  \includegraphics[width=0.95\linewidth]{assets/data-science-lifecycle.png}
+  \par\smallskip
+  {\small\textit{The Data Science lifecycle. Source: Spinelli, Lecture 00.}}
+\end{center}
+
+\clearpage
+\section{Artificial Intelligence and Machine Learning}
+
+\emph{Artificial Intelligence} (AI) studies how to build systems that
+perform tasks requiring abilities such as reasoning, learning, and
+problem solving.
+
+\begin{frameddefn}{Machine Learning}\label{def:machine-learning}
+Machine Learning (ML) studies algorithms whose performance $P$ on a task
+$T$ improves through experience $E$. A learning problem therefore
+specifies the task, the performance measure, and the available experience.
+\end{frameddefn}
+
+The main learning settings are:
+\begin{itemize}
+  \item \textbf{Supervised learning:} learn from inputs paired with known
+        desired outputs to predict the output for new inputs.
+  \item \textbf{Unsupervised learning:} discover structure in data without
+        given target outputs.
+  \item \textbf{Reinforcement learning:} learn how to act through
+        interaction with an environment and feedback in the form of rewards.
+\end{itemize}
+
+\begin{center}
+  \includegraphics[width=\linewidth]{assets/artificial-intelligence-and-machine-learning.png}
+  \par\smallskip
+  {\small\textit{AI, ML, and learning settings. Source: Spinelli, Lecture 00.}}
+\end{center}
+
+\emph{Deep learning} uses neural networks with multiple layers and can
+be applied in each of these settings.
 
 \end{document}
