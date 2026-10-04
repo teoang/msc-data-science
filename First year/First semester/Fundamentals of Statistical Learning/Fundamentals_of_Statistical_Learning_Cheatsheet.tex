@@ -10,7 +10,7 @@
 \setlist{topsep=0.5\baselineskip,itemsep=0.5\baselineskip,parsep=0pt,leftmargin=2.45em}
 \newcounter{definition}
 \setcounter{definition}{4}
-\renewcommand{\thedefinition}{4.\arabic{definition}}
+\renewcommand{\thedefinition}{3.\arabic{definition}}
 \definecolor{NotesDefinition}{rgb}{0.70,0.94,0.70}
 \definecolor{NotesPaper}{gray}{0.95}
 \tcbset{notesbox/.style={enhanced,breakable,
@@ -35,7 +35,7 @@
     boxed title style={colback=NotesDefinition,colframe=NotesDefinition}}}
 \newtcolorbox[use counter=definition]{frameddefn}[1]{definitionbox,
   title={Definition \thedefinition:\enspace #1}}
-\renewcommand{\thedefinition}{4.\arabic{definition}}
+\renewcommand{\thedefinition}{3.\arabic{definition}}
 \begin{document}
 \begin{center}
   {\Large\bfseries Fundamentals of Statistical Learning}\par

@@ -699,7 +699,6 @@ We seek $P(D\mid T_1\cap T_2)$.
 \end{enumerate}
 The second positive result raises the probability from about $16.53\%$
 to about $79.51\%$ under the conditional independence assumption.
-\setcounter{chapter}{3}
 \chapter{Random variables}
 
 \begin{tcolorbox}[colback=yellow!20,colframe=yellow!60!black,
@@ -1928,393 +1927,9 @@ The median is $0$, while both the $90$th percentile and the third
 quartile are $1$: different probability levels can give the same
 quantile when the CDF has jumps.
 
-\clearpage
-
-\begin{tcolorbox}[colback=yellow!20,colframe=yellow!60!black,
-  boxrule=0.4pt,arc=1mm,left=5pt,right=5pt,top=3pt,bottom=3pt,
-  before skip=6pt,after skip=6pt]
-\small\textbf{Start of lecture 1 October}
-\end{tcolorbox}
-
-\section{Simulation}
-\label{sec:simulation}
-\subsection{A ``what if?'' experiment}
-\label{sec:simulation-what-if}
-A ``what if?'' question asks what would happen in a hypothetical
-situation. A simulation reproduces possible outcomes of an experiment
-on a computer. We can repeat the simulation and observe what happens
-across the different repetitions.
-
-\begin{framedexample}{One hundred coin tosses}
-Suppose we ask:
-\begin{quote}
-If I tossed a coin $100$ times, how many heads would I get?
-\end{quote}
-A simulation produces a possible sequence of $100$ tosses, and we
-count the heads in that sequence. We can repeat this experiment
-on the computer and compare the numbers of heads obtained.
-\end{framedexample}
-
-\subsection{From a real coin to a simulation}
-Imagine that we have a coin, but we do not know its probability of
-landing heads. For each toss, let $X=1$ mean heads and $X=0$ mean tails.
-Its distribution is described by
-\[
-  P(X=1)=p,\qquad P(X=0)=1-p,
-\]
-where $p$ is unknown. This is our \textbf{population model}: it
-describes the possible outcomes and their probabilities.
-
-We decide to toss the coin $100$ times. We assume that the tosses are
-independent and that each has the same probability $p$ of heads.
-This is our \textbf{sampling scheme}. We call the tosses
-\textbf{IID}: independent and identically distributed. The outcome
-of one toss gives no information about the others, and all tosses
-follow the same distribution.
-
-Together, the population model and the sampling scheme describe the
-\textbf{data generating process}: the mechanism that produces the
-sequence of outcomes we observe.
-
-Suppose we observe $65$ heads in our $100$ tosses. We use the observed
-proportion of heads to estimate the unknown probability:
-\[
-  \widehat p=\frac{65}{100}=0.65.
-\]
-The hat means that $\widehat p$ is an estimate calculated from the
-data. It does not mean that the true $p$ is exactly $0.65$; another
-set of $100$ tosses could give a different proportion. Using data to
-learn about an unknown model is called \textbf{inference}.
-
-Now imagine that we choose the probability ourselves, for example
-$p=0.5$, and ask the computer to produce $100$ independent tosses
-with that probability. This is \textbf{simulation}: we specify the
-model and the sampling scheme, then generate data following those
-rules. We know the rules, but we do not fix the outcomes. One run
-could give $48$ heads and another $53$.
-
-\begin{notebox}[Inference and simulation]
-\textbf{Inference.} We observe data and use them to learn about an
-unknown model.
-\[
-  \text{Observed data}\ \longrightarrow\ \text{Information about the model}.
-\]
-\textbf{Simulation.} We choose a model and a sampling scheme, then
-generate data from them.
-\[
-  \text{Specified model and sampling scheme}\ \longrightarrow\ \text{Simulated data}.
-\]
-For our coin, the simulation question is: what numbers of heads
-could we observe in $100$ independent tosses if $p=0.5$?
-Repeating the experiment on the computer lets us explore the
-variation in those numbers.
-\end{notebox}
-
-\subsection{Where do the random numbers come from?}
-\label{sec:random-number-generators}
-We want the computer to simulate our $100$ coin tosses. A useful
-starting point is a sequence of numbers that behave like independent
-draws from a uniform distribution on $(0,1)$. But where do these
-numbers come from?
-
-\subsubsection{Using a physical source}
-A \textbf{true random number generator} measures a physical source
-of randomness, such as electronic noise or a quantum phenomenon.
-The device processes those measurements to obtain numbers that a
-computer can use. The changing patterns of lava lamps are another
-example of a physical source.
-
-We can distinguish two meanings of randomness:
-\begin{itemize}
-  \item \textbf{Epistemic randomness:} we cannot predict an outcome
-    because we lack information about the process.
-  \item \textbf{Ontological randomness:} randomness is intrinsic to
-    the physical phenomenon itself.
-\end{itemize}
-For simulation, the practical idea is to obtain numbers from a
-physical process. This requires a physical source and a device to
-read it. Collecting and processing measurements can take time.
-Repeating the experiment does not reproduce the same sequence of
-outcomes, although we can save the numbers already collected.
-
-\subsubsection{Using a formula}
-There is another approach: choose an initial value $x_0$ and a
-function $f$ that calculates the next value from the current one.
-Apply the same function repeatedly. This is how a
-\textbf{pseudorandom number generator} works.
-\[
-  \underbrace{x_0}_{\text{initial value}}
-  \ \longrightarrow\ \underbrace{f(x_0)}_{x_1}
-  \ \longrightarrow\ \underbrace{f(f(x_0))}_{x_2}
-  \ \longrightarrow\ \underbrace{f(f(f(x_0)))}_{x_3}
-  \ \longrightarrow\ \cdots
-\]
-First we calculate $x_1=f(x_0)$. We then use $x_1$ as the input
-to the same function, obtaining $x_2=f(x_1)=f(f(x_0))$, and
-continue in this way. In general, $x_{k+1}=f(x_k)$: each output
-becomes the input for the next step. Here $f$ denotes the update rule.
-
-The procedure is \textbf{deterministic}: once the starting value and
-the rule are fixed, the entire sequence is determined. A suitable
-generator is designed so that the sequence imitates the statistical
-behaviour of random draws from the distribution we need.
-
-The starting value is called the \textbf{seed}. Such generators can be fast
-and require no additional physical device. To reproduce a run,
-we can keep the seed and the generator settings rather than store
-the whole sequence.
-
-\begin{notebox}[Why the seed matters]
-With the same generator, settings and seed, we obtain the same
-sequence. This makes a simulation \textbf{reproducible}.
-
-Imagine that a simulation gives an unexpected result. We can run it
-again with the same seed and inspect exactly the same simulated
-experiment. We can also compare two programs using the same inputs.
-
-These pseudorandom numbers are the starting material from which
-we generate simulated coin tosses, die rolls and observations from
-other distributions.
-\end{notebox}
-
-\subsection{What should a pseudorandom sequence imitate?}
-\label{sec:prng-uniform}
-We can now make the goal of the generator more precise. We want
-its output to imitate independent draws from a uniform distribution
-on $(0,1)$.
-
-\begin{frameddefn}{Pseudorandom number generator}
-\label{def:prng}
-In a simplified description, a \emph{pseudorandom number generator}
-(PRNG) uses a deterministic function
-\[
-  f:(0,1)\longrightarrow(0,1)
-\]
-and a starting value, or \emph{seed}, $u_0\in(0,1)$ to generate
-\[
-  u_0,\quad u_1=f(u_0),\quad u_2=f(f(u_0)),\quad
-  \ldots,\quad u_n=f^n(u_0).
-\]
-The function is chosen so that the sequence imitates the statistical
-behaviour of an IID $\operatorname{Uniform}(0,1)$ sample.
-Here $f^n(u_0)$ means applying $f$ repeatedly $n$ times.
-\end{frameddefn}
-
-There are two parts to this goal:
-\begin{itemize}
-  \item \textbf{Uniformity.} Intervals of the same length should
-    receive approximately the same proportion of values. For example,
-    in a sufficiently long sequence, about $10\%$ of the values
-    should fall in $(0.2,0.3)$, and about $10\%$ in $(0.7,0.8)$.
-  \item \textbf{Imitating independence.} The sequence should imitate
-    draws in which observing one value gives no information about
-    the others. We want to avoid systematic patterns between
-    successive values.
-\end{itemize}
-
-For example, consider the repeating sequence
-\[
-  0.1,\ 0.2,\ 0.3,\ \ldots,\ 0.9,\ 0.1,\ 0.2,\ \ldots
-\]
-It visits different parts of the interval, but its next value is
-easy to predict. Spreading values across the interval is only one
-part of what we require from a good generator.
-
-\begin{notebox}[The apparent paradox]
-We know the seed and the rule, so the whole sequence is determined.
-Yet we design the generator so that its output statistically
-resembles independent uniform draws. Imitating an IID sample is
-the goal; for a fixed seed, the generated sequence remains
-deterministic.
-\end{notebox}
-
-\subsection{The linear congruential generator}
-\label{sec:lcg}
-A concrete way to generate the next value is to multiply the current
-value, add a constant, and keep the remainder after division.
-
-\begin{frameddefn}{Linear congruential generator}
-\label{def:lcg}
-A \emph{linear congruential generator} (LCG) uses integer parameters
-$\alpha$, $\beta$, and $M>1$, and an integer seed
-$x_0\in\{0,1,\ldots,M-1\}$. Its update rule is
-\[
-  x_{k+1}=f(x_k)=(\alpha+\beta x_k)\bmod M.
-\]
-Here $\bmod M$ gives the remainder after division by $M$, so every
-state $x_k$ belongs to $\{0,1,\ldots,M-1\}$.
-\end{frameddefn}
-
-At each step, we multiply the current value by $\beta$, add $\alpha$,
-and take the remainder. The resulting integer becomes the input
-for the next step.
-
-\Needspace{25\baselineskip}
-\begin{framedexample}{Following the sequence and finding its period}
-Choose small parameters so that we can follow the calculations:
-\[
-  \alpha=1,\qquad \beta=5,\qquad M=16,\qquad x_0=2.
-\]
-The first three updates are
-\[
-  \begin{aligned}
-    x_1&=(1+5\cdot2)\bmod16=11,\\
-    x_2&=(1+5\cdot11)\bmod16=56\bmod16=8,\\
-    x_3&=(1+5\cdot8)\bmod16=41\bmod16=9.
-  \end{aligned}
-\]
-For example, $56=3\cdot16+8$, so its remainder is $8$.
-Continuing with the same rule gives
-\[
-  \begin{aligned}
-    2&\to11\to8\to9\to14\to7\to4\to5\\
-     &\to10\to3\to0\to1\to6\to15\to12\to13\to2.
-  \end{aligned}
-\]
-Once $2$ returns, the same rule produces $11$ again, then $8$, and
-so on: the sequence repeats. The \textbf{period} is the length of
-this repeating cycle.
-
-Here we visit all $16$ possible states before returning to the
-starting value. The period is therefore $16$, the maximum possible
-for $M=16$. In general, an LCG can have period $M$ with appropriate
-choices of its parameters.
-\end{framedexample}
-
-To rescale the integer states to numbers between $0$ and $1$, we can
-use
-\[
-  u_k=\frac{x_k}{M+1}.
-\]
-For the first three generated states in the example, this gives
-\[
-  \frac{11}{17}\approx0.647,\qquad
-  \frac8{17}\approx0.471,\qquad
-  \frac9{17}\approx0.529.
-\]
-The output can be $0$ when the remainder is $0$, and is always less
-than $1$. Rescaling changes the range of the values; the parameters
-determine how the sequence behaves statistically.
-
-\begin{notebox}[Why the choice of parameters matters]
-We want the sequence to avoid repeating too soon. If we instead
-choose $\beta=2$, keeping $\alpha=1$, $M=16$ and $x_0=2$, we get
-\[
-  2\to5\to11\to7\to15\to15\to15\to\cdots
-\]
-The generator gets stuck at $15$, so the repeating cycle has period
-$1$. Such a sequence would be unsuitable for simulating coin tosses.
-
-A long period is one requirement for a useful generator. We also
-need its output to imitate uniformity and independence. Our small
-example illustrates the calculations and a full cycle; assessing
-statistical quality requires more than checking the period.
-\end{notebox}
-
-\subsection{The LCG in R}
-\label{sec:lcg-r}
-We can translate the update rule into a short R function. To follow
-the calculations, we keep the small parameters from
-\hyperref[sec:lcg]{the previous example} and generate three values:
-\begin{lstlisting}[language=R]
-lcg <- function(n = 3, a = 1, b = 5, M = 16, u0 = 2) {
-  out <- rep(NA, n)
-
-  for (i in 1:n) {
-    u0 <- (a + b*u0) %% M
-    out[i] <- u0 / (M + 1)
-  }
-
-  return(out)
-}
-\end{lstlisting}
-Here \texttt{a} corresponds to $\alpha$, \texttt{b} to $\beta$, and
-\texttt{n} is the number of values we ask the function to produce.
-The argument \texttt{u0} supplies the initial seed.
-
-\subsubsection{Prepare a place for the results}
-The instruction \texttt{out <- rep(NA, n)} creates a vector with
-\texttt{n} positions. Each initially contains \texttt{NA}, which
-means a missing value. For \texttt{n = 3}, the vector starts as
-\begin{lstlisting}[language=R]
-c(NA, NA, NA)
-\end{lstlisting}
-The loop will fill these positions with the generated outputs.
-
-\subsubsection{Update, rescale and store}
-The loop \texttt{for (i in 1:n)} repeats its body with
-\texttt{i = 1}, then \texttt{i = 2}, and so on up to \texttt{n}.
-Each iteration performs two operations:
-\begin{enumerate}
-  \item \textbf{Calculate the new state.}
-    The instruction \texttt{u0 <- (a + b*u0) \%\% M} applies
-    the LCG rule. In R, \texttt{\%\%} calculates the remainder and
-    \texttt{<-} assigns the result to a variable. The variable
-    \texttt{u0} initially holds the seed; after each update it holds
-    the current integer state.
-  \item \textbf{Rescale and save the output.}
-    The instruction \texttt{out[i] <- u0 / (M + 1)} divides the
-    new state by $M+1$ and stores it in position \texttt{i} of
-    \texttt{out}. R indexes the first position with $1$.
-\end{enumerate}
-
-For our example, the loop fills the vector as follows:
-\begin{center}
-\begin{tabular}{@{}cll@{}}
-\textbf{Iteration} & \textbf{New state} & \textbf{Stored output}\\
-\hline
-$i=1$ & $11$ & \texttt{out[1]} $=11/17$\\
-$i=2$ & $8$ & \texttt{out[2]} $=8/17$\\
-$i=3$ & $9$ & \texttt{out[3]} $=9/17$
-\end{tabular}
-\end{center}
-Finally, \texttt{return(out)} returns the completed vector to
-whoever called the function. Running \texttt{lcg()} gives approximately
-\[
-  (0.6470588,\ 0.4705882,\ 0.5294118).
-\]
-
-\Needspace{8\baselineskip}
-\subsubsection{Checking uniformity with a histogram}
-A \textbf{histogram} shows how numerical values are spread across
-intervals. We divide the range into intervals, count the values in
-each one, and draw adjacent bars. For equal widths, taller bars
-mean more values: we can see where the values are concentrated.
-
-We use the same function to generate $1000$ values, with seed $26$ and parameters
-$a=69069069$, $b=12345$ and $M=4096$:
-\begin{lstlisting}[language=R]
-u <- lcg(n = 1000, a = 69069069, b = 12345,
-         M = 2^12, u0 = 26)
-hist(u, breaks = seq(0, 1, 0.1), probability = TRUE)
-abline(h = 1, lty = 2)
-\end{lstlisting}
-We use ten intervals of width $0.1$. Here $80$ values fall between
-$0$ and $0.1$, and $107$ between $0.1$ and $0.2$, so the first bar
-is lower than the second. For a uniform distribution on $(0,1)$,
-each interval has probability $0.1$: we would expect about $100$
-values per interval in a sample of size $1000$.
-
-\begin{center}
-  \includegraphics[width=0.78\linewidth]{assets/lcg-uniformity-histogram.png}
-\end{center}
-
-With \texttt{probability = TRUE}, the vertical axis shows density.
-Each bar's height is its count divided by the product of the sample
-size and the interval width.
-For $100$ values in an interval of width $0.1$, the height is
-$100/(1000\times0.1)=1$. Each bar's area is the fraction of values
-in its interval; the total area is $1$.
-
-The dashed line is the uniform density, $1$ on $(0,1)$. The bars
-are roughly close to it: a first visual check of uniformity.
-Their heights need not be identical in a finite sequence.
-A histogram does not check independence: rearranging the values
-leaves it unchanged.
-
-\chapter*{Chapter 4 (exercises)}
-\markboth{Chapter 4 (exercises)}{}
-\addcontentsline{toc}{chapter}{Chapter 4 (exercises)}
+\chapter*{Chapter 3 (exercises)}
+\markboth{Chapter 3 (exercises)}{}
+\addcontentsline{toc}{chapter}{Chapter 3 (exercises)}
 
 \begin{tcolorbox}[colback=white,colframe=black!45,boxrule=0.5pt,arc=2mm]
 \textbf{Exercise 4.1 --- Two throws of a die}\par\smallskip
@@ -2500,5 +2115,397 @@ Equivalently, knowing that $M=2$ guarantees that $Z=0$:
 \[
   P(Z=0\mid M=2)=1\neq\frac{25}{36}=P(Z=0).
 \]
+
+\chapter{Simulation}
+\label{sec:simulation}
+
+\begin{tcolorbox}[colback=yellow!20,colframe=yellow!60!black,
+  boxrule=0.4pt,arc=1mm,left=5pt,right=5pt,top=3pt,bottom=3pt,
+  before skip=6pt,after skip=6pt]
+\small\textbf{Start of lecture 1 October}
+\end{tcolorbox}
+
+\section{A ``what if?'' experiment}
+\label{sec:simulation-what-if}
+A ``what if?'' question asks what would happen in a hypothetical
+situation. A simulation reproduces possible outcomes of an experiment
+on a computer. We can repeat the simulation and observe what happens
+across the different repetitions.
+
+\begin{framedexample}{One hundred coin tosses}
+Suppose we ask:
+\begin{quote}
+If I tossed a coin $100$ times, how many heads would I get?
+\end{quote}
+A simulation produces a possible sequence of $100$ tosses, and we
+count the heads in that sequence. We can repeat this experiment
+on the computer and compare the numbers of heads obtained.
+\end{framedexample}
+
+\section{From a real coin to a simulation}
+Imagine that we have a coin, but we do not know its probability of
+landing heads. For each toss, let $X=1$ mean heads and $X=0$ mean tails.
+Its distribution is described by
+\[
+  P(X=1)=p,\qquad P(X=0)=1-p,
+\]
+where $p$ is unknown. This is our \textbf{population model}: it
+describes the possible outcomes and their probabilities.
+
+We decide to toss the coin $100$ times. We assume that the tosses are
+independent and that each has the same probability $p$ of heads.
+This is our \textbf{sampling scheme}. We call the tosses
+\textbf{IID}: independent and identically distributed. The outcome
+of one toss gives no information about the others, and all tosses
+follow the same distribution.
+
+Together, the population model and the sampling scheme describe the
+\textbf{data generating process}: the mechanism that produces the
+sequence of outcomes we observe.
+
+Suppose we observe $65$ heads in our $100$ tosses. We use the observed
+proportion of heads to estimate the unknown probability:
+\[
+  \widehat p=\frac{65}{100}=0.65.
+\]
+The hat means that $\widehat p$ is an estimate calculated from the
+data. It does not mean that the true $p$ is exactly $0.65$; another
+set of $100$ tosses could give a different proportion. Using data to
+learn about an unknown model is called \textbf{inference}.
+
+Now imagine that we choose the probability ourselves, for example
+$p=0.5$, and ask the computer to produce $100$ independent tosses
+with that probability. This is \textbf{simulation}: we specify the
+model and the sampling scheme, then generate data following those
+rules. We know the rules, but we do not fix the outcomes. One run
+could give $48$ heads and another $53$.
+
+\begin{notebox}[Inference and simulation]
+\textbf{Inference.} We observe data and use them to learn about an
+unknown model.
+\[
+  \text{Observed data}\ \longrightarrow\ \text{Information about the model}.
+\]
+\textbf{Simulation.} We choose a model and a sampling scheme, then
+generate data from them.
+\[
+  \text{Specified model and sampling scheme}\ \longrightarrow\ \text{Simulated data}.
+\]
+For our coin, the simulation question is: what numbers of heads
+could we observe in $100$ independent tosses if $p=0.5$?
+Repeating the experiment on the computer lets us explore the
+variation in those numbers.
+\end{notebox}
+
+\section{Where do the random numbers come from?}
+\label{sec:random-number-generators}
+We want the computer to simulate our $100$ coin tosses. A useful
+starting point is a sequence of numbers that behave like independent
+draws from a uniform distribution on $(0,1)$. But where do these
+numbers come from?
+
+\subsection{Using a physical source}
+A \textbf{true random number generator} measures a physical source
+of randomness, such as electronic noise or a quantum phenomenon.
+The device processes those measurements to obtain numbers that a
+computer can use. The changing patterns of lava lamps are another
+example of a physical source.
+
+We can distinguish two meanings of randomness:
+\begin{itemize}
+  \item \textbf{Epistemic randomness:} we cannot predict an outcome
+    because we lack information about the process.
+  \item \textbf{Ontological randomness:} randomness is intrinsic to
+    the physical phenomenon itself.
+\end{itemize}
+For simulation, the practical idea is to obtain numbers from a
+physical process. This requires a physical source and a device to
+read it. Collecting and processing measurements can take time.
+Repeating the experiment does not reproduce the same sequence of
+outcomes, although we can save the numbers already collected.
+
+\subsection{Using a formula}
+There is another approach: choose an initial value $x_0$ and a
+function $f$ that calculates the next value from the current one.
+Apply the same function repeatedly. This is how a
+\textbf{pseudorandom number generator} works.
+\[
+  \underbrace{x_0}_{\text{initial value}}
+  \ \longrightarrow\ \underbrace{f(x_0)}_{x_1}
+  \ \longrightarrow\ \underbrace{f(f(x_0))}_{x_2}
+  \ \longrightarrow\ \underbrace{f(f(f(x_0)))}_{x_3}
+  \ \longrightarrow\ \cdots
+\]
+First we calculate $x_1=f(x_0)$. We then use $x_1$ as the input
+to the same function, obtaining $x_2=f(x_1)=f(f(x_0))$, and
+continue in this way. In general, $x_{k+1}=f(x_k)$: each output
+becomes the input for the next step. Here $f$ denotes the update rule.
+
+The procedure is \textbf{deterministic}: once the starting value and
+the rule are fixed, the entire sequence is determined. A suitable
+generator is designed so that the sequence imitates the statistical
+behaviour of random draws from the distribution we need.
+
+The starting value is called the \textbf{seed}. Such generators can be fast
+and require no additional physical device. To reproduce a run,
+we can keep the seed and the generator settings rather than store
+the whole sequence.
+
+\begin{notebox}[Why the seed matters]
+With the same generator, settings and seed, we obtain the same
+sequence. This makes a simulation \textbf{reproducible}.
+
+Imagine that a simulation gives an unexpected result. We can run it
+again with the same seed and inspect exactly the same simulated
+experiment. We can also compare two programs using the same inputs.
+
+These pseudorandom numbers are the starting material from which
+we generate simulated coin tosses, die rolls and observations from
+other distributions.
+\end{notebox}
+
+\section{What should a pseudorandom sequence imitate?}
+\label{sec:prng-uniform}
+We can now make the goal of the generator more precise. We want
+its output to imitate independent draws from a uniform distribution
+on $(0,1)$.
+
+\begin{frameddefn}{Pseudorandom number generator}
+\label{def:prng}
+In a simplified description, a \emph{pseudorandom number generator}
+(PRNG) uses a deterministic function
+\[
+  f:(0,1)\longrightarrow(0,1)
+\]
+and a starting value, or \emph{seed}, $u_0\in(0,1)$ to generate
+\[
+  u_0,\quad u_1=f(u_0),\quad u_2=f(f(u_0)),\quad
+  \ldots,\quad u_n=f^n(u_0).
+\]
+The function is chosen so that the sequence imitates the statistical
+behaviour of an IID $\operatorname{Uniform}(0,1)$ sample.
+Here $f^n(u_0)$ means applying $f$ repeatedly $n$ times.
+\end{frameddefn}
+
+There are two parts to this goal:
+\begin{itemize}
+  \item \textbf{Uniformity.} Intervals of the same length should
+    receive approximately the same proportion of values. For example,
+    in a sufficiently long sequence, about $10\%$ of the values
+    should fall in $(0.2,0.3)$, and about $10\%$ in $(0.7,0.8)$.
+  \item \textbf{Imitating independence.} The sequence should imitate
+    draws in which observing one value gives no information about
+    the others. We want to avoid systematic patterns between
+    successive values.
+\end{itemize}
+
+For example, consider the repeating sequence
+\[
+  0.1,\ 0.2,\ 0.3,\ \ldots,\ 0.9,\ 0.1,\ 0.2,\ \ldots
+\]
+It visits different parts of the interval, but its next value is
+easy to predict. Spreading values across the interval is only one
+part of what we require from a good generator.
+
+\begin{notebox}[The apparent paradox]
+We know the seed and the rule, so the whole sequence is determined.
+Yet we design the generator so that its output statistically
+resembles independent uniform draws. Imitating an IID sample is
+the goal; for a fixed seed, the generated sequence remains
+deterministic.
+\end{notebox}
+
+\section{The linear congruential generator}
+\label{sec:lcg}
+A concrete way to generate the next value is to multiply the current
+value, add a constant, and keep the remainder after division.
+
+\begin{frameddefn}{Linear congruential generator}
+\label{def:lcg}
+A \emph{linear congruential generator} (LCG) uses integer parameters
+$\alpha$, $\beta$, and $M>1$, and an integer seed
+$x_0\in\{0,1,\ldots,M-1\}$. Its update rule is
+\[
+  x_{k+1}=f(x_k)=(\alpha+\beta x_k)\bmod M.
+\]
+Here $\bmod M$ gives the remainder after division by $M$, so every
+state $x_k$ belongs to $\{0,1,\ldots,M-1\}$.
+\end{frameddefn}
+
+At each step, we multiply the current value by $\beta$, add $\alpha$,
+and take the remainder. The resulting integer becomes the input
+for the next step.
+
+\Needspace{25\baselineskip}
+\begin{framedexample}{Following the sequence and finding its period}
+Choose small parameters so that we can follow the calculations:
+\[
+  \alpha=1,\qquad \beta=5,\qquad M=16,\qquad x_0=2.
+\]
+The first three updates are
+\[
+  \begin{aligned}
+    x_1&=(1+5\cdot2)\bmod16=11,\\
+    x_2&=(1+5\cdot11)\bmod16=56\bmod16=8,\\
+    x_3&=(1+5\cdot8)\bmod16=41\bmod16=9.
+  \end{aligned}
+\]
+For example, $56=3\cdot16+8$, so its remainder is $8$.
+Continuing with the same rule gives
+\[
+  \begin{aligned}
+    2&\to11\to8\to9\to14\to7\to4\to5\\
+     &\to10\to3\to0\to1\to6\to15\to12\to13\to2.
+  \end{aligned}
+\]
+Once $2$ returns, the same rule produces $11$ again, then $8$, and
+so on: the sequence repeats. The \textbf{period} is the length of
+this repeating cycle.
+
+Here we visit all $16$ possible states before returning to the
+starting value. The period is therefore $16$, the maximum possible
+for $M=16$. In general, an LCG can have period $M$ with appropriate
+choices of its parameters.
+\end{framedexample}
+
+To rescale the integer states to numbers between $0$ and $1$, we can
+use
+\[
+  u_k=\frac{x_k}{M+1}.
+\]
+For the first three generated states in the example, this gives
+\[
+  \frac{11}{17}\approx0.647,\qquad
+  \frac8{17}\approx0.471,\qquad
+  \frac9{17}\approx0.529.
+\]
+The output can be $0$ when the remainder is $0$, and is always less
+than $1$. Rescaling changes the range of the values; the parameters
+determine how the sequence behaves statistically.
+
+\begin{notebox}[Why the choice of parameters matters]
+We want the sequence to avoid repeating too soon. If we instead
+choose $\beta=2$, keeping $\alpha=1$, $M=16$ and $x_0=2$, we get
+\[
+  2\to5\to11\to7\to15\to15\to15\to\cdots
+\]
+The generator gets stuck at $15$, so the repeating cycle has period
+$1$. Such a sequence would be unsuitable for simulating coin tosses.
+
+A long period is one requirement for a useful generator. We also
+need its output to imitate uniformity and independence. Our small
+example illustrates the calculations and a full cycle; assessing
+statistical quality requires more than checking the period.
+\end{notebox}
+
+\section{The LCG in R}
+\label{sec:lcg-r}
+We can translate the update rule into a short R function. To follow
+the calculations, we keep the small parameters from
+\hyperref[sec:lcg]{the previous example} and generate three values:
+\begin{lstlisting}[language=R]
+lcg <- function(n = 3, a = 1, b = 5, M = 16, u0 = 2) {
+  # Map an integer seed to a valid state between 0 and M - 1.
+  u0 <- u0 %% M
+  out <- rep(NA, n)
+
+  for (i in 1:n) {
+    u0 <- (a + b*u0) %% M
+    out[i] <- u0 / (M + 1)
+  }
+
+  return(out)
+}
+\end{lstlisting}
+Here \texttt{a} corresponds to $\alpha$, \texttt{b} to $\beta$, and
+\texttt{n} is the number of values we ask the function to produce.
+The argument \texttt{u0} supplies the initial seed.
+
+\Needspace{8\baselineskip}
+\subsection{Checking uniformity with a histogram}
+A \textbf{histogram} shows how numerical values are spread across
+intervals. We divide the range into intervals, count the values in
+each one, and draw adjacent bars. For equal widths, taller bars
+mean more values: we can see where the values are concentrated.
+
+We use the same function to generate $1000$ values, with seed $26$ and parameters
+$a=69069069$, $b=12345$ and $M=4096$:
+\begin{lstlisting}[language=R]
+u <- lcg(n = 1000, a = 69069069, b = 12345,
+         M = 2^12, u0 = 26)
+hist(u, breaks = seq(0, 1, 0.1), probability = TRUE)
+abline(h = 1, lty = 2)
+\end{lstlisting}
+We use ten intervals of width $0.1$. Here $80$ values fall between
+$0$ and $0.1$, and $107$ between $0.1$ and $0.2$, so the first bar
+is lower than the second. For a uniform distribution on $(0,1)$,
+each interval has probability $0.1$: we would expect about $100$
+values per interval in a sample of size $1000$.
+
+\begin{center}
+  \includegraphics[width=0.78\linewidth]{assets/lcg-uniformity-histogram.png}
+\end{center}
+
+With \texttt{probability = TRUE}, the vertical axis shows density.
+Each bar's height is its count divided by the product of the sample
+size and the interval width.
+For $100$ values in an interval of width $0.1$, the height is
+$100/(1000\times0.1)=1$. Each bar's area is the fraction of values
+in its interval; the total area is $1$.
+
+The dashed line is the uniform density, $1$ on $(0,1)$. The bars
+are roughly close to it: a first visual check of uniformity.
+Their heights need not be identical in a finite sequence.
+A histogram does not check independence: rearranging the values
+leaves it unchanged.
+
+\section{Assessing the quality of a generator}
+\label{sec:prng-quality}
+We have seen how a generator produces numbers. We now ask whether
+those numbers behave well enough for our simulations.
+
+Software uses generators more sophisticated than the LCG;
+the \textbf{Mersenne Twister} is one example. No pseudorandom
+generator produces a perfect IID sample: its sequence is determined
+by its initial state and update rule. Nevertheless, suitable
+generators can imitate independent uniform draws well enough for
+many practical purposes.
+
+\Needspace{14\baselineskip}
+We assess three \textbf{properties} of the output, understood as
+criteria for judging the quality of the generator:
+\begin{itemize}
+  \item \textbf{Property 0: Period.} The sequence should have a period
+    long enough for the simulation. We examined this in
+    \hyperref[sec:lcg]{the LCG example}.
+  \item \textbf{Property 1: Distribution of samples.} The values
+    should imitate draws from a uniform distribution on $(0,1)$.
+    The histogram provides a first visual check.
+  \item \textbf{Property 2: Independence of samples.} Groups of
+    values should imitate independent draws, without systematic
+    patterns between successive outputs.
+\end{itemize}
+Producing numbers between $0$ and $1$ is only the starting point;
+these properties concern the behaviour of the sequence as a whole.
+
+\Needspace{18\baselineskip}
+\begin{notebox}[For further reading]
+To prove when the LCG $x_{k+1}=(\alpha+\beta x_k)\bmod M$ has
+period $M$, we need to establish four points:
+\begin{enumerate}
+  \item \textbf{First necessary condition.} Show that period $M$
+    requires $\gcd(\alpha,M)=1$.
+  \item \textbf{Second necessary condition.} Show that period $M$
+    requires $\beta-1$ to be divisible by every prime factor of $M$.
+  \item \textbf{Third necessary condition.} Show that, if $4$ divides
+    $M$, period $M$ requires $4$ to divide $\beta-1$.
+  \item \textbf{Sufficiency.} Show that the three conditions together
+    guarantee period $M$ for every seed
+    $x_0\in\{0,1,\ldots,M-1\}$.
+\end{enumerate}
+Original reference:
+\href{https://epubs.siam.org/doi/10.1137/1004061}{Hull and Dobell,
+\textit{Random Number Generators} (1962)}.
+\end{notebox}
 
 \end{document}
