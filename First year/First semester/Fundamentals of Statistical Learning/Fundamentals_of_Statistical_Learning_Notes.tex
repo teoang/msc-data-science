@@ -9,6 +9,16 @@
   \begingroup\setlength{\fboxsep}{1pt}%
   \colorbox{yellow}{\strut\textbf{#1}}\endgroup\par\nobreak}
 
+% Temporary red marking for the latest 2 October additions, pending review.
+\newenvironment{octoberreview}{%
+  \begingroup\color{red}%
+  \hypersetup{linkcolor=red,citecolor=red,urlcolor=red}%
+  \lstset{basicstyle=\ttfamily\footnotesize\color{red},
+    keywordstyle=\color{red}\bfseries,
+    commentstyle=\color{red},stringstyle=\color{red}}%
+  \tcbset{notesbox/.append style={coltext=red,coltitle=red}}%
+}{\par\endgroup}
+
 \notestitle{FSL}
 \notessubtitle{Fundamentals of statistical learning}
 \notesauthor{Matteo}
@@ -2231,6 +2241,16 @@ rectangle with width $0.3$ and height $1$, so its area is $0.3$.
 \end{tikzpicture}
 \end{center}
 
+\section{The Bernoulli distribution}
+\label{sec:bernoulli-distribution}
+
+\begin{notebox}[TODO: Bernoulli distribution]
+To be introduced together in a future study session: binary
+outcomes, the success probability $p$, the notation
+$X\sim\operatorname{Ber}(p)$, and the probability mass function.
+This topic has not yet been covered.
+\end{notebox}
+
 \chapter{Simulation}
 \label{sec:simulation}
 
@@ -2513,6 +2533,12 @@ example illustrates the calculations and a full cycle; assessing
 statistical quality requires more than checking the period.
 \end{notebox}
 
+\begin{tcolorbox}[colback=yellow!20,colframe=yellow!60!black,
+  boxrule=0.4pt,arc=1mm,left=5pt,right=5pt,top=3pt,bottom=3pt,
+  before skip=6pt,after skip=6pt]
+\small\textbf{Start of lecture 2 October}
+\end{tcolorbox}
+
 \section{The LCG in R}
 \label{sec:lcg-r}
 We can translate the update rule into a short R function. To follow
@@ -2536,7 +2562,7 @@ Here \texttt{a} corresponds to $\alpha$, \texttt{b} to $\beta$, and
 \texttt{n} is the number of values we ask the function to produce.
 The argument \texttt{u0} supplies the initial seed.
 
-\Needspace{8\baselineskip}
+\Needspace{15\baselineskip}
 \subsection{Checking uniformity with a histogram}
 A \textbf{histogram} shows how numerical values are spread across
 intervals. We divide the range into intervals, count the values in
@@ -2603,7 +2629,28 @@ criteria for judging the quality of the generator:
 Producing numbers between $0$ and $1$ is only the starting point;
 these properties concern the behaviour of the sequence as a whole.
 
-\Needspace{18\baselineskip}
+\begin{octoberreview}
+\subsection{Checking consecutive pairs}
+A histogram ignores the order of the values. To look for dependence,
+form the pairs
+\[
+  (u_1,u_2),\ (u_2,u_3),\ldots,(u_{n-1},u_n)
+\]
+and draw a scatter plot. Using the sequence \texttt{u} generated
+above, with at least two values:
+\begin{lstlisting}[language=R]
+n <- length(u)
+plot(u[-n], u[-1], pch = ".",
+     xlab = "Current value", ylab = "Next value")
+\end{lstlisting}
+Here \texttt{u[-n]} removes the last value, while \texttt{u[-1]}
+removes the first, so the vectors contain matching consecutive pairs.
+Lines, bands, or other systematic patterns reveal structure that
+the histogram may miss. A scatter without an obvious pattern is
+a visual diagnostic, not a proof of independence.
+\end{octoberreview}
+
+\Needspace{10\baselineskip}
 \begin{notebox}[For further reading]
 To prove when the LCG $x_{k+1}=(\alpha+\beta x_k)\bmod M$ has
 period $M$, we need to establish four points:
@@ -2624,12 +2671,6 @@ Original reference:
 \end{notebox}
 
 \clearpage
-\begin{tcolorbox}[colback=yellow!20,colframe=yellow!60!black,
-  boxrule=0.4pt,arc=1mm,left=5pt,right=5pt,top=3pt,bottom=3pt,
-  before skip=6pt,after skip=6pt]
-\small\textbf{Start of lecture 2 October}
-\end{tcolorbox}
-
 \section{The quantile transform method}
 \label{sec:quantile-transform}
 We now have a way to generate numbers that imitate independent
@@ -2637,6 +2678,50 @@ uniform draws. How can we use them to simulate a different
 distribution? The link is the
 \hyperref[def:quantile-general]{quantile function}.
 
+\begin{framedexample}{From uniform numbers to a biased coin}
+\label{ex:quantile-transform-bridge}
+\textbf{1. The goal.} We want to simulate a coin whose result is
+$0$ with probability $0.6$ and $1$ with probability $0.4$.
+Let $X$ denote the desired coin result:
+\[
+  P(X=0)=0.6,\qquad P(X=1)=0.4.
+\]
+Each simulated toss must return one of these two values.
+
+\textbf{2. Start with a uniform number.} The computer generates
+$U\sim\operatorname{Unif}(0,1)$. Split the unit interval into a
+part of length $0.6$ and a part of length $0.4$, and return
+\[
+  Y=
+  \begin{cases}
+    0, & U\leq0.6,\\
+    1, & U>0.6.
+  \end{cases}
+\]
+For example, $u=0.25$ gives $y=0$, whereas $u=0.82$ gives $y=1$.
+Since $U$ is uniform, the first part is selected with probability
+$0.6$ and the second with probability $0.4$. The generated result
+$Y$ therefore has the probabilities we wanted.
+
+\textbf{3. Recognize the quantile rule.} The desired CDF satisfies
+\[
+  F(0)=P(X\leq0)=0.6,\qquad F(1)=P(X\leq1)=1.
+\]
+The quantile $Q(p)$ returns the smallest value whose CDF reaches
+or exceeds the input probability level $p$.
+For $p=0.82$, the value $0$ does not qualify because
+$F(0)=0.6<0.82$, while $1$ does because $F(1)=1\geq0.82$.
+Hence $Q(0.82)=1$. For $p=0.50$, the value $0$ already qualifies
+because $F(0)=0.6\geq0.50$, so $Q(0.50)=0$.
+
+\textbf{4. The bridge.} The input $u$ is a probability level;
+the output $Q(u)$ is a possible value of the coin, $0$ or $1$.
+Using a randomly generated uniform number as that input gives
+$Y=Q(U)$. This turns uniform draws into draws from the desired
+distribution.
+\end{framedexample}
+
+\clearpage
 Previously, we chose a probability level $p$ and found the
 corresponding threshold $Q(p)$. Now we draw that level at random:
 we generate $U$ uniformly between $0$ and $1$ and return $Q(U)$.
@@ -2742,6 +2827,8 @@ As a check, for $0\leq y\leq1$,
 \clearpage
 \subsection{A discrete example}
 \begin{framedexample}{Generating a Bernoulli variable}
+\textbf{TODO:} The Bernoulli distribution will be introduced in
+\hyperref[sec:bernoulli-distribution]{Section~\ref{sec:bernoulli-distribution}}.
 Suppose we want $X\sim\operatorname{Ber}(0.4)$, so
 \[
   P(X=0)=0.6,\qquad P(X=1)=0.4.
@@ -2800,5 +2887,713 @@ Thus $Y$ has the same distribution as $X$. Equivalently,
 $Y=\mathbf 1_{(0.6,1)}(U)$: the indicator is $1$ when $U$ falls
 above $0.6$, and $0$ otherwise.
 \end{framedexample}
+
+\clearpage
+\begin{octoberreview}
+\subsection{Population generation in R}
+The continuous example can be implemented directly. Use the
+uniform sequence \texttt{u} generated earlier and apply its
+quantile function to every value:
+\begin{lstlisting}[language=R]
+fx <- function(x) ifelse(x >= 0 & x <= 1, 3*x^2, 0)
+Fx <- function(x) ifelse(x < 0, 0, ifelse(x < 1, x^3, 1))
+Qx <- function(p) p^(1/3)
+
+y <- Qx(u)
+hist(y, breaks = 20, probability = TRUE, ylim = c(0, 3.2))
+curve(fx(x), from = 0, to = 1, add = TRUE, lwd = 2)
+\end{lstlisting}
+The three functions represent the target PDF, CDF, and quantile,
+respectively. The quantile input must lie in $[0,1]$; its values
+at the endpoints are assigned by continuous extension.
+The histogram of \texttt{y} is compared with $3x^2$, not with
+the horizontal uniform density.
+
+R also provides a built-in uniform generator:
+\begin{lstlisting}[language=R]
+set.seed(26)
+u <- runif(1000)
+y <- Qx(u)
+\end{lstlisting}
+\texttt{set.seed} makes the generated sequence reproducible;
+\texttt{runif} produces pseudorandom uniform values. The
+transformation step is the same whichever suitable uniform
+generator supplies the input.
+\end{octoberreview}
+
+\clearpage
+\begin{octoberreview}
+\section{From generator checks to statistical learning}
+\label{sec:loss-risk-density}
+
+The blackboard discussion on 2 October turned the visual
+histogram check into a more general question: how can we measure
+the difference between a target density and an estimate obtained
+from data?
+
+\subsection{A target density and a histogram estimate}
+For the standard uniform distribution, the target is known:
+\[
+  f_U(u)=\mathbf 1_{[0,1]}(u).
+\]
+Let $u_1,\ldots,u_n$ be the available values. A density histogram
+with equal bin width $h$ gives an estimate
+$\widehat f_{n,h}$. If bin $B_j$ contains $N_j$ observations,
+its height is
+\[
+  \widehat f_{n,h}(u)=\frac{N_j}{nh},\qquad u\in B_j.
+\]
+Use disjoint bins covering the range, assigning a boundary point
+to just one bin. Each bin's area is $N_j/n$, so the histogram
+has total area $1$.
+
+The notation records two choices: $n$ is the sample size and
+$h$ is the bin width. The histogram is an algorithm that turns
+the data into a density estimate.
+
+\subsection{Distances between densities}
+The lecture introduced the following ways to compare densities
+$f$ and $g$:
+\begin{align*}
+  D_1(f,g)&=\int_{\mathbb R}|f(u)-g(u)|\,du,\\[3pt]
+  D_2(f,g)&=\left(\int_{\mathbb R}|f(u)-g(u)|^2\,du\right)^{1/2},\\[3pt]
+  D_\infty(f,g)&=\operatorname*{ess\,sup}_{u\in\mathbb R}
+    |f(u)-g(u)|.
+\end{align*}
+These are the $L^1$, $L^2$, and $L^\infty$ distances, when finite.
+The first accumulates absolute discrepancies; the second
+squares them before integration; the third looks at the largest
+discrepancy, ignoring changes on sets of length zero.
+
+More generally, for $1\leq q<\infty$,
+\[
+  D_q(f,g)=\left(\int_{\mathbb R}|f(u)-g(u)|^q\,du\right)^{1/q}.
+\]
+Different distances emphasize different features of the error.
+
+\clearpage
+\subsection{Loss for one dataset and average risk}
+Once the data are fixed, the discrepancy
+\[
+  \ell_n(u_1,\ldots,u_n)
+    =D\bigl(f_U,\widehat f_{n,h}\bigr)
+\]
+is the \textbf{loss} for that dataset. A different dataset may
+produce a different histogram and a different loss.
+
+The blackboard contrasted two possible goals:
+\begin{itemize}
+  \item \textbf{Worst-case loss:} control the largest loss over
+    the possible datasets. In schematic form,
+    \[
+      \sup_{\mathbf u\in[0,1]^n}\ell_n(\mathbf u)
+        \longrightarrow0.
+    \]
+  \item \textbf{Average loss:} average over datasets generated
+    by a specified sampling model. This average is the
+    \textbf{risk}:
+    \[
+      R_n(f_U;h)=
+        \mathbb E_{f_U}\!\left[
+          D\bigl(f_U,\widehat f_{n,h}\bigr)\right].
+    \]
+\end{itemize}
+For example, under ideal independent uniform sampling, the
+expectation averages over the random samples
+$(U_1,\ldots,U_n)$. Risk tending to zero is an average guarantee;
+it does not require small loss for every possible dataset.
+
+The worst-case requirement is much stronger. For an ordinary
+histogram it need not hold: datasets concentrated in one bin
+remain possible even when the target distribution is uniform.
+
+\begin{notebox}[A criterion is not an LCG convergence theorem]
+These formulas express ways to judge an estimation procedure.
+They do not prove that every LCG converges to a uniform density.
+With a fixed seed, an LCG produces a deterministic sequence;
+an average risk requires a stated source of randomness, such as
+a random seed or a sampling model. Results for ideal IID data
+do not automatically apply to a deterministic generator.
+\end{notebox}
+
+\clearpage
+\subsection{Unknown ground truth and a class of models}
+In the simulation check, $f_U$ is known. In a learning problem,
+the true population density $f$ is typically unknown, and the
+algorithm must estimate it from data.
+
+For data generated from $f$, define
+\[
+  R_n(f;h)=\mathbb E_f\!\left[
+    D\bigl(f,\widehat f_{n,h}\bigr)\right].
+\]
+The subscript $f$ records the distribution used to average over
+datasets. The lecture's phrase ``all ground truths that make
+sense'' refers to a specified class of possible densities
+$\mathcal F$.
+
+There are two distinct consistency requirements:
+\begin{itemize}
+  \item \textbf{For a fixed density:}
+    $R_n(f;h_n)\to0$ for that population density $f$.
+  \item \textbf{Uniformly over a class:}
+    \[
+      \sup_{f\in\mathcal F}R_n(f;h_n)\longrightarrow0.
+    \]
+\end{itemize}
+In the second expression, we first average over datasets for
+each $f$, then take the worst risk over the class of population
+densities. This supremum is over \emph{models}, whereas the
+earlier worst-case loss was over \emph{datasets}.
+
+The class $\mathcal F$ and the estimation procedure matter.
+The formula is a goal to establish under suitable assumptions,
+not a guarantee for every class of densities. Writing $h_n$
+allows the bin width to change with sample size; a fixed bin
+width may retain approximation error for a general density.
+
+\subsection{Qualitative and quantitative questions}
+The final board remarks distinguish:
+\begin{itemize}
+  \item \textbf{Qualitative:} does the risk tend to zero?
+    This is a consistency question.
+  \item \textbf{Quantitative:} how fast does it tend to zero
+    as the sample size grows? This asks for a convergence rate.
+\end{itemize}
+A rate may be expressed by a bound such as
+\[
+  \sup_{f\in\mathcal F}R_n(f;h_n)\leq C r_n,
+  \qquad r_n\longrightarrow0,
+\]
+where $C$ does not depend on $n$. Such a bound must be proved
+for the chosen model class, loss, and algorithm; the board
+discussion did not establish a specific rate for the LCG.
+\end{octoberreview}
+
+\begin{tcolorbox}[colback=yellow!20,colframe=yellow!60!black,
+  boxrule=0.4pt,arc=1mm,left=5pt,right=5pt,top=3pt,bottom=3pt,
+  before skip=6pt,after skip=6pt]
+\small\textbf{End of lecture 2 October}
+\end{tcolorbox}
+
+\chapter{Random vectors}
+\label{chap:random-vectors}
+
+\begin{tcolorbox}[colback=yellow!20,colframe=yellow!60!black,
+  boxrule=0.4pt,arc=1mm,left=5pt,right=5pt,top=3pt,bottom=3pt,
+  before skip=6pt,after skip=6pt]
+\small\textbf{Start of lecture 7 October}
+\end{tcolorbox}
+
+We now study several random variables observed together, such as
+exam result and class attendance. We want to describe their
+individual distributions and their dependence.
+
+\section{Random vectors and the plan of study}
+
+\begin{frameddefn}{Random vector}
+On a common probability space $(\Omega,\mathcal F,P)$, a
+\textbf{random vector} is a vector of random variables
+\[
+  \mathbf X:\Omega\longrightarrow\mathbb R^p,
+  \qquad
+  \mathbf X(\omega)=
+  \begin{pmatrix}
+    X_1(\omega)\\
+    \vdots\\
+    X_p(\omega)
+  \end{pmatrix}.
+\]
+The integer $p$ is the dimension of the vector. Each component
+$X_j:\Omega\to\mathbb R$ is a random variable.
+\end{frameddefn}
+
+There are three related tasks:
+\begin{enumerate}
+  \item Describe the \textbf{joint distribution} of the whole vector.
+  \item Describe the distribution of each component separately:
+    \textbf{univariate analysis}.
+  \item Study how the components interact or depend on one another:
+    \textbf{multivariate analysis}.
+\end{enumerate}
+
+We start with \textbf{fully discrete vectors} and $p=2$: define
+the joint PMF, then derive marginal and conditional PMFs.
+The later cases are continuous vectors (using a joint PDF when
+one exists) and mixed vectors, with discrete and continuous
+components. Continuous marginals alone need not give a joint PDF.
+
+\clearpage
+\section{The joint PMF}
+\label{sec:joint-pmf}
+
+Let $\mathbf Z=(X,Y)^{\mathsf T}$, where $X$ and $Y$ are discrete,
+with supports $S_X$ and $S_Y$.
+
+\begin{frameddefn}{Joint probability mass function}
+The \textbf{joint PMF} assigns a probability to each pair of values:
+\[
+  p_{X,Y}(x,y)=P(X=x,Y=y)
+    =P\bigl(\{X=x\}\cap\{Y=y\}\bigr).
+\]
+It satisfies
+\[
+  p_{X,Y}(x,y)\geq0,
+  \qquad
+  \sum_{x\in S_X}\sum_{y\in S_Y}p_{X,Y}(x,y)=1.
+\]
+Some pairs in $S_X\times S_Y$ may have probability zero.
+The joint PMF completely determines the distribution of $(X,Y)$.
+\end{frameddefn}
+
+\begin{framedexample}{Exam result and class attendance}
+Let $X=1$ mean that a student passes the exam and $X=0$ mean
+that the student fails. Let $Y$ record class attendance:
+Always (A), Never (N), or Sometimes (S).
+These categories may be coded as $0$, $1$, and $2$, respectively;
+the numerical labels are just codes.
+
+The joint PMF is given by the following \textbf{contingency table}.
+Each interior cell is the probability of the corresponding pair.
+\begin{center}
+\begin{tabular}{lrrrr}
+\toprule
+ & A & N & S & Total\\
+\midrule
+Pass ($X=1$) & $0.09$ & $0.20$ & $0.01$ & $0.30$\\
+Fail ($X=0$) & $0.05$ & $0.60$ & $0.05$ & $0.70$\\
+\midrule
+Total & $0.14$ & $0.80$ & $0.06$ & $1.00$\\
+\bottomrule
+\end{tabular}
+\end{center}
+For example, $P(X=1,Y=\mathrm A)=0.09$: the probability that
+a student both passes and always attends is $0.09$.
+All six interior cells together sum to $1$.
+\end{framedexample}
+
+\clearpage
+\section{Marginal and conditional PMFs}
+\label{sec:marginal-conditional-pmf}
+
+\subsection{Marginalization}
+
+To study $X$ alone, we add the probabilities of all pairs with
+that value of $X$, allowing $Y$ to take any of its possible values.
+
+\begin{framedprop}{Marginal PMFs}
+The marginal distributions are obtained by summing out the
+other variable:
+\[
+  p_X(x)=\sum_{y\in S_Y}p_{X,Y}(x,y),
+  \qquad
+  p_Y(y)=\sum_{x\in S_X}p_{X,Y}(x,y).
+\]
+\end{framedprop}
+
+For a fixed $x$, the events $\{X=x,Y=y\}$ are disjoint as $y$
+varies, and their union is $\{X=x\}$. Hence
+\[
+  P(X=x)=\sum_{y\in S_Y}P(X=x,Y=y).
+\]
+In the table, marginalization means taking row or column totals.
+
+For the exam example,
+\begin{align*}
+  p_X(1)&=0.09+0.20+0.01=0.30,\\
+  p_X(0)&=0.05+0.60+0.05=0.70.
+\end{align*}
+Thus $X\sim\operatorname{Ber}(0.30)$, with passing as the success
+outcome. \textbf{TODO:} Review this notation after covering the
+\hyperref[sec:bernoulli-distribution]{Bernoulli distribution in
+Section~\ref{sec:bernoulli-distribution}}.
+
+For attendance,
+\begin{align*}
+  p_Y(\mathrm A)&=0.09+0.05=0.14,\\
+  p_Y(\mathrm N)&=0.20+0.60=0.80,\\
+  p_Y(\mathrm S)&=0.01+0.05=0.06.
+\end{align*}
+The marginal PMFs describe the individual variables, but they
+do not retain all the information in the joint table.
+
+\clearpage
+\subsection{Conditioning}
+
+Suppose attendance is known. We then describe exam results
+\emph{within that attendance group}. The conditioning value is
+fixed, and probabilities are renormalized within that group.
+
+\begin{frameddefn}{Conditional PMFs}
+For a value $y$ with $p_Y(y)>0$,
+\[
+  p_{X\mid Y}(x\mid y)
+    =P(X=x\mid Y=y)
+    =\frac{p_{X,Y}(x,y)}{p_Y(y)}.
+\]
+Similarly, for $x$ with $p_X(x)>0$,
+\[
+  p_{Y\mid X}(y\mid x)
+    =P(Y=y\mid X=x)
+    =\frac{p_{X,Y}(x,y)}{p_X(x)}.
+\]
+For each fixed conditioning value, the conditional probabilities
+are nonnegative and sum to $1$ over the remaining variable.
+\end{frameddefn}
+
+Among students who always attend,
+\begin{align*}
+  P(X=1\mid Y=\mathrm A)&=\frac{0.09}{0.14}
+    =\frac9{14}\approx0.643,\\
+  P(X=0\mid Y=\mathrm A)&=\frac{0.05}{0.14}
+    =\frac5{14}\approx0.357.
+\end{align*}
+Among students who never attend,
+\[
+  P(X=1\mid Y=\mathrm N)=\frac{0.20}{0.80}=0.25,
+  \qquad
+  P(X=0\mid Y=\mathrm N)=\frac{0.60}{0.80}=0.75.
+\]
+The same calculation for the remaining column gives
+\[
+  P(X=1\mid Y=\mathrm S)=\frac{0.01}{0.06}=\frac16,
+  \qquad
+  P(X=0\mid Y=\mathrm S)=\frac{0.05}{0.06}=\frac56.
+\]
+Thus each conditional distribution is
+\hyperref[sec:bernoulli-distribution]{Bernoulli}:
+\[
+  X\mid(Y=y)\sim\operatorname{Ber}\bigl(\pi(y)\bigr),
+  \qquad \pi(y)=P(X=1\mid Y=y).
+\]
+Its success probability depends on the attendance group.
+In particular, $0.643$, $0.25$, and $1/6$ differ from the
+marginal success probability $0.30$.
+
+\clearpage
+\section{Independence and the role of dependence}
+\label{sec:random-vector-independence}
+
+\begin{frameddefn}{Independence of discrete random variables}
+Two discrete random variables $X$ and $Y$ are independent if
+and only if
+\[
+  p_{X,Y}(x,y)=p_X(x)p_Y(y)
+  \qquad\text{for every }(x,y)\in S_X\times S_Y.
+\]
+Equivalently,
+\[
+  p_{X\mid Y}(x\mid y)=p_X(x)
+  \quad\text{for every }x
+  \text{ and every }y\text{ with }p_Y(y)>0.
+\]
+\end{frameddefn}
+
+Under independence, knowing one variable does not change the
+distribution of the other. The factorization must hold for
+every pair of values.
+
+The original exam table is not independent, because
+\[
+  p_{X,Y}(1,\mathrm A)=0.09
+  \neq 0.30\cdot0.14=0.042.
+\]
+
+\textbf{An independent table with the same marginals.}
+
+Keep the same row and column totals, and define a new joint PMF
+by multiplying the marginals:
+\[
+  \widetilde p_{X,Y}(x,y)=p_X(x)p_Y(y).
+\]
+This gives
+\begin{center}
+\begin{tabular}{lrrrr}
+\toprule
+ & A & N & S & Total\\
+\midrule
+Pass ($X=1$) & $0.042$ & $0.240$ & $0.018$ & $0.300$\\
+Fail ($X=0$) & $0.098$ & $0.560$ & $0.042$ & $0.700$\\
+\midrule
+Total & $0.140$ & $0.800$ & $0.060$ & $1.000$\\
+\bottomrule
+\end{tabular}
+\end{center}
+For instance, $\widetilde p_{X,Y}(0,\mathrm S)=0.70\cdot0.06
+=0.042$. Every conditional passing probability in this new
+table is $0.30$.
+
+\textbf{How far are we from independence?}
+
+The two tables have identical marginals but different joint
+distributions. This shows that the marginals alone do not
+determine the dependence between the variables.
+
+One way to study departures from independence is to compare the
+actual joint PMF with the independent one:
+\[
+  D\bigl(p_{X,Y},\widetilde p_{X,Y}\bigr),
+  \qquad \widetilde p_{X,Y}=p_Xp_Y.
+\]
+Here $D$ denotes a chosen discrepancy between distributions.
+Different choices emphasize different departures from independence.
+
+The next question is whether we can describe a joint distribution
+through its marginals together with a separate dependence
+structure. This motivates copulas. We first introduce the joint CDF.
+
+\clearpage
+\section{The joint CDF}
+\label{sec:joint-cdf}
+
+\begin{frameddefn}{Joint cumulative distribution function}
+For any pair of random variables, discrete or otherwise,
+\[
+  F_{X,Y}(x,y)=P(X\leq x,Y\leq y),
+  \qquad (x,y)\in\mathbb R^2.
+\]
+This is the probability of the lower-left region
+$(-\infty,x]\times(-\infty,y]$ in the plane.
+\end{frameddefn}
+
+\begin{center}
+\begin{tikzpicture}[x=1.15cm,y=0.8cm]
+  \fill[blue!12] (-2.5,-1.5) rectangle (2,2);
+  \draw[->] (-2.7,0) -- (3.2,0) node[right] {$X$};
+  \draw[->] (0,-1.7) -- (0,2.9) node[above] {$Y$};
+  \draw[dashed] (2,-1.5) -- (2,2) -- (-2.5,2);
+  \fill (2,2) circle (1.8pt) node[above right] {$(x,y)$};
+  \node[below right] at (2,0) {$x$};
+  \node[above left] at (0,2) {$y$};
+  \node at (-0.7,1) {\small $X\leq x,\ Y\leq y$};
+\end{tikzpicture}
+\end{center}
+
+\subsection{Recovering the marginals}
+Letting one threshold tend to $+\infty$ removes its restriction:
+\[
+  F_X(x)=\lim_{y\to+\infty}F_{X,Y}(x,y),
+  \qquad
+  F_Y(y)=\lim_{x\to+\infty}F_{X,Y}(x,y).
+\]
+This is marginalization expressed through CDFs rather than PMFs.
+
+\subsection{Basic properties}
+The joint CDF takes values in $[0,1]$, is nondecreasing in each
+coordinate, and is right-continuous. It tends to $0$ when either
+threshold tends to $-\infty$, and to $1$ when both tend to $+\infty$.
+
+In two dimensions, probabilities of rectangles must also be
+nonnegative. For $a<b$ and $c<d$,
+\begin{align*}
+  P(a<X\leq b,\ c<Y\leq d)
+    &=F_{X,Y}(b,d)-F_{X,Y}(a,d)\\
+    &\quad-F_{X,Y}(b,c)+F_{X,Y}(a,c)\geq0.
+\end{align*}
+This is called the \textbf{2-increasing property}; being
+nondecreasing separately in each coordinate is not sufficient.
+
+For arbitrary random variables, independence is equivalent to
+\[
+  F_{X,Y}(x,y)=F_X(x)F_Y(y)
+  \qquad\text{for all }x,y\in\mathbb R.
+\]
+
+\clearpage
+\section{Copulas and Sklar's theorem}
+\label{sec:copulas}
+
+The marginals describe the individual variables. A copula
+provides a way to combine those marginals into a joint CDF,
+accounting for their dependence.
+
+\begin{frameddefn}{Bivariate copula}
+A \textbf{copula} is a joint CDF of two random variables with
+standard uniform marginals:
+\[
+  C(u,v)=P(U\leq u,V\leq v),
+  \qquad U,V\sim\operatorname{Unif}(0,1).
+\]
+The variables $U$ and $V$ need not be independent. On $[0,1]^2$,
+the marginal conditions are $C(u,1)=u$ and $C(1,v)=v$.
+\end{frameddefn}
+
+\begin{framedthm}{Sklar's theorem: bivariate form}
+For any joint CDF $F_{X,Y}$ with marginals $F_X$ and $F_Y$,
+there exists a copula $C$ such that
+\[
+  F_{X,Y}(x,y)=C\bigl(F_X(x),F_Y(y)\bigr).
+\]
+If both marginals are continuous, the copula is unique. Otherwise,
+it is uniquely determined only on
+$\operatorname{Ran}(F_X)\times\operatorname{Ran}(F_Y)$, the product
+of the sets of values taken by the marginal CDFs.
+
+Conversely, combining any two marginal CDFs with a copula using
+this formula produces a joint CDF with those marginals.
+\end{framedthm}
+
+The lecture's schematic statement
+\[
+  \text{joint distribution}
+  =\text{marginals}+\text{dependence structure}
+\]
+is made precise by this composition. The plus sign in the
+schematic statement does not mean addition of CDFs.
+
+For independence, the \textbf{independence copula} is
+\[
+  C_{\perp}(u,v)=uv.
+\]
+Substituting the marginals gives
+\[
+  F_{X,Y}(x,y)=C_{\perp}\bigl(F_X(x),F_Y(y)\bigr)
+    =F_X(x)F_Y(y).
+\]
+This is the CDF counterpart of the independent PMF table.
+
+\clearpage
+\section{IID samples from a population}
+\label{sec:iid-sample}
+
+We now connect population distributions to the data used in
+statistical learning. Let $F_X$ be the CDF of a population
+variable $X$. A sampling scheme produces observations from that
+population.
+
+\begin{frameddefn}{Independent and identically distributed sample}
+A random sample $(X_1,\ldots,X_n)$ is \textbf{IID} from $F_X$ if
+\begin{itemize}
+  \item the random variables $X_1,\ldots,X_n$ are mutually
+    independent;
+  \item each $X_i$ has the same CDF $F_X$.
+\end{itemize}
+Here $n$ is the sample size. Uppercase $X_i$ denotes a random
+observation before sampling; lowercase $x_i$ denotes its observed
+value. The realized dataset is $\mathcal D_n=(x_1,\ldots,x_n)$.
+\end{frameddefn}
+
+\subsection{The joint CDF of the sample}
+Independence gives a product, and identical distribution gives
+the same CDF in every factor:
+\begin{align*}
+  F_{X_1,\ldots,X_n}(x_1,\ldots,x_n)
+    &=P(X_1\leq x_1,\ldots,X_n\leq x_n)\\
+    &=\prod_{i=1}^n P(X_i\leq x_i)\\
+    &=\prod_{i=1}^n F_X(x_i).
+\end{align*}
+This is the probability that \emph{all} observations lie below
+their respective thresholds.
+
+\subsection{Multivariate observations}
+Each observation may itself be a vector
+$\mathbf X_i\in\mathbb R^p$. If these vectors are IID with common
+joint CDF $F_{\mathbf X}$, then
+\[
+  P(\mathbf X_1\leq\mathbf x_1,\ldots,
+     \mathbf X_n\leq\mathbf x_n)
+    =\prod_{i=1}^n F_{\mathbf X}(\mathbf x_i),
+\]
+where each vector inequality is interpreted componentwise.
+The product is over observations. Coordinates within one
+observation may still be dependent.
+
+Thus $n$ counts observations, whereas $p$ counts variables in
+each observation.
+
+\clearpage
+\section{Likelihood and the empirical distribution}
+\label{sec:likelihood-empirical}
+
+The learning problem reverses the sampling perspective: after
+observing $\mathcal D_n$, we want to learn about the population
+distribution that generated it.
+
+\begin{notebox}[Joint CDF and likelihood]
+The product $\prod_iF_X(x_i)$ above is the joint CDF evaluated
+at thresholds. For exact observations, the usual IID likelihood
+is instead a product of \textbf{PMF or PDF values}.
+The two objects must be distinguished when reading the
+handwritten notes.
+\end{notebox}
+
+\subsection{Maximum likelihood estimation}
+Consider a model indexed by an unknown parameter $\theta\in\Theta$.
+For fixed observed data, its \textbf{likelihood} is
+\[
+  L(\theta;x_1,\ldots,x_n)=
+  \begin{cases}
+    \displaystyle\prod_{i=1}^n p_\theta(x_i),
+       & \text{discrete model},\\[6pt]
+    \displaystyle\prod_{i=1}^n f_\theta(x_i),
+       & \text{model with a PDF}.
+  \end{cases}
+\]
+Here $p_\theta$ or $f_\theta$ describes one population observation.
+In the continuous case, a PDF value is a density, not the
+probability of that exact observed value.
+
+The data stay fixed while we vary the model parameter. A
+\textbf{maximum likelihood estimator (MLE)} chooses a maximizer:
+\[
+  \widehat\theta_n\in
+  \argmax_{\theta\in\Theta}L(\theta;x_1,\ldots,x_n),
+\]
+when a maximizer exists. Equivalently, one may maximize the
+log-likelihood, which turns products into sums.
+
+\clearpage
+\subsection{The empirical CDF and its likelihood interpretation}
+
+\begin{frameddefn}{Empirical cumulative distribution function}
+Given observations $x_1,\ldots,x_n$, the \textbf{empirical CDF}
+is
+\[
+  \widehat F_n(t)=\frac1n\sum_{i=1}^n
+    \mathbf 1_{\{x_i\leq t\}}.
+\]
+It is the fraction of observations at or below $t$.
+The corresponding empirical distribution assigns mass $1/n$
+to each observation, counting repetitions.
+\end{frameddefn}
+
+To make the MLE interpretation precise, consider discrete
+distributions supported on the \emph{distinct observed values}
+$z_1,\ldots,z_m$. Let $n_j$ count how many observations equal
+$z_j$, and let $w_j$ be the model's probability mass there.
+Then
+\[
+  w_j\geq0,\qquad \sum_{j=1}^m w_j=1,
+  \qquad \sum_{j=1}^m n_j=n.
+\]
+The exact-observation likelihood is
+\[
+  L(w_1,\ldots,w_m)=\prod_{j=1}^m w_j^{n_j}.
+\]
+Maximizing it subject to the probability constraints gives
+\[
+  \widehat w_j=\frac{n_j}{n}.
+\]
+Indeed, the log-likelihood is $\sum_j n_j\log w_j$.
+Introducing a multiplier $\lambda$ for $\sum_jw_j=1$ gives
+$n_j/w_j=\lambda$; summing $w_j=n_j/\lambda$ yields $\lambda=n$.
+Concavity of the log-likelihood ensures that these weights
+maximize it.
+
+The resulting CDF is exactly
+\[
+  \sum_{j=1}^m\frac{n_j}{n}\mathbf 1_{\{z_j\leq t\}}
+    =\widehat F_n(t).
+\]
+This is the discrete nonparametric likelihood interpretation of
+the empirical distribution. It is not obtained by maximizing a
+product of CDF values, nor by freely maximizing over all
+continuous PDFs.
+
+\begin{tcolorbox}[colback=yellow!20,colframe=yellow!60!black,
+  boxrule=0.4pt,arc=1mm,left=5pt,right=5pt,top=3pt,bottom=3pt,
+  before skip=6pt,after skip=6pt]
+\small\textbf{End of lecture 7 October}
+\end{tcolorbox}
 
 \end{document}
