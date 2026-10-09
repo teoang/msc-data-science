@@ -3308,22 +3308,26 @@ has a PDF $f_X$, support $S_X$, and $Y=r(X)$.
     the derivative exists.
 \end{enumerate}
 
-For the square example and $0\leq y\leq1$,
+\begin{notebox}
+This method does not require $r$ to be invertible.
+\end{notebox}
+
+\begin{notebox}
+Even if $X$ has a PDF, its transformation $Y$ may not have one.
+
+For example, let $X\sim\operatorname{Unif}(-1,1)$ and choose
+$r(x)=0$. Every input value gives $Y=0$, so $P(Y=0)=1$.
+
+If $Y$ had a PDF, we would instead have
 \[
-  A_y=[-\sqrt y,\sqrt y].
+  P(Y=0)=P(0\leq Y\leq0)=\int_0^0 f_Y(t)\,dt=0.
 \]
-For $y<0$ it is empty; for $y\geq1$ it is the whole input
-support. These cases explain all three pieces of the CDF.
-
-The method does not require an inverse of $r$.
-Indeed, $r(x)=x^2$ is not one-to-one on $[-1,1]$:
-$r(-0.5)=r(0.5)$. Keeping only the positive square root
-would discard half of the relevant inputs.
-
-A continuous input does not ensure a PDF for every possible
-transformation: a constant function, for example, puts all
-the output probability at one point. The event method still
-gives the CDF in that case.
+An integral with identical lower and upper limits is zero.
+This contradicts $P(Y=0)=1$, so $Y$ has no PDF.
+Its PMF assigns $p_Y(0)=1$.
+The event method still gives its CDF: $F_Y(y)=0$ for $y<0$
+and $F_Y(y)=1$ for $y\geq0$.
+\end{notebox}
 
 \clearpage
 \subsection{When the transformation has an inverse}
