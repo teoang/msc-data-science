@@ -157,4 +157,99 @@ It gives the smallest threshold $x$ such that
 $P(X\leq x)$ is at least $p$. We also write $q_p$ instead of $Q(p)$.
 \end{frameddefn}
 
+\clearpage
+\section*{Relations}
+
+\subsection*{From the PMF to the CDF}
+\begin{tcolorbox}[colback=blue!3,colframe=blue!30!black,
+  boxrule=0.4pt,arc=1mm,title={What we are trying to answer},
+  colbacktitle=blue!10,coltitle=black,fonttitle=\bfseries]
+If we know the probability of each individual
+value of $X$, how do we calculate the probability that $X$ is at most $x$?
+\end{tcolorbox}
+
+For a discrete random variable, the event $X\leq x$ includes every
+possible value $k$ that is at most $x$. These events $\{X=k\}$ are
+pairwise disjoint, so we add their probabilities:
+\[
+  \boxed{\underbrace{F_X(x)}_{\text{CDF: to find}}=P(X\leq x)
+    =\sum_{\substack{k\in\operatorname{supp}(X)\\k\leq x}}
+      \underbrace{p_X(k)}_{\text{PMF: known}},
+    \qquad x\in\mathbb R.}
+\]
+\subsection*{From the PDF to the CDF}
+\label{rel:pdf-to-cdf}
+\begin{tcolorbox}[colback=blue!3,colframe=blue!30!black,
+  boxrule=0.4pt,arc=1mm,title={What we are trying to answer},
+  colbacktitle=blue!10,coltitle=black,fonttitle=\bfseries]
+We know how probability is spread over the possible values of $X$
+(its PDF). How do we calculate the probability of getting a value
+less than or equal to $x$?
+\end{tcolorbox}
+For a continuous random variable with PDF $f_X$, we calculate
+$P(X\leq x)$ by integrating the PDF over $(-\infty,x]$:
+\[
+  \boxed{\underbrace{F_X(x)}_{\text{CDF: to find}}=P(X\leq x)
+    =\int_{-\infty}^{x}\underbrace{f_X(t)}_{\text{PDF: known}}\,dt,
+    \qquad x\in\mathbb R.}
+\]
+\clearpage
+\subsection*{From the CDF to the PMF and PDF}
+\begin{tcolorbox}[colback=blue!3,colframe=blue!30!black,
+  boxrule=0.4pt,arc=1mm,title={What we are trying to answer},
+  colbacktitle=blue!10,coltitle=black,fonttitle=\bfseries]
+We know the CDF $F_X$. How do we recover the PMF $p_X$ if $X$ is
+discrete, or the PDF $f_X$ if $X$ is continuous?
+\end{tcolorbox}
+
+\textbf{What we know.} The CDF is defined by
+\[
+  F_X(x):=P(X\leq x).
+\]
+For every threshold $x$, it gives the probability of obtaining a
+value less than or equal to $x$. We want to recover the PMF or the
+PDF, depending on the type of $X$.
+
+\textbf{Discrete case: recover the PMF.}
+The PMF is defined by
+\[
+  p_X(x):=P(X=x).
+\]
+The CDF includes all values up to $x$. To isolate the probability
+of the single value $x$, we subtract the probability of values
+strictly less than $x$:
+\[
+  P(X=x)=P(X\leq x)-P(X<x).
+\]
+Since the left limit satisfies
+\[
+  F_X(x^-):=\lim_{t\uparrow x}F_X(t)=P(X<x),
+\]
+we obtain
+\[
+  \boxed{\underbrace{p_X(x)}_{\text{PMF: to find}}
+    =\underbrace{F_X(x)-F_X(x^-)}_{\text{CDF: known}}.}
+\]
+Thus the PMF at $x$ is the size of the jump of the CDF at $x$.
+
+\textbf{Continuous case: recover the PDF.}
+A PDF is a non-negative function $f_X$ such that
+\[
+  P(a\leq X\leq b)=\int_a^b f_X(t)\,dt,
+  \qquad \int_{\mathbb R}f_X(t)\,dt=1.
+\]
+In particular,
+\[
+  F_X(x)=P(X\leq x)=\int_{-\infty}^{x}f_X(t)\,dt.
+\]
+The CDF is therefore the integral of the PDF. To recover a PDF,
+we differentiate the CDF:
+\[
+  \boxed{\underbrace{f_X(x)}_{\text{PDF: to find}}
+    =\frac{d}{dx}\underbrace{F_X(x)}_{\text{CDF: known}}.}
+\]
+This recovers a PDF at points where the derivative exists, by the
+fundamental theorem of calculus.
+
+
 \end{document}
