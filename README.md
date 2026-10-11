@@ -14,11 +14,8 @@
 | Fundamentals of Data Science | [📖 Open PDF](First%20year/First%20semester/Fundamentals%20of%20Data%20Science/Fundamentals_of_Data_Science_Notes.pdf) | 🟡 In progress |
 | Algorithmic Methods of Data Mining | [📖 Open PDF](First%20year/First%20semester/Algorithmic%20Methods%20of%20Data%20Mining/Algorithmic_Methods_of_Data_Mining_Notes.pdf) | ⚪ Template |
 
-### Fundamentals of Statistical Learning · Lecture checklist
-
-The notes follow five main chapters: Defining probability, Conditional probability, Random variables, Random vectors, and Stochastic simulations. Crash course and random variable exercises are collected in appendices.
-
-Check a lecture once its notes have been completed and reviewed. All dates below refer to 2026.
+<details>
+<summary><strong>Fundamentals of Statistical Learning · Lecture checklist</strong></summary>
 
 - [ ] **24 September** — Crash course exercises; completeness to verify.
 - [x] **25 September** — Random variables, PMF, PDF and CDF.
@@ -29,7 +26,7 @@ Check a lecture once its notes have been completed and reviewed. All dates below
 - [ ] **8 October** — Transformations of continuous random variables, the example Y = X² and its simulation in R (Topic 06, Part II, slides 4–8); explanations added, pending Matteo's review.
 - [ ] **9 October** — Scheduled lecture; notes to cover.
 
-The weekly [FSL timetable on Sapienza Students](https://sapienzastudents.net/datasci/courses/timetables/timetable/) lists Wednesday 09:00–12:00, Thursday 09:00–11:00 and Friday 08:00–11:00.
+</details>
 
 ## About
 
