@@ -1479,16 +1479,16 @@ length of these residuals is the dataset's reconstruction error.
 
 \smallskip
 In the chapter on Data Representation, we chose weights to make a
-reconstruction error as small as possible. This is an optimization problem. We now
-study the general task of choosing an input that makes a function
-smallest or largest. We begin with a single adjustable number $w$.
+reconstruction error as small as possible. Machine learning uses the
+same idea: a loss function scores the error for each choice of a
+model's weights, and minimizing it selects the weights with the best
+fit according to that score. We now study how to minimize or maximize
+a function, beginning with one adjustable number $w$.
 
 \section{What are we trying to optimize?}
 
-Suppose a function $g(w)$ assigns a numerical score to each choice
-of $w$. Changing $w$ changes that score. Our goal is to choose $w$
-so that the score is as small as possible, or as large as possible,
-depending on the problem.
+Let $g(w)$ assign a numerical score to the choice $w$. We vary $w$
+to find the smallest or largest value of $g$, depending on the task.
 
 \begin{frameddefn}{Objective function and optimization}\label{def:optimization-objective}
 The \emph{objective function} is the function whose value we want to
@@ -1602,13 +1602,29 @@ points and infinitely many global maximum points. An optimum need
 not be unique.
 \end{framedexample}
 
-\Needspace{12\baselineskip}
+\Needspace{35\baselineskip}
 \section{Local minima and maxima}
 
 Now imagine a curve with several valleys of different depths.
 The bottom of one valley is lower than the points immediately around
 it, even when another valley is deeper. This motivates a comparison
 with \emph{nearby} inputs.
+
+\begin{center}
+  \includegraphics[width=\linewidth,trim=40pt 48pt 70pt 55pt,clip]{assets/andrew-ng-cost-landscape.pdf}
+  \par\smallskip
+  {\small\textit{A function with several valleys. Source:
+  \href{https://d396qusza40orc.cloudfront.net/ml/docs/slides/Lecture2.pdf}
+  {Andrew Ng, Machine Learning, Lecture 2, slide 25}.}}
+\end{center}
+
+Here the function has two inputs: the adjustable parameters $\theta_0$
+and $\theta_1$ on the horizontal axes. The height $J(\theta_0,\theta_1)$
+is the value we want to minimise; $J$ plays the same role as $g$ in
+our notation. The black path shows successive downhill steps into
+the valley on the right. The valley in front is deeper: being lower
+than nearby points does not necessarily mean having the lowest value
+overall.
 
 \begin{frameddefn}{Local minimum and local maximum}\label{def:local-optimum}
 An input $w_*$ is a \emph{local minimum point} if
@@ -1622,7 +1638,7 @@ some small interval around $w_*$.
 
 \Needspace{30\baselineskip}
 \begin{framedexample}{Valleys of different depths}
-The lecture combines an oscillating function and a quadratic term:
+Consider the sum of an oscillating function and a quadratic term:
 \[
   g(w)=\sin(3w)+0.1w^2.
 \]
@@ -1657,20 +1673,28 @@ The peaks near $w\approx0.536$ and $w\approx2.678$ are local maximum
 points: their values are larger than those at nearby inputs.
 \end{framedexample}
 
-Finding a local minimum therefore does not, by itself, establish
-that we have found the smallest value of the whole function.
+Imagine searching for a minimum by making small changes that lower
+$g$. In this example, the search can stop in the orange valley.
+Reaching the deeper green valley requires first climbing out of the
+orange one. The orange point is a local minimum, but the green point
+has a lower value of $g$.
 
 \Needspace{8\baselineskip}
 \section{Why these are called zero-order conditions}
 
 The global and local definitions compare values of $g$ directly.
 They are called \emph{zero-order conditions} because they use the
-function itself. First-order conditions use first derivatives, and
-second-order conditions use second derivatives. Derivatives will
-help us locate candidate optimum points instead of comparing every
+function itself. First-order conditions use first derivatives, which
+describe the slope of the graph. Second-order conditions use second
+derivatives, which describe how that slope changes. The definitions
+tell us what it means to be a minimum or maximum; derivatives will
+help us find candidate optimum points without comparing every
 possible input individually.
 
 \medskip
 {\small\textit{Source: Spinelli, Lecture 03 (Optimization), slides 2--11.}}
+\par\smallskip
+{\small\textit{Additional explanations: Watt, Borhani, and Katsaggelos,
+Machine Learning Refined (2016), Sections 1.4, 2.1.1, and 2.2.1.}}
 
 \end{document}
