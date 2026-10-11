@@ -21,6 +21,12 @@
 
 \chapter{Introduction}
 
+\begin{tcolorbox}[colback=yellow!20,colframe=yellow!60!black,
+  boxrule=0.4pt,arc=1mm,left=5pt,right=5pt,top=3pt,bottom=3pt,
+  before skip=0pt,after skip=0pt]
+\small\textbf{Start of lecture 00 (Spinelli)}
+\end{tcolorbox}
+
 \section{What is Data Science?}
 
 \begin{frameddefn}{Data Science}\label{def:data-science}
@@ -29,6 +35,7 @@ data to support decisions. It combines statistics, mathematics, computer
 science, and domain expertise to collect, clean, manage, and analyse data.
 \end{frameddefn}
 
+\Needspace{24\baselineskip}
 \section{The Data Science lifecycle}
 
 A project moves through business understanding, data engineering,
@@ -101,7 +108,7 @@ is setosa, versicolor, or virginica is a classification task.
 \begin{tcolorbox}[colback=yellow!20,colframe=yellow!60!black,
   boxrule=0.4pt,arc=1mm,left=5pt,right=5pt,top=3pt,bottom=3pt,
   before skip=0pt,after skip=0pt]
-\small\textbf{Start of lecture 2 October 2026 (Spinelli)}
+\small\textbf{Start of lecture 01 (Spinelli) --- 2 October 2026}
 \end{tcolorbox}
 
 \section{The Iris dataset}
@@ -983,7 +990,9 @@ it equals the identity and the equations reduce to $w=C^\top x$.
 
 \Needspace{23\baselineskip}
 \begin{framedexample}{Solving the normal equations}
-For our basis and point, the known quantities are
+Take the basis vectors $c_1=(2,1)^\top$ and $c_2=(1,2)^\top$,
+and the point $x=(5,5)^\top$. The columns of $C$ are $c_1$ and $c_2$,
+in that order. The known quantities are
 \[
 \begin{aligned}
   C&=\begin{pmatrix}2&1\\1&2\end{pmatrix},
@@ -1001,29 +1010,117 @@ The matrix equation $C^\top Cw=C^\top x$ becomes
 \]
 Solving gives $w_1=w_2=5/3$. With these weights, $Cw=(5,5)^\top=x$,
 so $h(w)=0$: we reconstruct the point exactly.
-
-Taking $C^\top x$ directly as the weights would instead give
-$(15,15)^\top$ and reconstruct $(45,45)^\top$.
-The factor $C^\top C$ is essential for this basis.
 \end{framedexample}
 
-\Needspace{10\baselineskip}
+\clearpage
 \subsection{Encoding the whole dataset}
 
-For a dataset of $n$ observations, repeat this calculation for each
-point $x^{(i)}$. Keep the same basis matrix $C$, but find a separate
-weight vector $w^{(i)}$ for each point. The average reconstruction
-error is
+In the previous example, we found the weights of one point. A dataset
+is a collection of points: we now want to describe every one of them
+using weights in the same chosen directions.
+
+This prepares us to describe data with fewer numbers. With a complete
+basis, each point still has as many weights as original coordinates.
+In the next section, we will choose fewer directions and use fewer
+weights per point. When these directions cannot reconstruct a point
+exactly, we will find its best approximation.
+
+For a concrete example, choose the two basis vectors below and put
+them in the columns of $C$:
 \[
-  \frac{1}{n}\sum_{i=1}^{n}
-    \lVert Cw^{(i)}-x^{(i)}\rVert_2^2.
+  c_1=(2,1)^\top,\qquad c_2=(1,2)^\top,\qquad
+  C=\begin{pmatrix}2&1\\1&2\end{pmatrix}.
 \]
-Each term depends only on that observation's weights, so we can minimise
-the terms separately by solving
+Suppose the dataset contains just two points:
+\begin{center}
+\begin{tabular}{@{}lll@{}}
+\toprule
+\textbf{Original point} & \textbf{Combination of the directions} & \textbf{Weights} \\
+\midrule
+$(3,3)^\top$ & $c_1+c_2$ & $(1,1)^\top$ \\
+$(6,6)^\top$ & $2c_1+2c_2$ & $(2,2)^\top$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+The first point uses each basis vector once; the second uses each
+twice. \emph{Encoding the whole dataset} means finding these weights
+for every observation. The matrix $C$ is shared by all points; each
+point has its own weights.
+
+These same points could also be described using just $d=(1,1)^\top$:
+the first is $3d$, the second $6d$. We would need only one weight
+per point. This is the benefit we will explore when choosing fewer
+directions.
+
+For $n$ observations, write $x^{(i)}$ for point $i$ and $w^{(i)}$
+for its weight vector. Find the weights one point at a time by solving
+the same normal equations as before:
 \[
   C^\top Cw^{(i)}=C^\top x^{(i)},\qquad i=1,\ldots,n.
 \]
-The basis matrix stays the same; the observation and its weights change.
+
+\clearpage
+Let us carry out this calculation for both points in the table.
+Each weight vector has two entries, $w_1^{(i)}$ and $w_2^{(i)}$,
+one for each column of $C$. The matrix on the left is the same for
+both points, so we compute it once:
+\[
+  C^\top C
+  =\begin{pmatrix}2&1\\1&2\end{pmatrix}
+   \begin{pmatrix}2&1\\1&2\end{pmatrix}
+  =\begin{pmatrix}5&4\\4&5\end{pmatrix}.
+\]
+
+\textbf{First point: $x^{(1)}=(3,3)^\top$.}
+Compute the right-hand side using this point:
+\[
+  C^\top x^{(1)}
+  =\begin{pmatrix}2\cdot3+1\cdot3\\1\cdot3+2\cdot3\end{pmatrix}
+  =\begin{pmatrix}9\\9\end{pmatrix}.
+\]
+The normal equations are therefore
+\[
+  \begin{cases}
+    5w_1^{(1)}+4w_2^{(1)}=9,\\
+    4w_1^{(1)}+5w_2^{(1)}=9.
+  \end{cases}
+\]
+To solve the system, subtract the second equation from the first.
+This gives $w_1^{(1)}-w_2^{(1)}=0$, so the weights are equal.
+Substituting into the first equation gives $9w_1^{(1)}=9$, hence
+$w^{(1)}=(1,1)^\top$. These weights reconstruct the first point:
+$Cw^{(1)}=(3,3)^\top$.
+
+\textbf{Second point: $x^{(2)}=(6,6)^\top$.}
+Keep the same $C^\top C$, and compute the right-hand side for this point:
+\[
+  C^\top x^{(2)}
+  =\begin{pmatrix}2\cdot6+1\cdot6\\1\cdot6+2\cdot6\end{pmatrix}
+  =\begin{pmatrix}18\\18\end{pmatrix}.
+\]
+This gives a separate system for the second point's weights:
+\[
+  \begin{cases}
+    5w_1^{(2)}+4w_2^{(2)}=18,\\
+    4w_1^{(2)}+5w_2^{(2)}=18.
+  \end{cases}
+\]
+Solving in the same way gives $w_1^{(2)}-w_2^{(2)}=0$.
+The first equation then becomes $9w_1^{(2)}=18$, hence
+$w^{(2)}=(2,2)^\top$. These weights reconstruct the second point:
+$Cw^{(2)}=(6,6)^\top$.
+
+Multiplying $Cw^{(i)}$ reconstructs point $i$ from its weights. To
+assess all the reconstructions together, add their squared errors
+and divide by the number of observations:
+\[
+  \text{average reconstruction error}
+  =\frac{1}{n}\sum_{i=1}^{n}
+    \lVert Cw^{(i)}-x^{(i)}\rVert_2^2.
+\]
+Each term is the error for one observation. Changing that observation's
+weights affects only its own term, so finding the best weights for
+each point separately also minimises the average error.
 
 \clearpage
 \section{Using fewer directions: subspaces}
@@ -1052,16 +1149,19 @@ combinations:
 If the columns are linearly independent, $S$ has dimension $K$ and they
 form a basis of $S$. This set contains the origin and is closed under
 vector addition and multiplication by scalars.
+
+A subspace of dimension $p-1$ is called a \emph{hyperplane}.
 \end{frameddefn}
 
 In two dimensions, keeping one direction gives a line through the
 origin. In three dimensions, keeping two independent directions gives
-a plane through the origin. A subspace of dimension $p-1$ is called a
-\emph{hyperplane}.
+a plane through the origin.
 
 \Needspace{15\baselineskip}
 \begin{framedexample}{A line in a two-dimensional space}
-Keep only $c_1=(1,1)^\top$. Then
+Suppose we want to describe points in the plane with a single weight
+$w$. We choose the diagonal direction $c_1=(1,1)^\top$. The matrix
+$C$ has only this column, so $C=c_1$. Multiplying by $w$ gives
 \[
   Cw=w\begin{pmatrix}1\\1\end{pmatrix}
      =\begin{pmatrix}w\\w\end{pmatrix}.
@@ -1081,10 +1181,18 @@ we find its closest available approximation.
 \clearpage
 \section{Projection onto a subspace}
 
-Suppose the chosen directions cannot reach $x$. We still want the point
-on their subspace that is closest to $x$. For a line, imagine dropping
-a perpendicular from $x$ to the line: its endpoint is the approximation
-we keep.
+Suppose we want to represent $x=(2,0)^\top$ using only the direction
+$(1,1)^\top$. Every weight produces $(w,w)^\top$, so no weight
+reconstructs $x$ exactly. We therefore choose the weight that gives
+the closest point on the line. This replaces exact reconstruction
+with the best approximation available in the chosen directions.
+
+More generally, $C$ contains $K$ chosen directions for points with
+$p$ original coordinates. Their combinations $Cw$ form the subspace
+$S$. We write $w_*$ for the weights that minimise the squared error,
+and $\hat{x}=Cw_*$ for the resulting reconstruction. The star marks
+the best weights; the hat distinguishes the reconstruction from
+the original point $x$.
 
 \begin{frameddefn}{Orthogonal projection}\label{def:orthogonal-projection}
 Let the columns of $C\in\mathbb{R}^{p\times K}$ be linearly independent
@@ -1095,15 +1203,29 @@ and span $S$. The orthogonal projection of $x$ onto $S$ is
 \]
 Thus $\hat{x}$ is the point of $S$ with the smallest Euclidean distance
 from $x$; $w_*$ contains its coordinates in the chosen basis of $S$.
+The notation $\argmin$ means ``the weights that make this error
+smallest''; it returns a weight vector, rather than the value of the
+minimum error.
 \end{frameddefn}
 
-The calculation is the same as before:
+To find $w_*$, solve the normal equations:
 \[
   C^\top Cw_*=C^\top x.
 \]
-This time the $K$ weights describe the closest point, which may differ
-from $x$. Since the columns are independent, $C^\top C$ is invertible,
-so we can also write the solution as
+These equations minimise the same squared error as before, even when
+the minimum is positive. They find the closest reconstruction without
+requiring $Cw_*=x$.
+
+There is also a compact formula for the solution. Since the columns
+of $C$ are independent, $C^\top C$ has an inverse, written
+$(C^\top C)^{-1}$. An inverse undoes multiplication by a matrix:
+$(C^\top C)^{-1}(C^\top C)=I_K$. Multiplying both sides of the normal
+equations by this inverse leaves $w_*$ on the left:
+\[
+  (C^\top C)^{-1}(C^\top C)w_*
+   =(C^\top C)^{-1}C^\top x.
+\]
+Thus the weights and reconstruction can also be written as
 \[
   w_*=(C^\top C)^{-1}C^\top x,\qquad
   \hat{x}=C(C^\top C)^{-1}C^\top x.
@@ -1111,36 +1233,30 @@ so we can also write the solution as
 
 \Needspace{16\baselineskip}
 \begin{framedexample}{The closest point on the line $x_2=x_1$}
-For $C=(1,1)^\top$ and $x=(2,0)^\top$, the normal equations give
+We want to approximate $x=(2,0)^\top$ using the diagonal direction
+$c_1=(1,1)^\top$. Here $C=c_1$ has one column, so we need just one
+weight. Compute the two quantities in the normal equations:
 \[
-  C^\top C=2,\qquad C^\top x=2,\qquad 2w_*=2.
+  C^\top C=1\cdot1+1\cdot1=2,\qquad
+  C^\top x=1\cdot2+1\cdot0=2.
 \]
-Hence $w_*=1$ and
+The equation $C^\top Cw_*=C^\top x$ becomes $2w_*=2$, so $w_*=1$.
+Multiplying the chosen direction by this weight gives
 \[
   \hat{x}=Cw_*=\begin{pmatrix}1\\1\end{pmatrix}.
 \]
 We cannot reach $(2,0)$ on this line, but $(1,1)$ is the closest point.
-The error left over is $x-\hat{x}=(1,-1)^\top$, whose squared length
-is $1^2+(-1)^2=2$.
+The vector left over, called the residual, is
+$r=x-\hat{x}=(1,-1)^\top$. It records an error of $1$ in the first
+coordinate and $-1$ in the second. Its squared length is
+$1^2+(-1)^2=2$, the minimum squared reconstruction error.
 \end{framedexample}
 
-\subsection{Why the projection is perpendicular}
-
-Call the part left over the \emph{residual}, $r=x-\hat{x}$. The normal
-equations say
-\[
-  C^\top r=C^\top(x-Cw_*)=0.
-\]
-Each entry is $c_j^\top r=0$: the residual is perpendicular to every
-chosen direction, and therefore to their whole subspace. Moving the
-approximation within that subspace cannot recover this missing part.
-In our example, $(1,1)^\top(1,-1)=1-1=0$.
-
-\clearpage
-\subsection{Seeing the projection and its encoding}
-
-The blue line contains all the points we can represent with $(1,1)^\top$.
-The dashed segment shows the residual from the projected point to $x$.
+\Needspace{20\baselineskip}
+The diagram shows the same example: $C=(1,1)^\top$, $x=(2,0)^\top$,
+and the closest reconstruction $\hat{x}=(1,1)^\top$. The blue line is
+$S$: all points of the form $(w,w)^\top$. The dashed segment is the
+residual $r=x-\hat{x}$ from the reconstruction to the original point.
 
 \begin{center}
 \begin{tikzpicture}[font=\small,x=1.8cm,y=1.8cm]
@@ -1153,7 +1269,7 @@ The dashed segment shows the residual from the projected point to $x$.
   \fill (2,0) circle (2pt) node[below right] {$x=(2,0)^\top$};
   \draw[-{Stealth},NotesBlue,very thick] (0,0)--(1,1);
   \fill[NotesBlue] (1,1) circle (2pt)
-    node[above left] {$\hat{x}=(1,1)^\top$};
+    node[above left,xshift=4mm,yshift=5mm] {$\hat{x}=(1,1)^\top$};
   \draw[-{Stealth},red!65!black,dashed,thick] (1,1)--(2,0)
     node[midway,above right] {$r=x-\hat{x}$};
   \draw[black!60] (1.13,1.13)--(1.26,1)--(1.13,0.87);
@@ -1161,8 +1277,33 @@ The dashed segment shows the residual from the projected point to $x$.
 \end{tikzpicture}
 \end{center}
 
-The residual joins the projection to the original point at a right
-angle. It measures what is lost when we keep only this line.
+The dashed segment meets the blue line at a right angle. Its length
+measures the distance between the original point and its reconstruction;
+its squared length is the reconstruction error.
+
+\Needspace{8\baselineskip}
+\subsection{Why the projection is perpendicular}
+
+For any point, the \emph{residual} is $r=x-\hat{x}=x-Cw_*$.
+It is the vector from the reconstruction to the original point.
+Using the normal equations gives
+\[
+  C^\top r=C^\top x-C^\top Cw_*=0.
+\]
+Row $j$ of $C^\top$ is $c_j^\top$, so entry $j$ of this equation is
+$c_j^\top r=0$. This is a zero dot product: the residual is perpendicular
+to each chosen direction and to every combination of them.
+In the diagonal-line example, this check is
+\[
+  (1,1)\begin{pmatrix}1\\-1\end{pmatrix}=1-1=0.
+\]
+Any other point on the line adds a sideways distance to this
+perpendicular distance. By Pythagoras, its squared distance to $x$
+is larger. This explains why the perpendicular projection is the
+closest point.
+
+\Needspace{16\baselineskip}
+\subsection{Encoding and decoding the projection}
 
 With a fixed $C$, the two steps are:
 \begin{center}
@@ -1176,7 +1317,8 @@ Decoding & Compute $\hat{x}=Cw_*$, returning to $p$ coordinates. \\
 \end{tabularx}
 \end{center}
 
-For the example, the whole process is
+For this example, encoding means solving $2w_*=2$ to store the single
+weight $1$. Decoding means multiplying $C=(1,1)^\top$ by that weight:
 \[
   \underbrace{\begin{pmatrix}2\\0\end{pmatrix}}_{\text{original: 2 coordinates}}
   \quad\xrightarrow{\text{encode}}\quad
@@ -1184,81 +1326,107 @@ For the example, the whole process is
   \quad\xrightarrow{\text{decode}}\quad
   \underbrace{\begin{pmatrix}1\\1\end{pmatrix}}_{\text{reconstructed: 2 coordinates}}.
 \]
-Decoding restores the number of coordinates, but it cannot restore the
-discarded residual. If $x$ already belongs to $S$, the residual is zero
+Both $(2,0)^\top$ and $(1,1)^\top$ have this same encoding, $1$.
+The weight alone cannot tell us which of those points we started with.
+Decoding returns two coordinates on the line and leaves out the residual.
+If the original point already lies on the line, that residual is zero
 and the reconstruction is exact.
 
 \clearpage
 \section{Orthonormal directions in a subspace}
 
-We can make projection easier by choosing perpendicular unit vectors
-as the basis of the subspace. There are only $K$ such vectors, so $C$
-still has $p$ rows and $K$ columns. Their lengths and dot products give
+We still want the closest reconstruction in a chosen subspace. We can
+simplify the calculation by using $K$ perpendicular unit vectors as
+its basis. Put these vectors in the columns of $C$; each has $p$
+coordinates, so $C$ has $p$ rows and $K$ columns.
+The diagonal entries of $C^\top C$ are their squared lengths, all $1$;
+the other entries are dot products between different vectors, all $0$.
+Therefore
 \[
   C^\top C=I_K.
 \]
-The normal equations then give the same useful shortcut as before:
+Substituting this identity into $C^\top Cw_*=C^\top x$ gives
+$I_Kw_*=C^\top x$, hence $w_*=C^\top x$. We then combine the
+directions with these weights to reconstruct the point:
 \[
   \boxed{w_*=C^\top x,\qquad \hat{x}=Cw_*=CC^\top x.}
 \]
-Each dot product measures how much of $x$ lies along a chosen direction.
-Adding those contributions gives the projection.
+Weight $j$ is the dot product $c_j^\top x$: the signed amount of $x$
+along that unit direction. Multiplying each direction by its weight
+and adding the results gives the projection $\hat{x}$.
 
 \Needspace{20\baselineskip}
 \begin{framedexample}{Normalising the direction of the same line}
-Our line can also be described by the unit vector
+We again approximate $x=(2,0)^\top$ on the line $x_2=x_1$.
+The direction $(1,1)^\top$ has length $\sqrt{1^2+1^2}=\sqrt{2}$.
+To make it a unit vector, divide each entry by this length:
 \[
   c_1=\frac{1}{\sqrt{2}}\begin{pmatrix}1\\1\end{pmatrix},
   \qquad C=c_1.
 \]
-For $x=(2,0)^\top$, the shortcut gives
+The normalised vector still points along the same line. Its unit
+length lets us find the weight by a dot product:
 \[
-  w_*=c_1^\top x=\sqrt{2},\qquad
+  w_*=c_1^\top x=\frac{1}{\sqrt{2}}\cdot2
+                   +\frac{1}{\sqrt{2}}\cdot0=\sqrt{2}.
+\]
+Decoding multiplies this weight by the new direction:
+\[
   \hat{x}=\sqrt{2}c_1=\begin{pmatrix}1\\1\end{pmatrix}.
 \]
 Previously the direction was $(1,1)^\top$ and its weight was $1$.
 After making it a unit vector, the weight becomes $\sqrt{2}$.
 The line and the projected point stay the same.
 
-Here the two matrix products have different sizes and jobs:
+Here $C$ is $2\times1$. Thus $C^\top C$ is $1\times1$, whereas
+$CC^\top$ is $2\times2$. Their entries are
 \[
-  C^\top C=(1),\qquad
+  C^\top C=\frac{1}{2}+\frac{1}{2}=1,\qquad
   CC^\top=\frac{1}{2}\begin{pmatrix}1&1\\1&1\end{pmatrix}.
 \]
 The first checks the unit length of our one direction. The second
-projects a two-dimensional point onto the line:
+combines encoding and decoding into a single matrix multiplication,
+$CC^\top x=C(C^\top x)$. For our point,
 \[
   CC^\top\begin{pmatrix}2\\0\end{pmatrix}
    =\begin{pmatrix}1\\1\end{pmatrix}.
 \]
 \end{framedexample}
 
-For $K<p$, $CC^\top$ is a projection matrix, not $I_p$: it keeps the
-component in $S$ and removes the perpendicular residual. If instead
-$K=p$ and the columns form a complete orthonormal basis, $CC^\top=I_p$
-and every point is recovered exactly.
+With orthonormal columns, $CC^\top$ is called a projection matrix:
+multiplying a point by it returns its closest point in $S$.
+For $K<p$, it keeps the part along the chosen directions and leaves
+out the perpendicular residual. For $K=p$, a complete orthonormal
+basis gives $CC^\top=I_p$, so every point is recovered exactly.
 
-\clearpage
+\Needspace{10\baselineskip}
 \subsection{From three coordinates to two}
 
-The same idea works for a plane in three dimensions. We retain two
-weights and decode them as a point on that plane.
+Suppose an observation has three coordinates, but we want to describe
+it using two weights. Choose two independent directions in three-dimensional
+space; their combinations form a plane. Encoding finds the two
+weights, and decoding returns the closest point on that plane.
 
 \begin{framedexample}{Projection onto the coordinate plane}
-Choose two perpendicular unit vectors in $\mathbb{R}^3$:
+We want to approximate $x=(2,3,4)^\top$ using only directions along
+the first two coordinate axes. Choose the perpendicular unit vectors
 \[
   c_1=\begin{pmatrix}1\\0\\0\end{pmatrix},\qquad
   c_2=\begin{pmatrix}0\\1\\0\end{pmatrix},\qquad
   C=\begin{pmatrix}1&0\\0&1\\0&0\end{pmatrix}.
 \]
-They span the plane $x_3=0$. Since $C^\top C=I_2$, for
-$x=(2,3,4)^\top$ the encoding is
+Every combination of these vectors has third coordinate $0$, so
+they span the plane $x_3=0$. Since $C^\top C=I_2$, encoding gives
 \[
-  w_*=C^\top x=\begin{pmatrix}2\\3\end{pmatrix}.
+  w_*=C^\top x
+      =\begin{pmatrix}1&0&0\\0&1&0\end{pmatrix}
+       \begin{pmatrix}2\\3\\4\end{pmatrix}
+      =\begin{pmatrix}2\\3\end{pmatrix}.
 \]
-Decoding gives
+The weights tell us to use $c_1$ twice and $c_2$ three times.
+Decoding and computing the residual give
 \[
-  \hat{x}=Cw_*=\begin{pmatrix}2\\3\\0\end{pmatrix},\qquad
+  \hat{x}=Cw_*=2c_1+3c_2=\begin{pmatrix}2\\3\\0\end{pmatrix},\qquad
   r=x-\hat{x}=\begin{pmatrix}0\\0\\4\end{pmatrix}.
 \]
 The first two coordinates are preserved. The third is lost because
@@ -1266,6 +1434,7 @@ the chosen directions cannot move us out of the plane. The residual
 is perpendicular to that plane, and its squared length is $4^2=16$.
 \end{framedexample}
 
+\Needspace{20\baselineskip}
 \subsection{What changes when we reduce the dimension?}
 
 For independent columns, the same normal equations work in every case:
@@ -1298,288 +1467,210 @@ length of these residuals is the dataset's reconstruction error.
 
 \chapter{Principal Component Analysis}\label{chap:pca}
 
+% Deferred PCA chapter: Fundamentals_of_Data_Science_PCA.tmp.tex.
+
+\chapter{Optimization}\label{chap:optimization}
+
 \begin{tcolorbox}[colback=yellow!20,colframe=yellow!60!black,
   boxrule=0.4pt,arc=1mm,left=5pt,right=5pt,top=3pt,bottom=3pt,
   before skip=0pt,after skip=0pt]
-\small\textbf{Start of lecture: PCA (Spinelli, Lecture 03)}
+\small\textbf{Start of lecture 03 (Spinelli)}
 \end{tcolorbox}
 
 \smallskip
-So far, we have computed weights in a given basis. We now ask how to
-choose useful directions from the data, using matrix transformations
-and reconstruction error.
+In the chapter on Data Representation, we chose weights to make a
+reconstruction error as small as possible. This is an optimization problem. We now
+study the general task of choosing an input that makes a function
+smallest or largest. We begin with a single adjustable number $w$.
 
-\section{Linear transformations}
+\section{What are we trying to optimize?}
 
-A matrix can change a vector's coordinates, stretch a direction, rotate
-a point, or project it onto a smaller space. Its entries specify how
-to combine the input coordinates to produce the output coordinates.
+Suppose a function $g(w)$ assigns a numerical score to each choice
+of $w$. Changing $w$ changes that score. Our goal is to choose $w$
+so that the score is as small as possible, or as large as possible,
+depending on the problem.
 
-\begin{frameddefn}{Linear transformation}\label{def:linear-transformation}
-For a fixed matrix $A\in\mathbb{R}^{q\times p}$, the map
+\begin{frameddefn}{Objective function and optimization}\label{def:optimization-objective}
+The \emph{objective function} is the function whose value we want to
+minimize or maximize. For an objective $g(w)$, we write
 \[
-  T:\mathbb{R}^p\to\mathbb{R}^q,\qquad T(x)=Ax
+  \min_w g(w)\qquad\text{or}\qquad\max_w g(w).
 \]
-is a linear transformation. The input $x$ has $p$ coordinates and the
-output $y=Ax$ has $q$ coordinates. Each row of $A$ forms one output
-coordinate as a weighted sum of the input coordinates.
-The map preserves vector addition and multiplication by scalars;
-in particular, it maps the origin to the origin.
+The subscript $w$ identifies the input we are allowed to change.
+When we minimize an error or a cost, the objective is also called a
+\emph{loss function} or a \emph{cost function}.
 \end{frameddefn}
+
+We use $w_*$ for an input that achieves the desired optimum. Thus
+$w_*$ is the chosen input, and $g(w_*)$ is its score. For minimization,
+$w_*=\argmin_w g(w)$ means ``choose an input at which $g$ is
+smallest''. For maximization, $\argmax$ has the corresponding meaning
+with ``largest''. More than one input may achieve the same best score.
+
+\Needspace{12\baselineskip}
+\section{Global minima and maxima}
+
+A global optimum must be best among \emph{all} the inputs we are
+considering. In the following examples, $w$ can be any real number.
+
+\begin{frameddefn}{Global minimum and global maximum}\label{def:global-optimum}
+An input $w_*$ is a \emph{global minimum point} of $g$ if
+\[
+  g(w_*)\leq g(w)\qquad\text{for every }w.
+\]
+It is a \emph{global maximum point} if
+\[
+  g(w_*)\geq g(w)\qquad\text{for every }w.
+\]
+The values $g(w_*)$ are called the global minimum value and the
+global maximum value, respectively.
+\end{frameddefn}
+
+\Needspace{22\baselineskip}
+\begin{framedexample}{The bottom of a parabola}
+Suppose we want to choose $w$ to minimize $g(w)=w^2$. The horizontal
+axis shows the input $w$; the vertical axis shows its score $g(w)$.
+The green dot marks the bottom of the curve.
+
+\begin{center}
+\begin{tikzpicture}[font=\small,x=1.4cm,y=0.55cm]
+  \draw[-{Stealth},black!50] (-2.5,0)--(2.6,0) node[right] {$w$};
+  \draw[-{Stealth},black!50] (0,-0.5)--(0,4.8) node[above] {$g(w)$};
+  \draw[NotesBlue,thick,domain=-2:2,samples=81]
+    plot (\x,{\x*\x});
+  \foreach \xx in {-2,2} {
+    \draw[black!50] (\xx,0.08)--(\xx,-0.08) node[below] {$\xx$};
+  }
+  \node[below left] at (0,0) {$0$};
+  \fill[green!60!black] (0,0) circle (2.5pt);
+\end{tikzpicture}
+\end{center}
+
+For example, $g(-2)=4$, $g(0)=0$, and $g(2)=4$.
+Every square is nonnegative, so $g(0)=0\leq w^2$ for every $w$.
+Therefore $w_*=0$ is the global minimum point, and the minimum value
+is $0$.
+
+If we turn the curve upside down, the function becomes $-g(w)=-w^2$.
+Every value is now at most $0$, so the same input $w_*=0$ is its
+global maximum point.
+\end{framedexample}
+
+This change of sign works for any objective. If one input gives a
+larger value of $g$, it gives a smaller value of $-g$. We can therefore
+solve a maximization problem by minimizing the negative function:
+\[
+  \argmax_w g(w)=\argmin_w\bigl(-g(w)\bigr),\qquad
+  \max_w g(w)=-\min_w\bigl(-g(w)\bigr).
+\]
+The first equality identifies the optimizing inputs; the second
+relates the optimum values.
+
+\Needspace{28\baselineskip}
+\begin{framedexample}{Several inputs can be globally optimal}
+Consider the objective $g(w)=\sin(2w)$. Its graph repeatedly reaches
+the same lowest height, $-1$, and the same highest height, $1$.
+Green dots mark minima; orange dots mark maxima.
+
+\begin{center}
+\begin{tikzpicture}[font=\small,x=1.25cm,y=1.1cm]
+  \draw[-{Stealth},black!50] (-3.5,0)--(3.6,0) node[right] {$w$};
+  \draw[-{Stealth},black!50] (0,-1.4)--(0,1.5) node[above] {$g(w)$};
+  \draw[NotesBlue,thick,domain=-3.14159:3.14159,samples=161]
+    plot (\x,{sin(deg(2*\x))});
+  \foreach \xx/\yy in {-0.785398/-1,2.356194/-1}
+    {\fill[green!60!black] (\xx,\yy) circle (2.5pt);}
+  \foreach \xx/\yy in {-2.356194/1,0.785398/1}
+    {\fill[orange!90!black] (\xx,\yy) circle (2.5pt);}
+  \foreach \yy in {-1,1} {
+    \draw[black!50] (-0.07,\yy)--(0.07,\yy);
+    \node[left] at (-0.07,\yy) {$\yy$};
+  }
+  \node[below left] at (0,0) {$0$};
+  \node[below] at (-3.14159,0) {$-\pi$};
+  \node[below] at (3.14159,0) {$\pi$};
+\end{tikzpicture}
+\end{center}
+
+For instance, $w=-\pi/4$ and $w=3\pi/4$ both give $g(w)=-1$.
+No input can produce a smaller value, so both are global minimum
+points. Likewise, $w=-3\pi/4$ and $w=\pi/4$ give the global maximum
+value $1$.
+
+The sine curve repeats, so there are infinitely many global minimum
+points and infinitely many global maximum points. An optimum need
+not be unique.
+\end{framedexample}
+
+\Needspace{12\baselineskip}
+\section{Local minima and maxima}
+
+Now imagine a curve with several valleys of different depths.
+The bottom of one valley is lower than the points immediately around
+it, even when another valley is deeper. This motivates a comparison
+with \emph{nearby} inputs.
+
+\begin{frameddefn}{Local minimum and local maximum}\label{def:local-optimum}
+An input $w_*$ is a \emph{local minimum point} if
+\[
+  g(w_*)\leq g(w)\qquad\text{for all }w\text{ sufficiently near }w_*.
+\]
+It is a \emph{local maximum point} if the inequality is reversed.
+Here ``sufficiently near'' means that the comparison holds throughout
+some small interval around $w_*$.
+\end{frameddefn}
+
+\Needspace{30\baselineskip}
+\begin{framedexample}{Valleys of different depths}
+The lecture combines an oscillating function and a quadratic term:
+\[
+  g(w)=\sin(3w)+0.1w^2.
+\]
+The sine term produces peaks and valleys. The quadratic term grows
+as $|w|$ increases, so these valleys have different depths. The graph
+shows two of them with colored dots.
+
+\begin{center}
+\begin{tikzpicture}[font=\small,x=1.4cm,y=1.2cm]
+  \draw[-{Stealth},black!50] (-3.3,0)--(3.5,0) node[right] {$w$};
+  \draw[-{Stealth},black!50] (0,-1.3)--(0,2) node[above] {$g(w)$};
+  \draw[NotesBlue,thick,domain=-3:3,samples=181]
+    plot (\x,{sin(deg(3*\x))+0.1*\x*\x});
+  \foreach \xx in {-3,-2,-1,1,2,3} {
+    \draw[black!50] (\xx,0.06)--(\xx,-0.06) node[below] {$\xx$};
+  }
+  \node[below left] at (0,0) {$0$};
+  \fill[green!60!black] (-0.512214,-0.973180) circle (2.5pt);
+  \node[below left] at (-0.512214,-0.973180) {$w\approx-0.5$};
+  \fill[orange!90!black] (1.536590,-0.758628) circle (2.5pt);
+  \node[below right] at (1.536590,-0.758628) {$w\approx1.5$};
+\end{tikzpicture}
+\end{center}
+
+The green point near $w=-0.5$ is the deepest valley: its value is
+about $-0.973$. It is a global minimum point. The orange point near
+$w=1.5$ is also lower than its immediate neighbors, but its value is
+about $-0.759$. It is a local minimum point with a larger objective
+value.
+
+The peaks near $w\approx0.536$ and $w\approx2.678$ are local maximum
+points: their values are larger than those at nearby inputs.
+\end{framedexample}
+
+Finding a local minimum therefore does not, by itself, establish
+that we have found the smallest value of the whole function.
 
 \Needspace{8\baselineskip}
-\begin{framedexample}{Reading what a matrix does}
-For $x=(2,1)^\top$, read the multiplication one row at a time:
-\[
-  A=\begin{pmatrix}2&0\\0&0.5\end{pmatrix},\qquad
-  y=Ax=\begin{pmatrix}2\cdot2+0\cdot1\\0\cdot2+0.5\cdot1\end{pmatrix}
-      =\begin{pmatrix}4\\0.5\end{pmatrix}.
-\]
-The first row doubles the first coordinate; the second row halves the
-second coordinate. The transformed vector is $y=(4,0.5)^\top$.
-\end{framedexample}
+\section{Why these are called zero-order conditions}
 
-\clearpage
-\subsection{What different matrices do}
-
-Apply each of the following matrices to the same input $x=(2,1)^\top$.
-The output makes the geometric effect concrete.
-
-\begin{center}
-\begin{tabularx}{\linewidth}{@{}lccX@{}}
-\toprule
-\textbf{Type} & $A$ & $y=Ax$ & \textbf{Effect} \\
-\midrule
-Scaling & $\begin{pmatrix}2&0\\0&0.5\end{pmatrix}$
-  & $\begin{pmatrix}4\\0.5\end{pmatrix}$
-  & Double the first coordinate; halve the second. \\[9pt]
-Rotation & $\begin{pmatrix}0&-1\\1&0\end{pmatrix}$
-  & $\begin{pmatrix}-1\\2\end{pmatrix}$
-  & Rotate the point $90^\circ$ counterclockwise. \\[9pt]
-Reflection & $\begin{pmatrix}-1&0\\0&1\end{pmatrix}$
-  & $\begin{pmatrix}-2\\1\end{pmatrix}$
-  & Reflect across the vertical axis. \\[9pt]
-Shear & $\begin{pmatrix}1&1\\0&1\end{pmatrix}$
-  & $\begin{pmatrix}3\\1\end{pmatrix}$
-  & Add the second coordinate to the first. \\[9pt]
-Projection & $\begin{pmatrix}1&0\\0&0\end{pmatrix}$
-  & $\begin{pmatrix}2\\0\end{pmatrix}$
-  & Keep the horizontal component. \\
-\bottomrule
-\end{tabularx}
-\end{center}
-
-For a square matrix, $A^\top A=I_p$ means that its columns are
-orthonormal. Such a transformation preserves lengths and distances;
-rotations and reflections are examples. The scaling and shear matrices
-above change some lengths or angles.
-
-Off-diagonal entries mix input coordinates. Both the rotation and the
-shear above have such entries: their effect depends on the whole matrix.
-
-\subsection{How many directions survive?}
-
-\begin{frameddefn}{Rank of a matrix}\label{def:matrix-rank}
-The rank of $A$ is the dimension of the space spanned by its columns:
-the number of linearly independent output directions they provide.
-\end{frameddefn}
-
-The projection matrix in the table has rank $1$: its outputs all lie on
-the horizontal axis. Both $(2,1)^\top$ and $(2,-1)^\top$ become
-$(2,0)^\top$, so the output cannot tell us which input we started with.
-
-More generally, if $\operatorname{rank}(A)=K<p$, some input directions
-are lost and the transformation cannot be inverted for every input.
-Orthogonal projection is one way to reduce the number of directions.
-
-\clearpage
-\section{Changing coordinates and projecting}
-
-The previous lecture used a matrix $C$ whose columns are the chosen
-directions. Assume they are perpendicular unit vectors. Then $C^\top$
-computes the weights, and $C$ combines those weights into a vector in
-the original space. The number of columns determines what can be kept.
-
-\subsection{A complete basis keeps every direction}
-
-With $p$ basis vectors in $\mathbb{R}^p$, $C$ is square and
-$C^\top C=CC^\top=I_p$. Encoding and decoding give
-\[
-  w=C^\top x,\qquad Cw=CC^\top x=x.
-\]
-We have $p$ new coordinates for a point with $p$ original coordinates.
-Every point can be reconstructed exactly, and distances between points
-are preserved by the orthogonal change of coordinates.
-
-\subsection{Fewer directions keep only a projection}
-
-With $K<p$ columns, $C\in\mathbb{R}^{p\times K}$ spans a smaller
-subspace $S$. Now
-\[
-  C^\top C=I_K,\qquad
-  w=C^\top x\in\mathbb{R}^K,\qquad
-  \hat{x}=Cw=CC^\top x\in\mathbb{R}^p.
-\]
-The encoding has only $K$ weights. Decoding returns $p$ coordinates,
-but the decoded point must lie in $S$. It equals $x$ precisely when
-$x$ already belongs to $S$.
-
-\Needspace{19\baselineskip}
-\begin{framedexample}{Two coordinates, one weight, two coordinates}
-Take $x=(2,3)^\top$ and keep only the horizontal unit direction
-$c_1=(1,0)^\top$. With $C=c_1$, encoding gives
-\[
-  w=C^\top x=1\cdot2+0\cdot3=2.
-\]
-Decoding uses that weight to produce
-\[
-  \hat{x}=Cw=2\begin{pmatrix}1\\0\end{pmatrix}
-          =\begin{pmatrix}2\\0\end{pmatrix}.
-\]
-The process is
-\[
-  (2,3)^\top
-    \quad\xrightarrow{\text{encode}}\quad 2
-    \quad\xrightarrow{\text{decode}}\quad (2,0)^\top.
-\]
-The horizontal coordinate is kept. The vertical coordinate is lost:
-even though the decoded vector has two entries, its second entry must
-be zero for this choice of direction.
-\end{framedexample}
-
-\clearpage
-\section{Measuring reconstruction error}
-
-To judge a reduced representation, we measure the part of each
-observation that decoding leaves out. For our example, this is the
-vertical segment from the projected point to the original point.
-
-\begin{center}
-\begin{tikzpicture}[font=\small,x=0.8cm,y=0.8cm]
-  \draw[step=1,black!12,very thin] (0,0) grid (3,3);
-  \draw[-{Stealth},NotesBlue,thick] (-0.4,0)--(3.8,0)
-    node[right] {$S$};
-  \draw[-{Stealth},black!50] (0,-0.3)--(0,3.6) node[above] {$x_2$};
-  \draw[-{Stealth},black,thick] (0,0)--(2,3);
-  \fill (2,3) circle (2pt) node[above right] {$x=(2,3)^\top$};
-  \fill[NotesBlue] (2,0) circle (2pt)
-    node[below] {$\hat{x}=(2,0)^\top$};
-  \draw[-{Stealth},red!65!black,dashed,thick] (2,0)--(2,3)
-    node[midway,right] {$r=(0,3)^\top$};
-  \draw[black!60] (1.8,0)--(1.8,0.2)--(2,0.2);
-  \node[below left] at (0,0) {$0$};
-\end{tikzpicture}
-\end{center}
-
-The residual is $r=x-\hat{x}=(0,3)^\top$. Its length is $3$, the
-perpendicular distance to $S$. The \emph{squared} reconstruction error
-is $\lVert r\rVert_2^2=0^2+3^2=9$. For a plane in three dimensions,
-the same idea measures the perpendicular segment from a point to the
-plane.
-
-\begin{frameddefn}{Squared reconstruction error}\label{def:reconstruction-error}
-For an observation $x^{(i)}$ and its reconstruction
-$\hat{x}^{(i)}=Cw^{(i)}$, the squared reconstruction error is
-\[
-  E_i=\lVert x^{(i)}-\hat{x}^{(i)}\rVert_2^2
-     =\sum_{j=1}^{p}\bigl(x_j^{(i)}-\hat{x}_j^{(i)}\bigr)^2.
-\]
-It adds up the squared errors in the original $p$ coordinates. It is
-zero when the observation is reconstructed exactly.
-\end{frameddefn}
-
-\subsection{From one observation to the dataset}
-
-For a fixed $C$, choose the weights of each of the $n$ observations to
-minimise the average squared error:
-\[
-  \min_{w^{(1)},\ldots,w^{(n)}}
-    \frac{1}{n}\sum_{i=1}^{n}
-      \lVert Cw^{(i)}-x^{(i)}\rVert_2^2.
-\]
-With orthonormal columns, the best weights are
-$w^{(i)}=C^\top x^{(i)}$. Substituting them gives the error left for
-that choice of directions:
-\[
-  \boxed{g(C)=\frac{1}{n}\sum_{i=1}^{n}
-    \lVert CC^\top x^{(i)}-x^{(i)}\rVert_2^2.}
-\]
-For this fixed subspace, changing the weights cannot make the residuals
-shorter: the projections are already the closest points. Choosing a
-different subspace can change the error. This makes $g(C)$ a way to
-compare possible choices of directions.
-
-\clearpage
-\section{Learning the basis from the data}
-
-So far, $C$ was given and we found the weights. We now also want to
-learn $C$: which $K$ directions give a useful representation of the
-whole dataset? The choice should depend on how the observations are
-arranged in space.
-
-\begin{framedexample}{Comparing two choices of direction}
-Consider four mean-centred observations:
-\[
-  (-3,-1)^\top,\quad (-3,1)^\top,\quad
-  (3,-1)^\top,\quad (3,1)^\top.
-\]
-We want to keep only one weight per observation. The black dots are
-the same data in both panels; blue dots show their projections.
-
-\begin{center}
-\begin{tikzpicture}[font=\small]
-  \begin{scope}[x=0.53cm,y=0.53cm]
-    \node[font=\small\bfseries] at (0,2.5) {Keep the horizontal direction};
-    \draw[-{Stealth},black!40] (0,-1.9)--(0,1.9);
-    \draw[-{Stealth},NotesBlue,thick] (-4,0)--(4,0);
-    \foreach \xx in {-3,3} {
-      \draw[red!65!black,dashed] (\xx,-1)--(\xx,1);
-      \fill[NotesBlue] (\xx,0) circle (2.5pt);
-      \foreach \yy in {-1,1} {\fill (\xx,\yy) circle (2pt);}
-    }
-    \node[below right] at (0,0) {$0$};
-  \end{scope}
-  \begin{scope}[shift={(7.4cm,0)},x=0.53cm,y=0.53cm]
-    \node[font=\small\bfseries] at (0,2.5) {Keep the vertical direction};
-    \draw[-{Stealth},black!40] (-4,0)--(4,0);
-    \draw[-{Stealth},NotesBlue,thick] (0,-1.9)--(0,1.9);
-    \foreach \yy in {-1,1} {
-      \draw[red!65!black,dashed] (-3,\yy)--(3,\yy);
-      \fill[NotesBlue] (0,\yy) circle (2.5pt);
-      \foreach \xx in {-3,3} {\fill (\xx,\yy) circle (2pt);}
-    }
-    \node[below right] at (0,0) {$0$};
-  \end{scope}
-\end{tikzpicture}
-\end{center}
-
-The perpendicular segments are shorter for the horizontal line.
-Keeping $c_1=(1,0)^\top$ removes only the vertical coordinate $\pm1$,
-so each squared error is $1$ and their average is $g(C)=1$.
-Keeping $c_1=(0,1)^\top$ removes the horizontal coordinate $\pm3$,
-so each squared error is $9$ and $g(C)=9$.
-
-Both choices use one weight. The horizontal direction reconstructs
-these observations better: it preserves their larger horizontal spread.
-\end{framedexample}
-
-\begin{frameddefn}{Principal Component Analysis}\label{def:pca}
-For mean-centred numerical data and a chosen dimension $K<p$,
-Principal Component Analysis (PCA) learns $K$ perpendicular unit
-directions that minimise the average squared reconstruction error.
-The columns of $C$ contain these directions; each observation is
-encoded by $w^{(i)}=C^\top x^{(i)}$ and reconstructed by
-$\hat{x}^{(i)}=Cw^{(i)}$.
-\end{frameddefn}
-
-PCA is \emph{unsupervised}: it learns the directions from the input
-observations, without target labels. We specify how many directions to
-keep; the data determine which directions are useful. Mean-centering
-places the data cloud around the origin, where these subspaces pass.
-
-The next question is how to find the directions that minimise $g(C)$.
+The global and local definitions compare values of $g$ directly.
+They are called \emph{zero-order conditions} because they use the
+function itself. First-order conditions use first derivatives, and
+second-order conditions use second derivatives. Derivatives will
+help us locate candidate optimum points instead of comparing every
+possible input individually.
 
 \medskip
-{\small\textit{Source: Spinelli, Lecture 03 (PCA), slides 2--8.}}
+{\small\textit{Source: Spinelli, Lecture 03 (Optimization), slides 2--11.}}
 
 \end{document}
