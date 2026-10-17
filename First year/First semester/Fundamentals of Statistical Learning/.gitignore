@@ -2,6 +2,9 @@
 !.gitignore
 !Fundamentals_of_Statistical_Learning_Notes.pdf
 !Fundamentals_of_Statistical_Learning_Notes.tex
+!Code/
+!Code/01_lcg.R
+!Code/02_histogram.R
 !assets/
 !assets/README.md
 !assets/sapienza.png
@@ -9,3 +12,7 @@
 !assets/preimage-probability-map.png
 !assets/square-uniform-transformation.png
 !assets/square-uniform-density.png
+!assets/exponential-pdf-cdf.pdf
+!assets/beta-pdf-cdf.pdf
+!assets/mle-narrow-rectangles.pdf
+/AGENTS.md

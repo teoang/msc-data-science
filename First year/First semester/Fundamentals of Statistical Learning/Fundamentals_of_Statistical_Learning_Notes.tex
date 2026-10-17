@@ -784,6 +784,15 @@ an even number, we add the probabilities of rolling $2$, $4$, or $6$:
 \clearpage
 \section{Continuous random variables}
 
+For a continuous random variable, we describe how probability is
+concentrated along its possible values using a \emph{probability
+density function} (PDF). The notation $f_X$ names this function;
+the subscript $X$ identifies the random variable it describes.
+For a possible value $x$, $f_X(x)$ is a number measuring the local
+concentration of probability: \textbf{probability per unit of length}
+near $x$. The definition below specifies precisely how this function
+represents the distribution of $X$.
+
 \begin{frameddefn}{Continuous random variable and PDF}
 \label{def:continuous-pdf}
 A random variable $X$ is \emph{continuous} (in the sense used here)
@@ -799,6 +808,31 @@ function} (PDF), such that, for every $a\leq b$,
   \item $\displaystyle\int_{\mathbb R}f_X(x)\,dx=1$.
 \end{enumerate}
 \end{frameddefn}
+
+To make the meaning of $f_X(x)$ explicit, fix a value $x$ and
+consider an interval centred at $x$, with positive width $h$:
+\[
+  \left[x-\frac h2,\;x+\frac h2\right].
+\]
+Its probability is $P(x-h/2\leq X\leq x+h/2)$. Dividing this
+probability by $h$ gives the \textbf{average probability per unit
+of length} over that interval. Keep $x$ fixed and shrink the
+interval by letting $h\to0^+$. If $f_X$ is continuous at $x$, then
+\[
+  \boxed{
+    f_X(x)=\lim_{h\to0^+}
+    \frac{P(x-h/2\leq X\leq x+h/2)}{h}.
+  }
+\]
+Indeed, by the definition above, the ratio is
+\[
+  \frac{1}{h}\int_{x-h/2}^{x+h/2}f_X(t)\,dt,
+\]
+the average value of the PDF on that interval. Continuity at $x$
+ensures that this average approaches $f_X(x)$ as the interval
+shrinks. This limit is a local interpretation of the PDF under
+that continuity assumption; the integral definition above is the
+general one.
 
 \begin{tcolorbox}[notesbox,colframe=red!45,colback=red!3,
   boxed title style={colback=red!25,colframe=red!45},
@@ -827,11 +861,24 @@ guarantee that a PDF exists.
 \begin{framedexample}{Waiting for a bus}
 Suppose a bus arrives every $10$ minutes and you reach the stop
 at a uniformly random time between two arrivals. Let $X$ be your
-waiting time in minutes. Intervals of the same length have the
-same probability, so the PDF is constant on $[0,10]$.
-Its height is $1/10$, since the total area must be $1$.
+waiting time in minutes. Its possible values lie in $[0,10]$.
+Uniformity means that the probability of a waiting-time interval
+is its length divided by the full length, $10$ minutes.
 
-Its PDF is:
+For example, fix $x=5$ minutes and consider a small interval
+centred at $5$, of width $h$ minutes. As long as the interval
+stays inside $[0,10]$, its probability is $h/10$. Therefore,
+\[
+  \frac{P(5-h/2\leq X\leq5+h/2)}{h}
+  =\frac{h/10}{h}=\frac1{10}.
+\]
+For widths $h=1$, $0.2$ and $0.02$, the probabilities are
+$0.1$, $0.02$ and $0.002$: the interval's probability decreases,
+but the probability per minute remains $1/10$.
+The same calculation works at every interior point $0<x<10$,
+so the PDF is constant there, with value $1/10$.
+
+Choosing the same value at the endpoints, its PDF is:
 \[
   f_X(x)=
   \begin{cases}
@@ -1835,6 +1882,7 @@ All six interior cells together sum to $1$.
 \label{sec:marginal-conditional-pmf}
 
 \subsection{Marginalization}
+\label{sec:marginal-pmf}
 
 To study $X$ alone, we add the probabilities of all pairs with
 that value of $X$, allowing $Y$ to take any of its possible values.
@@ -1862,9 +1910,7 @@ For the exam example,
   p_X(0)&=0.05+0.60+0.05=0.70.
 \end{align*}
 Thus $X\sim\operatorname{Ber}(0.30)$, with passing as the success
-outcome. \textbf{TODO:} Review this notation after covering the
-\hyperref[sec:bernoulli-distribution]{Bernoulli distribution in
-Section~\ref{sec:bernoulli-distribution}}.
+outcome.
 
 For attendance,
 \begin{align*}
@@ -1877,6 +1923,7 @@ do not retain all the information in the joint table.
 
 \clearpage
 \subsection{Conditioning}
+\label{sec:conditional-pmf}
 
 Suppose attendance is known. We then describe exam results
 \emph{within that attendance group}. The conditioning value is
@@ -2163,9 +2210,64 @@ each observation.
 \section{Likelihood and the empirical distribution}
 \label{sec:likelihood-empirical}
 
-The learning problem reverses the sampling perspective: after
-observing $\mathcal D_n$, we want to learn about the population
-distribution that generated it.
+Our goal is to \textbf{estimate the population distribution from
+the data we have observed}. We have collected measurements and
+want to use them to learn about the process that produced them.
+
+For example, let $X$ be the waiting time until an event occurs.
+We collect $n$ waiting times, called $x_1,\ldots,x_n$. We want
+to build a model that lets us answer questions such as:
+\emph{``What is the probability of waiting less than five minutes?''}
+The observed times are our data; the distribution of waiting times
+in the population is what we want to estimate.
+
+If the population variable has a PDF, we denote it by $f_X$;
+its CDF is $F_X$. These describe the same distribution in different
+ways. The PDF describes how probability is concentrated, while
+the CDF gives the probability of being at or below a threshold.
+Both describe the population, beyond the particular observations
+we have collected.
+
+\begin{center}
+\begin{tikzpicture}[
+  stage/.style={draw=NotesMuted,fill=NotesPaper,rounded corners=1mm,
+    align=center,inner sep=6pt,text width=0.25\linewidth,font=\small}]
+  \node[stage] (population) at (0,0)
+    {\textbf{Population model}\\[3pt]CDF $F_X$};
+  \node[stage] (sampling) at (5.2,0)
+    {\textbf{\hyperref[sec:iid-sample]{IID sampling}}\\[3pt]
+     $X_1,\ldots,X_n$};
+  \node[stage] (observations) at (10.4,0)
+    {\textbf{Observed data}\\[3pt]$\mathcal D_n=(x_1,\ldots,x_n)$};
+  \draw[-{Stealth[length=2mm]},line width=0.6pt]
+    (population.east) -- (sampling.west);
+  \draw[-{Stealth[length=2mm]},line width=0.6pt]
+    (sampling.east) -- (observations.west);
+\end{tikzpicture}
+\end{center}
+
+The diagram shows how a population model leads to observations.
+Here $n$ is the sample size. Before sampling, the $X_i$ are
+independent random variables sharing the population CDF $F_X$;
+after sampling, the $x_i$ are the observed values.
+The population model and the sampling scheme together describe
+the \textbf{data-generating process}: what varies in the population
+and how we obtain observations from it.
+
+\textbf{Learning goes in the other direction}: we start with the
+observed data on the right and try to estimate the population
+distribution on the left. For the waiting-time example, we use
+the recorded times to estimate $f_X$, then use the fitted model
+to calculate probabilities for waiting times.
+
+This is the \textbf{learning problem}. The observations are fixed;
+we compare possible distributions to find a model that fits them.
+
+One rule for choosing among these candidates is \textbf{maximum
+likelihood}: choose the model that makes the observed data most
+plausible according to their likelihood. We introduce this
+comparison formally below, distinguishing masses, densities and
+CDF values.
 
 \begin{notebox}[Joint CDF and likelihood]
 The product $\prod_iF_X(x_i)$ above is the joint CDF evaluated
@@ -2176,8 +2278,23 @@ handwritten notes.
 \end{notebox}
 
 \subsection{Maximum likelihood estimation}
-Consider a model indexed by an unknown parameter $\theta\in\Theta$.
-For fixed observed data, its \textbf{likelihood} is
+
+Suppose our candidates form a family of distributions described
+by a parameter $\theta$. This parameter may be one number or
+several numbers; $\Theta$ is the set of values we allow it to take.
+Choosing a value of $\theta$ chooses one candidate distribution.
+For one observation, write $p_\theta$ for its PMF in a discrete
+model, or $f_\theta$ for its PDF in a continuous model.
+
+For each candidate, we evaluate its PMF or PDF at all the observed
+values. The IID assumption makes their joint mass or density a
+product. This product is the candidate's likelihood: the score
+we use to compare it with the other candidates.
+
+\begin{frameddefn}{Likelihood}
+\label{def:likelihood}
+For fixed observed data $\mathcal D_n=(x_1,\ldots,x_n)$ and
+a model parameter $\theta\in\Theta$, the \textbf{IID likelihood} is
 \[
   L(\theta;x_1,\ldots,x_n)=
   \begin{cases}
@@ -2187,18 +2304,173 @@ For fixed observed data, its \textbf{likelihood} is
        & \text{model with a PDF}.
   \end{cases}
 \]
-Here $p_\theta$ or $f_\theta$ describes one population observation.
-In the continuous case, a PDF value is a density, not the
-probability of that exact observed value.
+\end{frameddefn}
 
-The data stay fixed while we vary the model parameter. A
-\textbf{maximum likelihood estimator (MLE)} chooses a maximizer:
+\begin{frameddefn}{Maximum likelihood estimation}
+\label{def:maximum-likelihood}
+A \textbf{maximum likelihood estimator (MLE)} chooses
 \[
   \widehat\theta_n\in
   \argmax_{\theta\in\Theta}L(\theta;x_1,\ldots,x_n),
 \]
-when a maximizer exists. Equivalently, one may maximize the
-log-likelihood, which turns products into sums.
+when a maximizer exists. Here $\widehat\theta_n$ is the parameter
+estimate calculated from the $n$ observations, and $\argmax$
+denotes the set of parameter values attaining the largest
+likelihood.
+\end{frameddefn}
+
+When a candidate is denoted directly by its PDF $f=f_\theta$,
+we write $L(f;\mathcal D_n)$ for the same likelihood and
+$\widehat f$ for the fitted density.
+
+The data stay fixed while we vary the model parameter. For our
+waiting times, this means evaluating the same recorded times
+under different candidate distributions, then selecting a
+candidate with the largest likelihood.
+In the continuous case, a PDF value is a density, not the
+probability of that exact observed value.
+Equivalently, one may maximize the log-likelihood: the logarithm
+turns products into sums while preserving the ordering of
+positive likelihoods.
+
+\Needspace{12\baselineskip}
+\begin{framedexample}{MLE from two waiting times}
+\label{ex:mle-two-waiting-times}
+We observe two independent waiting times:
+\[
+  x_1=1\text{ minute},\qquad x_2=2\text{ minutes}.
+\]
+Assume they are IID from a uniform distribution on $[0,\theta]$.
+Here $\theta>0$ is unknown: it is the largest waiting time allowed
+by our model. Changing $\theta$ changes the candidate distribution.
+
+Which value of $\theta$ does maximum likelihood choose?
+
+\textbf{Compare the same data under different candidates.}
+\begin{enumerate}[label=\textbf{Step \arabic*:},leftmargin=*]
+  \item \textbf{Write the density of one observation.}
+  A uniform PDF is constant on its interval. Its area is $1$, so
+  its height is $1/\theta$:
+  \[
+    f_\theta(x)=\frac1\theta\mathbf1_{[0,\theta]}(x).
+  \]
+  The parameter $\theta$ is the candidate interval's upper limit;
+  $x$ is a possible waiting time.
+
+  \item \textbf{Check which candidates can include our observations.}
+  If $\theta<2$, the second observed time lies outside the interval,
+  so $f_\theta(2)=0$. If $\theta\geq2$, both observations are
+  included and each has density $1/\theta$.
+
+  \item \textbf{Calculate the likelihood.}
+  Independence gives a product:
+  \[
+    L(\theta;1,2)=f_\theta(1)f_\theta(2)=
+    \begin{cases}
+      0,&0<\theta<2,\\[3pt]
+      1/\theta^2,&\theta\geq2.
+    \end{cases}
+  \]
+  For example, the same data give the following scores:
+  \begin{center}
+  \begin{tabular}{@{}ccc@{}}
+    \toprule
+    Candidate $\theta$ & Candidate interval & Likelihood\\
+    \midrule
+    $1$ & $[0,1]$ & $0$\\
+    $2$ & $[0,2]$ & $1/4=0.25$\\
+    $3$ & $[0,3]$ & $1/9\approx0.111$\\
+    $10$ & $[0,10]$ & $1/100=0.01$\\
+    \bottomrule
+  \end{tabular}
+  \end{center}
+  These scores are products of density values, not probabilities
+  of the exact observations.
+
+  \item \textbf{Choose the parameter with the highest score.}
+  Among all $\theta\geq2$, increasing $\theta$ makes
+  $1/\theta^2$ smaller. The best candidate is therefore the
+  smallest upper limit that includes both observations:
+  \[
+    \boxed{\widehat\theta_2=2\text{ minutes}.}
+  \]
+\end{enumerate}
+The MLE has selected the fitted model $\operatorname{Unif}(0,2)$.
+We kept the observations $1$ and $2$ fixed and varied the model's
+parameter to find its largest likelihood. The result is an estimate
+under the uniform assumption; new observations could produce
+a different estimate of the upper limit.
+\end{framedexample}
+
+\Needspace{12\baselineskip}
+\begin{framedexample}{Why does likelihood prefer one density?}
+\label{ex:mle-comparing-two-densities}
+The \hyperref[ex:mle-two-waiting-times]{earlier waiting-time example}
+showed how to maximize likelihood over a parameter. Here we focus
+on why one candidate receives a higher score than another.
+
+We observe four IID waiting times, measured in minutes:
+\[
+  \mathcal D_4=(4,12,7,3).
+\]
+Consider exactly two candidate models: a uniform distribution
+on $[0,15]$ and a uniform distribution on $[0,30]$. Their PDFs are
+\[
+  f_1(x)=\frac1{15}\mathbf1_{[0,15]}(x),
+  \qquad
+  f_2(x)=\frac1{30}\mathbf1_{[0,30]}(x).
+\]
+Our class is $\mathcal F=\{f_1,f_2\}$. Each uniform PDF is a
+rectangle with total area $1$, so its height is the reciprocal
+of its interval's width.
+
+\textbf{Step 1: evaluate each candidate at the same observations.}
+All four observations lie in both intervals. Therefore,
+\[
+  f_1(4)=f_1(12)=f_1(7)=f_1(3)=\frac1{15},
+\]
+whereas
+\[
+  f_2(4)=f_2(12)=f_2(7)=f_2(3)=\frac1{30}.
+\]
+The observations stay fixed; only the candidate density changes.
+
+\textbf{Step 2: multiply the density values.}
+Independence gives
+\begin{align*}
+  L(f_1;\mathcal D_4)
+    &=\frac1{15}\cdot\frac1{15}\cdot\frac1{15}\cdot\frac1{15}
+      =\frac1{50625},\\
+  L(f_2;\mathcal D_4)
+    &=\frac1{30}\cdot\frac1{30}\cdot\frac1{30}\cdot\frac1{30}
+      =\frac1{810000}.
+\end{align*}
+Thus the first model has the larger likelihood. Its score is
+\[
+  \frac{L(f_1;\mathcal D_4)}{L(f_2;\mathcal D_4)}
+    =\left(\frac{30}{15}\right)^4=2^4=16
+\]
+times the second model's score. Within this two-model class,
+the MLE selects $\widehat f=f_1$.
+
+\textbf{Step 3: understand the preference through probabilities.}
+The first model concentrates its probability over a shorter
+interval, so it puts more probability near each observed value.
+For example, the interval $(3.9,4.1)$ has width $0.2$ minutes:
+\[
+  \Pr_{f_1}(3.9<X<4.1)=\frac{0.2}{15},
+  \qquad
+  \Pr_{f_2}(3.9<X<4.1)=\frac{0.2}{30}.
+\]
+Here $\Pr_{f_j}$ means probability calculated under candidate
+$f_j$. The first probability is twice the second. The same
+comparison holds for intervals of width $0.2$ around $12$, $7$
+and $3$. By independence, the probability of all four observations
+falling in their respective intervals is $2^4=16$ times larger
+under $f_1$. This gives a probability interpretation of the
+likelihood ratio, even though the probability of any exact
+continuous observation is zero.
+\end{framedexample}
 
 \clearpage
 \subsection{The empirical CDF and its likelihood interpretation}
@@ -2544,8 +2816,13 @@ statistical quality requires more than checking the period.
 
 \section{The LCG in R}
 \label{sec:lcg-r}
-We can translate the update rule into a short R function. To follow
-the calculations, we keep the small parameters from
+We can translate the update rule into a short R function.
+The argument \texttt{n} specifies how many values we ask the function
+to generate. The arguments \texttt{a} and \texttt{b} correspond to
+$\alpha$ and $\beta$, \texttt{M} is the modulus, and \texttt{u0}
+supplies the initial seed.
+
+To follow the calculations, we keep the small parameters from
 \hyperref[sec:lcg]{the previous example} and generate three values:
 \begin{lstlisting}[language=R]
 lcg <- function(n = 3, a = 1, b = 5, M = 16, u0 = 2) {
@@ -2561,43 +2838,122 @@ lcg <- function(n = 3, a = 1, b = 5, M = 16, u0 = 2) {
   return(out)
 }
 \end{lstlisting}
-Here \texttt{a} corresponds to $\alpha$, \texttt{b} to $\beta$, and
-\texttt{n} is the number of values we ask the function to produce.
-The argument \texttt{u0} supplies the initial seed.
-
 \Needspace{15\baselineskip}
 \subsection{Checking uniformity with a histogram}
-A \textbf{histogram} shows how numerical values are spread across
-intervals. We divide the range into intervals, count the values in
-each one, and draw adjacent bars. For equal widths, taller bars
-mean more values: we can see where the values are concentrated.
+A histogram helps us see where numerical observations are concentrated.
+Imagine measuring many people's heights and marking each measurement
+as a point on a horizontal axis. With enough measurements, nearby
+points overlap, hiding how many values occur in each region.
+Stacking only exactly equal values does not solve the problem:
+two heights can be very close without being identical.
 
-We use the same function to generate $1000$ values, with seed $26$ and parameters
+Instead, divide the range into adjacent intervals, called \emph{bins}.
+Group together all measurements in each bin, then draw a bar above it.
+In a \textbf{count histogram}, the bar's height is the number of
+observations in that bin. A taller bar means that more observations
+fall in that interval. This makes concentrations, spread and the
+overall shape easier to see.\footnote{This introduction follows
+Josh Starmer's \href{https://www.youtube.com/watch?v=qBigTkBLU6g}
+{StatQuest: Histograms, Clearly Explained}.}
+
+The bin width matters. Very narrow bins may leave almost every
+observation on its own; very wide bins can merge different features.
+Trying several widths helps us see which patterns persist.
+
+For our LCG, the observations are the generated numbers.
+We want to check whether the LCG output resembles draws from
+$\operatorname{Unif}(0,1)$.
+We use a histogram to compare their distribution with the uniform
+distribution. To compare it with a PDF, we will change its scale:
+each bar's \textbf{area} will represent the fraction of values in its
+bin. We derive the corresponding height below.
+
+In this example, we choose to generate $1000$ values by setting
+\texttt{n = 1000}. We use seed $26$ and parameters
 $a=69069069$, $b=12345$ and $M=4096$:
 \begin{lstlisting}[language=R]
 u <- lcg(n = 1000, a = 69069069, b = 12345,
          M = 2^12, u0 = 26)
+\end{lstlisting}
+
+The reasoning is as follows:
+\begin{enumerate}
+  \item We ask the LCG to produce $1000$ numbers between $0$ and $1$.
+  \item We want to see whether they are distributed approximately
+  like a uniform distribution: in each interval of width $0.1$,
+  we expect about $100$ numbers.
+  \item We build a \textbf{histogram of the numbers produced by the LCG}
+  to see how many fall in each interval.
+  \item We compare it with what the uniform distribution predicts.
+\end{enumerate}
+
+We divide $[0,1]$ into ten bins of width $0.1$.
+The uniform PDF is our theoretical reference. To compare the LCG
+output with it, we make each bar's \textbf{area} equal to the fraction
+of generated values in its bin. The calculation below explains
+how this determines the bar's height.
+
+\begin{lstlisting}[language=R]
 hist(u, breaks = seq(0, 1, 0.1), probability = TRUE)
 abline(h = 1, lty = 2)
 \end{lstlisting}
-We use ten intervals of width $0.1$. Here $80$ values fall between
-$0$ and $0.1$, and $107$ between $0.1$ and $0.2$, so the first bar
-is lower than the second. For a uniform distribution on $(0,1)$,
-each interval has probability $0.1$: we would expect about $100$
-values per interval in a sample of size $1000$.
 
+\begin{minipage}{\linewidth}
 \begin{center}
   \includegraphics[width=0.78\linewidth]{assets/lcg-uniformity-histogram.png}
 \end{center}
 
-With \texttt{probability = TRUE}, the vertical axis shows density.
-Each bar's height is its count divided by the product of the sample
-size and the interval width.
-For $100$ values in an interval of width $0.1$, the height is
-$100/(1000\times0.1)=1$. Each bar's area is the fraction of values
-in its interval; the total area is $1$.
+In this sequence, $80$ values fall between
+$0$ and $0.1$, and $107$ between $0.1$ and $0.2$, so the first bar
+is lower than the second.
+\end{minipage}
 
-The dashed line is the uniform density, $1$ on $(0,1)$. The bars
+\Needspace{19\baselineskip}
+With \texttt{probability = TRUE}, R scales the bars to represent
+an estimated PDF. To understand the calculation, consider the
+\textbf{first bin}, of width $0.1$:
+\begin{enumerate}
+  \item \textbf{Find the fraction of values in the bin.}
+  There are $80$ values in this bin out of $1000$ in total, so
+  \[
+    \frac{80}{1000}=0.08.
+  \]
+  This is $8\%$ of the generated values, our estimate of the
+  probability of falling in this bin.
+
+  \item \textbf{Give the bar this area.}
+  Probabilities are areas under a PDF, so we want the rectangle's
+  area to be $0.08$. Since area equals width times height, we need
+  \[
+    0.1\times\text{height}=0.08.
+  \]
+
+  \item \textbf{Solve for the height.}
+  Dividing the required area by the width gives
+  \[
+    \text{height}=\frac{0.08}{0.1}=0.8.
+  \]
+\end{enumerate}
+The first bar is therefore $0.8$ high and has area
+$0.1\times0.8=0.08$, representing $8\%$ of the values.
+
+\Needspace{10\baselineskip}
+The same calculation applies to every bin. Let $n$ be the total
+number of values, $N_j$ the count in bin $j$, and $h$ its width.
+The fraction in that bin is $N_j/n$; dividing this area by $h$ gives
+\[
+  \text{height of bar }j
+  =\frac{\text{fraction of values in bin }j}{\text{bin width}}
+  =\frac{N_j/n}{h}=\frac{N_j}{nh}.
+\]
+This is why we divide the count by \emph{both} the sample size and
+the bin width. Every value belongs to one bin, so the fractions
+sum to $1$ and the histogram's total area is $1$.
+
+The vertical axis shows the estimated PDF, that is, the bar heights.
+For a bin containing the expected $100$ values, the height would be
+$100/(1000\times0.1)=1$. The dashed line is the uniform PDF,
+$1$ on $(0,1)$. The bars
 are roughly close to it: a first visual check of uniformity.
 Their heights need not be identical in a finite sequence.
 A histogram does not check independence: rearranging the values
@@ -3333,10 +3689,22 @@ and $F_Y(y)=1$ for $y\geq0$.
 \subsection{When the transformation has an inverse}
 \label{sec:invertible-transformation}
 
-Slide 5 gives a shortcut when $r$ is strictly monotone on the
-input support. Let $s=r^{-1}$ denote its inverse.
-For thresholds inside the output range, the direction of
-monotonicity determines the CDF calculation.
+There is another way to carry out the calculation in the
+previous section when $r$ is strictly monotone and has an inverse.
+
+We can use the known CDF of $X$ directly to find the CDF of
+$Y=r(X)$, without explicitly calculating the integral over $A_y$.
+
+The inverse lets us rewrite the same condition $r(X)\leq y$
+as a condition on $X$ that its CDF can evaluate.
+
+Suppose $r$ is strictly monotone on the input support: it is
+either strictly increasing or strictly decreasing. Each value
+in the output range then corresponds to exactly one input value.
+The inverse $s=r^{-1}$ returns that input: $s(y)$ is the unique
+value satisfying $r(s(y))=y$.
+For thresholds $y$ inside the output range, applying the inverse
+lets us express the event using $X$ directly.
 
 \textbf{If $r$ is increasing}, applying the inverse preserves
 the inequality:
@@ -3348,17 +3716,27 @@ the inequality:
   F_Y(y)=P(X\geq s(y))=1-F_X(s(y)),
 \]
 where we used continuity of $X$, so $P(X=s(y))=0$.
-The CDF expression written on the slide is the increasing case.
 
 Under the usual smoothness assumptions (for example, $r$ is
 continuously differentiable with nonzero derivative on the
-interior of the support), the two cases give the PDF formula
+interior of the support), we obtain the PDF by differentiating
+the CDF. The chain rule gives $f_X(s(y))s'(y)$ in the increasing
+case and $-f_X(s(y))s'(y)$ in the decreasing case.
+Since $s'(y)>0$ in the first case and $s'(y)<0$ in the second,
+both expressions can be written as
 \[
   f_Y(y)=f_X(s(y))\,|s'(y)|.
 \]
 The factor $|s'(y)|$ accounts for the change in interval lengths.
+
+\begin{framedexample}{}
 This single-inverse formula cannot be applied directly to
 $x^2$ on the full interval $[-1,1]$.
+Indeed, $r'(x)=2x$, so $r'(0)=0$: the assumption of a nonzero
+derivative on the interior of the support is not satisfied.
+Moreover, $r(-0.5)=r(0.5)=0.25$, so $r$ has no single inverse
+on this interval.
+\end{framedexample}
 
 \subsubsection{The connection with the quantile transform}
 For the square example, $F_Y(y)=\sqrt y$ on $[0,1]$ is
@@ -3380,8 +3758,9 @@ on $[0,1]$.
 \subsection{Check the transformation in R}
 \label{sec:square-uniform-r}
 
-Slide 8 generates input values, squares each one, and compares
-the output histogram with the derived PDF:
+To check our calculation, we generate values of $X$, square
+each one to obtain values of $Y$, and compare the output
+histogram with the PDF we derived:
 \begin{lstlisting}[language=R]
 set.seed(8)
 x <- runif(5000, min = -1, max = 1)
@@ -3406,15 +3785,936 @@ above zero to avoid division by zero.
 \begin{center}
 \includegraphics[width=\textwidth]{assets/square-uniform-transformation.png}
 \end{center}
-The left panel shows the PDF of $X$. The right panel compares
-the transformed sample with $1/(2\sqrt y)$. The curve continues
+The left panel shows the PDF of $X$.
+
+The right panel compares the transformed sample with $1/(2\sqrt y)$.
+
+The curve continues
 upwards beyond the displayed range near zero; the finite
 height of the first histogram bar estimates the average PDF value over that bin.
 
 \begin{tcolorbox}[colback=yellow!20,colframe=yellow!60!black,
   boxrule=0.4pt,arc=1mm,left=5pt,right=5pt,top=3pt,bottom=3pt,
   before skip=6pt,after skip=6pt]
-\small\textbf{End of lecture 8 October: Topic 06, Part II, slides 4--8}
+\small\textbf{End of lecture 8 October}
+\end{tcolorbox}
+
+\clearpage
+\begin{tcolorbox}[colback=yellow!20,colframe=yellow!60!black,
+  boxrule=0.4pt,arc=1mm,left=5pt,right=5pt,top=3pt,bottom=3pt,
+  before skip=6pt,after skip=6pt]
+\small\textbf{Start of lecture 14 October}
+\end{tcolorbox}
+
+\section{Density estimation}
+\label{sec:density-estimation}
+\label{sec:lecture-14-october}
+% Reference: Flavia's notes for 14 October 2026, FSL-1fla.pdf.
+
+\subsection{Which distributions can we choose from?}
+
+Before choosing a model, we need to decide which distributions
+we will consider. Each candidate gives a possible explanation
+of how the observations were generated. A \emph{class of models}
+is simply the set of candidates we allow ourselves to choose from.
+
+\begin{frameddefn}{Class of models}
+In this density-estimation problem, a \textbf{class of models}
+$\mathcal F$ is a set of candidate PDFs. Each $f\in\mathcal F$
+represents one possible population distribution.
+\end{frameddefn}
+
+We compare these candidates using the
+\hyperref[def:maximum-likelihood]{maximum likelihood rule
+introduced in Section~4.8.1}. The chosen class $\mathcal F$
+specifies which densities can compete in that comparison.
+
+With this idea in mind, we now ask why we cannot simply allow
+maximum likelihood to choose among all possible densities $f$.
+
+\subsection{Why not consider every possible PDF?}
+\label{sec:unrestricted-density-likelihood}
+
+Now we can explain the difficulty. If we allow \textbf{every
+possible PDF}, we can build a curve with very narrow peaks
+centred exactly on our observed values. Making the peaks narrower
+lets us make them taller while keeping the total area equal to $1$.
+
+As the peaks become taller, the values $f(x_i)$ increase, so
+their product increases too. We can keep increasing the likelihood
+without reaching a largest finite value. The instruction
+``choose the PDF with the highest likelihood'' therefore fails
+to select a PDF in this unrestricted search.
+
+\Needspace{12\baselineskip}
+\begin{framedexample}{}
+\label{ex:mle-narrow-rectangles}
+Use our four observed waiting times, measured in minutes:
+\[
+  \mathcal D_4=(4,12,7,3).
+\]
+We construct a candidate PDF specifically around these data:
+four small rectangles, each centred on one observed value.
+Each rectangle has area $1/4$, so their total area is $1$.
+Outside the rectangles, the density is zero.
+
+\begin{center}
+  \includegraphics[width=\linewidth]{assets/mle-narrow-rectangles.pdf}
+\end{center}
+
+\textbf{Step 1: keep the area fixed while narrowing the rectangles.}
+The upper panel shows all four data points. The lower panel
+zooms in on the rectangle centred at $7$. Each colour represents
+a different candidate PDF. We can make the rectangles narrower
+while keeping each area equal to $1/4$, provided we increase
+their height:
+\[
+  \text{height}=\frac{\text{area}}{\text{width}}.
+\]
+For the widths shown, the rectangles have disjoint interiors.
+The numerical comparison is:
+\begin{center}
+\begin{tabular}{@{}ccc@{}}
+  \toprule
+  Width of each rectangle & Height & Area of each rectangle\\
+  \midrule
+  $1$ & $0.25$ & $1\cdot0.25=1/4$\\
+  $0.1$ & $2.5$ & $0.1\cdot2.5=1/4$\\
+  $0.01$ & $25$ & $0.01\cdot25=1/4$\\
+  \bottomrule
+\end{tabular}
+\end{center}
+In every row, the four areas still sum to $1$: every candidate
+is a valid PDF.
+
+\textbf{Step 2: evaluate the density at the observed values.}
+Each observation lies at the centre of its own rectangle, so
+the PDF value there equals that rectangle's height. If the
+common width is $h$, with $0<h\leq1$, denote the resulting
+density by $f_h$. At each of the four observations,
+\[
+  f_h(4)=f_h(12)=f_h(7)=f_h(3)=\frac{1}{4h}.
+\]
+Thus narrowing every rectangle by a factor of $10$ multiplies
+each observed density value by $10$.
+
+\textbf{Step 3: multiply the four density values.}
+Under the IID model, the likelihood is
+\[
+  L(f_h;\mathcal D_4)
+    =f_h(4)f_h(12)f_h(7)f_h(3)
+    =\left(\frac{1}{4h}\right)^4.
+\]
+When the rectangles become ten times narrower, this product
+increases by
+\[
+  10\cdot10\cdot10\cdot10=10^4=10\,000.
+\]
+We can keep narrowing the rectangles and increasing their heights,
+always preserving total area $1$. The likelihood grows without
+bound as $h\to0^+$, so this unrestricted search has no largest
+finite likelihood. This is why we need to control which densities
+are allowed to compete.
+\end{framedexample}
+
+\begin{notebox}[{\parbox[t]{0.71\linewidth}{How can we stop MLE from increasing the likelihood
+by building ever-narrower peaks around the data?}}]
+To make the search meaningful, we need to control which curves
+can win. One approach is to choose a restricted family of PDFs
+before fitting the model. Another is to change the comparison
+score so that overly irregular curves receive a penalty.
+The class of models and the fitting rule together define the
+learning problem we are trying to solve.
+\end{notebox}
+
+\Needspace{12\baselineskip}
+\subsection{How does a penalty enter the comparison?}
+
+First, take the logarithm of the likelihood. This turns the product
+into a sum\begingroup\renewcommand{\thefootnote}{\fnsymbol{footnote}}\footnote[1]{%
+For $a,b>0$, $\log(ab)=\log a+\log b$.}\endgroup\ without changing
+which positive likelihood is largest:
+\[
+  \log L(f;\mathcal D_n)=\sum_{i=1}^n\log f(x_i).
+\]
+Working with this sum has two practical advantages:
+\begin{enumerate}
+  \item \textbf{More reliable numerical calculations.}
+  Suppose we have $1000$ observations and each contributes a
+  factor of $0.1$ to the likelihood. Their product is
+  $0.1^{1000}=10^{-1000}$, so small that ordinary computer
+  arithmetic may round it to zero. Instead, we can calculate
+  \[
+    \log L=1000\log(0.1)\approx-2302.6,
+  \]
+  using the natural logarithm. We add the log of each factor
+  directly, without first computing the tiny product.
+
+  \item \textbf{Easier differentiation.}
+  To find a maximum analytically, we often differentiate with
+  respect to the model parameter. For a sum, we differentiate
+  each term separately and add the results. This is usually
+  simpler than applying the product rule to a likelihood with
+  hundreds or thousands of factors.
+\end{enumerate}
+
+We now subtract a penalty from the log-likelihood. The result is
+called the \textbf{penalized log-likelihood}.
+
+\begin{frameddefn}{Penalized log-likelihood}
+\label{def:penalized-log-likelihood}
+For fixed observed data $\mathcal D_n=(x_1,\ldots,x_n)$ from an
+IID sample, consider a candidate PDF $f$. Let $J(f)\geq0$ be
+its penalty, and let $\lambda>0$ be the weight given to that
+penalty. The \textbf{penalized log-likelihood} is
+\[
+  \log L(f;\mathcal D_n)-\lambda J(f)
+    =\sum_{i=1}^n\log f(x_i)-\lambda J(f).
+\]
+\end{frameddefn}
+
+If two densities have the same log-likelihood, we prefer the
+one with the smaller penalty.
+
+\Needspace{12\baselineskip}
+\begin{framedexample}{}
+\label{ex:penalized-narrow-rectangles}
+Return to Example~\ref{ex:mle-narrow-rectangles}, with the same
+four waiting times $4,12,7,3$. We keep the four rectangles,
+each with area $1/4$, but now add a cost for making them tall.
+
+\textbf{Step 1: choose the penalty.}
+For this example, let the penalty be the height of the tallest
+rectangle. All four rectangles have the same height, which we
+call $H$, so $J(f)=H$. Choose $\lambda=1$: we subtract the
+height itself from the log-likelihood.
+
+\textbf{Step 2: calculate the new result.}
+Each observation lies inside a rectangle of height $H$.
+The likelihood is therefore $H^4$, and its logarithm is
+$4\log H$. After subtracting the penalty, we obtain
+\[
+  \underbrace{4\log H}_{\text{log-likelihood}}
+    -\underbrace{H}_{\text{penalty}}.
+\]
+Compare the three widths already shown in
+Example~\ref{ex:mle-narrow-rectangles}. The values below use
+natural logarithms and are rounded to two decimal places.
+\begin{center}
+\begin{tabular}{@{}cccc@{}}
+  \toprule
+  Width & Height $H$ & Log-likelihood & Penalized log-likelihood\\
+  \midrule
+  $1$ & $0.25$ & $-5.55$ & $-5.80$\\
+  $0.1$ & $2.5$ & $3.67$ & $\mathbf{1.17}$\\
+  $0.01$ & $25$ & $12.88$ & $-12.12$\\
+  \bottomrule
+\end{tabular}
+\end{center}
+Among these three candidates,
+we now choose the rectangles of width $0.1$.
+
+\textbf{Step 3: see why narrower is no longer always better.}
+Going from width $0.1$ to width $0.01$ increases the
+log-likelihood by about $9.21$, but increases the penalty
+by $25-2.5=22.5$. The extra height costs more than it gains.
+
+This also stops the problem when we allow any common width
+$0<h\leq1$. The height is $H=1/(4h)$, so shrinking $h$
+towards zero makes $H$ grow without limit. However, the
+penalty $H$ eventually grows faster than $4\log H$:
+\[
+  4\log H-H\longrightarrow-\infty
+  \qquad\text{as }H\longrightarrow+\infty.
+\]
+Within this family of rectangular densities, making the peaks
+ever taller can no longer keep improving the result.
+\end{framedexample}
+
+\clearpage
+\section{Continuous and mixed random vectors}
+\label{sec:continuous-mixed-random-vectors}
+
+\subsection{Joint probability density functions}
+\label{sec:joint-pdf-continuous}
+
+We now return to the
+\hyperref[chap:random-vectors]{random vectors introduced on
+7 October}. We have already studied
+\hyperref[sec:joint-pmf]{joint},
+\hyperref[sec:marginal-pmf]{marginal} and
+\hyperref[sec:conditional-pmf]{conditional} PMFs for discrete variables.
+The next sections ask the same questions for continuous variables:
+how do we describe them together, recover one component, and use
+information about another component? Probabilities will be computed
+by integrating densities, rather than summing masses.
+
+Let $\mathbf X=(X_1,\ldots,X_p)^{\mathsf T}$ be a random vector
+with $p$ components. A possible value is
+$\mathbf x=(x_1,\ldots,x_p)^{\mathsf T}\in\mathbb R^p$.
+Here we assume that its joint distribution admits a PDF.
+For $p=2$, we write the components as $(X,Y)$ and the density as
+$f_{X,Y}(x,y)$.
+
+\Needspace{12\baselineskip}
+\begin{frameddefn}{Joint PDF}
+A \textbf{joint probability density function}
+$f_{\mathbf X}:\mathbb R^p\to[0,+\infty)$ satisfies
+\[
+  \int_{\mathbb R^p}f_{\mathbf X}(\mathbf x)\,d\mathbf x=1,
+\]
+and gives the probability of a measurable region
+$A\subseteq\mathbb R^p$ through
+\[
+  P(\mathbf X\in A)=\int_A f_{\mathbf X}(\mathbf x)\,d\mathbf x.
+\]
+\end{frameddefn}
+
+In two dimensions, $d\mathbf x$ means $dx\,dy$.
+A joint PDF assigns density to locations in the plane or in a
+higher-dimensional space. A probability is obtained by integrating
+over a region. In particular, for a small rectangle near $(x,y)$,
+its probability is approximately
+$f_{X,Y}(x,y)\,\Delta x\,\Delta y$ when the density varies little
+over the rectangle. The PDF value itself is not a point probability;
+in this setting, every individual point has probability zero.
+
+\begin{notebox}[The joint density assumption]
+Having continuous marginals alone does not guarantee a joint PDF.
+For example, if $X$ is continuous and $Y=X$, each component is
+continuous, but the pair lies on the line $y=x$. There is no
+ordinary two-dimensional density for that pair. The formulas below
+apply when a joint PDF exists.
+\end{notebox}
+
+\subsubsection{Normalizing a nonnegative function}
+
+Sometimes a model is supplied only up to a multiplicative constant.
+Let $g(\mathbf x)\geq0$ be such a function, often called a
+\emph{kernel}. Compute its total integral
+\[
+  c=\int_{\mathbb R^p}g(\mathbf x)\,d\mathbf x.
+\]
+If $0<c<+\infty$, then
+\[
+  f_{\mathbf X}(\mathbf x)=\frac{g(\mathbf x)}{c}
+\]
+is a PDF: it remains nonnegative, and its total integral is $c/c=1$.
+The constant $c$ is the \textbf{normalizing constant}. It adjusts
+the overall scale while preserving the relative density values.
+
+\subsubsection{Moving between the joint CDF and the joint PDF}
+
+The \hyperref[sec:joint-cdf]{joint CDF} is still
+$F_{X,Y}(x,y)=P(X\leq x,Y\leq y)$. With a joint PDF, this probability
+is the integral over the lower-left region:
+\[
+  F_{X,Y}(x,y)
+  =\int_{-\infty}^{x}\int_{-\infty}^{y}
+       f_{X,Y}(s,t)\,dt\,ds.
+\]
+The letters $s,t$ are integration variables; $x,y$ are the fixed
+thresholds defining the region. For $p$ components, the same idea
+uses $p$ integrals, one for each coordinate.
+
+Where the required derivatives exist, differentiating with respect
+to both thresholds recovers the joint density:
+\[
+  f_{X,Y}(x,y)
+    =\frac{\partial^2}{\partial x\,\partial y}F_{X,Y}(x,y).
+\]
+This extends the univariate relation $f_X(x)=F_X'(x)$.
+In general, the density identity is understood almost everywhere;
+the examples below are smooth inside their supports.
+
+\subsection{Marginal densities}
+\label{sec:marginal-pdf-continuous}
+
+To study $X$ alone, we must allow $Y$ to take every possible value.
+For discrete variables we summed over those possibilities; for a
+joint PDF we integrate over them:
+\[
+  f_X(x)=\int_{\mathbb R}f_{X,Y}(x,y)\,dy,
+  \qquad
+  f_Y(y)=\int_{\mathbb R}f_{X,Y}(x,y)\,dx.
+\]
+In the first integral, $x$ stays fixed while $y$ is integrated out.
+The integration can be restricted to the support because the joint
+density is zero elsewhere. Both marginal densities are normalized:
+integrating a marginal over its remaining coordinate gives the
+total joint integral, which is $1$.
+
+The procedure also works when we retain several components.
+For a vector $(X_1,X_2,X_3)$ with joint PDF $f_{1,2,3}$, the pair
+$(X_1,X_2)$ has density
+\[
+  f_{1,2}(x_1,x_2)
+    =\int_{\mathbb R}f_{1,2,3}(x_1,x_2,t)\,dt.
+\]
+We integrate out the component we do not want to retain.
+
+\begin{notebox}[Marginalizing or conditioning?]
+The integral above gives the distribution of $(X_1,X_2)$ without
+specifying $X_3$. If instead $X_3=t$ is known, we hold $t$ fixed
+and use a conditional density:
+\[
+  f_{1,2\mid3}(x_1,x_2\mid t)
+    =\frac{f_{1,2,3}(x_1,x_2,t)}{f_3(t)},\qquad f_3(t)>0.
+\]
+Here $f_3(t)$ is obtained by integrating the joint density over
+$x_1$ and $x_2$. The next discussion of conditioning explains
+why this ratio is normalized.
+\end{notebox}
+
+\Needspace{18\baselineskip}
+\begin{framedexample}{Two independent exponential variables}
+\label{sec:exponential-joint-example}
+
+The lecture gives the following joint CDF, with parameters
+$\alpha>0$ and $\beta>0$:
+\[
+  F_{X,Y}(x,y)=
+  \begin{cases}
+    1-e^{-\alpha x}-e^{-\beta y}+e^{-(\alpha x+\beta y)},
+       &x>0,\ y>0,\\
+    0,&x\leq0\text{ or }y\leq0.
+  \end{cases}
+\]
+Recover the marginal distributions and the joint PDF, and check
+whether $X$ and $Y$ are independent.
+
+\textbf{Find the marginal distributions.}
+The possible values of both variables are positive. We recover
+the marginal CDF of $X$ by removing the restriction on $Y$:
+\[
+  F_X(x)=\lim_{y\to+\infty}F_{X,Y}(x,y)
+         =1-e^{-\alpha x},\qquad x>0.
+\]
+It is zero for $x\leq0$. Differentiating gives
+\[
+  f_X(x)=\alpha e^{-\alpha x}\mathbf1_{(0,+\infty)}(x).
+\]
+This is the \textbf{exponential distribution with rate $\alpha$},
+written $X\sim\operatorname{Exp}(\alpha)$.
+Similarly,
+\[
+  f_Y(y)=\beta e^{-\beta y}\mathbf1_{(0,+\infty)}(y),
+  \qquad Y\sim\operatorname{Exp}(\beta).
+\]
+
+\textbf{Find the joint PDF and check independence.}
+To recover the joint PDF, first differentiate the CDF in $x$,
+then in $y$. Inside the positive quadrant,
+\begin{align*}
+  \frac{\partial F_{X,Y}}{\partial x}(x,y)
+    &=\alpha e^{-\alpha x}-\alpha e^{-(\alpha x+\beta y)},\\
+  f_{X,Y}(x,y)
+    &=\alpha\beta e^{-(\alpha x+\beta y)}.
+\end{align*}
+The joint density is zero outside that quadrant. It factorizes as
+\[
+  f_{X,Y}(x,y)
+    =\bigl[\alpha e^{-\alpha x}\mathbf1_{(0,+\infty)}(x)\bigr]
+     \bigl[\beta e^{-\beta y}\mathbf1_{(0,+\infty)}(y)\bigr]
+    =f_X(x)f_Y(y).
+\]
+For variables with a joint PDF, independence is equivalent to this
+factorization almost everywhere. Thus $X$ and $Y$ are independent.
+The same conclusion follows directly from the CDF, whose expression
+for positive $x,y$ is $(1-e^{-\alpha x})(1-e^{-\beta y})$.
+
+\textbf{Check by marginalizing.}
+As a check, integrating the joint density over $y>0$ gives
+\[
+  f_X(x)=\alpha e^{-\alpha x}
+          \underbrace{\int_0^{+\infty}\beta e^{-\beta y}\,dy}_{=1},
+  \qquad x>0.
+\]
+\end{framedexample}
+
+\Needspace{12\baselineskip}
+\subsection{The exponential distribution as a waiting-time model}
+\label{sec:exponential-distribution}
+
+The marginals in the previous example have exponential
+distributions. To understand the model, let $T$ be the time until the
+next event, such as a job reaching a printer. Times are
+nonnegative. The parameter $\lambda>0$ is a \textbf{rate}, measured
+in inverse time units: a larger rate describes shorter waits.
+
+\begin{frameddefn}{Exponential distribution}
+We write $T\sim\operatorname{Exp}(\lambda)$, with rate $\lambda>0$,
+when its PDF and CDF are
+\[
+  f_T(t)=\lambda e^{-\lambda t}\mathbf1_{[0,+\infty)}(t),
+  \qquad
+  F_T(t)=
+  \begin{cases}
+    0,&t<0,\\
+    1-e^{-\lambda t},&t\geq0.
+  \end{cases}
+\]
+\end{frameddefn}
+
+The density integrates to $1$ because
+\[
+  \int_0^{+\infty}\lambda e^{-\lambda t}\,dt
+    =\left[-e^{-\lambda t}\right]_0^{+\infty}=1.
+\]
+Integrating only up to a threshold $t\geq0$ gives the CDF.
+Consequently, the probability of waiting longer than $t$ is
+\[
+  P(T>t)=1-F_T(t)=e^{-\lambda t}.
+\]
+This is the \textbf{survival function}. The exponential is also
+a special case of the Gamma family of distributions on positive
+values, with shape parameter $1$.
+
+\begin{center}
+  \includegraphics[width=\linewidth]{assets/exponential-pdf-cdf.pdf}
+\end{center}
+
+The left panel compares PDFs for four rates. A larger $\lambda$
+places more density near zero, and the tail decays faster.
+The right panel shows the corresponding CDFs: with a larger rate,
+more probability accumulates before the same waiting-time threshold.
+Every PDF still has total area $1$.
+
+\subsubsection{A constant chance of arrival over a short interval}
+
+Suppose no event has occurred by time $t$. For a short additional
+interval of length $h>0$, the model gives
+\begin{align*}
+  P(t<T\leq t+h\mid T>t)
+    &=\frac{F_T(t+h)-F_T(t)}{P(T>t)}\\
+    &=\frac{e^{-\lambda t}-e^{-\lambda(t+h)}}
+            {e^{-\lambda t}}\\
+    &=1-e^{-\lambda h}\approx\lambda h.
+\end{align*}
+The approximation applies when $\lambda h$ is small. The exact
+probability depends on the interval's length, not on how long we
+have already waited. Equivalently, the instantaneous event rate is
+constant. An average arrival rate alone does not guarantee an
+exponential waiting time; this constant-rate assumption is part
+of the model.
+
+\begin{framedexample}{The next printer job}
+Jobs reach a printer at an average rate of $3$ per hour. Assume
+the waiting time follows $T\sim\operatorname{Exp}(3)$, with $T$
+measured in hours. What is the probability that the next job
+arrives within $5$ minutes?
+
+\textbf{Convert the time, then evaluate the CDF.}
+\begin{enumerate}[label=\textbf{Step \arabic*:},leftmargin=*]
+  \item \textbf{Use the same time unit as the rate.}
+  Five minutes is $5/60=1/12$ of an hour.
+  \item \textbf{Translate the question into an event.}
+  We want $P(T\leq1/12)=F_T(1/12)$.
+  \item \textbf{Substitute the rate and threshold.}
+  \[
+    \boxed{P(T\leq1/12)=1-e^{-3/12}
+      =1-e^{-1/4}\approx0.2212.}
+  \]
+\end{enumerate}
+Under this model, the probability is about $22.12\%$.
+\end{framedexample}
+
+\subsubsection{The memoryless property}
+
+If we have already waited $t$ time units, how long must we wait
+from now? For $s,t\geq0$,
+\begin{align*}
+  P(T>t+s\mid T>t)
+    &=\frac{P(T>t+s)}{P(T>t)}\\
+    &=\frac{e^{-\lambda(t+s)}}{e^{-\lambda t}}\\
+    &=e^{-\lambda s}=P(T>s).
+\end{align*}
+This is called \textbf{memorylessness}: conditional on the event
+not having occurred, the remaining waiting time has the same
+exponential distribution as the original waiting time. It is
+a statement about the model's conditional distribution.
+
+\subsubsection{The PDF and CDF in R}
+
+R evaluates these two functions with \texttt{dexp} and
+\texttt{pexp}. For example, the following commands plot the
+rate-$1$ PDF and CDF; changing \texttt{rate} gives the curves above.
+\begin{lstlisting}[language=R]
+curve(dexp(x, rate = 1), from = 0, to = 5,
+      xlab = "Waiting time", ylab = "Density")
+curve(pexp(x, rate = 1), from = 0, to = 5,
+      xlab = "Waiting time", ylab = "Probability")
+pexp(5 / 60, rate = 3)  # 0.2211992
+\end{lstlisting}
+
+\subsection{Conditional densities}
+\label{sec:conditional-pdf-continuous}
+
+We now ask how the distribution of $X$ changes when the value of
+$Y$ is known. In the discrete case we divided a joint probability
+by $P(Y=y)$. For a continuous $Y$, however, $P(Y=y)=0$; substituting
+point probabilities into that formula would not define the desired
+conditional distribution.
+
+For a fixed threshold $x$, first condition on the interval
+$y<Y\leq y+h$, which has positive probability when its density
+is positive nearby. Then
+\[
+  P(X\leq x\mid y<Y\leq y+h)
+  =\frac{\displaystyle\int_y^{y+h}\int_{-\infty}^x
+                f_{X,Y}(s,t)\,ds\,dt}
+         {\displaystyle\int_y^{y+h}f_Y(t)\,dt}.
+\]
+At values $y$ where these averages converge and $f_Y(y)>0$,
+letting $h\to0^+$ gives the conditional CDF
+\[
+  F_{X\mid Y}(x\mid y)
+    =\frac{\displaystyle\int_{-\infty}^x f_{X,Y}(s,y)\,ds}
+           {f_Y(y)}.
+\]
+Differentiating in $x$ gives the density ratio below. This explains
+the passage from a small interval to the notation ``given $Y=y$''.
+
+The density formula can be understood by conditioning on a small
+interval near $y$. Its probability is approximately
+$f_Y(y)\,\Delta y$, while the probability of a small joint rectangle
+near $(x,y)$ is approximately
+$f_{X,Y}(x,y)\,\Delta x\,\Delta y$. Their ratio is
+\[
+  \frac{f_{X,Y}(x,y)\,\Delta x\,\Delta y}
+       {f_Y(y)\,\Delta y}
+  =\frac{f_{X,Y}(x,y)}{f_Y(y)}\,\Delta x.
+\]
+The coefficient of $\Delta x$ is the conditional density.
+
+\begin{frameddefn}{Conditional PDFs}
+When a joint PDF exists, a conditional density of $X$ given $Y=y$
+can be defined, for $f_Y(y)>0$, by
+\[
+  f_{X\mid Y}(x\mid y)=\frac{f_{X,Y}(x,y)}{f_Y(y)}.
+\]
+Similarly, for $f_X(x)>0$,
+\[
+  f_{Y\mid X}(y\mid x)=\frac{f_{X,Y}(x,y)}{f_X(x)}.
+\]
+The conditioning value is held fixed. Integrating the conditional
+density over the other variable gives $1$.
+\end{frameddefn}
+
+For instance, the normalization follows from marginalization:
+\[
+  \int_{\mathbb R}f_{X\mid Y}(x\mid y)\,dx
+    =\frac{\int_{\mathbb R}f_{X,Y}(x,y)\,dx}{f_Y(y)}=1.
+\]
+In the exponential example, for $y>0$,
+\[
+  f_{X\mid Y}(x\mid y)
+    =\frac{\alpha\beta e^{-(\alpha x+\beta y)}}
+           {\beta e^{-\beta y}}
+       \mathbf1_{(0,+\infty)}(x)
+    =f_X(x).
+\]
+Knowing $Y$ leaves the distribution of $X$ unchanged, as expected
+under independence. The same holds for $f_{Y\mid X}(y\mid x)=f_Y(y)$.
+
+\subsection{Exercise 1: a density given up to a constant}
+\label{sec:october-14-exercise-1}
+
+\begin{framedexercise}{Normalize, condition and transform}
+Let $X$ have a PDF specified up to a positive constant:
+\[
+  f_X(x)\propto x\,\mathbf1_{[0,2]}(x).
+\]
+\begin{enumerate}[label=(\arabic*)]
+  \item Find its PDF, CDF and quantile $Q_X(1/4)$.
+  \item Find the conditional density given $A=\{X>1\}$.
+  \item Find the distribution of $Y=\sqrt X$ under the original
+    distribution of $X$.
+\end{enumerate}
+\end{framedexercise}
+
+The symbol $\propto$ means that the PDF is proportional to the
+given kernel: a positive multiplicative constant is still unknown.
+The indicator is $1$ on $[0,2]$ and $0$ elsewhere, so this interval
+is the support of the model.
+
+\solutionheading{Part (1): normalize the kernel.}
+The kernel is $g(x)=x\mathbf1_{[0,2]}(x)$. Its integral is
+\[
+  c=\int_0^2 x\,dx
+    =\left[\frac{x^2}{2}\right]_0^2=2.
+\]
+Dividing by this total gives the PDF
+\[
+  \boxed{f_X(x)=\frac{x}{2}\mathbf1_{[0,2]}(x).}
+\]
+The density increases with $x$: intervals of the same small width
+near the right end carry more probability than those near zero.
+
+\solutionheading{Part (1): find the CDF and a quantile.}
+For $0\leq x\leq2$, the event $X\leq x$ retains the part of the
+support from $0$ to $x$. Consequently,
+\[
+  F_X(x)=\int_0^x\frac{t}{2}\,dt=\frac{x^2}{4}.
+\]
+Including thresholds outside the support gives the complete CDF:
+\[
+  \boxed{F_X(x)=
+  \begin{cases}
+    0,&x<0,\\
+    x^2/4,&0\leq x\leq2,\\
+    1,&x>2.
+  \end{cases}}
+\]
+The lecture asks for the quantile at probability $1/4$: a threshold
+below which one quarter of the probability lies. Since this CDF
+is strictly increasing on its support, solve
+\[
+  F_X(x)=\frac14
+  \quad\Longleftrightarrow\quad
+  \frac{x^2}{4}=\frac14
+  \quad\Longrightarrow\quad
+  \boxed{Q_X(1/4)=1.}
+\]
+More generally, $Q_X(u)=2\sqrt u$ for $0<u<1$.
+A continuous CDF need not always have an ordinary inverse; here
+strict increase on $[0,2]$ justifies this inversion.
+
+\begin{notebox}[What happens where the density is zero?]
+If the PDF is zero throughout an interval, the CDF stays constant
+there: integrating over that interval adds no probability.
+For example, a density supported on $[0,1]\cup[3,4]$ has a flat
+CDF between $1$ and $3$. It can still be a continuous distribution,
+but its CDF is not strictly increasing everywhere. This explains
+why the generalized quantile definition is useful.
+\end{notebox}
+
+\solutionheading{Part (2): condition on $A=\{X>1\}$.}
+This is conditioning on an event of positive probability, rather
+than on an exact value of a continuous variable. We keep only
+the part of the density on $1<x\leq2$, then normalize it within
+that interval. First,
+\[
+  P(A)=\int_1^2\frac{x}{2}\,dx=\frac34.
+\]
+For any measurable set $B$, the conditional probability is
+$P(X\in B\mid A)=P(X\in B, A)/P(A)$. Thus its density is
+\[
+  \boxed{f_{X\mid A}(x)
+    =\frac{f_X(x)\mathbf1_{(1,2]}(x)}{P(A)}
+    =\frac{2x}{3}\mathbf1_{(1,2]}(x).}
+\]
+It integrates to $1$ on the retained interval. The handwritten
+calculation reaches the same result by first normalizing the
+restricted kernel $x\mathbf1_{(1,2]}(x)$, whose integral is $3/2$.
+
+\solutionheading{Part (3): transform the original variable.}
+We now return to the original distribution of $X$. Since
+$0\leq X\leq2$, the output satisfies $0\leq Y\leq\sqrt2$.
+For $y$ in that range, taking the square root is increasing, so
+\[
+  F_Y(y)=P(\sqrt X\leq y)=P(X\leq y^2)
+        =F_X(y^2)=\frac{y^4}{4}.
+\]
+Differentiation gives
+\[
+  \boxed{f_Y(y)=y^3\mathbf1_{[0,\sqrt2]}(y).}
+\]
+The complete CDF is zero for $y<0$ and one for $y>\sqrt2$.
+We can also apply the \hyperref[sec:invertible-transformation]
+{inverse transformation formula} from the previous lecture.
+The inverse of $y=\sqrt x$ is $x=y^2$, whose derivative is $2y$:
+\[
+  f_Y(y)=f_X(y^2)\left|\frac{d}{dy}y^2\right|
+         =\frac{y^2}{2}\,2y=y^3,
+  \qquad 0<y<\sqrt2.
+\]
+Both approaches produce the same density and the same support.
+
+\subsection{Exercise 2: a binomial model with a latent probability}
+\label{sec:october-14-exercise-2}
+
+The final example studies the mixed vector
+$\mathbf Z=(X,P)^{\mathsf T}$. Here $X$ is an observable, discrete
+count, while $P$ is a continuous, \textbf{latent} variable: it is
+not directly observed, but represents uncertainty about the
+success probability underlying the count. The capital letter $P$
+denotes a random variable, and $p$ denotes a possible value of it.
+We use $\Pr(\cdot)$ for the probability operator in this example
+to distinguish it from the variable $P$.
+
+\subsubsection{The conditional model for the observable}
+Fix a positive integer $n$, the number of trials. Conditional on
+$P=p$, each trial is a success with probability $p$ and a failure
+with probability $1-p$, and the trials are independent. Let $X$
+count the successes. Then
+\[
+  X\mid(P=p)\sim\operatorname{Bin}(n,p).
+\]
+Write its conditional PMF as
+\[
+  b(k\mid p)=\Pr(X=k\mid P=p)
+     =\binom nk p^k(1-p)^{n-k},
+  \qquad k=0,\ldots,n,\quad 0<p<1.
+\]
+The factor $p^k(1-p)^{n-k}$ is the probability of a particular
+sequence with $k$ successes. The coefficient $\binom nk$ counts
+how many such sequences have the same number of successes.
+Here $n$ counts trials within the model, rather than the number
+of population observations in the opening sampling recap.
+
+\subsubsection{The distribution of the latent variable}
+We also need a PDF $\pi(p)$ for $P$, called its \textbf{prior
+density}: it describes our uncertainty before observing $X$.
+The lecture proposes two choices:
+\[
+  P\sim\operatorname{Unif}(0,1)
+  \qquad\text{or}\qquad
+  P\sim\operatorname{Beta}(\alpha,\beta),\quad\alpha,\beta>0.
+\]
+For the uniform choice, $\pi(p)=1$ on $(0,1)$ and zero elsewhere.
+The Beta family allows different shapes on the same interval.
+
+\begin{frameddefn}{Beta distribution}
+For $\alpha,\beta>0$, the density of
+$P\sim\operatorname{Beta}(\alpha,\beta)$ is
+\[
+  \pi(p)=\frac{p^{\alpha-1}(1-p)^{\beta-1}}{B(\alpha,\beta)},
+  \qquad 0<p<1,
+\]
+and it is zero elsewhere. The denominator is the normalizing
+constant
+\[
+  B(\alpha,\beta)=\int_0^1
+       t^{\alpha-1}(1-t)^{\beta-1}\,dt.
+\]
+\end{frameddefn}
+
+This is another application of kernel normalization: divide
+$p^{\alpha-1}(1-p)^{\beta-1}$ by its total integral. Positivity of
+$\alpha$ and $\beta$ makes this integral finite, including when
+the density grows without bound near an endpoint. Such a peak is
+not a point mass; $\Pr(P=0)=\Pr(P=1)=0$.
+
+For a threshold $0\leq u\leq1$, the CDF accumulates only the
+part of the kernel to the left of $u$:
+\[
+  F_P(u)=\frac{B(u;\alpha,\beta)}{B(\alpha,\beta)},
+  \qquad
+  B(u;\alpha,\beta)=\int_0^u
+        t^{\alpha-1}(1-t)^{\beta-1}\,dt.
+\]
+The numerator is the \textbf{incomplete Beta function}; the CDF
+is $0$ for $u<0$ and $1$ for $u>1$. The full Beta function also
+satisfies
+\[
+  B(\alpha,\beta)
+    =\frac{\Gamma(\alpha)\Gamma(\beta)}{\Gamma(\alpha+\beta)},
+  \qquad
+  \Gamma(a)=\int_0^{+\infty}t^{a-1}e^{-t}\,dt,\quad a>0.
+\]
+Here $\Gamma$ names the Gamma function. For general real
+parameters, we usually evaluate these functions numerically.
+
+\begin{center}
+  \includegraphics[width=\linewidth]{assets/beta-pdf-cdf.pdf}
+\end{center}
+
+The parameters $\alpha,\beta$ control the shape:
+\begin{itemize}
+  \item With $\alpha=\beta=1$, the kernel and its integral are both
+    $1$, so the distribution is $\operatorname{Unif}(0,1)$.
+  \item With both parameters below $1$, the density has peaks
+    near $0$ and $1$. The plot for $(0.5,0.5)$ cuts off their
+    unbounded heights to make the rest of the curve visible.
+  \item With both parameters above $1$, the density has one
+    interior peak. The symmetric example $(2,2)$ concentrates
+    probability around $1/2$.
+  \item When $\alpha=\beta$, the density is symmetric about $1/2$.
+    The examples $(5,1)$ and $(1,5)$ put more probability near
+    $1$ and $0$, respectively.
+\end{itemize}
+In R, \texttt{dbeta} evaluates the PDF and \texttt{pbeta} evaluates
+the CDF. The arguments \texttt{shape1} and \texttt{shape2}
+correspond to $\alpha$ and $\beta$:
+\begin{lstlisting}[language=R]
+curve(dbeta(x, shape1 = 2, shape2 = 2), from = 0, to = 1,
+      xlab = "p", ylab = "Density")
+curve(pbeta(x, shape1 = 2, shape2 = 2), from = 0, to = 1,
+      xlab = "p", ylab = "Probability")
+\end{lstlisting}
+The Beta family is especially useful in the binomial model below:
+after observing a count, its posterior also belongs to the Beta
+family. This property is called \textbf{conjugacy}; identifying
+the updated parameters is one of the final exercise questions.
+
+\subsubsection{Combine the PMF and the PDF}
+Because $X$ is discrete and $P$ is continuous, their joint model
+uses a mass in the first coordinate and a density in the second.
+Define the mixed joint function
+\[
+  q(k,p)=b(k\mid p)\,\pi(p).
+\]
+This function is not an ordinary two-dimensional PDF: probabilities
+require a \emph{sum} over the count and an \emph{integral} over
+the latent probability.
+Its meaning is expressed by probabilities of a count and an interval:
+\[
+  \Pr(X=k,\ a<P<b)=\int_a^b q(k,p)\,dp,
+  \qquad 0\leq a<b\leq1.
+\]
+The factorization first specifies the distribution of the latent
+variable, then the count distribution given its value.
+It is normalized because
+\[
+  \sum_{k=0}^n\int_0^1 q(k,p)\,dp
+    =\int_0^1\pi(p)
+       \underbrace{\sum_{k=0}^n b(k\mid p)}_{=1}\,dp=1.
+\]
+
+\subsubsection{Marginalization and conditioning in the mixed model}
+To describe $X$ alone, average over the unknown success probability.
+Its marginal PMF, denoted by $m(k)$, is
+\[
+  m(k)=\Pr(X=k)=\int_0^1 b(k\mid p)\,\pi(p)\,dp.
+\]
+This is the continuous version of summing over an unobserved
+component. Conversely, summing $q(k,p)$ over $k$ recovers $\pi(p)$.
+
+After observing $X=k$, we want to update the distribution of $P$.
+For $m(k)>0$, its \textbf{posterior density} is
+\[
+  f_{P\mid X}(p\mid k)=\frac{b(k\mid p)\,\pi(p)}{m(k)}.
+\]
+The count $k$ is now fixed, while $p$ varies. The numerator gives
+more weight to values of $p$ that make the observed count likely;
+the denominator normalizes those weights to integrate to $1$.
+This is Bayes' rule for a discrete observation and a continuous
+latent variable.
+
+Equivalently, the same joint function can be written in the other
+order:
+\[
+  q(k,p)=f_{P\mid X}(p\mid k)\,m(k).
+\]
+The first factorization uses a conditional PMF and a marginal PDF;
+the second uses a conditional PDF and a marginal PMF. Both describe
+the same joint distribution. A conditional factorization by itself
+does not assert independence.
+
+\exerciseheading{Questions left to work through.}
+To complete the example, determine:
+\begin{enumerate}
+  \item What is the marginal distribution of $X$?
+  \item What is the conditional distribution of $P\mid X$?
+\end{enumerate}
+Apply the formulas above to each proposed prior, keeping track of
+which object is a PMF and which is a PDF.
+
+\begin{tcolorbox}[colback=yellow!20,colframe=yellow!60!black,
+  boxrule=0.4pt,arc=1mm,left=5pt,right=5pt,top=3pt,bottom=3pt,
+  before skip=6pt,after skip=6pt]
+\small\textbf{End of lecture 14 October}
 \end{tcolorbox}
 
 \appendix
