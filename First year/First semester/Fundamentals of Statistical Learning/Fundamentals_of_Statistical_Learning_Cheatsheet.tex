@@ -1,49 +1,138 @@
-\documentclass[12pt,a4paper]{article}
-\usepackage[english]{babel}
-\usepackage[T1]{fontenc}
-\usepackage[margin=18mm]{geometry}
-\usepackage{amsmath,amssymb}
-\usepackage{enumitem}
-\usepackage[most]{tcolorbox}
-\usepackage[colorlinks=true,linkcolor=blue]{hyperref}
-\setlength{\parindent}{0pt}
-\setlist{topsep=0.5\baselineskip,itemsep=0.5\baselineskip,parsep=0pt,leftmargin=2.45em}
-\newcounter{definition}
-\setcounter{definition}{4}
-\renewcommand{\thedefinition}{3.\arabic{definition}}
-\definecolor{NotesDefinition}{rgb}{0.70,0.94,0.70}
-\definecolor{NotesPaper}{gray}{0.95}
-\tcbset{notesbox/.style={enhanced,breakable,
-  colback=NotesPaper,coltitle=black,fonttitle=\bfseries,
-  boxrule=0.5mm,arc=1mm,boxsep=1mm,left=1mm,right=1mm,top=1mm,bottom=1mm,
-  before skip=7mm,after skip=4mm,
-  attach boxed title to top left={xshift=12.5mm,yshift=-0.5mm},
-  boxed title style={enhanced,boxrule=0.4mm,arc=0.75mm,
-    boxsep=1mm,left=2mm,right=2mm,top=0mm,bottom=0mm,
-    frame code={%
-      \path[fill=tcbcolframe,draw=tcbcolframe]
-        (frame.north west) -- (frame.north east)
-        .. controls ([xshift=4mm]frame.north east) and
-                    ([xshift=7mm]frame.south east) ..
-                    ([xshift=11mm]frame.south east)
-        -- ([xshift=-11mm]frame.south west)
-        .. controls ([xshift=-7mm]frame.south west) and
-                    ([xshift=-4mm]frame.north west) .. (frame.north west) -- cycle;
-    }},
-  before upper={\setlength{\parskip}{0.5\baselineskip}}},
-  definitionbox/.style={notesbox,colframe=NotesDefinition,
-    boxed title style={colback=NotesDefinition,colframe=NotesDefinition}}}
-\newtcolorbox[use counter=definition]{frameddefn}[1]{definitionbox,
-  title={Definition \thedefinition:\enspace #1}}
-\renewcommand{\thedefinition}{3.\arabic{definition}}
+\documentclass[12pt,a4paper,oneside]{report}
+\usepackage[english]{../../../shared/latex/learningnotes}
+% The shared style is made for the notes; a cheatsheet needs narrower
+% margins and no running headers.
+\geometry{margin=18mm}
+\pagestyle{notescontents}
+% Short boxes read better when a page break never splits them.
+\tcbset{notesbox/.append style={unbreakable}}
+% Each heading starts the next chapter of the notes, so the box
+% counters restart and every number matches the notes.
+\newcommand{\notesheading}[1]{%
+  \refstepcounter{chapter}%
+  \section*{\chaptername~\thechapter.\enspace #1}}
 \begin{document}
+\thispagestyle{notescontents}
 \begin{center}
   {\Large\bfseries Fundamentals of Statistical Learning}\par
   \smallskip
-  {\large Definitions cheatsheet}
+  {\large Definitions and results cheatsheet}
 \end{center}
 
-\setcounter{definition}{1}
+\notesheading{Defining probability}
+
+\begin{frameddefn}{Outcomes and events}\label{def:outcomes-events}
+A random experiment is a process whose result is not known in advance.
+Each possible result is an \emph{outcome} $\omega$. The set of all possible
+outcomes is the \emph{sample space} $\Omega$. An \emph{event} is a subset
+$A\subseteq\Omega$; it occurs when the observed outcome belongs to $A$.
+\end{frameddefn}
+
+\begin{framedprop}{De Morgan's laws}\label{prop:de-morgan}
+For any events $A$ and $B$,
+\[
+  (A\cup B)^c=A^c\cap B^c,
+  \qquad
+  (A\cap B)^c=A^c\cup B^c.
+\]
+More generally, for events $A_1,\ldots,A_n$,
+\[
+  \left(\bigcup_{i=1}^{n}A_i\right)^c
+    =\bigcap_{i=1}^{n}A_i^c,
+  \qquad
+  \left(\bigcap_{i=1}^{n}A_i\right)^c
+    =\bigcup_{i=1}^{n}A_i^c.
+\]
+\end{framedprop}
+
+\begin{frameddefn}{Probability on a finite sample space}\label{def:probability-finite}
+A probability measure $P$ assigns a number $P(A)$ to every event
+$A\subseteq\Omega$ such that:
+\begin{enumerate}
+  \item $0\leq P(A)\leq 1$ for every event $A$;
+  \item $P(\Omega)=1$;
+  \item if $A\cap B=\varnothing$, then
+        $P(A\cup B)=P(A)+P(B)$.
+\end{enumerate}
+The last property is called \emph{finite additivity}.
+\end{frameddefn}
+
+\begin{framedprop}{Inclusion--exclusion for two events}
+For any events $A$ and $B$,
+\[
+  P(A\cup B)=P(A)+P(B)-P(A\cap B).
+\]
+\end{framedprop}
+
+\begin{framedprop}{Union bound (Boole's inequality)}
+For events $A_1,\ldots,A_n$,
+\[
+  P\!\left(\bigcup_{i=1}^{n} A_i\right)
+  \leq \sum_{i=1}^{n}P(A_i).
+\]
+\end{framedprop}
+
+\begin{framedprop}{Bonferroni's inequality}
+For events $A_1,\ldots,A_n$,
+\[
+  P\!\left(\bigcap_{i=1}^{n} A_i\right)
+  \geq \sum_{i=1}^{n}P(A_i)-(n-1).
+\]
+\end{framedprop}
+
+\notesheading{Conditional probability}
+
+\begin{frameddefn}{Conditional probability}
+\label{def:conditional-probability}
+For events $A,B$ with $P(B)>0$, the probability of $A$ given $B$ is
+\[
+  P(A\mid B)=\frac{P(A\cap B)}{P(B)}.
+\]
+\end{frameddefn}
+
+\begin{frameddefn}{Independent events}
+\label{def:independent-events}
+Two events $A$ and $B$ are independent if
+\[
+  P(A\cap B)=P(A)P(B).
+\]
+\end{frameddefn}
+
+\begingroup
+\renewcommand{\thefootnote}{\fnsymbol{footnote}}
+\footnotetext[2]{Here $B_1,\ldots,B_m$ form a partition of the sample space, with $P(B_i)>0$.}
+\endgroup
+\nopagebreak
+\begin{framedthm}{Bayes' theorem}
+\label{thm:bayes}
+For a group $B_j$ of the partition\begingroup\renewcommand{\thefootnote}{\fnsymbol{footnote}}\footnotemark[2]\endgroup\ and an event $A$ with $P(A)>0$,
+\[
+  P(B_j\mid A)
+    =\frac{P(A\mid B_j)P(B_j)}{P(A)}
+    =\frac{P(A\mid B_j)P(B_j)}
+           {\sum_{i=1}^m P(A\mid B_i)P(B_i)}.
+\]
+\end{framedthm}
+
+\notesheading{Random variables}
+
+\begingroup
+\renewcommand{\thefootnote}{\fnsymbol{footnote}}
+\footnotetext[1]{A rigorous definition of measurability is beyond the scope of this course.}
+\endgroup
+\nopagebreak
+\begin{frameddefn}{Random object}\label{def:random-object}
+A \emph{random object} is a measurable\begingroup\renewcommand{\thefootnote}{\fnsymbol{footnote}}\footnotemark[1]\endgroup\ map from outcomes to possible
+observations:
+\[
+  Z:\Omega\longrightarrow\mathcal T,
+  \qquad \omega\longmapsto Z(\omega).
+\]
+The set $\mathcal T$ says what kind of thing we record. It could contain
+numbers, vectors, images, or text messages. Once $\omega$ is known,
+$Z(\omega)$ is the observation we get.
+\end{frameddefn}
+
 \begin{frameddefn}{Random variable}\label{def:random-variable}
 A \emph{random variable} is a measurable map
 \[
@@ -52,7 +141,19 @@ A \emph{random variable} is a measurable map
 It assigns one real number $X(\omega)$ to each outcome $\omega$.
 \end{frameddefn}
 
-\setcounter{definition}{3}
+\begin{frameddefn}{Random vector}\label{def:random-vector}
+A \emph{$p$-dimensional random vector} is a measurable map
+\[
+  \underline{X}:\Omega\longrightarrow\mathbb R^p,
+  \qquad
+  \underline{X}(\omega)
+    :=\bigl(X_1(\omega),\ldots,X_p(\omega)\bigr).
+\]
+Each coordinate $X_j$ is a real-valued random variable. Thus one
+outcome gives us $p$ numbers collected into a vector. These measurements
+can be related; they do not have to be independent.
+\end{frameddefn}
+
 \begin{frameddefn}{Preimage}\label{def:preimage}
 For a random variable $X:\Omega\to\mathbb R$ and a set
 $E\subseteq\mathbb R$, the \emph{preimage} (or \emph{inverse image}) of
@@ -75,7 +176,6 @@ In particular, for a single value $x$,
 Here $X$ is the random variable, while $x$ is a particular real number.
 \end{frameddefn}
 
-\setcounter{definition}{4}
 \begin{frameddefn}{Distribution of a random variable}
 \label{def:distribution}
 The \emph{distribution} of $X$ is the rule that tells us with what
@@ -85,12 +185,15 @@ probability $X$ takes values in a given set $E$.
 \]
 \end{frameddefn}
 
-\newpage
-\setcounter{definition}{5}
+\begingroup
+\renewcommand{\thefootnote}{\fnsymbol{footnote}}
+\footnotetext[3]{A finite set has finitely many elements. A set $A$ is countably infinite if there exists a bijection $f:\mathbb N\to A$.}
+\endgroup
+\nopagebreak
 \begin{frameddefn}{Discrete random variable and PMF}
 \label{def:discrete-pmf}
 A random variable $X$ is \emph{discrete} if there is a finite or
-countably infinite set\begingroup\renewcommand{\thefootnote}{\fnsymbol{footnote}}\footnotemark[1]\endgroup
+countably infinite set\begingroup\renewcommand{\thefootnote}{\fnsymbol{footnote}}\footnotemark[3]\endgroup\ 
 $\mathcal X=\{x_1,x_2,\ldots\}$ such that
 $P(X\in\mathcal X)=1$.
 
@@ -108,12 +211,6 @@ Its \emph{probability mass function} (PMF) is
 \end{enumerate}
 \end{frameddefn}
 
-\begingroup
-\renewcommand{\thefootnote}{\fnsymbol{footnote}}
-\footnotetext[1]{A finite set has finitely many elements. A set $A$ is countably infinite if there exists a bijection $f:\mathbb N\to A$.}
-\endgroup
-
-\setcounter{definition}{6}
 \begin{frameddefn}{Continuous random variable and PDF}
 \label{def:continuous-pdf}
 A random variable $X$ is \emph{continuous} (in the sense used here)
@@ -130,7 +227,6 @@ function} (PDF), such that, for every $a\leq b$,
 \end{enumerate}
 \end{frameddefn}
 
-\setcounter{definition}{7}
 \begin{frameddefn}{Cumulative distribution function}
 \label{def:cdf}
 Given a random variable $X$, its \emph{cumulative distribution
@@ -145,7 +241,88 @@ threshold $x$. It is defined for both
 \hyperref[def:continuous-pdf]{continuous} random variables.
 \end{frameddefn}
 
-\setcounter{definition}{9}
+\begin{framedprop}{Properties of the CDF (I)}\label{prop:cdf-properties-i}
+A function $F(\cdot)$ mapping the real line to $[0,1]$ is a CDF
+for some probability measure $P(\cdot)$ if and only if:
+\begin{enumerate}
+  \item $F(\cdot)$ is \emph{non-decreasing}: $x_1<x_2$ implies that
+    $F(x_1)\leq F(x_2)$.
+  \item $F(\cdot)$ is \emph{normalized}:
+    \[
+      \lim_{x\to-\infty}F(x)=0,
+      \qquad
+      \lim_{x\to+\infty}F(x)=1.
+    \]
+  \item $F(\cdot)$ is \emph{right-continuous}: for all $x$ we have
+    \[
+      F(x)=F(x^+),
+      \qquad F(x^+):=\lim_{t\downarrow x}F(t).
+    \]
+\end{enumerate}
+\end{framedprop}
+
+\begin{framedprop}{Properties of the CDF (II/a)}
+Let $F_X(\cdot)$ be the CDF of a random variable $X$. Then:
+\begin{enumerate}
+  \item For $x_1<x_2$,
+    \[
+      P(x_1<X\leq x_2)=P\bigl(X\in(x_1,x_2]\bigr)
+        =F_X(x_2)-F_X(x_1).
+    \]
+    In the discrete case, be careful with the strict and non-strict
+    inequalities.
+  \item
+    \[
+      P(X>x)=P\bigl(X\in(x,+\infty)\bigr)=1-F_X(x).
+    \]
+  \item If $X$ is continuous with PDF $f_X(\cdot)$, then
+    \[
+      F_X(x)=\int_{-\infty}^{x}f_X(t)\,dt.
+    \]
+    A PDF can be recovered from the CDF as
+    \[
+      f_X(x)=F_X'(x)
+    \]
+    at points where $F_X$ is differentiable.
+\end{enumerate}
+\end{framedprop}
+
+\begin{framedprop}{Properties of the CDF (II/b)}
+Let $F_X(\cdot)$ be the CDF of a random variable $X$. Then:
+\begin{enumerate}
+  \item
+    \[
+      P(x_1<X\leq x_2)=P\bigl(X\in(x_1,x_2]\bigr)
+        =F_X(x_2)-F_X(x_1),\qquad x_1<x_2.
+    \]
+  \item
+    \[
+      P(X>x)=P\bigl(X\in(x,+\infty)\bigr)=1-F_X(x).
+    \]
+  \item If $X$ is discrete with PMF $p_X(\cdot)$ and support
+    $\mathcal X=\{x_1,x_2,\ldots\}$, then
+    \[
+      F_X(x)=\sum_{x_i\leq x}p_X(x_i)=P(X<x)+p_X(x).
+    \]
+    Hence
+    \[
+      p_X(x)=F_X(x)-F_X(x^-),
+      \qquad F_X(x^-):=\lim_{t\uparrow x}F_X(t).
+    \]
+\end{enumerate}
+\end{framedprop}
+
+\begin{frameddefn}{Quantile function: continuous case}
+\label{def:quantile-continuous}
+Let $X$ be a continuous random variable with CDF $F_X$. For a
+probability level $0<p<1$, its \emph{quantile function} is
+\[
+  Q(p):=\inf\{x\in\mathbb R:F_X(x)=p\}.
+\]
+It gives the smallest value $x$ such that $F_X(x)=P(X\leq x)=p$.
+We also write $q_p$ instead of $Q(p)$.
+\end{frameddefn}
+
 \begin{frameddefn}{Quantile function: general case}
 \label{def:quantile-general}
 Let $X$ be any random variable, discrete or continuous, with CDF
@@ -155,6 +332,426 @@ $F_X$. For a probability level $0<p<1$, its \emph{quantile function} is
 \]
 It gives the smallest threshold $x$ such that
 $P(X\leq x)$ is at least $p$. We also write $q_p$ instead of $Q(p)$.
+\end{frameddefn}
+
+\begin{frameddefn}{Uniform distribution}
+\label{def:uniform-distribution}
+A continuous random variable $X$ has a \emph{uniform distribution}
+with parameters $a<b$, where $a,b\in\mathbb R$, if its PDF and CDF
+are
+\[
+  f_X(x)=\frac{1}{b-a}\mathbf 1_{[a,b]}(x),
+\]
+\[
+  F_X(x)=
+  \begin{cases}
+    0, & x<a,\\
+    \dfrac{x-a}{b-a}, & a\leq x\leq b,\\
+    1, & x>b.
+  \end{cases}
+\]
+We denote this distribution by $\operatorname{Unif}(a,b)$ and write
+$X\sim\operatorname{Unif}(a,b)$. Here $\operatorname{Unif}$
+abbreviates \emph{uniform}, and $\sim$ means \emph{has distribution}.
+\end{frameddefn}
+
+\begin{frameddefn}{Exponential distribution}
+We write $T\sim\operatorname{Exp}(\lambda)$, with rate $\lambda>0$,
+when its PDF and CDF are
+\[
+  f_T(t)=\lambda e^{-\lambda t}\mathbf1_{[0,+\infty)}(t),
+  \qquad
+  F_T(t)=
+  \begin{cases}
+    0,&t<0,\\
+    1-e^{-\lambda t},&t\geq0.
+  \end{cases}
+\]
+\end{frameddefn}
+
+\begin{frameddefn}{Bernoulli distribution}
+For $0\leq p\leq1$, we write $X\sim\operatorname{Ber}(p)$ when
+\[
+  p_X(x)=
+  \begin{cases}
+    1-p,&x=0,\\p,&x=1,\\0,&\text{otherwise}.
+  \end{cases}
+\]
+The parameter $p$ is the success probability. The two masses add
+to $1$.
+\end{frameddefn}
+
+\begin{frameddefn}{Binomial distribution}
+For an integer $n\geq1$ and $0<p<1$, $X\sim\operatorname{Bin}(n,p)$
+has PMF
+\[
+  p_X(k)=\binom nk p^k(1-p)^{n-k},\qquad k=0,\ldots,n,
+\]
+and zero elsewhere. For $p=0$, $X=0$ with probability $1$;
+for $p=1$, $X=n$ with probability $1$.
+\end{frameddefn}
+
+\begin{frameddefn}{Beta distribution}
+\label{def:beta-distribution}
+For $\alpha,\beta>0$, the density of
+$P\sim\operatorname{Beta}(\alpha,\beta)$ is
+\[
+  \pi(p)=\frac{p^{\alpha-1}(1-p)^{\beta-1}}{B(\alpha,\beta)},
+  \qquad 0<p<1,
+\]
+and it is zero elsewhere. The denominator is the normalizing
+constant
+\[
+  B(\alpha,\beta)=\int_0^1
+       t^{\alpha-1}(1-t)^{\beta-1}\,dt.
+\]
+\end{frameddefn}
+
+\begingroup
+\renewcommand{\thefootnote}{\fnsymbol{footnote}}
+\footnotetext[4]{In the notes, $\Gamma(a)=\int_0^{+\infty}t^{a-1}e^{-t}\,dt$ for $a>0$.}
+\endgroup
+\nopagebreak
+\begin{frameddefn}{Gamma distribution}
+Using the Gamma function\begingroup\renewcommand{\thefootnote}{\fnsymbol{footnote}}\footnotemark[4]\endgroup\ defined above, we write
+$T\sim\operatorname{Gamma}(a,\lambda)$ when its PDF is
+\[
+  f_T(t)=\frac{\lambda^a}{\Gamma(a)}
+           t^{a-1}e^{-\lambda t}\mathbf1_{(0,+\infty)}(t).
+\]
+\end{frameddefn}
+
+\notesheading{Random vectors}
+
+\begin{frameddefn}{Random vector}
+On a common probability space $(\Omega,\mathcal F,P)$, a
+\textbf{random vector} is a vector of random variables
+\[
+  \underline{X}:\Omega\longrightarrow\mathbb R^p,
+  \qquad
+  \underline{X}(\omega)=
+  \begin{pmatrix}
+    X_1(\omega)\\
+    \vdots\\
+    X_p(\omega)
+  \end{pmatrix}.
+\]
+The integer $p$ is the dimension of the vector. Each component
+$X_j:\Omega\to\mathbb R$ is a random variable.
+\end{frameddefn}
+
+\begin{frameddefn}{Independence of random variables}
+\label{def:independent-random-variables}
+Two random variables $X$ and $Y$ are independent when
+\[
+  P(X\in I,\ Y\in J)=P(X\in I)P(Y\in J)
+  \quad\text{for every pair of intervals }I,J.
+\]
+\end{frameddefn}
+
+\begingroup
+\renewcommand{\thefootnote}{\fnsymbol{footnote}}
+\footnotetext[5]{Here $X$ and $Y$ are discrete, with supports $S_X$ and $S_Y$.}
+\endgroup
+\nopagebreak
+\begin{frameddefn}{Joint probability mass function}
+The \textbf{joint PMF} assigns a probability to each pair of values\begingroup\renewcommand{\thefootnote}{\fnsymbol{footnote}}\footnotemark[5]\endgroup:
+\[
+  p_{X,Y}(x,y)=P(X=x,Y=y)
+    =P\bigl(\{X=x\}\cap\{Y=y\}\bigr).
+\]
+It satisfies
+\[
+  p_{X,Y}(x,y)\geq0,
+  \qquad
+  \sum_{x\in S_X}\sum_{y\in S_Y}p_{X,Y}(x,y)=1.
+\]
+Some pairs in $S_X\times S_Y$ may have probability zero.
+The joint PMF completely determines the distribution of $(X,Y)$.
+\end{frameddefn}
+
+\begin{framedprop}{Marginal PMFs}
+The marginal distributions are obtained by summing out the
+other variable:
+\[
+  p_X(x)=\sum_{y\in S_Y}p_{X,Y}(x,y),
+  \qquad
+  p_Y(y)=\sum_{x\in S_X}p_{X,Y}(x,y).
+\]
+\end{framedprop}
+
+\begin{frameddefn}{Conditional PMFs}
+For a value $y$ with $p_Y(y)>0$,
+\[
+  p_{X\mid Y}(x\mid y)
+    =P(X=x\mid Y=y)
+    =\frac{p_{X,Y}(x,y)}{p_Y(y)}.
+\]
+Similarly, for $x$ with $p_X(x)>0$,
+\[
+  p_{Y\mid X}(y\mid x)
+    =P(Y=y\mid X=x)
+    =\frac{p_{X,Y}(x,y)}{p_X(x)}.
+\]
+For each fixed conditioning value, the conditional probabilities
+are nonnegative and sum to $1$ over the remaining variable.
+\end{frameddefn}
+
+\begin{frameddefn}{Independence of discrete random variables}
+Two discrete random variables $X$ and $Y$ are independent if
+and only if
+\[
+  p_{X,Y}(x,y)=p_X(x)p_Y(y)
+  \qquad\text{for every }(x,y)\in S_X\times S_Y.
+\]
+Equivalently,
+\[
+  p_{X\mid Y}(x\mid y)=p_X(x)
+  \quad\text{for every }x
+  \text{ and every }y\text{ with }p_Y(y)>0.
+\]
+\end{frameddefn}
+
+\begin{frameddefn}{Joint cumulative distribution function}
+For any pair of random variables, discrete or otherwise,
+\[
+  F_{X,Y}(x,y)=P(X\leq x,Y\leq y),
+  \qquad (x,y)\in\mathbb R^2.
+\]
+This is the probability of the lower-left region
+$(-\infty,x]\times(-\infty,y]$ in the plane.
+\end{frameddefn}
+
+\begin{framedprop}{Marginal CDFs}
+\label{prop:marginal-cdfs}
+The marginal CDFs are obtained as limits of the joint CDF:
+\[
+  F_X(x)=\lim_{y\to+\infty}F_{X,Y}(x,y),
+  \qquad
+  F_Y(y)=\lim_{x\to+\infty}F_{X,Y}(x,y).
+\]
+\end{framedprop}
+
+\begin{framedprop}{$X,Y$ independent $\Longleftrightarrow$ joint CDF $=F_XF_Y$}
+\label{prop:independence-cdf}
+Let $X$ and $Y$ be \textbf{arbitrary random variables}, with
+CDFs $F_X$ and $F_Y$. They are \textbf{independent if and only if}
+their joint CDF satisfies
+\[
+  F_{X,Y}(x,y)=F_X(x)F_Y(y)
+  \qquad\text{for all }x,y\in\mathbb R.
+\]
+\end{framedprop}
+
+\begin{frameddefn}{Joint PDF}
+\label{def:joint-pdf}
+A \textbf{joint probability density function}
+$f_{\underline{X}}:\mathbb R^p\to[0,+\infty)$ satisfies
+\[
+  \int_{\mathbb R^p}f_{\underline{X}}(\underline{x})\,d\underline{x}=1,
+\]
+and gives the probability of a measurable region
+$A\subseteq\mathbb R^p$ through
+\[
+  P(\underline{X}\in A)=\int_A f_{\underline{X}}(\underline{x})\,d\underline{x}.
+\]
+\end{frameddefn}
+
+\begin{frameddefn}{Kernel of a PDF}
+\label{def:pdf-kernel}
+A \textbf{kernel of a PDF} is a nonnegative function
+$g(\underline{x})$ proportional to that PDF. It specifies the
+shape of the density, leaving a positive multiplicative constant
+to be determined.
+
+To obtain the PDF, compute the total integral
+\[
+  c=\int_{\mathbb R^p}g(\underline{x})\,d\underline{x}.
+\]
+If $0<c<+\infty$, then
+\[
+  f_{\underline{X}}(\underline{x})=\frac{g(\underline{x})}{c}
+\]
+is the corresponding PDF. The constant $c$ is the
+\textbf{normalizing constant}.
+\end{frameddefn}
+
+\begin{framedprop}{Marginal PDFs}
+\label{prop:marginal-pdfs}
+The marginal densities are obtained by integrating out the
+other variable:
+\[
+  f_X(x)=\int_{\mathbb R}f_{X,Y}(x,y)\,dy,
+  \qquad
+  f_Y(y)=\int_{\mathbb R}f_{X,Y}(x,y)\,dx.
+\]
+\end{framedprop}
+
+\begin{frameddefn}{Conditional PDFs}
+When a joint PDF exists, a conditional density of $X$ given $Y=y$
+can be defined, for $f_Y(y)>0$, by
+\[
+  f_{X\mid Y}(x\mid y)=\frac{f_{X,Y}(x,y)}{f_Y(y)}.
+\]
+Similarly, for $f_X(x)>0$,
+\[
+  f_{Y\mid X}(y\mid x)=\frac{f_{X,Y}(x,y)}{f_X(x)}.
+\]
+The conditioning value is held fixed. Integrating the conditional
+density over the other variable gives $1$.
+\end{frameddefn}
+
+\begin{framedprop}{$X,Y$ independent $\Longleftrightarrow$ joint PDF $=f_Xf_Y$}
+\label{prop:independence-pdf}
+Suppose $X$ and $Y$ \textbf{each have a PDF},
+denoted by $f_X$ and $f_Y$. They are \textbf{independent if and only if}
+their joint PDF exists and satisfies
+\[
+  f_{X,Y}(x,y)=f_X(x)f_Y(y)
+  \qquad\text{almost everywhere}.
+\]
+\end{framedprop}
+
+\begin{frameddefn}{Bivariate copula}
+A \textbf{copula} is a joint CDF of two random variables with
+standard uniform marginals:
+\[
+  C(u,v)=P(U\leq u,V\leq v),
+  \qquad U,V\sim\operatorname{Unif}(0,1).
+\]
+The variables $U$ and $V$ need not be independent. On $[0,1]^2$,
+the marginal conditions are $C(u,1)=u$ and $C(1,v)=v$.
+\end{frameddefn}
+
+\begin{framedthm}{Sklar's theorem: bivariate form}
+For any joint CDF $F_{X,Y}$ with marginals $F_X$ and $F_Y$,
+there exists a copula $C$ such that
+\[
+  F_{X,Y}(x,y)=C\bigl(F_X(x),F_Y(y)\bigr).
+\]
+If both marginals are continuous, the copula is unique. Otherwise,
+it is uniquely determined only on
+$\operatorname{Ran}(F_X)\times\operatorname{Ran}(F_Y)$, the product
+of the sets of values taken by the marginal CDFs.
+
+Conversely, combining any two marginal CDFs with a copula using
+this formula produces a joint CDF with those marginals.
+\end{framedthm}
+
+\begin{frameddefn}{Independent and identically distributed sample}
+A random sample $(X_1,\ldots,X_n)$ is \textbf{IID} from $F_X$ if
+\begin{itemize}
+  \item the random variables $X_1,\ldots,X_n$ are mutually
+    independent;
+  \item each $X_i$ has the same CDF $F_X$.
+\end{itemize}
+Here $n$ is the sample size. Uppercase $X_i$ denotes a random
+observation before sampling; lowercase $x_i$ denotes its observed
+value. The realized dataset is $\mathcal D_n=(x_1,\ldots,x_n)$.
+\end{frameddefn}
+
+\begin{frameddefn}{Likelihood}
+\label{def:likelihood}
+For fixed observed data $\mathcal D_n=(x_1,\ldots,x_n)$ and
+a model parameter $\theta\in\Theta$, the \textbf{IID likelihood} is
+\[
+  L(\theta;x_1,\ldots,x_n)=
+  \begin{cases}
+    \displaystyle\prod_{i=1}^n p_\theta(x_i),
+       & \text{discrete model},\\[6pt]
+    \displaystyle\prod_{i=1}^n f_\theta(x_i),
+       & \text{model with a PDF}.
+  \end{cases}
+\]
+\end{frameddefn}
+
+\begin{frameddefn}{Maximum likelihood estimation}
+\label{def:maximum-likelihood}
+A \textbf{maximum likelihood estimator (MLE)} chooses
+\[
+  \widehat\theta_n\in
+  \argmax_{\theta\in\Theta}L(\theta;x_1,\ldots,x_n),
+\]
+when a maximizer exists. Here $\widehat\theta_n$ is the parameter
+estimate calculated from the $n$ observations, and $\argmax$
+denotes the set of parameter values attaining the largest
+likelihood.
+\end{frameddefn}
+
+\begin{frameddefn}{Empirical cumulative distribution function}
+Given observations $x_1,\ldots,x_n$, the \textbf{empirical CDF}
+is
+\[
+  \widehat F_n(t)=\frac1n\sum_{i=1}^n
+    \mathbf 1_{\{x_i\leq t\}}.
+\]
+It is the fraction of observations at or below $t$.
+The corresponding empirical distribution assigns mass $1/n$
+to each observation, counting repetitions.
+\end{frameddefn}
+
+\notesheading{Stochastic simulations}
+
+\begin{frameddefn}{Pseudorandom number generator}
+\label{def:prng}
+In a simplified description, a \emph{pseudorandom number generator}
+(PRNG) uses a deterministic function
+\[
+  f:(0,1)\longrightarrow(0,1)
+\]
+and a starting value, or \emph{seed}, $u_0\in(0,1)$ to generate
+\[
+  u_0,\quad u_1=f(u_0),\quad u_2=f(f(u_0)),\quad
+  \ldots,\quad u_n=f^n(u_0).
+\]
+The function is chosen so that the sequence imitates the statistical
+behaviour of an IID $\operatorname{Uniform}(0,1)$ sample.
+Here $f^n(u_0)$ means applying $f$ repeatedly $n$ times.
+\end{frameddefn}
+
+\begin{frameddefn}{Linear congruential generator}
+\label{def:lcg}
+A \emph{linear congruential generator} (LCG) uses integer parameters
+$\alpha$, $\beta$, and $M>1$, and an integer seed
+$x_0\in\{0,1,\ldots,M-1\}$. Its update rule is
+\[
+  x_{k+1}=f(x_k)=(\alpha+\beta x_k)\bmod M.
+\]
+Here $\bmod M$ gives the remainder after division by $M$, so every
+state $x_k$ belongs to $\{0,1,\ldots,M-1\}$.
+\end{frameddefn}
+
+\begin{framedprop}{Quantile transform}
+\label{prop:quantile-transform}
+Let $F$ be any CDF and let
+\[
+  Q(p)=\inf\{x\in\mathbb R:F(x)\geq p\},\qquad 0<p<1,
+\]
+be its quantile function. If $U\sim\operatorname{Unif}(0,1)$ and
+$Y=Q(U)$, then $Y$ has CDF $F$:
+\[
+  F_Y(y)=P(Y\leq y)=F(y),\qquad y\in\mathbb R.
+\]
+\end{framedprop}
+
+\notesheading{Exploratory data analysis}
+
+\begin{frameddefn}{Class of models}
+In this density-estimation problem, a \textbf{class of models}
+$\mathcal F$ is a set of candidate PDFs. Each $f\in\mathcal F$
+represents one possible population distribution.
+\end{frameddefn}
+
+\begin{frameddefn}{Penalized log-likelihood}
+\label{def:penalized-log-likelihood}
+For fixed observed data $\mathcal D_n=(x_1,\ldots,x_n)$ from an
+IID sample, consider a candidate PDF $f$. Let $J(f)\geq0$ be
+its penalty, and let $\lambda>0$ be the weight given to that
+penalty. The \textbf{penalized log-likelihood} is
+\[
+  \log L(f;\mathcal D_n)-\lambda J(f)
+    =\sum_{i=1}^n\log f(x_i)-\lambda J(f).
+\]
 \end{frameddefn}
 
 \clearpage

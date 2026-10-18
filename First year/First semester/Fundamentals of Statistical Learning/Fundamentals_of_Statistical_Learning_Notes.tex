@@ -1,8 +1,9 @@
 \documentclass[a4paper,12pt,oneside]{report}
-\usepackage[english]{learningnotes}
+\usepackage[english]{../../../shared/latex/learningnotes}
 \usepackage{needspace}
 \hypersetup{linktoc=all}
 \setcounter{secnumdepth}{3}
+
 \newcommand{\exerciseheading}[1]{%
   \par\Needspace{5\baselineskip}\noindent\textbf{#1}\par\nobreak}
 \newcommand{\solutionheading}[1]{%
@@ -356,6 +357,27 @@ identity.
 
 \section{Understanding conditional probability}
 
+Knowing that an event $B$ occurred restricts our attention to its
+outcomes. Within this smaller group, how often does $A$ occur?
+
+\begin{frameddefn}{Conditional probability}
+\label{def:conditional-probability}
+For events $A,B$ with $P(B)>0$, the probability of $A$ given $B$ is
+\[
+  P(A\mid B)=\frac{P(A\cap B)}{P(B)}.
+\]
+\end{frameddefn}
+
+For a fair die, let $A$ mean an even result and $B$ a result greater
+than $3$. Among the three outcomes in $B=\{4,5,6\}$, two are even:
+$P(A\mid B)=(2/6)/(3/6)=2/3$.
+Rearranging the definition gives the \textbf{multiplication rule}:
+\[
+  P(A\cap B)=P(A\mid B)P(B).
+\]
+Within the conditioning group, $A$ and $A^c$ remain complementary,
+so $P(A^c\mid B)=1-P(A\mid B)$.
+
 \subsection{Odds}
 
 For an event $A$ with $P(A)<1$, its \emph{odds in favor} are
@@ -379,15 +401,68 @@ Two events $A$ and $B$ are independent if
 When $P(B)>0$, this is equivalent to $P(A\mid B)=P(A)$:
 knowing that $B$ occurred does not change the probability of $A$.
 
+For more than two events, we need \textbf{mutual independence}:
+every subcollection must satisfy the product rule. For events
+$A_1,\ldots,A_n$, this means
+\[
+  P\left(\bigcap_{i\in J}A_i\right)
+    =\prod_{i\in J}P(A_i)
+  \quad\text{for every nonempty }J\subseteq\{1,\ldots,n\}.
+\]
+The same product rule holds when selected events are replaced by
+their complements. In particular, independent coin tosses allow
+us to multiply the probabilities of the specified heads and tails.
+
+\subsection{Conditional independence}
+Events $A$ and $B$ are \textbf{conditionally independent given $C$},
+with $P(C)>0$, when
+\[
+  P(A\cap B\mid C)=P(A\mid C)P(B\mid C).
+\]
+We apply independence within the group $C$. This does not assert
+that $A$ and $B$ are independent before conditioning.
+
 \section{Bayes' theorem}
+
+\subsection{The law of total probability}
+Let $B_1,\ldots,B_m$ form a partition of the sample space, with
+$P(B_i)>0$. The events $A\cap B_i$ are disjoint and together make
+up $A$. Addition of their probabilities and the multiplication
+rule therefore give
+\[
+  P(A)=\sum_{i=1}^m P(A\cap B_i)
+      =\sum_{i=1}^m P(A\mid B_i)P(B_i).
+\]
+Groups of probability zero can be omitted. This formula computes
+an overall probability by combining the probabilities within
+the separate groups.
+
+\Needspace{12\baselineskip}
+\subsection{Reversing the conditioning}
+\begin{framedthm}{Bayes' theorem}
+\label{thm:bayes}
+For a group $B_j$ of the partition and an event $A$ with $P(A)>0$,
+\[
+  P(B_j\mid A)
+    =\frac{P(A\mid B_j)P(B_j)}{P(A)}
+    =\frac{P(A\mid B_j)P(B_j)}
+           {\sum_{i=1}^m P(A\mid B_i)P(B_i)}.
+\]
+\end{framedthm}
+\begin{proof}
+The conditional probability definition gives
+$P(B_j\mid A)=P(B_j\cap A)/P(A)$. The multiplication rule
+replaces its numerator by $P(A\mid B_j)P(B_j)$, and total
+probability supplies the denominator.
+\end{proof}
+We start with the probability $P(B_j)$ before observing $A$,
+called the \textbf{prior}, and update it to $P(B_j\mid A)$,
+called the \textbf{posterior}. For example, a disease is a group
+and a positive test is the observed event; their probabilities
+are worked out in the exercise appendix.
 
 \chapter{Random variables}
 
-\begin{tcolorbox}[colback=yellow!20,colframe=yellow!60!black,
-  boxrule=0.4pt,arc=1mm,left=5pt,right=5pt,top=3pt,bottom=3pt,
-  before skip=0pt,after skip=0pt]
-\small\textbf{Start of lecture 25 September}
-\end{tcolorbox}
 
 \section{From outcomes to data}
 
@@ -466,11 +541,13 @@ can be related; they do not have to be independent.
 \end{frameddefn}
 
 \begin{notebox}[Notation]
-In these notes, we denote a random vector by $\underline{X}$
+Following Brutti's notation, we denote a random vector by $\underline{X}$
 ($X$ with a bar underneath):
 \[
   \underline{X}=(X_1,\ldots,X_p).
 \]
+We write $\underline{x}=(x_1,\ldots,x_p)$ for a vector of observed
+values. Individual components remain $X_j$ and $x_j$, without a bar.
 \end{notebox}
 
 
@@ -588,7 +665,6 @@ The same two students also give the exact value $178$:
 $X^{-1}(\{178\})=\{\text{Luca},\text{Sara}\}$, so
 $P(X=178)=1/2$. One value can correspond to several outcomes.
 \end{framedexample}
-
 
 
 \Needspace{14\baselineskip}
@@ -724,7 +800,7 @@ For the target of radius $10$ cm,
 \label{def:discrete-pmf}
 A random variable $X$ is \emph{discrete} if there is a finite or
 countably infinite set\begingroup\renewcommand{\thefootnote}{\fnsymbol{footnote}}\footnotemark[1]\endgroup
-$\mathcal X=\{x_1,x_2,\ldots\}$ such that
+\ $\mathcal X=\{x_1,x_2,\ldots\}$ such that
 $P(X\in\mathcal X)=1$.
 
 Its \emph{probability mass function} (PMF) is
@@ -1193,18 +1269,9 @@ For the two intervals used in the slides, the same method gives
 \]
 \end{framedexample}
 
-\begin{tcolorbox}[colback=yellow!20,colframe=yellow!60!black,
-  boxrule=0.4pt,arc=1mm,left=5pt,right=5pt,top=3pt,bottom=3pt,
-  before skip=6pt,after skip=0pt]
-\small\textbf{End of lecture 25 September}
-\end{tcolorbox}
 
 \clearpage
-\begin{tcolorbox}[colback=yellow!20,colframe=yellow!60!black,
-  boxrule=0.4pt,arc=1mm,left=5pt,right=5pt,top=3pt,bottom=3pt,
-  before skip=6pt,after skip=6pt]
-\small\textbf{Start of lecture 30 September}
-\end{tcolorbox}
+
 \section{Relations}
 \subsection{From the PMF to the CDF}
 \begin{tcolorbox}[colback=blue!3,colframe=blue!30!black,
@@ -1278,6 +1345,8 @@ we obtain
 \]
 Thus the PMF at $x$ is the size of the jump of the CDF at $x$.
 
+\phantomsection
+\label{rel:cdf-to-pdf}
 \textbf{Continuous case: recover the PDF.}
 A PDF is a non-negative function $f_X$ such that
 \[
@@ -1658,6 +1727,15 @@ quantile when the CDF has jumps.
 
 \section{Common univariate distributions}
 
+We collect the univariate distribution families here. Their later
+uses in joint models and simulations refer to these definitions.
+In the formulas, the \textbf{indicator function} of a set $A$ is
+\[
+  \mathbf1_A(x)=
+  \begin{cases}1,&x\in A,\\0,&x\notin A.\end{cases}
+\]
+Multiplying a density by this indicator makes it zero outside $A$.
+
 \subsection{The uniform distribution}
 \label{sec:uniform-distribution}
 A \textbf{uniform distribution} assigns the same probability to
@@ -1771,24 +1849,248 @@ rectangle with width $0.3$ and height $1$, so its area is $0.3$.
 \end{tikzpicture}
 \end{center}
 
+\Needspace{12\baselineskip}
+\subsection{The exponential distribution as a waiting-time model}
+\label{sec:exponential-distribution}
+
+Let $T$ be the time until the next event, such as a job reaching a printer. Times are
+nonnegative. The parameter $\lambda>0$ is a \textbf{rate}, measured
+in inverse time units: a larger rate describes shorter waits.
+
+\begin{frameddefn}{Exponential distribution}
+We write $T\sim\operatorname{Exp}(\lambda)$, with rate $\lambda>0$,
+when its PDF and CDF are
+\[
+  f_T(t)=\lambda e^{-\lambda t}\mathbf1_{[0,+\infty)}(t),
+  \qquad
+  F_T(t)=
+  \begin{cases}
+    0,&t<0,\\
+    1-e^{-\lambda t},&t\geq0.
+  \end{cases}
+\]
+\end{frameddefn}
+
+The density integrates to $1$ because
+\[
+  \int_0^{+\infty}\lambda e^{-\lambda t}\,dt
+    =\left[-e^{-\lambda t}\right]_0^{+\infty}=1.
+\]
+Integrating only up to a threshold $t\geq0$ gives the CDF.
+Consequently, the probability of waiting longer than $t$ is
+\[
+  P(T>t)=1-F_T(t)=e^{-\lambda t}.
+\]
+This is the \textbf{survival function}.
+
+\begin{center}
+  \includegraphics[width=\linewidth]{assets/exponential-pdf-cdf.pdf}
+\end{center}
+
+The left panel compares PDFs for four rates. A larger $\lambda$
+places more density near zero, and the tail decays faster.
+The right panel shows the corresponding CDFs: with a larger rate,
+more probability accumulates before the same waiting-time threshold.
+Every PDF still has total area $1$.
+
+\subsubsection{A constant chance of arrival over a short interval}
+
+Suppose no event has occurred by time $t$. For a short additional
+interval of length $h>0$, the model gives
+\begin{align*}
+  P(t<T\leq t+h\mid T>t)
+    &=\frac{F_T(t+h)-F_T(t)}{P(T>t)}\\
+    &=\frac{e^{-\lambda t}-e^{-\lambda(t+h)}}
+            {e^{-\lambda t}}\\
+    &=1-e^{-\lambda h}\approx\lambda h.
+\end{align*}
+The approximation applies when $\lambda h$ is small. The exact
+probability depends on the interval's length, not on how long we
+have already waited. Equivalently, the instantaneous event rate is
+constant. An average arrival rate alone does not guarantee an
+exponential waiting time; this constant-rate assumption is part
+of the model.
+
+\begin{framedexample}{The next printer job}
+Jobs reach a printer at an average rate of $3$ per hour. Assume
+the waiting time follows $T\sim\operatorname{Exp}(3)$, with $T$
+measured in hours. What is the probability that the next job
+arrives within $5$ minutes?
+
+\textbf{Convert the time, then evaluate the CDF.}
+\begin{enumerate}[label=\textbf{Step \arabic*:},leftmargin=*]
+  \item \textbf{Use the same time unit as the rate.}
+  Five minutes is $5/60=1/12$ of an hour.
+  \item \textbf{Translate the question into an event.}
+  We want $P(T\leq1/12)=F_T(1/12)$.
+  \item \textbf{Substitute the rate and threshold.}
+  \[
+    \boxed{P(T\leq1/12)=1-e^{-3/12}
+      =1-e^{-1/4}\approx0.2212.}
+  \]
+\end{enumerate}
+Under this model, the probability is about $22.12\%$.
+\end{framedexample}
+
+\subsubsection{The memoryless property}
+
+If we have already waited $t$ time units, how long must we wait
+from now? For $s,t\geq0$,
+\begin{align*}
+  P(T>t+s\mid T>t)
+    &=\frac{P(T>t+s)}{P(T>t)}\\
+    &=\frac{e^{-\lambda(t+s)}}{e^{-\lambda t}}\\
+    &=e^{-\lambda s}=P(T>s).
+\end{align*}
+This is called \textbf{memorylessness}: conditional on the event
+not having occurred, the remaining waiting time has the same
+exponential distribution as the original waiting time. It is
+a statement about the model's conditional distribution.
+
+\subsubsection{The PDF and CDF in R}
+
+R evaluates these two functions with \texttt{dexp} and
+\texttt{pexp}. For example, the following commands plot the
+rate-$1$ PDF and CDF; changing \texttt{rate} gives the curves above.
+\begin{lstlisting}[language=R]
+curve(dexp(x, rate = 1), from = 0, to = 5,
+      xlab = "Waiting time", ylab = "Density")
+curve(pexp(x, rate = 1), from = 0, to = 5,
+      xlab = "Waiting time", ylab = "Probability")
+pexp(5 / 60, rate = 3)  # 0.2211992
+\end{lstlisting}
+
 \subsection{The Bernoulli distribution}
 \label{sec:bernoulli-distribution}
 
-\begin{notebox}[TODO: Bernoulli distribution]
-To be introduced together in a future study session: binary
-outcomes, the success probability $p$, the notation
-$X\sim\operatorname{Ber}(p)$, and the probability mass function.
-This topic has not yet been covered.
-\end{notebox}
+One trial with a success or failure can be recorded as $1$ or $0$.
+\begin{frameddefn}{Bernoulli distribution}
+For $0\leq p\leq1$, we write $X\sim\operatorname{Ber}(p)$ when
+\[
+  p_X(x)=
+  \begin{cases}
+    1-p,&x=0,\\p,&x=1,\\0,&\text{otherwise}.
+  \end{cases}
+\]
+The parameter $p$ is the success probability. The two masses add
+to $1$.
+\end{frameddefn}
+
+\subsection{The binomial distribution}
+\label{sec:binomial-distribution}
+Repeat a Bernoulli trial independently $n$ times, with the same
+success probability $p$. Count the successes rather than record
+their order.
+\begin{frameddefn}{Binomial distribution}
+For an integer $n\geq1$ and $0<p<1$, $X\sim\operatorname{Bin}(n,p)$
+has PMF
+\[
+  p_X(k)=\binom nk p^k(1-p)^{n-k},\qquad k=0,\ldots,n,
+\]
+and zero elsewhere. For $p=0$, $X=0$ with probability $1$;
+for $p=1$, $X=n$ with probability $1$.
+\end{frameddefn}
+For $0<p<1$, each ordered sequence with $k$ successes has
+probability $p^k(1-p)^{n-k}$. There are $\binom nk$ such sequences,
+which explains the PMF. The binomial theorem gives total mass
+$(p+(1-p))^n=1$.
+
+\subsection{The Beta distribution}
+\label{sec:beta-distribution}
+
+Let $P$ take values in $(0,1)$, and write $\pi(p)$ for its PDF.
+
+\begin{frameddefn}{Beta distribution}
+\label{def:beta-distribution}
+For $\alpha,\beta>0$, the density of
+$P\sim\operatorname{Beta}(\alpha,\beta)$ is
+\[
+  \pi(p)=\frac{p^{\alpha-1}(1-p)^{\beta-1}}{B(\alpha,\beta)},
+  \qquad 0<p<1,
+\]
+and it is zero elsewhere. The denominator is the normalizing
+constant
+\[
+  B(\alpha,\beta)=\int_0^1
+       t^{\alpha-1}(1-t)^{\beta-1}\,dt.
+\]
+\end{frameddefn}
+
+To normalize this density, divide
+$p^{\alpha-1}(1-p)^{\beta-1}$ by its total integral. Positivity of
+$\alpha$ and $\beta$ makes this integral finite, including when
+the density grows without bound near an endpoint. Such a peak is
+not a point mass; $\Pr(P=0)=\Pr(P=1)=0$.
+
+For a threshold $0\leq u\leq1$, the CDF accumulates only the
+part of the numerator to the left of $u$:
+\[
+  F_P(u)=\frac{B(u;\alpha,\beta)}{B(\alpha,\beta)},
+  \qquad
+  B(u;\alpha,\beta)=\int_0^u
+        t^{\alpha-1}(1-t)^{\beta-1}\,dt.
+\]
+The numerator is the \textbf{incomplete Beta function}; the CDF
+is $0$ for $u<0$ and $1$ for $u>1$. The full Beta function also
+satisfies
+\[
+  B(\alpha,\beta)
+    =\frac{\Gamma(\alpha)\Gamma(\beta)}{\Gamma(\alpha+\beta)},
+  \qquad
+  \Gamma(a)=\int_0^{+\infty}t^{a-1}e^{-t}\,dt,\quad a>0.
+\]
+Here $\Gamma$ names the Gamma function. For general real
+parameters, we usually evaluate these functions numerically.
+
+\begin{center}
+  \includegraphics[width=\linewidth]{assets/beta-pdf-cdf.pdf}
+\end{center}
+
+The parameters $\alpha,\beta$ control the shape:
+\begin{itemize}
+  \item With $\alpha=\beta=1$, the numerator and its integral are both
+    $1$, so the distribution is $\operatorname{Unif}(0,1)$.
+  \item With both parameters below $1$, the density has peaks
+    near $0$ and $1$. The plot for $(0.5,0.5)$ cuts off their
+    unbounded heights to make the rest of the curve visible.
+  \item With both parameters above $1$, the density has one
+    interior peak. The symmetric example $(2,2)$ concentrates
+    probability around $1/2$.
+  \item When $\alpha=\beta$, the density is symmetric about $1/2$.
+    The examples $(5,1)$ and $(1,5)$ put more probability near
+    $1$ and $0$, respectively.
+\end{itemize}
+In R, \texttt{dbeta} evaluates the PDF and \texttt{pbeta} evaluates
+the CDF. The arguments \texttt{shape1} and \texttt{shape2}
+correspond to $\alpha$ and $\beta$:
+\begin{lstlisting}[language=R]
+curve(dbeta(x, shape1 = 2, shape2 = 2), from = 0, to = 1,
+      xlab = "p", ylab = "Density")
+curve(pbeta(x, shape1 = 2, shape2 = 2), from = 0, to = 1,
+      xlab = "p", ylab = "Probability")
+\end{lstlisting}
+
+\subsection{The Gamma distribution}
+\label{sec:gamma-distribution}
+The Gamma family describes positive values with a shape parameter
+$a>0$ and a rate $\lambda>0$.
+\begin{frameddefn}{Gamma distribution}
+Using the Gamma function defined above, we write
+$T\sim\operatorname{Gamma}(a,\lambda)$ when its PDF is
+\[
+  f_T(t)=\frac{\lambda^a}{\Gamma(a)}
+           t^{a-1}e^{-\lambda t}\mathbf1_{(0,+\infty)}(t).
+\]
+\end{frameddefn}
+The substitution $u=\lambda t$ shows that its total integral is
+$\Gamma(a)/\Gamma(a)=1$. The exponential is also
+a special case of the Gamma family of distributions on positive
+values, with shape parameter $1$: since $\Gamma(1)=1$, choosing
+$a=1$ gives $\lambda e^{-\lambda t}$ for $t>0$.
 
 \chapter{Random vectors}
 \label{chap:random-vectors}
 
-\begin{tcolorbox}[colback=yellow!20,colframe=yellow!60!black,
-  boxrule=0.4pt,arc=1mm,left=5pt,right=5pt,top=3pt,bottom=3pt,
-  before skip=6pt,after skip=6pt]
-\small\textbf{Start of lecture 7 October}
-\end{tcolorbox}
 
 We now study several random variables observed together, such as
 exam result and class attendance. We want to describe their
@@ -1800,9 +2102,9 @@ individual distributions and their dependence.
 On a common probability space $(\Omega,\mathcal F,P)$, a
 \textbf{random vector} is a vector of random variables
 \[
-  \mathbf X:\Omega\longrightarrow\mathbb R^p,
+  \underline{X}:\Omega\longrightarrow\mathbb R^p,
   \qquad
-  \mathbf X(\omega)=
+  \underline{X}(\omega)=
   \begin{pmatrix}
     X_1(\omega)\\
     \vdots\\
@@ -1828,11 +2130,27 @@ The later cases are continuous vectors (using a joint PDF when
 one exists) and mixed vectors, with discrete and continuous
 components. Continuous marginals alone need not give a joint PDF.
 
+\begin{frameddefn}{Independence of random variables}
+\label{def:independent-random-variables}
+Two random variables $X$ and $Y$ are independent when
+\[
+  P(X\in I,\ Y\in J)=P(X\in I)P(Y\in J)
+  \quad\text{for every pair of intervals }I,J.
+\]
+\end{frameddefn}
+This is the independence of the events defined by the two
+variables. It is enough to check intervals; their probabilities
+determine the joint distribution. The PMF, CDF and PDF criteria
+below express this same condition in different ways.
+
 \clearpage
-\section{The joint PMF}
+\section{Fully discrete random vectors}
+\label{sec:fully-discrete-random-vectors}
+
+\subsection{The joint PMF}
 \label{sec:joint-pmf}
 
-Let $\mathbf Z=(X,Y)^{\mathsf T}$, where $X$ and $Y$ are discrete,
+Let $\underline{Z}=(X,Y)^{\mathsf T}$, where $X$ and $Y$ are discrete,
 with supports $S_X$ and $S_Y$.
 
 \begin{frameddefn}{Joint probability mass function}
@@ -1878,10 +2196,10 @@ All six interior cells together sum to $1$.
 \end{framedexample}
 
 \clearpage
-\section{Marginal and conditional PMFs}
+\subsection{Marginal and conditional PMFs}
 \label{sec:marginal-conditional-pmf}
 
-\subsection{Marginalization}
+\subsubsection{Marginalization}
 \label{sec:marginal-pmf}
 
 To study $X$ alone, we add the probabilities of all pairs with
@@ -1922,7 +2240,7 @@ The marginal PMFs describe the individual variables, but they
 do not retain all the information in the joint table.
 
 \clearpage
-\subsection{Conditioning}
+\subsubsection{Conditioning}
 \label{sec:conditional-pmf}
 
 Suppose attendance is known. We then describe exam results
@@ -1976,7 +2294,7 @@ In particular, $0.643$, $0.25$, and $1/6$ differ from the
 marginal success probability $0.30$.
 
 \clearpage
-\section{Independence and the role of dependence}
+\subsection{Independence and the role of dependence}
 \label{sec:random-vector-independence}
 
 \begin{frameddefn}{Independence of discrete random variables}
@@ -2043,9 +2361,10 @@ actual joint PMF with the independent one:
 Here $D$ denotes a chosen discrepancy between distributions.
 Different choices emphasize different departures from independence.
 
-The next question is whether we can describe a joint distribution
-through its marginals together with a separate dependence
-structure. This motivates copulas. We first introduce the joint CDF.
+To describe dependence beyond a discrete table, we first introduce
+the joint CDF, which applies to every pair of random variables.
+After the continuous and mixed cases, copulas will describe how
+marginals combine with a dependence structure.
 
 \clearpage
 \section{The joint CDF}
@@ -2075,13 +2394,24 @@ $(-\infty,x]\times(-\infty,y]$ in the plane.
 \end{center}
 
 \subsection{Recovering the marginals}
-Letting one threshold tend to $+\infty$ removes its restriction:
+\label{sec:marginal-cdf}
+
+To study $X$ alone, we remove the restriction on $Y$ by letting
+its threshold tend to $+\infty$.
+
+\begin{framedprop}{Marginal CDFs}
+\label{prop:marginal-cdfs}
+The marginal CDFs are obtained as limits of the joint CDF:
 \[
   F_X(x)=\lim_{y\to+\infty}F_{X,Y}(x,y),
   \qquad
   F_Y(y)=\lim_{x\to+\infty}F_{X,Y}(x,y).
 \]
-This is marginalization expressed through CDFs rather than PMFs.
+\end{framedprop}
+
+As $y$ increases, the event $\{X\leq x,\ Y\leq y\}$ grows and
+approaches $\{X\leq x\}$, so its probability approaches
+$P(X\leq x)=F_X(x)$.
 
 \subsection{Basic properties}
 The joint CDF takes values in $[0,1]$, is nondecreasing in each
@@ -2098,13 +2428,697 @@ nonnegative. For $a<b$ and $c<d$,
 This is called the \textbf{2-increasing property}; being
 nondecreasing separately in each coordinate is not sufficient.
 
-For arbitrary random variables, independence is equivalent to
+\begin{framedprop}{$X,Y$ independent $\Longleftrightarrow$ joint CDF $=F_XF_Y$}
+\label{prop:independence-cdf}
+Let $X$ and $Y$ be \textbf{arbitrary random variables}, with
+CDFs $F_X$ and $F_Y$. They are \textbf{independent if and only if}
+their joint CDF satisfies
 \[
   F_{X,Y}(x,y)=F_X(x)F_Y(y)
   \qquad\text{for all }x,y\in\mathbb R.
 \]
+\end{framedprop}
+\begin{proof}
+If $X$ and $Y$ are independent, the definition applied to the
+events $X\leq x$ and $Y\leq y$ gives
+\[
+  F_{X,Y}(x,y)=P(X\leq x,Y\leq y)
+             =P(X\leq x)P(Y\leq y)=F_X(x)F_Y(y).
+\]
+Conversely, substitute this product into the rectangle formula
+above. It gives
+\begin{align*}
+  P(a<X\leq b,\ c<Y\leq d)
+    &=[F_X(b)-F_X(a)][F_Y(d)-F_Y(c)]\\
+    &=P(a<X\leq b)P(c<Y\leq d).
+\end{align*}
+Thus the interval probabilities factorize, which is independence.
+Limits include unbounded intervals, and differences of limits
+include their endpoint variants.
+\end{proof}
 
 \clearpage
+\section{Fully continuous random vectors}
+\label{sec:continuous-mixed-random-vectors}
+\label{sec:fully-continuous-random-vectors}
+
+\subsection{Joint probability density functions}
+\label{sec:joint-pdf-continuous}
+
+We now study continuous components of the
+\hyperref[chap:random-vectors]{random vectors introduced above}.
+We have already studied
+\hyperref[sec:joint-pmf]{joint},
+\hyperref[sec:marginal-pmf]{marginal} and
+\hyperref[sec:conditional-pmf]{conditional} PMFs for discrete variables.
+The next sections ask the same questions for continuous variables:
+how do we describe them together, recover one component, and use
+information about another component? Probabilities will be computed
+by integrating densities, rather than summing masses.
+
+Let $\underline{X}=(X_1,\ldots,X_p)^{\mathsf T}$ be a random vector
+with $p$ components. A possible value is
+$\underline{x}=(x_1,\ldots,x_p)^{\mathsf T}\in\mathbb R^p$.
+Here we assume that its joint distribution admits a PDF.
+For $p=2$, we write the components as $(X,Y)$ and the density as
+$f_{X,Y}(x,y)$.
+
+\Needspace{12\baselineskip}
+\begin{frameddefn}{Joint PDF}
+\label{def:joint-pdf}
+A \textbf{joint probability density function}
+$f_{\underline{X}}:\mathbb R^p\to[0,+\infty)$ satisfies
+\[
+  \int_{\mathbb R^p}f_{\underline{X}}(\underline{x})\,d\underline{x}=1,
+\]
+and gives the probability of a measurable region
+$A\subseteq\mathbb R^p$ through
+\[
+  P(\underline{X}\in A)=\int_A f_{\underline{X}}(\underline{x})\,d\underline{x}.
+\]
+\end{frameddefn}
+
+In two dimensions, $d\underline{x}$ means $dx\,dy$.
+A joint PDF assigns density to locations in the plane or in a
+higher-dimensional space. A probability is obtained by integrating
+over a region.
+
+In particular, a small rectangle near $(x,y)$ has probability approximately
+$f_{X,Y}(x,y)\,\Delta x\,\Delta y$ when the density varies little
+over the rectangle. The PDF value itself is not a point probability;
+in this setting, every individual point has probability zero.
+
+\Needspace{12\baselineskip}
+\begin{framedexample}{}
+\label{ex:joint-pdf-uniform-square}
+Choose a point uniformly at random in the square $[0,2]\times[0,2]$.
+Let $X$ be its horizontal coordinate and $Y$ its vertical coordinate.
+Together they form the random vector $\underline{X}=(X,Y)$.
+Regions with equal area have equal probability. The square has
+area $2\cdot2=4$, so the constant density must be $1/4$:
+\[
+  f_{X,Y}(x,y)=
+  \begin{cases}
+    \frac14,&(x,y)\in[0,2]^2,\\
+    0,&\text{otherwise}.
+  \end{cases}
+\]
+
+\begin{center}
+  \includegraphics[width=0.85\linewidth]{assets/joint-uniform-square.pdf}
+\end{center}
+
+\textbf{Step 1: read the density as a height.}
+The horizontal axes of the graph show $x$ and $y$. The vertical
+axis shows $f_{X,Y}(x,y)$: the density is the height of the surface.
+Here that height is $1/4$ throughout the square. We have two
+random variables; the third axis displays their density.
+
+\textbf{Step 2: check the total probability.}
+The probability of a region is the volume under the surface,
+above that region. Since the height is constant, we multiply
+the height by the area of the base. Over the whole square,
+\[
+  \int_0^2\int_0^2\frac14\,dy\,dx
+    =\underbrace{\frac14}_{\text{height}}
+       \cdot\underbrace{(2\cdot2)}_{\text{area of the base}}=1.
+\]
+Here $dx\,dy$ is an element of area in the plane of the two coordinates.
+
+\textbf{Step 3: find the probability of a smaller region.}
+What is the probability that both coordinates lie between $0$
+and $1$? The base is now the smaller square $[0,1]\times[0,1]$,
+with area $1$. The blue block in the graph has this base and
+height $1/4$. Its volume gives the probability. Since $X$ and $Y$
+are nonnegative, this probability is $F_{X,Y}(1,1)$. Using the
+\hyperref[sec:joint-cdf]{definition of the joint CDF},
+\[
+  F_{X,Y}(1,1)
+    =\int_{-\infty}^1\int_{-\infty}^1 f_{X,Y}(x,y)\,dy\,dx
+    =\int_0^1\int_0^1\frac14\,dy\,dx
+    =\int_0^1\frac14\,dx
+    =\boxed{\frac14}.
+\]
+The lower limits become $0$ because the density is zero outside
+the square $[0,2]^2$.
+If the density varies across a region, the surface has different
+heights. The integral adds up the small volumes to obtain the probability.
+\end{framedexample}
+
+\begin{notebox}[The joint density assumption]
+Having continuous marginals alone does not guarantee a joint PDF.
+
+Choose $X$ uniformly between $0$ and $2$, then set $Y=X$.
+Both variables are continuous, but the possible pairs are
+$(0.3,0.3)$, $(1.2,1.2)$, and so on: they all lie on the
+diagonal $y=x$. Let
+\[
+  A=\{(x,y):0\leq x\leq2,\ y=x\}.
+\]
+Which points belong to $A$? If $x=0.5$, only $(0.5,0.5)$;
+if $x=1$, only $(1,1)$. So $A$ is \textbf{just the diagonal
+segment}.
+
+The segment has length, but \textbf{no thickness}, so its area
+is zero. We can surround it with a strip and make that strip
+as thin as we like: its area approaches zero while it still
+contains the whole segment. The word ``region'' here simply
+means a set of points; it does not imply a positive area.
+
+By the \hyperref[def:joint-pdf]{definition of a joint PDF}, the integral
+over \textbf{the whole plane} must equal $1$:
+\[
+  \iint_{\mathbb R^2}f_{X,Y}(x,y)\,dx\,dy=1.
+\]
+In our example, the pair always lands in $A$, because
+$Y=X$. All the probability is on the diagonal, so
+$P\bigl((X,Y)\in A\bigr)=1$.
+
+Now suppose a joint PDF existed. By its definition, integrating
+it over $A$ would have to give that probability. But $A$ has area
+zero, so the integral would be zero. This gives the contradiction
+\[
+  1=P\bigl((X,Y)\in A\bigr)
+    \overset{\text{def.}}{=}\iint_A f_{X,Y}(x,y)\,dx\,dy=0.
+\]
+No joint PDF can satisfy this requirement. The pair has a joint
+distribution, but \textbf{no ordinary joint PDF}.
+\end{notebox}
+
+\subsection{Normalizing a nonnegative function}
+
+We have already met normalization with
+\hyperref[sec:conditional-pmf]{conditional PMFs}: dividing by
+the probability of the conditioning group makes the probabilities
+within that group sum to $1$.
+
+Here we want a density whose total integral is $1$.
+Sometimes a model is supplied only up to a multiplicative constant.
+
+\Needspace{16\baselineskip}
+\begin{frameddefn}{Kernel of a PDF}
+\label{def:pdf-kernel}
+A \textbf{kernel of a PDF} is a nonnegative function
+$g(\underline{x})$ proportional to that PDF. It specifies the
+shape of the density, leaving a positive multiplicative constant
+to be determined.
+
+To obtain the PDF, compute the total integral
+\[
+  c=\int_{\mathbb R^p}g(\underline{x})\,d\underline{x}.
+\]
+If $0<c<+\infty$, then
+\[
+  f_{\underline{X}}(\underline{x})=\frac{g(\underline{x})}{c}
+\]
+is the corresponding PDF. The constant $c$ is the
+\textbf{normalizing constant}.
+\end{frameddefn}
+
+The resulting function remains nonnegative, and its total integral
+is $c/c=1$.
+
+\Needspace{18\baselineskip}
+\begin{framedexample}{}
+\label{ex:normalize-linear-kernel}
+Start with one variable and the nonnegative function
+\[
+  g(x)=
+  \begin{cases}
+    x,&0\leq x\leq2,\\
+    0,&\text{otherwise}.
+  \end{cases}
+\]
+This is the \textbf{kernel}: it gives the shape of the density,
+while the factor that makes its total integral $1$ is still missing.
+
+\textbf{Step 1: find the total area.}
+\[
+  c=\int_{\mathbb R}g(x)\,dx
+    =\int_0^2x\,dx
+    =\left[\frac{x^2}{2}\right]_0^2
+    =\frac42-0=2.
+\]
+The function is not yet a PDF: its total area is $2$, rather than $1$.
+
+\textbf{Step 2: divide every height by $2$.}
+\[
+  f_X(x)=\frac{g(x)}{2}=
+  \begin{cases}
+    \dfrac{x}{2},&0\leq x\leq2,\\
+    0,&\text{otherwise}.
+  \end{cases}
+\]
+The function remains nonnegative, and now
+\[
+  \int_{\mathbb R}f_X(x)\,dx
+    =\int_0^2\frac{x}{2}\,dx
+    =\frac12\int_0^2x\,dx
+    =\frac12\cdot2=1.
+\]
+So $f_X$ is a PDF.
+\end{framedexample}
+
+\subsection{Moving between the joint CDF and the joint PDF}
+
+Recall that the \hyperref[sec:joint-cdf]{joint CDF} is
+$F_{X,Y}(x,y)=P(X\leq x,Y\leq y)$. With a joint PDF, this probability
+is the integral over the lower-left region:
+\[
+  F_{X,Y}(x,y)
+  =\int_{-\infty}^{x}\int_{-\infty}^{y}
+       f_{X,Y}(s,t)\,dt\,ds.
+\]
+The letters $s,t$ are integration variables; $x,y$ are the fixed
+thresholds defining the region. For $p$ components, the same idea
+uses $p$ integrals, one for each coordinate.
+
+Where the required derivatives exist, differentiating with respect
+to both thresholds recovers the joint density:
+\[
+  f_{X,Y}(x,y)
+    =\frac{\partial^2}{\partial x\,\partial y}F_{X,Y}(x,y).
+\]
+This extends the \hyperref[rel:cdf-to-pdf]{univariate relation $f_X(x)=F_X'(x)$}.
+In general, the density identity is understood almost everywhere;
+the examples below are smooth inside their supports.
+Here \textbf{almost everywhere} allows exceptions on a set of area
+zero, such as individual points or boundary lines. Changing density
+values only on such a set does not change any probability integral.
+Inside the supports of these examples, the derivatives are ordinary
+continuous derivatives; the boundaries can be treated separately.
+
+\subsection{Marginal densities}
+\label{sec:marginal-pdf-continuous}
+
+We know how $X$ and $Y$ behave together; how do we describe $X$ alone
+(or, similarly, $Y$ alone)?
+
+To study $X$ alone, we must allow $Y$ to take every possible value.
+For discrete variables we summed over those possibilities; for a
+joint PDF we integrate over them.
+
+\begin{framedprop}{Marginal PDFs}
+\label{prop:marginal-pdfs}
+The marginal densities are obtained by integrating out the
+other variable:
+\[
+  f_X(x)=\int_{\mathbb R}f_{X,Y}(x,y)\,dy,
+  \qquad
+  f_Y(y)=\int_{\mathbb R}f_{X,Y}(x,y)\,dx.
+\]
+\end{framedprop}
+
+In the first integral, $x$ stays fixed while $y$ is integrated out.
+The integration can be restricted to the support because the joint
+density is zero elsewhere. Both marginal densities are normalized:
+integrating a marginal over its remaining coordinate gives the
+total joint integral, which is $1$.
+
+The procedure also works when we retain several components.
+For a vector $(X_1,X_2,X_3)$ with joint PDF $f_{1,2,3}$, the pair
+$(X_1,X_2)$ has density
+\[
+  f_{1,2}(x_1,x_2)
+    =\int_{\mathbb R}f_{1,2,3}(x_1,x_2,t)\,dt.
+\]
+We integrate out the component we do not want to retain.
+
+\subsection{Conditional densities}
+\label{sec:conditional-pdf-continuous}
+
+We now ask how the distribution of $X$ changes when the value of
+$Y$ is known. In the discrete case we divided a joint probability
+by $P(Y=y)$. For a continuous $Y$, however, $P(Y=y)=0$; substituting
+point probabilities into that formula would not define the desired
+conditional distribution.
+
+For a fixed threshold $x$, first condition on the interval
+$y<Y\leq y+h$, which has positive probability when its density
+is positive nearby. Then
+\[
+  P(X\leq x\mid y<Y\leq y+h)
+  =\frac{\displaystyle\int_y^{y+h}\int_{-\infty}^x
+                f_{X,Y}(s,t)\,ds\,dt}
+         {\displaystyle\int_y^{y+h}f_Y(t)\,dt}.
+\]
+At values $y$ where these averages converge and $f_Y(y)>0$,
+letting $h\to0^+$ gives the conditional CDF
+\[
+  F_{X\mid Y}(x\mid y)
+    =\frac{\displaystyle\int_{-\infty}^x f_{X,Y}(s,y)\,ds}
+           {f_Y(y)}.
+\]
+Differentiating in $x$ gives the density ratio below. This explains
+the passage from a small interval to the notation ``given $Y=y$''.
+
+The density formula can be understood by conditioning on a small
+interval near $y$. Its probability is approximately
+$f_Y(y)\,\Delta y$, while the probability of a small joint rectangle
+near $(x,y)$ is approximately
+$f_{X,Y}(x,y)\,\Delta x\,\Delta y$. Their ratio is
+\[
+  \frac{f_{X,Y}(x,y)\,\Delta x\,\Delta y}
+       {f_Y(y)\,\Delta y}
+  =\frac{f_{X,Y}(x,y)}{f_Y(y)}\,\Delta x.
+\]
+The coefficient of $\Delta x$ is the conditional density.
+
+\begin{frameddefn}{Conditional PDFs}
+When a joint PDF exists, a conditional density of $X$ given $Y=y$
+can be defined, for $f_Y(y)>0$, by
+\[
+  f_{X\mid Y}(x\mid y)=\frac{f_{X,Y}(x,y)}{f_Y(y)}.
+\]
+Similarly, for $f_X(x)>0$,
+\[
+  f_{Y\mid X}(y\mid x)=\frac{f_{X,Y}(x,y)}{f_X(x)}.
+\]
+The conditioning value is held fixed. Integrating the conditional
+density over the other variable gives $1$.
+\end{frameddefn}
+
+For instance, the normalization follows from marginalization:
+\[
+  \int_{\mathbb R}f_{X\mid Y}(x\mid y)\,dx
+    =\frac{\int_{\mathbb R}f_{X,Y}(x,y)\,dx}{f_Y(y)}=1.
+\]
+\Needspace{20\baselineskip}
+\subsection{Independence for variables with PDFs}
+
+Independence means that learning where $X$ lies does not change
+the probabilities for $Y$.
+
+\begin{framedprop}{$X,Y$ independent $\Longleftrightarrow$ joint PDF $=f_Xf_Y$}
+\label{prop:independence-pdf}
+Suppose $X$ and $Y$ \textbf{each have a PDF},
+denoted by $f_X$ and $f_Y$. They are \textbf{independent if and only if}
+their joint PDF exists and satisfies
+\[
+  f_{X,Y}(x,y)=f_X(x)f_Y(y)
+  \qquad\text{almost everywhere}.
+\]
+\end{framedprop}
+\begin{proof}
+\textbf{$(\Rightarrow)$ Independence implies factorization.}\par
+Take an interval $I$ for $X$ and an interval $J$ for $Y$.
+The event $X\in I$, $Y\in J$ means that the pair falls in the
+rectangle $I\times J$. Independence gives
+\[
+\begin{aligned}
+  P(X\in I,\ Y\in J)
+    &=P(X\in I)P(Y\in J)\\
+    &=\left(\int_I f_X(x)\,dx\right)
+      \left(\int_J f_Y(y)\,dy\right)\\
+    &=\iint_{I\times J}f_X(x)f_Y(y)\,dx\,dy.
+\end{aligned}
+\]
+The product therefore gives exactly the joint probabilities we
+need. Since these rectangle probabilities determine the joint
+distribution, $f_X(x)f_Y(y)$ is a joint PDF for the pair.
+
+\textbf{$(\Leftarrow)$ Factorization implies independence.}\par
+Now suppose the joint PDF exists and equals $f_X(x)f_Y(y)$ almost
+everywhere. For any intervals $I$ and $J$,
+\[
+\begin{aligned}
+  P(X\in I,\ Y\in J)
+    &=\int_I\int_J f_{X,Y}(x,y)\,dy\,dx\\
+    &=\int_I\int_J f_X(x)f_Y(y)\,dy\,dx\\
+    &=\left(\int_I f_X(x)\,dx\right)
+      \left(\int_J f_Y(y)\,dy\right)\\
+    &=P(X\in I)P(Y\in J).
+\end{aligned}
+\]
+The integrals separate because $f_X$ depends only on $x$ and
+$f_Y$ only on $y$. Since the last equality holds for every pair
+of intervals, $X$ and $Y$ are independent.
+\end{proof}
+
+\clearpage
+\subsection{Two independent exponential variables}
+
+\begin{framedexample}{Two independent exponential variables}
+\label{sec:exponential-joint-example}
+
+Consider the following joint CDF, with parameters
+$\alpha>0$ and $\beta>0$:
+\[
+  F_{X,Y}(x,y)=
+  \begin{cases}
+    1-e^{-\alpha x}-e^{-\beta y}+e^{-(\alpha x+\beta y)},
+       &x>0,\ y>0,\\
+    0,&x\leq0\text{ or }y\leq0.
+  \end{cases}
+\]
+Find the marginal CDFs and PDFs, recover the joint PDF, and check
+whether $X$ and $Y$ are independent.
+
+\textbf{The plan.}
+Four functions describe $X$ in this example: the joint and the
+marginal CDF in the top row, the joint and the marginal PDF in the
+bottom row. We start from $F_{X,Y}$ and follow the arrows.
+\begin{center}
+\begin{tikzpicture}[
+    every node/.style={font=\small},
+    maparrow/.style={-{Stealth[length=2.2mm]},thick,blue!65!black}]
+  \node (F)  at (0,2.3) {$F_{X,Y}$};
+  \node (FX) at (5,2.3) {$F_X$};
+  \node (f)  at (0,0)   {$f_{X,Y}$};
+  \node (fX) at (5,0)   {$f_X$};
+  \node[NotesMuted,above=4mm of F]  {joint};
+  \node[NotesMuted,above=4mm of FX] {marginal};
+  \draw[maparrow] (F) -- node[above] {Step 1: let $y\to+\infty$} (FX);
+  \draw[maparrow] (FX) -- node[right] {Step 2: $\dfrac{d}{dx}$} (fX);
+  \draw[maparrow] (F) -- node[left]
+    {Step 3: $\dfrac{\partial^2}{\partial x\,\partial y}$} (f);
+  \draw[maparrow] (f) -- node[below] {Step 5: integrate out $y$} (fX);
+\end{tikzpicture}
+\end{center}
+Two paths lead from $F_{X,Y}$ to $f_X$.
+
+\textbf{Step 1: marginal CDFs.}
+By the \hyperref[prop:marginal-cdfs]{marginal CDF proposition},
+we remove the restriction on $Y$ by letting $y\to+\infty$.
+Both terms containing $e^{-\beta y}$ vanish:
+\[
+  F_X(x)=\lim_{y\to+\infty}F_{X,Y}(x,y)=1-e^{-\alpha x},
+  \qquad x>0.
+\]
+Letting $x\to+\infty$ instead gives
+\[
+  F_Y(y)=\lim_{x\to+\infty}F_{X,Y}(x,y)=1-e^{-\beta y},
+  \qquad y>0.
+\]
+Both marginal CDFs are zero when their argument is $\leq0$.
+
+\textbf{Step 2: marginal PDFs.}
+Differentiating each marginal CDF gives
+\[
+  f_X(x)=\alpha e^{-\alpha x}\mathbf1_{(0,+\infty)}(x),
+  \qquad
+  f_Y(y)=\beta e^{-\beta y}\mathbf1_{(0,+\infty)}(y).
+\]
+These are \hyperref[sec:exponential-distribution]{\textbf{exponential distributions}}
+with rates $\alpha$ and $\beta$:
+$X\sim\operatorname{Exp}(\alpha)$ and $Y\sim\operatorname{Exp}(\beta)$.
+
+\textbf{Step 3: joint PDF.}
+Differentiate the joint CDF first in $x$, then in $y$.
+Inside the positive quadrant,
+\begin{align*}
+  \frac{\partial F_{X,Y}}{\partial x}(x,y)
+    &=\alpha e^{-\alpha x}-\alpha e^{-(\alpha x+\beta y)},\\
+  f_{X,Y}(x,y)
+    =\frac{\partial^2 F_{X,Y}}{\partial x\,\partial y}(x,y)
+    &=\alpha\beta e^{-(\alpha x+\beta y)}.
+\end{align*}
+In the derivative in $y$, the term $\alpha e^{-\alpha x}$ does
+not depend on $y$ and vanishes. The joint density is zero outside
+the quadrant.
+
+\textbf{Step 4: independence.}
+Both the joint CDF and the joint PDF factorize.
+
+\emph{Through the CDF.}
+Write $a=e^{-\alpha x}$ and $b=e^{-\beta y}$, so that
+$e^{-(\alpha x+\beta y)}=ab$. For $x,y>0$,
+\begin{align*}
+  F_{X,Y}(x,y)
+    &=1-a-b+ab=(1-a)-b(1-a)=(1-a)(1-b)\\
+    &=\bigl(1-e^{-\alpha x}\bigr)\bigl(1-e^{-\beta y}\bigr)
+     =F_X(x)F_Y(y).
+\end{align*}
+When $x\leq0$ or $y\leq0$, both sides are zero, so the
+factorization holds for all $x,y$. By the
+\hyperref[prop:independence-cdf]{CDF independence criterion proved above},
+$X$ and $Y$ are therefore independent.
+
+\emph{Through the PDF.}
+The exponential of a sum is a product of exponentials:
+\[
+  f_{X,Y}(x,y)
+    =\bigl[\alpha e^{-\alpha x}\mathbf1_{(0,+\infty)}(x)\bigr]
+     \bigl[\beta e^{-\beta y}\mathbf1_{(0,+\infty)}(y)\bigr]
+    =f_X(x)f_Y(y).
+\]
+By the \hyperref[prop:independence-pdf]{PDF independence criterion proved above},
+$X$ and $Y$ are therefore independent.
+
+\emph{Through the conditional densities.}
+Independence also shows up in the
+\hyperref[sec:conditional-pdf-continuous]{conditional densities}.
+For $y>0$,
+\[
+  f_{X\mid Y}(x\mid y)
+    =\frac{\alpha\beta e^{-(\alpha x+\beta y)}}
+           {\beta e^{-\beta y}}
+       \mathbf1_{(0,+\infty)}(x)
+    =f_X(x).
+\]
+Knowing $Y$ leaves the distribution of $X$ unchanged.
+The same holds for $f_{Y\mid X}(y\mid x)=f_Y(y)$.
+
+\textbf{Step 5: check by marginalizing.}
+Steps~1 and~2 reached $f_X$ through the marginal CDF. We can also
+reach it from the joint PDF of Step~3: by the
+\hyperref[prop:marginal-pdfs]{marginal PDF proposition}, we
+integrate out $y$. The density is zero for $y\leq0$, so the
+integral runs over $y>0$:
+\[
+  \int_0^{+\infty}\alpha\beta e^{-(\alpha x+\beta y)}\,dy
+    =\alpha e^{-\alpha x}
+      \underbrace{\int_0^{+\infty}\beta e^{-\beta y}\,dy}_{=1}
+    =\alpha e^{-\alpha x},
+  \qquad x>0.
+\]
+The inner integral is $1$ because $\beta e^{-\beta y}$ is the
+density of $Y$. Both paths give the same $f_X$, so the computations
+agree. If Step~3 contained an error, for instance a missing
+factor $\beta$, this integral would give $\alpha e^{-\alpha x}/\beta$
+instead of $f_X$.
+\end{framedexample}
+
+\section{Mixed random vectors}
+\label{sec:mixed-random-vectors}
+
+\subsection{A binomial model with a latent probability}
+\label{sec:october-14-exercise-2}
+
+We now study the mixed vector
+$\underline{Z}=(X,P)^{\mathsf T}$. Here $X$ is an observable, discrete
+count, while $P$ is a continuous, \textbf{latent} variable: it is
+not directly observed, but represents uncertainty about the
+success probability underlying the count. The capital letter $P$
+denotes a random variable, and $p$ denotes a possible value of it.
+We use $\Pr(\cdot)$ for the probability operator in this example
+to distinguish it from the variable $P$.
+
+\subsubsection{The conditional model for the observable}
+Fix a positive integer $n$, the number of trials. Conditional on
+$P=p$, each trial is a success with probability $p$ and a failure
+with probability $1-p$, and the trials are independent. Let $X$
+count the successes. Then
+\[
+  X\mid(P=p)\sim\operatorname{Bin}(n,p).
+\]
+This is the \hyperref[sec:binomial-distribution]{binomial distribution
+introduced in Section~\ref{sec:binomial-distribution}}.
+Write its conditional PMF as
+\[
+  b(k\mid p)=\Pr(X=k\mid P=p)
+     =\binom nk p^k(1-p)^{n-k},
+  \qquad k=0,\ldots,n,\quad 0<p<1.
+\]
+The factor $p^k(1-p)^{n-k}$ is the probability of a particular
+sequence with $k$ successes. The coefficient $\binom nk$ counts
+how many such sequences have the same number of successes.
+Here $n$ counts the trials making up one observed count.
+It is a parameter of this model, not a count of separate datasets.
+
+\subsubsection{The distribution of the latent variable}
+We also need a PDF $\pi(p)$ for $P$, called its \textbf{prior
+density}: it describes our uncertainty before observing $X$.
+Consider two choices:
+\[
+  P\sim\operatorname{Unif}(0,1)
+  \qquad\text{or}\qquad
+  P\sim\operatorname{Beta}(\alpha,\beta),\quad\alpha,\beta>0.
+\]
+For the uniform choice, $\pi(p)=1$ on $(0,1)$ and zero elsewhere.
+The \hyperref[sec:beta-distribution]{Beta family introduced in Section~\ref{sec:beta-distribution}}
+allows different shapes on the same interval.
+
+\subsubsection{Combine the PMF and the PDF}
+Because $X$ is discrete and $P$ is continuous, their joint model
+uses a mass in the first coordinate and a density in the second.
+Define the mixed joint function
+\[
+  q(k,p)=b(k\mid p)\,\pi(p).
+\]
+This function is not an ordinary two-dimensional PDF: probabilities
+require a \emph{sum} over the count and an \emph{integral} over
+the latent probability.
+Its meaning is expressed by probabilities of a count and an interval:
+\[
+  \Pr(X=k,\ a<P<b)=\int_a^b q(k,p)\,dp,
+  \qquad 0\leq a<b\leq1.
+\]
+The factorization first specifies the distribution of the latent
+variable, then the count distribution given its value.
+It is normalized because
+\[
+  \sum_{k=0}^n\int_0^1 q(k,p)\,dp
+    =\int_0^1\pi(p)
+       \underbrace{\sum_{k=0}^n b(k\mid p)}_{=1}\,dp=1.
+\]
+
+\subsubsection{Marginalization and conditioning in the mixed model}
+To describe $X$ alone, average over the unknown success probability.
+Its marginal PMF, denoted by $m(k)$, is
+\[
+  m(k)=\Pr(X=k)=\int_0^1 b(k\mid p)\,\pi(p)\,dp.
+\]
+This is the continuous version of summing over an unobserved
+component. Conversely, summing $q(k,p)$ over $k$ recovers $\pi(p)$.
+
+After observing $X=k$, we want to update the distribution of $P$.
+For $m(k)>0$, its \textbf{posterior density} is
+\[
+  f_{P\mid X}(p\mid k)=\frac{b(k\mid p)\,\pi(p)}{m(k)}.
+\]
+The count $k$ is now fixed, while $p$ varies. The numerator gives
+more weight to values of $p$ that make the observed count likely;
+the denominator normalizes those weights to integrate to $1$.
+This is Bayes' rule for a discrete observation and a continuous
+latent variable.
+
+The Beta family is especially useful in this binomial model:
+after observing a count, its posterior also belongs to the Beta
+family. This property is called \textbf{conjugacy}; identifying
+the updated parameters is one of the final exercise questions.
+
+
+Equivalently, the same joint function can be written in the other
+order:
+\[
+  q(k,p)=f_{P\mid X}(p\mid k)\,m(k).
+\]
+The first factorization uses a conditional PMF and a marginal PDF;
+the second uses a conditional PDF and a marginal PMF. Both describe
+the same joint distribution. A conditional factorization by itself
+does not assert independence.
+
+\exerciseheading{Questions left to work through.}
+To complete the example, determine:
+\begin{enumerate}
+  \item What is the marginal distribution of $X$?
+  \item What is the conditional distribution of $P\mid X$?
+\end{enumerate}
+Apply the formulas above to each proposed prior, keeping track of
+which object is a PMF and which is a PDF.
+
+
 \section{Copulas and Sklar's theorem}
 \label{sec:copulas}
 
@@ -2138,7 +3152,7 @@ Conversely, combining any two marginal CDFs with a copula using
 this formula produces a joint CDF with those marginals.
 \end{framedthm}
 
-The lecture's schematic statement
+The schematic statement
 \[
   \text{joint distribution}
   =\text{marginals}+\text{dependence structure}
@@ -2178,6 +3192,15 @@ observation before sampling; lowercase $x_i$ denotes its observed
 value. The realized dataset is $\mathcal D_n=(x_1,\ldots,x_n)$.
 \end{frameddefn}
 
+For $n$ variables, \textbf{mutual independence} means that
+\[
+  P\left(\bigcap_{i=1}^n\{X_i\in I_i\}\right)
+    =\prod_{i=1}^nP(X_i\in I_i)
+  \quad\text{for all intervals }I_1,\ldots,I_n.
+\]
+Taking any unused interval to be $\mathbb R$ also gives the
+factorization for every subcollection.
+
 \subsection{The joint CDF of the sample}
 Independence gives a product, and identical distribution gives
 the same CDF in every factor:
@@ -2192,12 +3215,12 @@ their respective thresholds.
 
 \subsection{Multivariate observations}
 Each observation may itself be a vector
-$\mathbf X_i\in\mathbb R^p$. If these vectors are IID with common
-joint CDF $F_{\mathbf X}$, then
+$\underline{X}_i\in\mathbb R^p$. If these vectors are IID with common
+joint CDF $F_{\underline{X}}$, then
 \[
-  P(\mathbf X_1\leq\mathbf x_1,\ldots,
-     \mathbf X_n\leq\mathbf x_n)
-    =\prod_{i=1}^n F_{\mathbf X}(\mathbf x_i),
+  P(\underline{X}_1\leq\underline{x}_1,\ldots,
+     \underline{X}_n\leq\underline{x}_n)
+    =\prod_{i=1}^n F_{\underline{X}}(\underline{x}_i),
 \]
 where each vector inequality is interpreted componentwise.
 The product is over observations. Coordinates within one
@@ -2278,6 +3301,7 @@ handwritten notes.
 \end{notebox}
 
 \subsection{Maximum likelihood estimation}
+\label{sec:maximum-likelihood}
 
 Suppose our candidates form a family of distributions described
 by a parameter $\theta$. This parameter may be one number or
@@ -2505,10 +3529,21 @@ Maximizing it subject to the probability constraints gives
   \widehat w_j=\frac{n_j}{n}.
 \]
 Indeed, the log-likelihood is $\sum_j n_j\log w_j$.
+To impose the total-mass constraint while differentiating, form
+\[
+  \mathcal L(w,\lambda)=\sum_{j=1}^m n_j\log w_j
+                  -\lambda\left(\sum_{j=1}^m w_j-1\right).
+\]
+The auxiliary variable $\lambda$ is a \textbf{Lagrange multiplier}.
+Setting the derivatives in the weights to zero enforces the
+stationary condition alongside the constraint.
 Introducing a multiplier $\lambda$ for $\sum_jw_j=1$ gives
 $n_j/w_j=\lambda$; summing $w_j=n_j/\lambda$ yields $\lambda=n$.
 Concavity of the log-likelihood ensures that these weights
 maximize it.
+In fact, $d^2(n_j\log w_j)/dw_j^2=-n_j/w_j^2<0$ for the distinct
+observed values, so this stationary point is the maximum on the
+probability simplex, the set of nonnegative weights summing to $1$.
 
 The resulting CDF is exactly
 \[
@@ -2520,20 +3555,10 @@ the empirical distribution. It is not obtained by maximizing a
 product of CDF values, nor by freely maximizing over all
 continuous PDFs.
 
-\begin{tcolorbox}[colback=yellow!20,colframe=yellow!60!black,
-  boxrule=0.4pt,arc=1mm,left=5pt,right=5pt,top=3pt,bottom=3pt,
-  before skip=6pt,after skip=6pt]
-\small\textbf{End of lecture 7 October}
-\end{tcolorbox}
 
 \chapter{Stochastic simulations}
 \label{sec:simulation}
 
-\begin{tcolorbox}[colback=yellow!20,colframe=yellow!60!black,
-  boxrule=0.4pt,arc=1mm,left=5pt,right=5pt,top=3pt,bottom=3pt,
-  before skip=6pt,after skip=6pt]
-\small\textbf{Start of lecture 1 October}
-\end{tcolorbox}
 
 \section{A ``what if?'' experiment}
 \label{sec:simulation-what-if}
@@ -2808,11 +3833,6 @@ example illustrates the calculations and a full cycle; assessing
 statistical quality requires more than checking the period.
 \end{notebox}
 
-\begin{tcolorbox}[colback=yellow!20,colframe=yellow!60!black,
-  boxrule=0.4pt,arc=1mm,left=5pt,right=5pt,top=3pt,bottom=3pt,
-  before skip=6pt,after skip=6pt]
-\small\textbf{Start of lecture 2 October}
-\end{tcolorbox}
 
 \section{The LCG in R}
 \label{sec:lcg-r}
@@ -3186,7 +4206,7 @@ As a check, for $0\leq y\leq1$,
 \clearpage
 \subsection{A discrete example}
 \begin{framedexample}{Generating a Bernoulli variable}
-\textbf{TODO:} The Bernoulli distribution will be introduced in
+Recall the Bernoulli distribution introduced in
 \hyperref[sec:bernoulli-distribution]{Section~\ref{sec:bernoulli-distribution}}.
 Suppose we want $X\sim\operatorname{Ber}(0.4)$, so
 \[
@@ -3280,169 +4300,9 @@ transformation step is the same whichever suitable uniform
 generator supplies the input.
 \end{octoberreview}
 
-\clearpage
-\begin{octoberreview}
-\section{From generator checks to statistical learning}
-\label{sec:loss-risk-density}
-
-The blackboard discussion on 2 October turned the visual
-histogram check into a more general question: how can we measure
-the difference between a target density and an estimate obtained
-from data?
-
-\subsection{A target density and a histogram estimate}
-For the standard uniform distribution, the target is known:
-\[
-  f_U(u)=\mathbf 1_{[0,1]}(u).
-\]
-Let $u_1,\ldots,u_n$ be the available values. A density histogram
-with equal bin width $h$ gives an estimate
-$\widehat f_{n,h}$. If bin $B_j$ contains $N_j$ observations,
-its height is
-\[
-  \widehat f_{n,h}(u)=\frac{N_j}{nh},\qquad u\in B_j.
-\]
-Use disjoint bins covering the range, assigning a boundary point
-to just one bin. Each bin's area is $N_j/n$, so the histogram
-has total area $1$.
-
-The notation records two choices: $n$ is the sample size and
-$h$ is the bin width. The histogram is an algorithm that turns
-the data into a density estimate.
-
-\subsection{Distances between densities}
-The lecture introduced the following ways to compare densities
-$f$ and $g$:
-\begin{align*}
-  D_1(f,g)&=\int_{\mathbb R}|f(u)-g(u)|\,du,\\[3pt]
-  D_2(f,g)&=\left(\int_{\mathbb R}|f(u)-g(u)|^2\,du\right)^{1/2},\\[3pt]
-  D_\infty(f,g)&=\operatorname*{ess\,sup}_{u\in\mathbb R}
-    |f(u)-g(u)|.
-\end{align*}
-These are the $L^1$, $L^2$, and $L^\infty$ distances, when finite.
-The first accumulates absolute discrepancies; the second
-squares them before integration; the third looks at the largest
-discrepancy, ignoring changes on sets of length zero.
-
-More generally, for $1\leq q<\infty$,
-\[
-  D_q(f,g)=\left(\int_{\mathbb R}|f(u)-g(u)|^q\,du\right)^{1/q}.
-\]
-Different distances emphasize different features of the error.
-
-\clearpage
-\subsection{Loss for one dataset and average risk}
-Once the data are fixed, the discrepancy
-\[
-  \ell_n(u_1,\ldots,u_n)
-    =D\bigl(f_U,\widehat f_{n,h}\bigr)
-\]
-is the \textbf{loss} for that dataset. A different dataset may
-produce a different histogram and a different loss.
-
-The blackboard contrasted two possible goals:
-\begin{itemize}
-  \item \textbf{Worst-case loss:} control the largest loss over
-    the possible datasets. In schematic form,
-    \[
-      \sup_{\mathbf u\in[0,1]^n}\ell_n(\mathbf u)
-        \longrightarrow0.
-    \]
-  \item \textbf{Average loss:} average over datasets generated
-    by a specified sampling model. This average is the
-    \textbf{risk}:
-    \[
-      R_n(f_U;h)=
-        \mathbb E_{f_U}\!\left[
-          D\bigl(f_U,\widehat f_{n,h}\bigr)\right].
-    \]
-\end{itemize}
-For example, under ideal independent uniform sampling, the
-expectation averages over the random samples
-$(U_1,\ldots,U_n)$. Risk tending to zero is an average guarantee;
-it does not require small loss for every possible dataset.
-
-The worst-case requirement is much stronger. For an ordinary
-histogram it need not hold: datasets concentrated in one bin
-remain possible even when the target distribution is uniform.
-
-\begin{notebox}[A criterion is not an LCG convergence theorem]
-These formulas express ways to judge an estimation procedure.
-They do not prove that every LCG converges to a uniform density.
-With a fixed seed, an LCG produces a deterministic sequence;
-an average risk requires a stated source of randomness, such as
-a random seed or a sampling model. Results for ideal IID data
-do not automatically apply to a deterministic generator.
-\end{notebox}
-
-\clearpage
-\subsection{Unknown ground truth and a class of models}
-In the simulation check, $f_U$ is known. In a learning problem,
-the true population density $f$ is typically unknown, and the
-algorithm must estimate it from data.
-
-For data generated from $f$, define
-\[
-  R_n(f;h)=\mathbb E_f\!\left[
-    D\bigl(f,\widehat f_{n,h}\bigr)\right].
-\]
-The subscript $f$ records the distribution used to average over
-datasets. The lecture's phrase ``all ground truths that make
-sense'' refers to a specified class of possible densities
-$\mathcal F$.
-
-There are two distinct consistency requirements:
-\begin{itemize}
-  \item \textbf{For a fixed density:}
-    $R_n(f;h_n)\to0$ for that population density $f$.
-  \item \textbf{Uniformly over a class:}
-    \[
-      \sup_{f\in\mathcal F}R_n(f;h_n)\longrightarrow0.
-    \]
-\end{itemize}
-In the second expression, we first average over datasets for
-each $f$, then take the worst risk over the class of population
-densities. This supremum is over \emph{models}, whereas the
-earlier worst-case loss was over \emph{datasets}.
-
-The class $\mathcal F$ and the estimation procedure matter.
-The formula is a goal to establish under suitable assumptions,
-not a guarantee for every class of densities. Writing $h_n$
-allows the bin width to change with sample size; a fixed bin
-width may retain approximation error for a general density.
-
-\subsection{Qualitative and quantitative questions}
-The final board remarks distinguish:
-\begin{itemize}
-  \item \textbf{Qualitative:} does the risk tend to zero?
-    This is a consistency question.
-  \item \textbf{Quantitative:} how fast does it tend to zero
-    as the sample size grows? This asks for a convergence rate.
-\end{itemize}
-A rate may be expressed by a bound such as
-\[
-  \sup_{f\in\mathcal F}R_n(f;h_n)\leq C r_n,
-  \qquad r_n\longrightarrow0,
-\]
-where $C$ does not depend on $n$. Such a bound must be proved
-for the chosen model class, loss, and algorithm; the board
-discussion did not establish a specific rate for the LCG.
-\end{octoberreview}
-
-\begin{tcolorbox}[colback=yellow!20,colframe=yellow!60!black,
-  boxrule=0.4pt,arc=1mm,left=5pt,right=5pt,top=3pt,bottom=3pt,
-  before skip=6pt,after skip=6pt]
-\small\textbf{End of lecture 2 October}
-\end{tcolorbox}
-
 \section{Transformations of random variables}
 \label{chap:random-variable-transformations}
 
-\begin{tcolorbox}[colback=yellow!20,colframe=yellow!60!black,
-  boxrule=0.4pt,arc=1mm,left=5pt,right=5pt,top=3pt,bottom=3pt,
-  before skip=6pt,after skip=6pt]
-\small\textbf{Start of lecture 8 October}
-\end{tcolorbox}
 
 \subsection{What are we trying to compute?}
 
@@ -3793,18 +4653,182 @@ The curve continues
 upwards beyond the displayed range near zero; the finite
 height of the first histogram bar estimates the average PDF value over that bin.
 
-\begin{tcolorbox}[colback=yellow!20,colframe=yellow!60!black,
-  boxrule=0.4pt,arc=1mm,left=5pt,right=5pt,top=3pt,bottom=3pt,
-  before skip=6pt,after skip=6pt]
-\small\textbf{End of lecture 8 October}
-\end{tcolorbox}
 
 \clearpage
-\begin{tcolorbox}[colback=yellow!20,colframe=yellow!60!black,
-  boxrule=0.4pt,arc=1mm,left=5pt,right=5pt,top=3pt,bottom=3pt,
-  before skip=6pt,after skip=6pt]
-\small\textbf{Start of lecture 14 October}
-\end{tcolorbox}
+\chapter{Exploratory data analysis}
+\label{chap:learning-distributions}
+
+We now use observed samples to learn a population distribution.
+The empirical CDF and likelihood were introduced after
+\hyperref[sec:iid-sample]{IID sampling}. The simulation chapter
+then supplied a concrete histogram check. Here we develop density
+estimation, ways to measure its error, and the role of the class
+of candidate models.
+
+\begin{octoberreview}
+\section{From generator checks to statistical learning}
+\label{sec:loss-risk-density}
+
+The \hyperref[sec:lcg-r]{histogram check for a generator} leads
+to a more general question: how can we measure
+the difference between a target density and an estimate obtained
+from data?
+
+\subsection{A target density and a histogram estimate}
+For the standard uniform distribution, the target is known:
+\[
+  f_U(u)=\mathbf 1_{[0,1]}(u).
+\]
+Let $u_1,\ldots,u_n$ be the available values. A density histogram
+with equal bin width $h$ gives an estimate
+$\widehat f_{n,h}$. If bin $B_j$ contains $N_j$ observations,
+its height is
+\[
+  \widehat f_{n,h}(u)=\frac{N_j}{nh},\qquad u\in B_j.
+\]
+Use disjoint bins covering the range, assigning a boundary point
+to just one bin. Each bin's area is $N_j/n$, so the histogram
+has total area $1$.
+
+The notation records two choices: $n$ is the sample size and
+$h$ is the bin width. The histogram is an algorithm that turns
+the data into a density estimate.
+
+\subsection{Distances between densities}
+Consider the following ways to compare densities
+$f$ and $g$:
+\begin{align*}
+  D_1(f,g)&=\int_{\mathbb R}|f(u)-g(u)|\,du,\\[3pt]
+  D_2(f,g)&=\left(\int_{\mathbb R}|f(u)-g(u)|^2\,du\right)^{1/2},\\[3pt]
+  D_\infty(f,g)&=\operatorname*{ess\,sup}_{u\in\mathbb R}
+    |f(u)-g(u)|.
+\end{align*}
+These are the $L^1$, $L^2$, and $L^\infty$ distances, when finite.
+The first accumulates absolute discrepancies; the second
+squares them before integration; the third looks at the largest
+discrepancy, ignoring changes on sets of length zero.
+
+More generally, for $1\leq q<\infty$,
+\[
+  D_q(f,g)=\left(\int_{\mathbb R}|f(u)-g(u)|^q\,du\right)^{1/q}.
+\]
+Different distances emphasize different features of the error.
+
+\clearpage
+\subsection{Loss for one dataset and average risk}
+An average over random outcomes is called an \textbf{expectation}.
+For a nonnegative random variable $Z$, it is a probability-weighted
+average: $\mathbb E[Z]=\sum_z z\,p_Z(z)$ in a discrete model, or
+$\mathbb E[Z]=\int_{\mathbb R}z f_Z(z)\,dz$ when $Z$ has a PDF.
+The value may be $+\infty$. We apply this idea to the nonnegative
+error produced by a random dataset.
+
+Once the data are fixed, the discrepancy
+\[
+  \ell_n(u_1,\ldots,u_n)
+    =D\bigl(f_U,\widehat f_{n,h}\bigr)
+\]
+is the \textbf{loss} for that dataset. A different dataset may
+produce a different histogram and a different loss.
+
+The blackboard contrasted two possible goals:
+\begin{itemize}
+  \item \textbf{Worst-case loss:} control the largest loss over
+    the possible datasets. In schematic form,
+    \[
+      \sup_{\underline{u}\in[0,1]^n}\ell_n(\underline{u})
+        \longrightarrow0.
+    \]
+  \item \textbf{Average loss:} average over datasets generated
+    by a specified sampling model. This average is the
+    \textbf{risk}:
+    \[
+      R_n(f_U;h)=
+        \mathbb E_{f_U}\!\left[
+          D\bigl(f_U,\widehat f_{n,h}\bigr)\right].
+    \]
+\end{itemize}
+For example, under ideal independent uniform sampling, the
+expectation averages over the random samples
+$(U_1,\ldots,U_n)$. Risk tending to zero is an average guarantee;
+it does not require small loss for every possible dataset.
+More explicitly, for IID observations from a density $f$ and an
+estimation rule $\widehat f_{n,h}$, this average is
+\[
+  R_n(f;h)=\int_{\mathbb R^n}
+    D\bigl(f,\widehat f_{n,h}(\,\cdot\,;x_1,\ldots,x_n)\bigr)
+    \prod_{i=1}^n f(x_i)\,dx_1\cdots dx_n.
+\]
+The dot is the argument of the estimated density; the values
+$x_1,\ldots,x_n$ specify the dataset used to construct it.
+The product is the joint PDF supplied by the IID model.
+
+The worst-case requirement is much stronger. For an ordinary
+histogram it need not hold: datasets concentrated in one bin
+remain possible even when the target distribution is uniform.
+
+\begin{notebox}[A criterion is not an LCG convergence theorem]
+These formulas express ways to judge an estimation procedure.
+They do not prove that every LCG converges to a uniform density.
+With a fixed seed, an LCG produces a deterministic sequence;
+an average risk requires a stated source of randomness, such as
+a random seed or a sampling model. Results for ideal IID data
+do not automatically apply to a deterministic generator.
+\end{notebox}
+
+\clearpage
+\subsection{Unknown ground truth and a class of models}
+In the simulation check, $f_U$ is known. In a learning problem,
+the true population density $f$ is typically unknown, and the
+algorithm must estimate it from data.
+
+For data generated from $f$, define
+\[
+  R_n(f;h)=\mathbb E_f\!\left[
+    D\bigl(f,\widehat f_{n,h}\bigr)\right].
+\]
+The subscript $f$ records the distribution used to average over
+datasets. The phrase ``all ground truths that make
+sense'' refers to a specified class of possible densities
+$\mathcal F$.
+
+There are two distinct consistency requirements:
+\begin{itemize}
+  \item \textbf{For a fixed density:}
+    $R_n(f;h_n)\to0$ for that population density $f$.
+  \item \textbf{Uniformly over a class:}
+    \[
+      \sup_{f\in\mathcal F}R_n(f;h_n)\longrightarrow0.
+    \]
+\end{itemize}
+In the second expression, we first average over datasets for
+each $f$, then take the worst risk over the class of population
+densities. This supremum is over \emph{models}, whereas the
+earlier worst-case loss was over \emph{datasets}.
+
+The class $\mathcal F$ and the estimation procedure matter.
+The formula is a goal to establish under suitable assumptions,
+not a guarantee for every class of densities. Writing $h_n$
+allows the bin width to change with sample size; a fixed bin
+width may retain approximation error for a general density.
+
+\subsection{Qualitative and quantitative questions}
+The final board remarks distinguish:
+\begin{itemize}
+  \item \textbf{Qualitative:} does the risk tend to zero?
+    This is a consistency question.
+  \item \textbf{Quantitative:} how fast does it tend to zero
+    as the sample size grows? This asks for a convergence rate.
+\end{itemize}
+A rate may be expressed by a bound such as
+\[
+  \sup_{f\in\mathcal F}R_n(f;h_n)\leq C r_n,
+  \qquad r_n\longrightarrow0,
+\]
+where $C$ does not depend on $n$. Such a bound must be proved
+for the chosen model class, loss, and algorithm; these formulas do not establish a specific rate for the LCG.
+\end{octoberreview}
+
 
 \section{Density estimation}
 \label{sec:density-estimation}
@@ -3826,7 +4850,7 @@ represents one possible population distribution.
 
 We compare these candidates using the
 \hyperref[def:maximum-likelihood]{maximum likelihood rule
-introduced in Section~4.8.1}. The chosen class $\mathcal F$
+introduced in Section~\ref{sec:maximum-likelihood}}. The chosen class $\mathcal F$
 specifies which densities can compete in that comparison.
 
 With this idea in mind, we now ask why we cannot simply allow
@@ -4032,691 +5056,6 @@ ever taller can no longer keep improving the result.
 \end{framedexample}
 
 \clearpage
-\section{Continuous and mixed random vectors}
-\label{sec:continuous-mixed-random-vectors}
-
-\subsection{Joint probability density functions}
-\label{sec:joint-pdf-continuous}
-
-We now return to the
-\hyperref[chap:random-vectors]{random vectors introduced on
-7 October}. We have already studied
-\hyperref[sec:joint-pmf]{joint},
-\hyperref[sec:marginal-pmf]{marginal} and
-\hyperref[sec:conditional-pmf]{conditional} PMFs for discrete variables.
-The next sections ask the same questions for continuous variables:
-how do we describe them together, recover one component, and use
-information about another component? Probabilities will be computed
-by integrating densities, rather than summing masses.
-
-Let $\mathbf X=(X_1,\ldots,X_p)^{\mathsf T}$ be a random vector
-with $p$ components. A possible value is
-$\mathbf x=(x_1,\ldots,x_p)^{\mathsf T}\in\mathbb R^p$.
-Here we assume that its joint distribution admits a PDF.
-For $p=2$, we write the components as $(X,Y)$ and the density as
-$f_{X,Y}(x,y)$.
-
-\Needspace{12\baselineskip}
-\begin{frameddefn}{Joint PDF}
-A \textbf{joint probability density function}
-$f_{\mathbf X}:\mathbb R^p\to[0,+\infty)$ satisfies
-\[
-  \int_{\mathbb R^p}f_{\mathbf X}(\mathbf x)\,d\mathbf x=1,
-\]
-and gives the probability of a measurable region
-$A\subseteq\mathbb R^p$ through
-\[
-  P(\mathbf X\in A)=\int_A f_{\mathbf X}(\mathbf x)\,d\mathbf x.
-\]
-\end{frameddefn}
-
-In two dimensions, $d\mathbf x$ means $dx\,dy$.
-A joint PDF assigns density to locations in the plane or in a
-higher-dimensional space. A probability is obtained by integrating
-over a region. In particular, for a small rectangle near $(x,y)$,
-its probability is approximately
-$f_{X,Y}(x,y)\,\Delta x\,\Delta y$ when the density varies little
-over the rectangle. The PDF value itself is not a point probability;
-in this setting, every individual point has probability zero.
-
-\begin{notebox}[The joint density assumption]
-Having continuous marginals alone does not guarantee a joint PDF.
-For example, if $X$ is continuous and $Y=X$, each component is
-continuous, but the pair lies on the line $y=x$. There is no
-ordinary two-dimensional density for that pair. The formulas below
-apply when a joint PDF exists.
-\end{notebox}
-
-\subsubsection{Normalizing a nonnegative function}
-
-Sometimes a model is supplied only up to a multiplicative constant.
-Let $g(\mathbf x)\geq0$ be such a function, often called a
-\emph{kernel}. Compute its total integral
-\[
-  c=\int_{\mathbb R^p}g(\mathbf x)\,d\mathbf x.
-\]
-If $0<c<+\infty$, then
-\[
-  f_{\mathbf X}(\mathbf x)=\frac{g(\mathbf x)}{c}
-\]
-is a PDF: it remains nonnegative, and its total integral is $c/c=1$.
-The constant $c$ is the \textbf{normalizing constant}. It adjusts
-the overall scale while preserving the relative density values.
-
-\subsubsection{Moving between the joint CDF and the joint PDF}
-
-The \hyperref[sec:joint-cdf]{joint CDF} is still
-$F_{X,Y}(x,y)=P(X\leq x,Y\leq y)$. With a joint PDF, this probability
-is the integral over the lower-left region:
-\[
-  F_{X,Y}(x,y)
-  =\int_{-\infty}^{x}\int_{-\infty}^{y}
-       f_{X,Y}(s,t)\,dt\,ds.
-\]
-The letters $s,t$ are integration variables; $x,y$ are the fixed
-thresholds defining the region. For $p$ components, the same idea
-uses $p$ integrals, one for each coordinate.
-
-Where the required derivatives exist, differentiating with respect
-to both thresholds recovers the joint density:
-\[
-  f_{X,Y}(x,y)
-    =\frac{\partial^2}{\partial x\,\partial y}F_{X,Y}(x,y).
-\]
-This extends the univariate relation $f_X(x)=F_X'(x)$.
-In general, the density identity is understood almost everywhere;
-the examples below are smooth inside their supports.
-
-\subsection{Marginal densities}
-\label{sec:marginal-pdf-continuous}
-
-To study $X$ alone, we must allow $Y$ to take every possible value.
-For discrete variables we summed over those possibilities; for a
-joint PDF we integrate over them:
-\[
-  f_X(x)=\int_{\mathbb R}f_{X,Y}(x,y)\,dy,
-  \qquad
-  f_Y(y)=\int_{\mathbb R}f_{X,Y}(x,y)\,dx.
-\]
-In the first integral, $x$ stays fixed while $y$ is integrated out.
-The integration can be restricted to the support because the joint
-density is zero elsewhere. Both marginal densities are normalized:
-integrating a marginal over its remaining coordinate gives the
-total joint integral, which is $1$.
-
-The procedure also works when we retain several components.
-For a vector $(X_1,X_2,X_3)$ with joint PDF $f_{1,2,3}$, the pair
-$(X_1,X_2)$ has density
-\[
-  f_{1,2}(x_1,x_2)
-    =\int_{\mathbb R}f_{1,2,3}(x_1,x_2,t)\,dt.
-\]
-We integrate out the component we do not want to retain.
-
-\begin{notebox}[Marginalizing or conditioning?]
-The integral above gives the distribution of $(X_1,X_2)$ without
-specifying $X_3$. If instead $X_3=t$ is known, we hold $t$ fixed
-and use a conditional density:
-\[
-  f_{1,2\mid3}(x_1,x_2\mid t)
-    =\frac{f_{1,2,3}(x_1,x_2,t)}{f_3(t)},\qquad f_3(t)>0.
-\]
-Here $f_3(t)$ is obtained by integrating the joint density over
-$x_1$ and $x_2$. The next discussion of conditioning explains
-why this ratio is normalized.
-\end{notebox}
-
-\Needspace{18\baselineskip}
-\begin{framedexample}{Two independent exponential variables}
-\label{sec:exponential-joint-example}
-
-The lecture gives the following joint CDF, with parameters
-$\alpha>0$ and $\beta>0$:
-\[
-  F_{X,Y}(x,y)=
-  \begin{cases}
-    1-e^{-\alpha x}-e^{-\beta y}+e^{-(\alpha x+\beta y)},
-       &x>0,\ y>0,\\
-    0,&x\leq0\text{ or }y\leq0.
-  \end{cases}
-\]
-Recover the marginal distributions and the joint PDF, and check
-whether $X$ and $Y$ are independent.
-
-\textbf{Find the marginal distributions.}
-The possible values of both variables are positive. We recover
-the marginal CDF of $X$ by removing the restriction on $Y$:
-\[
-  F_X(x)=\lim_{y\to+\infty}F_{X,Y}(x,y)
-         =1-e^{-\alpha x},\qquad x>0.
-\]
-It is zero for $x\leq0$. Differentiating gives
-\[
-  f_X(x)=\alpha e^{-\alpha x}\mathbf1_{(0,+\infty)}(x).
-\]
-This is the \textbf{exponential distribution with rate $\alpha$},
-written $X\sim\operatorname{Exp}(\alpha)$.
-Similarly,
-\[
-  f_Y(y)=\beta e^{-\beta y}\mathbf1_{(0,+\infty)}(y),
-  \qquad Y\sim\operatorname{Exp}(\beta).
-\]
-
-\textbf{Find the joint PDF and check independence.}
-To recover the joint PDF, first differentiate the CDF in $x$,
-then in $y$. Inside the positive quadrant,
-\begin{align*}
-  \frac{\partial F_{X,Y}}{\partial x}(x,y)
-    &=\alpha e^{-\alpha x}-\alpha e^{-(\alpha x+\beta y)},\\
-  f_{X,Y}(x,y)
-    &=\alpha\beta e^{-(\alpha x+\beta y)}.
-\end{align*}
-The joint density is zero outside that quadrant. It factorizes as
-\[
-  f_{X,Y}(x,y)
-    =\bigl[\alpha e^{-\alpha x}\mathbf1_{(0,+\infty)}(x)\bigr]
-     \bigl[\beta e^{-\beta y}\mathbf1_{(0,+\infty)}(y)\bigr]
-    =f_X(x)f_Y(y).
-\]
-For variables with a joint PDF, independence is equivalent to this
-factorization almost everywhere. Thus $X$ and $Y$ are independent.
-The same conclusion follows directly from the CDF, whose expression
-for positive $x,y$ is $(1-e^{-\alpha x})(1-e^{-\beta y})$.
-
-\textbf{Check by marginalizing.}
-As a check, integrating the joint density over $y>0$ gives
-\[
-  f_X(x)=\alpha e^{-\alpha x}
-          \underbrace{\int_0^{+\infty}\beta e^{-\beta y}\,dy}_{=1},
-  \qquad x>0.
-\]
-\end{framedexample}
-
-\Needspace{12\baselineskip}
-\subsection{The exponential distribution as a waiting-time model}
-\label{sec:exponential-distribution}
-
-The marginals in the previous example have exponential
-distributions. To understand the model, let $T$ be the time until the
-next event, such as a job reaching a printer. Times are
-nonnegative. The parameter $\lambda>0$ is a \textbf{rate}, measured
-in inverse time units: a larger rate describes shorter waits.
-
-\begin{frameddefn}{Exponential distribution}
-We write $T\sim\operatorname{Exp}(\lambda)$, with rate $\lambda>0$,
-when its PDF and CDF are
-\[
-  f_T(t)=\lambda e^{-\lambda t}\mathbf1_{[0,+\infty)}(t),
-  \qquad
-  F_T(t)=
-  \begin{cases}
-    0,&t<0,\\
-    1-e^{-\lambda t},&t\geq0.
-  \end{cases}
-\]
-\end{frameddefn}
-
-The density integrates to $1$ because
-\[
-  \int_0^{+\infty}\lambda e^{-\lambda t}\,dt
-    =\left[-e^{-\lambda t}\right]_0^{+\infty}=1.
-\]
-Integrating only up to a threshold $t\geq0$ gives the CDF.
-Consequently, the probability of waiting longer than $t$ is
-\[
-  P(T>t)=1-F_T(t)=e^{-\lambda t}.
-\]
-This is the \textbf{survival function}. The exponential is also
-a special case of the Gamma family of distributions on positive
-values, with shape parameter $1$.
-
-\begin{center}
-  \includegraphics[width=\linewidth]{assets/exponential-pdf-cdf.pdf}
-\end{center}
-
-The left panel compares PDFs for four rates. A larger $\lambda$
-places more density near zero, and the tail decays faster.
-The right panel shows the corresponding CDFs: with a larger rate,
-more probability accumulates before the same waiting-time threshold.
-Every PDF still has total area $1$.
-
-\subsubsection{A constant chance of arrival over a short interval}
-
-Suppose no event has occurred by time $t$. For a short additional
-interval of length $h>0$, the model gives
-\begin{align*}
-  P(t<T\leq t+h\mid T>t)
-    &=\frac{F_T(t+h)-F_T(t)}{P(T>t)}\\
-    &=\frac{e^{-\lambda t}-e^{-\lambda(t+h)}}
-            {e^{-\lambda t}}\\
-    &=1-e^{-\lambda h}\approx\lambda h.
-\end{align*}
-The approximation applies when $\lambda h$ is small. The exact
-probability depends on the interval's length, not on how long we
-have already waited. Equivalently, the instantaneous event rate is
-constant. An average arrival rate alone does not guarantee an
-exponential waiting time; this constant-rate assumption is part
-of the model.
-
-\begin{framedexample}{The next printer job}
-Jobs reach a printer at an average rate of $3$ per hour. Assume
-the waiting time follows $T\sim\operatorname{Exp}(3)$, with $T$
-measured in hours. What is the probability that the next job
-arrives within $5$ minutes?
-
-\textbf{Convert the time, then evaluate the CDF.}
-\begin{enumerate}[label=\textbf{Step \arabic*:},leftmargin=*]
-  \item \textbf{Use the same time unit as the rate.}
-  Five minutes is $5/60=1/12$ of an hour.
-  \item \textbf{Translate the question into an event.}
-  We want $P(T\leq1/12)=F_T(1/12)$.
-  \item \textbf{Substitute the rate and threshold.}
-  \[
-    \boxed{P(T\leq1/12)=1-e^{-3/12}
-      =1-e^{-1/4}\approx0.2212.}
-  \]
-\end{enumerate}
-Under this model, the probability is about $22.12\%$.
-\end{framedexample}
-
-\subsubsection{The memoryless property}
-
-If we have already waited $t$ time units, how long must we wait
-from now? For $s,t\geq0$,
-\begin{align*}
-  P(T>t+s\mid T>t)
-    &=\frac{P(T>t+s)}{P(T>t)}\\
-    &=\frac{e^{-\lambda(t+s)}}{e^{-\lambda t}}\\
-    &=e^{-\lambda s}=P(T>s).
-\end{align*}
-This is called \textbf{memorylessness}: conditional on the event
-not having occurred, the remaining waiting time has the same
-exponential distribution as the original waiting time. It is
-a statement about the model's conditional distribution.
-
-\subsubsection{The PDF and CDF in R}
-
-R evaluates these two functions with \texttt{dexp} and
-\texttt{pexp}. For example, the following commands plot the
-rate-$1$ PDF and CDF; changing \texttt{rate} gives the curves above.
-\begin{lstlisting}[language=R]
-curve(dexp(x, rate = 1), from = 0, to = 5,
-      xlab = "Waiting time", ylab = "Density")
-curve(pexp(x, rate = 1), from = 0, to = 5,
-      xlab = "Waiting time", ylab = "Probability")
-pexp(5 / 60, rate = 3)  # 0.2211992
-\end{lstlisting}
-
-\subsection{Conditional densities}
-\label{sec:conditional-pdf-continuous}
-
-We now ask how the distribution of $X$ changes when the value of
-$Y$ is known. In the discrete case we divided a joint probability
-by $P(Y=y)$. For a continuous $Y$, however, $P(Y=y)=0$; substituting
-point probabilities into that formula would not define the desired
-conditional distribution.
-
-For a fixed threshold $x$, first condition on the interval
-$y<Y\leq y+h$, which has positive probability when its density
-is positive nearby. Then
-\[
-  P(X\leq x\mid y<Y\leq y+h)
-  =\frac{\displaystyle\int_y^{y+h}\int_{-\infty}^x
-                f_{X,Y}(s,t)\,ds\,dt}
-         {\displaystyle\int_y^{y+h}f_Y(t)\,dt}.
-\]
-At values $y$ where these averages converge and $f_Y(y)>0$,
-letting $h\to0^+$ gives the conditional CDF
-\[
-  F_{X\mid Y}(x\mid y)
-    =\frac{\displaystyle\int_{-\infty}^x f_{X,Y}(s,y)\,ds}
-           {f_Y(y)}.
-\]
-Differentiating in $x$ gives the density ratio below. This explains
-the passage from a small interval to the notation ``given $Y=y$''.
-
-The density formula can be understood by conditioning on a small
-interval near $y$. Its probability is approximately
-$f_Y(y)\,\Delta y$, while the probability of a small joint rectangle
-near $(x,y)$ is approximately
-$f_{X,Y}(x,y)\,\Delta x\,\Delta y$. Their ratio is
-\[
-  \frac{f_{X,Y}(x,y)\,\Delta x\,\Delta y}
-       {f_Y(y)\,\Delta y}
-  =\frac{f_{X,Y}(x,y)}{f_Y(y)}\,\Delta x.
-\]
-The coefficient of $\Delta x$ is the conditional density.
-
-\begin{frameddefn}{Conditional PDFs}
-When a joint PDF exists, a conditional density of $X$ given $Y=y$
-can be defined, for $f_Y(y)>0$, by
-\[
-  f_{X\mid Y}(x\mid y)=\frac{f_{X,Y}(x,y)}{f_Y(y)}.
-\]
-Similarly, for $f_X(x)>0$,
-\[
-  f_{Y\mid X}(y\mid x)=\frac{f_{X,Y}(x,y)}{f_X(x)}.
-\]
-The conditioning value is held fixed. Integrating the conditional
-density over the other variable gives $1$.
-\end{frameddefn}
-
-For instance, the normalization follows from marginalization:
-\[
-  \int_{\mathbb R}f_{X\mid Y}(x\mid y)\,dx
-    =\frac{\int_{\mathbb R}f_{X,Y}(x,y)\,dx}{f_Y(y)}=1.
-\]
-In the exponential example, for $y>0$,
-\[
-  f_{X\mid Y}(x\mid y)
-    =\frac{\alpha\beta e^{-(\alpha x+\beta y)}}
-           {\beta e^{-\beta y}}
-       \mathbf1_{(0,+\infty)}(x)
-    =f_X(x).
-\]
-Knowing $Y$ leaves the distribution of $X$ unchanged, as expected
-under independence. The same holds for $f_{Y\mid X}(y\mid x)=f_Y(y)$.
-
-\subsection{Exercise 1: a density given up to a constant}
-\label{sec:october-14-exercise-1}
-
-\begin{framedexercise}{Normalize, condition and transform}
-Let $X$ have a PDF specified up to a positive constant:
-\[
-  f_X(x)\propto x\,\mathbf1_{[0,2]}(x).
-\]
-\begin{enumerate}[label=(\arabic*)]
-  \item Find its PDF, CDF and quantile $Q_X(1/4)$.
-  \item Find the conditional density given $A=\{X>1\}$.
-  \item Find the distribution of $Y=\sqrt X$ under the original
-    distribution of $X$.
-\end{enumerate}
-\end{framedexercise}
-
-The symbol $\propto$ means that the PDF is proportional to the
-given kernel: a positive multiplicative constant is still unknown.
-The indicator is $1$ on $[0,2]$ and $0$ elsewhere, so this interval
-is the support of the model.
-
-\solutionheading{Part (1): normalize the kernel.}
-The kernel is $g(x)=x\mathbf1_{[0,2]}(x)$. Its integral is
-\[
-  c=\int_0^2 x\,dx
-    =\left[\frac{x^2}{2}\right]_0^2=2.
-\]
-Dividing by this total gives the PDF
-\[
-  \boxed{f_X(x)=\frac{x}{2}\mathbf1_{[0,2]}(x).}
-\]
-The density increases with $x$: intervals of the same small width
-near the right end carry more probability than those near zero.
-
-\solutionheading{Part (1): find the CDF and a quantile.}
-For $0\leq x\leq2$, the event $X\leq x$ retains the part of the
-support from $0$ to $x$. Consequently,
-\[
-  F_X(x)=\int_0^x\frac{t}{2}\,dt=\frac{x^2}{4}.
-\]
-Including thresholds outside the support gives the complete CDF:
-\[
-  \boxed{F_X(x)=
-  \begin{cases}
-    0,&x<0,\\
-    x^2/4,&0\leq x\leq2,\\
-    1,&x>2.
-  \end{cases}}
-\]
-The lecture asks for the quantile at probability $1/4$: a threshold
-below which one quarter of the probability lies. Since this CDF
-is strictly increasing on its support, solve
-\[
-  F_X(x)=\frac14
-  \quad\Longleftrightarrow\quad
-  \frac{x^2}{4}=\frac14
-  \quad\Longrightarrow\quad
-  \boxed{Q_X(1/4)=1.}
-\]
-More generally, $Q_X(u)=2\sqrt u$ for $0<u<1$.
-A continuous CDF need not always have an ordinary inverse; here
-strict increase on $[0,2]$ justifies this inversion.
-
-\begin{notebox}[What happens where the density is zero?]
-If the PDF is zero throughout an interval, the CDF stays constant
-there: integrating over that interval adds no probability.
-For example, a density supported on $[0,1]\cup[3,4]$ has a flat
-CDF between $1$ and $3$. It can still be a continuous distribution,
-but its CDF is not strictly increasing everywhere. This explains
-why the generalized quantile definition is useful.
-\end{notebox}
-
-\solutionheading{Part (2): condition on $A=\{X>1\}$.}
-This is conditioning on an event of positive probability, rather
-than on an exact value of a continuous variable. We keep only
-the part of the density on $1<x\leq2$, then normalize it within
-that interval. First,
-\[
-  P(A)=\int_1^2\frac{x}{2}\,dx=\frac34.
-\]
-For any measurable set $B$, the conditional probability is
-$P(X\in B\mid A)=P(X\in B, A)/P(A)$. Thus its density is
-\[
-  \boxed{f_{X\mid A}(x)
-    =\frac{f_X(x)\mathbf1_{(1,2]}(x)}{P(A)}
-    =\frac{2x}{3}\mathbf1_{(1,2]}(x).}
-\]
-It integrates to $1$ on the retained interval. The handwritten
-calculation reaches the same result by first normalizing the
-restricted kernel $x\mathbf1_{(1,2]}(x)$, whose integral is $3/2$.
-
-\solutionheading{Part (3): transform the original variable.}
-We now return to the original distribution of $X$. Since
-$0\leq X\leq2$, the output satisfies $0\leq Y\leq\sqrt2$.
-For $y$ in that range, taking the square root is increasing, so
-\[
-  F_Y(y)=P(\sqrt X\leq y)=P(X\leq y^2)
-        =F_X(y^2)=\frac{y^4}{4}.
-\]
-Differentiation gives
-\[
-  \boxed{f_Y(y)=y^3\mathbf1_{[0,\sqrt2]}(y).}
-\]
-The complete CDF is zero for $y<0$ and one for $y>\sqrt2$.
-We can also apply the \hyperref[sec:invertible-transformation]
-{inverse transformation formula} from the previous lecture.
-The inverse of $y=\sqrt x$ is $x=y^2$, whose derivative is $2y$:
-\[
-  f_Y(y)=f_X(y^2)\left|\frac{d}{dy}y^2\right|
-         =\frac{y^2}{2}\,2y=y^3,
-  \qquad 0<y<\sqrt2.
-\]
-Both approaches produce the same density and the same support.
-
-\subsection{Exercise 2: a binomial model with a latent probability}
-\label{sec:october-14-exercise-2}
-
-The final example studies the mixed vector
-$\mathbf Z=(X,P)^{\mathsf T}$. Here $X$ is an observable, discrete
-count, while $P$ is a continuous, \textbf{latent} variable: it is
-not directly observed, but represents uncertainty about the
-success probability underlying the count. The capital letter $P$
-denotes a random variable, and $p$ denotes a possible value of it.
-We use $\Pr(\cdot)$ for the probability operator in this example
-to distinguish it from the variable $P$.
-
-\subsubsection{The conditional model for the observable}
-Fix a positive integer $n$, the number of trials. Conditional on
-$P=p$, each trial is a success with probability $p$ and a failure
-with probability $1-p$, and the trials are independent. Let $X$
-count the successes. Then
-\[
-  X\mid(P=p)\sim\operatorname{Bin}(n,p).
-\]
-Write its conditional PMF as
-\[
-  b(k\mid p)=\Pr(X=k\mid P=p)
-     =\binom nk p^k(1-p)^{n-k},
-  \qquad k=0,\ldots,n,\quad 0<p<1.
-\]
-The factor $p^k(1-p)^{n-k}$ is the probability of a particular
-sequence with $k$ successes. The coefficient $\binom nk$ counts
-how many such sequences have the same number of successes.
-Here $n$ counts trials within the model, rather than the number
-of population observations in the opening sampling recap.
-
-\subsubsection{The distribution of the latent variable}
-We also need a PDF $\pi(p)$ for $P$, called its \textbf{prior
-density}: it describes our uncertainty before observing $X$.
-The lecture proposes two choices:
-\[
-  P\sim\operatorname{Unif}(0,1)
-  \qquad\text{or}\qquad
-  P\sim\operatorname{Beta}(\alpha,\beta),\quad\alpha,\beta>0.
-\]
-For the uniform choice, $\pi(p)=1$ on $(0,1)$ and zero elsewhere.
-The Beta family allows different shapes on the same interval.
-
-\begin{frameddefn}{Beta distribution}
-For $\alpha,\beta>0$, the density of
-$P\sim\operatorname{Beta}(\alpha,\beta)$ is
-\[
-  \pi(p)=\frac{p^{\alpha-1}(1-p)^{\beta-1}}{B(\alpha,\beta)},
-  \qquad 0<p<1,
-\]
-and it is zero elsewhere. The denominator is the normalizing
-constant
-\[
-  B(\alpha,\beta)=\int_0^1
-       t^{\alpha-1}(1-t)^{\beta-1}\,dt.
-\]
-\end{frameddefn}
-
-This is another application of kernel normalization: divide
-$p^{\alpha-1}(1-p)^{\beta-1}$ by its total integral. Positivity of
-$\alpha$ and $\beta$ makes this integral finite, including when
-the density grows without bound near an endpoint. Such a peak is
-not a point mass; $\Pr(P=0)=\Pr(P=1)=0$.
-
-For a threshold $0\leq u\leq1$, the CDF accumulates only the
-part of the kernel to the left of $u$:
-\[
-  F_P(u)=\frac{B(u;\alpha,\beta)}{B(\alpha,\beta)},
-  \qquad
-  B(u;\alpha,\beta)=\int_0^u
-        t^{\alpha-1}(1-t)^{\beta-1}\,dt.
-\]
-The numerator is the \textbf{incomplete Beta function}; the CDF
-is $0$ for $u<0$ and $1$ for $u>1$. The full Beta function also
-satisfies
-\[
-  B(\alpha,\beta)
-    =\frac{\Gamma(\alpha)\Gamma(\beta)}{\Gamma(\alpha+\beta)},
-  \qquad
-  \Gamma(a)=\int_0^{+\infty}t^{a-1}e^{-t}\,dt,\quad a>0.
-\]
-Here $\Gamma$ names the Gamma function. For general real
-parameters, we usually evaluate these functions numerically.
-
-\begin{center}
-  \includegraphics[width=\linewidth]{assets/beta-pdf-cdf.pdf}
-\end{center}
-
-The parameters $\alpha,\beta$ control the shape:
-\begin{itemize}
-  \item With $\alpha=\beta=1$, the kernel and its integral are both
-    $1$, so the distribution is $\operatorname{Unif}(0,1)$.
-  \item With both parameters below $1$, the density has peaks
-    near $0$ and $1$. The plot for $(0.5,0.5)$ cuts off their
-    unbounded heights to make the rest of the curve visible.
-  \item With both parameters above $1$, the density has one
-    interior peak. The symmetric example $(2,2)$ concentrates
-    probability around $1/2$.
-  \item When $\alpha=\beta$, the density is symmetric about $1/2$.
-    The examples $(5,1)$ and $(1,5)$ put more probability near
-    $1$ and $0$, respectively.
-\end{itemize}
-In R, \texttt{dbeta} evaluates the PDF and \texttt{pbeta} evaluates
-the CDF. The arguments \texttt{shape1} and \texttt{shape2}
-correspond to $\alpha$ and $\beta$:
-\begin{lstlisting}[language=R]
-curve(dbeta(x, shape1 = 2, shape2 = 2), from = 0, to = 1,
-      xlab = "p", ylab = "Density")
-curve(pbeta(x, shape1 = 2, shape2 = 2), from = 0, to = 1,
-      xlab = "p", ylab = "Probability")
-\end{lstlisting}
-The Beta family is especially useful in the binomial model below:
-after observing a count, its posterior also belongs to the Beta
-family. This property is called \textbf{conjugacy}; identifying
-the updated parameters is one of the final exercise questions.
-
-\subsubsection{Combine the PMF and the PDF}
-Because $X$ is discrete and $P$ is continuous, their joint model
-uses a mass in the first coordinate and a density in the second.
-Define the mixed joint function
-\[
-  q(k,p)=b(k\mid p)\,\pi(p).
-\]
-This function is not an ordinary two-dimensional PDF: probabilities
-require a \emph{sum} over the count and an \emph{integral} over
-the latent probability.
-Its meaning is expressed by probabilities of a count and an interval:
-\[
-  \Pr(X=k,\ a<P<b)=\int_a^b q(k,p)\,dp,
-  \qquad 0\leq a<b\leq1.
-\]
-The factorization first specifies the distribution of the latent
-variable, then the count distribution given its value.
-It is normalized because
-\[
-  \sum_{k=0}^n\int_0^1 q(k,p)\,dp
-    =\int_0^1\pi(p)
-       \underbrace{\sum_{k=0}^n b(k\mid p)}_{=1}\,dp=1.
-\]
-
-\subsubsection{Marginalization and conditioning in the mixed model}
-To describe $X$ alone, average over the unknown success probability.
-Its marginal PMF, denoted by $m(k)$, is
-\[
-  m(k)=\Pr(X=k)=\int_0^1 b(k\mid p)\,\pi(p)\,dp.
-\]
-This is the continuous version of summing over an unobserved
-component. Conversely, summing $q(k,p)$ over $k$ recovers $\pi(p)$.
-
-After observing $X=k$, we want to update the distribution of $P$.
-For $m(k)>0$, its \textbf{posterior density} is
-\[
-  f_{P\mid X}(p\mid k)=\frac{b(k\mid p)\,\pi(p)}{m(k)}.
-\]
-The count $k$ is now fixed, while $p$ varies. The numerator gives
-more weight to values of $p$ that make the observed count likely;
-the denominator normalizes those weights to integrate to $1$.
-This is Bayes' rule for a discrete observation and a continuous
-latent variable.
-
-Equivalently, the same joint function can be written in the other
-order:
-\[
-  q(k,p)=f_{P\mid X}(p\mid k)\,m(k).
-\]
-The first factorization uses a conditional PMF and a marginal PDF;
-the second uses a conditional PDF and a marginal PMF. Both describe
-the same joint distribution. A conditional factorization by itself
-does not assert independence.
-
-\exerciseheading{Questions left to work through.}
-To complete the example, determine:
-\begin{enumerate}
-  \item What is the marginal distribution of $X$?
-  \item What is the conditional distribution of $P\mid X$?
-\end{enumerate}
-Apply the formulas above to each proposed prior, keeping track of
-which object is a PMF and which is a PDF.
-
-\begin{tcolorbox}[colback=yellow!20,colframe=yellow!60!black,
-  boxrule=0.4pt,arc=1mm,left=5pt,right=5pt,top=3pt,bottom=3pt,
-  before skip=6pt,after skip=6pt]
-\small\textbf{End of lecture 14 October}
-\end{tcolorbox}
-
 \appendix
 
 \chapter{Crash course exercises}
@@ -5052,6 +5391,123 @@ The second positive result raises the probability from about $16.53\%$
 to about $79.51\%$ under the conditional independence assumption.
 \chapter{Random variable exercises}
 
+\section{A density given up to a constant}
+\label{sec:october-14-exercise-1}
+
+\begin{framedexercise}{Normalize, condition and transform}
+Let $X$ have a PDF specified up to a positive constant:
+\[
+  f_X(x)\propto x\,\mathbf1_{[0,2]}(x).
+\]
+\begin{enumerate}[label=(\arabic*)]
+  \item Find its PDF, CDF and quantile $Q_X(1/4)$.
+  \item Find the conditional density given $A=\{X>1\}$.
+  \item Find the distribution of $Y=\sqrt X$ under the original
+    distribution of $X$.
+\end{enumerate}
+\end{framedexercise}
+
+The symbol $\propto$ means that the PDF is proportional to the
+given kernel: a positive multiplicative constant is still unknown.
+The indicator is $1$ on $[0,2]$ and $0$ elsewhere, restricting the
+density to that interval. With our convention that the support
+contains the points of positive density, its support is $(0,2]$.
+
+\solutionheading{Part (1): normalize the kernel.}
+The kernel is $g(x)=x\mathbf1_{[0,2]}(x)$. Its integral is
+\[
+  c=\int_0^2 x\,dx
+    =\left[\frac{x^2}{2}\right]_0^2=2.
+\]
+Dividing by this total gives the PDF
+\[
+  \boxed{f_X(x)=\frac{x}{2}\mathbf1_{[0,2]}(x).}
+\]
+The density increases with $x$: intervals of the same small width
+near the right end carry more probability than those near zero.
+
+\solutionheading{Part (1): find the CDF and a quantile.}
+For $0\leq x\leq2$, the event $X\leq x$ retains the part of the
+support from $0$ to $x$. Consequently,
+\[
+  F_X(x)=\int_0^x\frac{t}{2}\,dt=\frac{x^2}{4}.
+\]
+Including thresholds outside the support gives the complete CDF:
+\[
+  \boxed{F_X(x)=
+  \begin{cases}
+    0,&x<0,\\
+    x^2/4,&0\leq x\leq2,\\
+    1,&x>2.
+  \end{cases}}
+\]
+We seek the quantile at probability $1/4$: a threshold
+below which one quarter of the probability lies. Since this CDF
+is strictly increasing on $[0,2]$, solve
+\[
+  F_X(x)=\frac14
+  \quad\Longleftrightarrow\quad
+  \frac{x^2}{4}=\frac14
+  \quad\Longrightarrow\quad
+  \boxed{Q_X(1/4)=1.}
+\]
+More generally, $Q_X(u)=2\sqrt u$ for $0<u<1$.
+A continuous CDF need not always have an ordinary inverse; here
+strict increase on $[0,2]$ justifies this inversion.
+
+\begin{notebox}[What happens where the density is zero?]
+If the PDF is zero throughout an interval, the CDF stays constant
+there: integrating over that interval adds no probability.
+For example, a density supported on $[0,1]\cup[3,4]$ has a flat
+CDF between $1$ and $3$. It can still be a continuous distribution,
+but its CDF is not strictly increasing everywhere. This explains
+why the generalized quantile definition is useful.
+\end{notebox}
+
+\solutionheading{Part (2): condition on $A=\{X>1\}$.}
+This is conditioning on an event of positive probability, rather
+than on an exact value of a continuous variable. We keep only
+the part of the density on $1<x\leq2$, then normalize it within
+that interval. First,
+\[
+  P(A)=\int_1^2\frac{x}{2}\,dx=\frac34.
+\]
+For any measurable set $B$, the conditional probability is
+$P(X\in B\mid A)=P(X\in B, A)/P(A)$. Thus its density is
+\[
+  \boxed{f_{X\mid A}(x)
+    =\frac{f_X(x)\mathbf1_{(1,2]}(x)}{P(A)}
+    =\frac{2x}{3}\mathbf1_{(1,2]}(x).}
+\]
+It integrates to $1$ on the retained interval. The handwritten
+calculation reaches the same result by first normalizing the
+restricted kernel $x\mathbf1_{(1,2]}(x)$, whose integral is $3/2$.
+
+\solutionheading{Part (3): transform the original variable.}
+We now return to the original distribution of $X$. Since
+$0\leq X\leq2$, the output satisfies $0\leq Y\leq\sqrt2$.
+For $y$ in that range, taking the square root is increasing, so
+\[
+  F_Y(y)=P(\sqrt X\leq y)=P(X\leq y^2)
+        =F_X(y^2)=\frac{y^4}{4}.
+\]
+Differentiation gives
+\[
+  \boxed{f_Y(y)=y^3\mathbf1_{[0,\sqrt2]}(y).}
+\]
+The complete CDF is zero for $y<0$ and one for $y>\sqrt2$.
+We can also apply the \hyperref[sec:invertible-transformation]
+{inverse transformation formula} from Section~\ref{sec:invertible-transformation}.
+The inverse of $y=\sqrt x$ is $x=y^2$, whose derivative is $2y$:
+\[
+  f_Y(y)=f_X(y^2)\left|\frac{d}{dy}y^2\right|
+         =\frac{y^2}{2}\,2y=y^3,
+  \qquad 0<y<\sqrt2.
+\]
+Both approaches produce the same density and the same support.
+
+\clearpage
+\section{Two throws of a die}
 \begin{tcolorbox}[colback=white,colframe=black!45,boxrule=0.5pt,arc=2mm]
 \textbf{Exercise 4.1 --- Two throws of a die}\par\smallskip
 \textit{Source: Dekking et al., A Modern Introduction to Probability
