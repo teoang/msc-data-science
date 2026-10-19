@@ -1529,24 +1529,35 @@ $x,y,z\in U$:
 \end{tikzpicture}
 \end{center}
 
-In the next lectures we will see different distances depending on the
-data. We should define distances that make sense for the problem: what
-does it mean for two objects to be ``close''? It depends on the
-problem we are considering.
+We should define distances that make sense for the problem: what does
+it mean for two objects to be ``close''? It depends on the problem we
+are considering.
 
 \section{\texorpdfstring{$L_p$}{Lp} distances}
 
-\begin{framedexample}{Restaurants near me}\label{ex:euclidean}
-We are designing an app like Google Maps to find restaurants near us.
-A good distance is the Euclidean one. For $U=\R^m$,
-$\vec x=[x_1,\ldots,x_m]$ and $\vec y=[y_1,\ldots,y_m]$,
+We have defined what a distance function is
+(Definition~\ref{def:distance}). We now look at concrete distances,
+starting with objects described by vectors of numbers, that is,
+$U=\R^m$.
+
+Suppose we are designing an app like Google Maps that shows the
+restaurants near us. On the map, our position and each restaurant are
+points with two coordinates, that is, vectors in $\R^2$. To decide
+which restaurants are near, we need a distance between two points. The
+natural choice is the length of the straight segment that joins them:
+the Euclidean distance. The same formula works for vectors with any
+number $m$ of coordinates.
+
+\begin{frameddefn}{Euclidean distance}\label{def:euclidean}
+For $U=\R^m$, $\vec x=[x_1,\ldots,x_m]$ and $\vec y=[y_1,\ldots,y_m]$,
+the \emph{Euclidean distance}, or $L_2$ distance, is
 \[
   d(\vec x,\vec y)=\sqrt{\sum_{j=1}^{m}(x_j-y_j)^2}.
 \]
-This is the \emph{Euclidean distance}, or $L_2$ distance. It is
-clearly non-negative and symmetric; it also satisfies the triangle
-inequality, but we do not prove it.
-\end{framedexample}
+\end{frameddefn}
+
+It is clearly non-negative and symmetric; it also satisfies the
+triangle inequality, but we do not prove it.
 
 \begin{frameddefn}{$L_p$ distance}\label{def:lp-distance}
 For a constant $p\geq1$,
@@ -1568,9 +1579,18 @@ between coordinates differently:
       =\max_{i\in\{1,\ldots,m\}}\abs{x_i-y_i}$.
   \item ``$L_0$'': the number of coordinates in which the vectors
     differ, $\abs{\{i:x_i\neq y_i\}}$. For binary strings this is the
-    \emph{Hamming distance}: $00110$ and $10100$ differ in $2$
-    positions, and $[3,1,3]$ and $[0,1,3]$ differ in $1$.
+    \emph{Hamming distance}.
 \end{itemize}
+
+\begin{framedexample}{Counting the coordinates that differ}
+\label{ex:hamming}
+\begin{itemize}
+  \item The binary strings $00110$ and $10100$ differ in $2$ positions
+    (the first and the fourth), so their Hamming distance is $2$.
+  \item The vectors $[3,1,3]$ and $[0,1,3]$ differ only in the first
+    coordinate, so their $L_0$ distance is $1$.
+\end{itemize}
+\end{framedexample}
 
 \begin{framedexample}{Comparing $L_p$ distances}\label{ex:lp-distances}
 Let
@@ -1618,28 +1638,10 @@ Intuitively, persons $1$ and $3$ are more similar than persons $1$
 and $2$.
 \end{framedexample}
 
-\subsection{Counting common items}
-
-A first idea is to look at the elements in common:
-\[
-  \abs{P_1\cap P_2}=1,\qquad\abs{P_1\cap P_3}=2.
-\]
-Is this a good distance? We should check the three properties.
-Symmetry certainly holds, but the larger the value, the \emph{closer}
-the two sets: this is a similarity, not a distance.
-
-\begin{notebox}[Distance and similarity]
-It is often more natural to talk about \emph{similarity} than about
-distance. The two notions are closely related, but they go in opposite
-directions: a large similarity means a small distance. Here we do not
-see a ``natural'' distance function, and we cannot simply take the
-negative of the similarity, because distances cannot be negative.
-\end{notebox}
-
 \subsection{Sets as binary vectors}
 
-A second idea is to write each set as a binary vector, with one
-coordinate per product, and use the $L_1$ distance:
+We can write each set as a binary vector, with one coordinate per
+product, and use the $L_1$ distance:
 \begin{center}
 \begin{tabular}{c|cccccccc}
       & $A$ & $B$ & $C$ & $D$ & $E$ & $F$ & $G$ & $H$\\
@@ -1654,19 +1656,45 @@ $\abs{P_1-P_3}=[1,0,0,1,1,1,0,0]$, so
 \[
   \norm{P_1-P_2}_1=6,\qquad\norm{P_1-P_3}_1=4.
 \]
-This is how we can turn the comparison into a distance. In general,
+So $P_1$ is closer to $P_3$, as we expected. In general,
 \[
   \norm{P-Q}_1=\abs{P}+\abs{Q}-2\abs{P\cap Q}=\abs{P\mathbin{\triangle}Q},
 \]
 the size of the \emph{symmetric difference} $P\mathbin{\triangle}Q$,
 the elements in exactly one of the two sets.
 
+\subsection{Counting common items}
+
+The formula above depends on the intersection $P\cap Q$. Let us look
+at the elements in common directly:
+\[
+  \abs{P_1\cap P_2}=1,\qquad\abs{P_1\cap P_3}=2.
+\]
+Is this a good distance? We should check the three properties.
+Symmetry certainly holds, but the larger the value, the \emph{closer}
+the two sets: this is a \emph{similarity}, not a distance. It is often
+more natural to talk about similarity than about distance.
+
+\begin{frameddefn}{Similarity function}\label{def:similarity}
+A \emph{similarity function} is a map $s:U\times U\to\R$ such that
+$s(x,y)=s(y,x)$ for all $x,y\in U$, and whose value is larger the more
+similar $x$ and $y$ are. Similarities are often normalized to take
+values in $[0,1]$, with $s(x,x)=1$ for every $x$.
+\end{frameddefn}
+
+Unlike distances, similarities have no standard list of properties:
+the ones above are the usual conventions. The two notions go in
+opposite directions: a large similarity means a small distance. Here
+we do not see a ``natural'' distance function, and we cannot simply
+take the negative of the similarity, because distances cannot be
+negative.
+
 \subsection{Normalizing the intersection}
 
-Back to the first idea: the size of the intersection alone is
-misleading. Two pairs of sets can have intersections of the same size,
-but if the sets in the second pair are smaller, the intersection is a
-larger fraction of them, so they are more similar.
+The size of the intersection alone, however, is misleading. Two pairs
+of sets can have intersections of the same size, but if the sets in the
+second pair are smaller, the intersection is a larger fraction of them,
+so they are more similar.
 
 \begin{center}
 \begin{tikzpicture}
@@ -1706,8 +1734,10 @@ The \emph{Jaccard similarity} of two finite sets $P$ and $Q$ is
 where $\abs{\cdot}$ is the cardinality (not the absolute value).
 \end{frameddefn}
 
-The Jaccard similarity is symmetric and lies between $0$ and $1$. For
-the baskets in Example~\ref{ex:baskets},
+The Jaccard similarity is symmetric, lies between $0$ and $1$, and
+gives $J(P,P)=1$ for every nonempty $P$: it is a normalized similarity
+function (Definition~\ref{def:similarity}). For the baskets in
+Example~\ref{ex:baskets},
 \[
   J(P_1,P_2)=\frac{\abs{\{A\}}}{\abs{\{A,B,C,D,E,G,H\}}}=\frac17,
   \qquad
@@ -1767,47 +1797,49 @@ How do we define a ``distance measure'' between strings?
 \section{First attempts}
 
 \begin{itemize}
-  \item \textbf{Compare letter by letter}, as with the Hamming or $L_1$
-    distance. But what if the strings have different lengths?
-  \item \textbf{Count how many times each character appears.}
-    Biologically, \texttt{AAGGGTT} and \texttt{TGAAGTG} are very
-    different, even though they contain exactly the same characters.
-  \item \textbf{Look at common pieces}: \texttt{CATGAGG} and
+  \item \textbf{Compare letter by letter.} We could compare the strings
+    position by position, as with the Hamming or $L_1$ distance. But
+    what if the strings have different lengths?
+  \item \textbf{Letters as numbers.} Another idea that might come to
+    mind is to associate each letter with its position in the alphabet
+    ($A=1$, $C=3$, $G=7$, $T=20$) and to compute the $L_1$ distance
+    between the resulting vectors. For example,
+    \[
+      \begin{array}{r@{\quad}cccc}
+        \texttt{CAGT}: & 3 & 1 & 7 & 20\\
+        \texttt{ACTT}: & 1 & 3 & 20 & 20\\
+        \hline
+        \text{difference}: & 2 & 2 & 13 & 0
+      \end{array}
+      \qquad\Longrightarrow\qquad 2+2+13+0=17.
+    \]
+    The larger the number, the farther the strings, and the distance
+    is symmetric. However, it does not work well:
+    \begin{itemize}
+      \item \texttt{SAPIENZA} and \texttt{SSAPIENZA}, typed with an
+        extra \texttt{S} by mistake, are almost identical, but the
+        extra letter shifts all the following ones and the distance
+        explodes;
+      \item the distance between $A$ and $T$ is larger than between
+        $A$ and $B$ only because of the alphabetical order.
+    \end{itemize}
+  \item \textbf{Count the characters.} We could count how many times
+    each character appears. Biologically, however, \texttt{AAGGGTT}
+    and \texttt{TGAAGTG} are very different, even though they contain
+    exactly the same characters.
+  \item \textbf{Look at common pieces.} \texttt{CATGAGG} and
     \texttt{CAGAGT} share \texttt{CA} and \texttt{GAG}, even though
     they have different lengths.
-  \item \textbf{Count modifications}: take the second string and count
-    how many changes are needed to make it equal to the first. For
-    \texttt{SAPIENZA} and \texttt{SAAPIEMZA}, we delete the extra
-    \texttt{A} and replace \texttt{M} with \texttt{N}: two changes, so
-    the distance is $2$.
+  \item \textbf{Count modifications.} We could take the second string
+    and count how many changes are needed to make it equal to the
+    first. For \texttt{SAPIENZA} and \texttt{SAAPIEMZA}, we delete the
+    extra \texttt{A} and replace \texttt{M} with \texttt{N}: two
+    changes, so the distance is $2$.
 \end{itemize}
 
-\begin{framedexample}{Letters as numbers}\label{ex:letters-numbers}
-Associate each letter with its position in the alphabet ($A=1$,
-$C=3$, $G=7$, $T=20$) and subtract:
-\[
-  \begin{array}{r@{\quad}cccc}
-    \texttt{CAGT}: & 3 & 1 & 7 & 20\\
-    \texttt{ACTT}: & 1 & 3 & 20 & 20\\
-    \hline
-    \text{difference}: & 2 & 2 & 13 & 0
-  \end{array}
-  \qquad\Longrightarrow\qquad 2+2+13+0=17.
-\]
-The larger the number, the farther the strings; this distance is
-symmetric. However:
-\begin{itemize}
-  \item comparing \texttt{SAPIENZA} with \texttt{SSAPIENZA}, typed
-    with an extra \texttt{S} by mistake, shifts every letter: the two
-    words are almost identical, but the distance explodes;
-  \item the distance between $A$ and $T$ is larger than between $A$
-    and $B$ only because of the alphabetical order.
-\end{itemize}
-This is why such a distance cannot work well.
-\end{framedexample}
-
-We go back to the two previous ideas: common pieces (subsequences) and
-modifications (edit operations). Consider sequences over an alphabet.
+The last two ideas are the promising ones: common pieces lead to
+subsequences, and modifications lead to the edit distance. Consider
+sequences over an alphabet.
 
 \section{Subsequences}
 
@@ -1946,7 +1978,7 @@ Consider two strings $S$ and $T$ with $\abs S=n$ and $\abs T=m$:
   S=[S[1],S[2],\ldots,S[n]],\qquad T=[T[1],\ldots,T[m]].
 \]
 We write $S^i=[S[1],\ldots,S[i]]$ and $T^j=[T[1],\ldots,T[j]]$ for the
-\emph{prefixes} of length $i$ and $j$ (the superscript is not a power).
+\emph{prefixes} of length $i$ and $j$.
 \end{notebox}
 
 \begin{framedprop}{Recurrence for the edit distance}\label{prop:ed-recurrence}
