@@ -223,7 +223,9 @@ function} (PDF), such that, for every $a\leq b$,
   \item $f_X(x)\geq0$ for every $x\in\mathbb R$.
   \item Following the convention in the slides, the \emph{support} is
     $\operatorname{supp}(X):=\{x\in\mathbb R:f_X(x)>0\}$.
-  \item $\displaystyle\int_{\mathbb R}f_X(x)\,dx=1$.
+  \item $\displaystyle\int_{\mathbb R}f_X(x)\,dx=1$, since the total
+    area under $f_X$ equals $P(X\in\mathbb R)$, and $X$ certainly
+    takes some real value.
 \end{enumerate}
 \end{frameddefn}
 
@@ -611,6 +613,22 @@ their joint PDF exists and satisfies
   \qquad\text{almost everywhere}.
 \]
 \end{framedprop}
+
+\begin{frameddefn}{Mixed joint function}
+\label{def:mixed-joint-function}
+Let $X\mid(P=p)$ have PMF $b(k\mid p)$ on $\{0,\ldots,n\}$, and let
+$P$ have prior PDF $\pi(p)$ on $(0,1)$.
+The \textbf{mixed joint function} of $(X,P)$ is
+\[
+  q(k,p)=b(k\mid p)\,\pi(p),
+  \qquad k=0,\ldots,n,\quad 0<p<1.
+\]
+It gives the probability of a count and an interval:
+\[
+  \Pr(X=k,\ a<P<b)=\int_a^b q(k,p)\,dp,
+  \qquad 0\leq a<b\leq1.
+\]
+\end{frameddefn}
 
 \begin{frameddefn}{Bivariate copula}
 A \textbf{copula} is a joint CDF of two random variables with

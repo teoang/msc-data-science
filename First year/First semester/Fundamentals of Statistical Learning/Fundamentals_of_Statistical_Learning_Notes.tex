@@ -881,7 +881,9 @@ function} (PDF), such that, for every $a\leq b$,
   \item $f_X(x)\geq0$ for every $x\in\mathbb R$.
   \item Following the convention in the slides, the \emph{support} is
     $\operatorname{supp}(X):=\{x\in\mathbb R:f_X(x)>0\}$.
-  \item $\displaystyle\int_{\mathbb R}f_X(x)\,dx=1$.
+  \item $\displaystyle\int_{\mathbb R}f_X(x)\,dx=1$, since the total
+    area under $f_X$ equals $P(X\in\mathbb R)$, and $X$ certainly
+    takes some real value.
 \end{enumerate}
 \end{frameddefn}
 
@@ -2248,6 +2250,7 @@ Suppose attendance is known. We then describe exam results
 fixed, and probabilities are renormalized within that group.
 
 \begin{frameddefn}{Conditional PMFs}
+\label{def:conditional-pmfs}
 For a value $y$ with $p_Y(y)>0$,
 \[
   p_{X\mid Y}(x\mid y)
@@ -2785,6 +2788,7 @@ $f_{X,Y}(x,y)\,\Delta x\,\Delta y$. Their ratio is
 The coefficient of $\Delta x$ is the conditional density.
 
 \begin{frameddefn}{Conditional PDFs}
+\label{def:conditional-pdfs}
 When a joint PDF exists, a conditional density of $X$ given $Y=y$
 can be defined, for $f_Y(y)>0$, by
 \[
@@ -2986,7 +2990,7 @@ reach it from the joint PDF of Step~3: by the
 integrate out $y$. The density is zero for $y\leq0$, so the
 integral runs over $y>0$:
 \[
-  \int_0^{+\infty}\alpha\beta e^{-(\alpha x+\beta y)}\,dy
+  f_X(x)=\int_0^{+\infty}\alpha\beta e^{-(\alpha x+\beta y)}\,dy
     =\alpha e^{-\alpha x}
       \underbrace{\int_0^{+\infty}\beta e^{-\beta y}\,dy}_{=1}
     =\alpha e^{-\alpha x},
@@ -2994,9 +2998,7 @@ integral runs over $y>0$:
 \]
 The inner integral is $1$ because $\beta e^{-\beta y}$ is the
 density of $Y$. Both paths give the same $f_X$, so the computations
-agree. If Step~3 contained an error, for instance a missing
-factor $\beta$, this integral would give $\alpha e^{-\alpha x}/\beta$
-instead of $f_X$.
+agree.
 \end{framedexample}
 
 \section{Mixed random vectors}
@@ -3014,6 +3016,21 @@ denotes a random variable, and $p$ denotes a possible value of it.
 We use $\Pr(\cdot)$ for the probability operator in this example
 to distinguish it from the variable $P$.
 
+\begin{framedexample}{A coin of unknown bias}
+We have a coin and do not know how biased it is. Chance decides
+two things, one after the other:
+\begin{enumerate}
+  \item first, \textbf{how biased the coin is}: this is $P$, the
+    probability of heads, a \textbf{real} number in the interval
+    $(0,1)$, such as $0.3$ or $0.37$, so a \textbf{continuous}
+    variable;
+  \item then, \textbf{how many heads} appear when the coin is tossed
+    $n$ times: this is $X$, a count, so a \textbf{discrete} variable.
+\end{enumerate}
+The pair $(X,P)$ is called mixed because one coordinate is discrete
+and the other is continuous.
+\end{framedexample}
+
 \subsubsection{The conditional model for the observable}
 Fix a positive integer $n$, the number of trials. Conditional on
 $P=p$, each trial is a success with probability $p$ and a failure
@@ -3030,11 +3047,6 @@ Write its conditional PMF as
      =\binom nk p^k(1-p)^{n-k},
   \qquad k=0,\ldots,n,\quad 0<p<1.
 \]
-The factor $p^k(1-p)^{n-k}$ is the probability of a particular
-sequence with $k$ successes. The coefficient $\binom nk$ counts
-how many such sequences have the same number of successes.
-Here $n$ counts the trials making up one observed count.
-It is a parameter of this model, not a count of separate datasets.
 
 \subsubsection{The distribution of the latent variable}
 We also need a PDF $\pi(p)$ for $P$, called its \textbf{prior
@@ -3052,20 +3064,45 @@ allows different shapes on the same interval.
 \subsubsection{Combine the PMF and the PDF}
 Because $X$ is discrete and $P$ is continuous, their joint model
 uses a mass in the first coordinate and a density in the second.
-Define the mixed joint function
+
+\begin{frameddefn}{Mixed joint function}
+\label{def:mixed-joint-function}
+Let $X\mid(P=p)$ have PMF $b(k\mid p)$ on $\{0,\ldots,n\}$, and let
+$P$ have prior PDF $\pi(p)$ on $(0,1)$.
+The \textbf{mixed joint function} of $(X,P)$ is
 \[
-  q(k,p)=b(k\mid p)\,\pi(p).
+  q(k,p)=b(k\mid p)\,\pi(p),
+  \qquad k=0,\ldots,n,\quad 0<p<1.
 \]
-This function is not an ordinary two-dimensional PDF: probabilities
-require a \emph{sum} over the count and an \emph{integral} over
-the latent probability.
-Its meaning is expressed by probabilities of a count and an interval:
+It gives the probability of a count and an interval:
 \[
   \Pr(X=k,\ a<P<b)=\int_a^b q(k,p)\,dp,
   \qquad 0\leq a<b\leq1.
 \]
-The factorization first specifies the distribution of the latent
-variable, then the count distribution given its value.
+\end{frameddefn}
+
+\begin{notebox}[Conditional $\times$ marginal]
+The structure in
+\hyperref[def:mixed-joint-function]{Definition~\ref{def:mixed-joint-function}}
+is not new: a joint distribution is a conditional
+times a marginal. Rearranging
+\hyperref[def:conditional-pmfs]{Definition~\ref{def:conditional-pmfs}
+of conditional PMFs} and
+\hyperref[def:conditional-pdfs]{Definition~\ref{def:conditional-pdfs}
+of conditional PDFs} gives
+\[
+  p_{X,Y}(x,y)=p_{X\mid Y}(x\mid y)\,p_Y(y),
+  \qquad
+  f_{X,Y}(x,y)=f_{X\mid Y}(x\mid y)\,f_Y(y).
+\]
+Here the conditional is the PMF $b(k\mid p)$ and the marginal is
+the PDF $\pi(p)$: first the latent variable, then the count given
+its value.
+\end{notebox}
+
+This function is not an ordinary two-dimensional PDF: probabilities
+require a \emph{sum} over the count and an \emph{integral} over
+the latent probability.
 It is normalized because
 \[
   \sum_{k=0}^n\int_0^1 q(k,p)\,dp

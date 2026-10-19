@@ -30,14 +30,81 @@
 - [x] **7 October** — Random vectors, joint/marginal/conditional distributions, independence, copulas and IID samples; likelihood and empirical CDF clarified and reviewed.
 - [ ] **8 October** — Transformations of continuous random variables, the example Y = X² and its simulation in R (Topic 06, Part II, slides 4–8); explanations added, pending Matteo's review.
 - [ ] **9 October** — Scheduled lecture; notes to cover.
-- [ ] **14 October** — Continuous random vectors: joint PDFs, marginalization and conditioning; exponential waiting times, memorylessness and a printer example; worked normalization/CDF/quantile/transformation exercise; mixed binomial model with a latent uniform or Beta success probability, including Beta PDFs and CDFs. Revised against Flavia's notes, with plots and R examples; personal review pending. Final marginal and posterior questions retained as exercises.
+- [ ] **14 October** — Continuous and mixed random vectors are collected in chapter 4; exponential waiting times, memorylessness, the printer example, and Beta distribution theory are under Common univariate distributions (§3.9). Density estimation and penalization are in chapter 6; the worked normalization/CDF/quantile/transformation exercise is in the random-variable exercise appendix. 
+
+</details>
+
+<details>
+<summary><strong>Fundamentals of Statistical Learning · Topics in lecture order</strong></summary>
+
+Compiled from Flavia's handwritten notes up to 16 October, in the order the topics were covered. Her notes start with random variables and date only the last lecture, so earlier topics are listed in order without dates.
+
+**Random variables (Topic 03)**
+
+1. Random variables as maps from the sample space: five coin flips and the dart example.
+2. Discrete and continuous variables: PMF and PDF, support, and why P(X = x) = 0 for a continuous variable.
+3. The CDF: definition and properties; the PDF as the derivative of the CDF.
+4. Discrete example: PMF, step-function CDF, and recovering the PMF from the jumps.
+5. Relations between PMF, PDF and CDF.
+6. Continuous example (darts): CDF, PDF, indicator functions and interval probabilities.
+7. The quantile function: invertible case, general definition, Pareto example (percentiles and median), discrete example (median, 90th percentile, third quartile), and solving F(x) = p numerically.
+8. The sample space moves into the background; "famous" distributions.
+
+**Gallery of univariate distributions (Topic 04)**
+
+9. Modelling a psychic's 25 card guesses: Bernoulli model, IID assumptions, and the number of successes as a Binomial.
+10. Bernoulli and Binomial distributions; log-odds and the link to logistic regression.
+11. Poisson distribution and the Poisson approximation to the Binomial.
+12. Uniform distribution; quantile transform and probability transform.
+13. Single-parameter exponential families, with Binomial and Normal examples.
+
+**Simulation, Part I (Topic 06)**
+
+14. Why simulate: typical behaviour, variability and rare events; population model and sampling scheme; generative models.
+15. Physical simulators; truly random and pseudorandom numbers.
+16. First definitions of random vectors and IID random samples.
+17. Pseudorandom number generators and seeds in R.
+18. Distances between densities (L1, L2, L∞, KL divergence, Wasserstein, Hellinger); when a generator works: worst-case and average loss, a first definition of learning, convergence rates.
+19. Checking generated samples: uniformity and independence of consecutive pairs.
+20. Linear congruential generator: definition, period, distribution and independence of the samples (k-dimensional equidistribution).
+21. Generating discrete random variables; the inverse-transform (quantile) method with continuous and Bernoulli examples in R; its limits (Normal and Box–Muller, dimension p > 1).
+
+**Random vectors**
+
+22. Describing a random vector: individual variables and their dependence; the exam and attendance contingency table.
+23. Fully discrete vectors: joint, marginal and conditional PMFs.
+24. Independence and distances from independence.
+25. Sklar's theorem and copulas; the joint CDF and its basic properties (marginals as limits, independence through the CDF).
+26. IID samples from a population model, the data-generating process, the likelihood, maximum likelihood and the empirical CDF.
+
+**Simulation, Part II (Topic 06)**
+
+27. Transformations of random variables: the three-step method, the monotone case, and Y = X² with X ~ Unif(−1, 1).
+28. Computing a quantile function numerically.
+29. Density estimation: empirical CDF, histograms in one and several dimensions, kernel density estimation; maximum likelihood over densities needs a penalty.
+
+**Random vectors, Part II**
+
+30. Fully continuous vectors: joint PDF, normalizing a kernel, probabilities as volumes, and moving between the joint CDF and the joint PDF.
+31. Two independent exponential variables: marginals, joint PDF and independence.
+32. Exponential distribution: waiting times, memorylessness and the printer example.
+33. Conditional densities and marginalization for PDFs.
+34. Exam-style exercise: normalizing a kernel, CDF, quantile, conditioning on an event, and the transformation Y = √X.
+35. Mixed random vector: a Binomial count with a Uniform or Beta success probability; the Beta distribution, the Beta-Binomial marginal, the posterior and conjugacy (a first Bayesian analysis).
+36. Stopping time of a stream of uniforms: T given X is Geometric, the marginal of T, and the geometric distribution with its memorylessness.
+
+**16 October**
+
+37. The mixing "trick": latent variables and the marginals of joint models (Beta-Binomial, Geometric with a Uniform parameter).
+38. Normal distribution: standardization, probabilities, quantiles and light tails.
+39. Heavier tails: Student's t and Laplace distributions; the Gamma distribution and its special cases (Exponential, Erlang, χ²).
+40. Scale mixtures of Gaussians: the Student's t with a Gamma latent variable and the Laplace with an exponential one.
+41. Finite mixtures: Bernoulli mixtures through the law of total probability and mixtures of Gaussians.
 
 </details>
 
 <details>
 <summary><strong>Algorithmic Methods of Data Mining · Topics in lecture order</strong></summary>
-
-Compiled from Flavia's handwritten notes up to 12 October. The notes do not date the first lecture; 24 September is inferred from the [first-year timetable](https://sapienzastudents.net/datasci/courses/timetables/per-year/first-year/) (Mon 14–16, Tue 15–19, Thu 14–16) and the [2026/27 calendar](https://sapienzastudents.net/datasci/courses/calendars/2026-27/) (lectures start on 23 September), as the only ADM slot before 28 September.
 
 **24 September**
 
@@ -91,6 +158,16 @@ Compiled from Flavia's handwritten notes up to 12 October. The notes do not date
 
 I write these notes in English to organize what I learn and work through the material in my own words. They are works in progress and may contain mistakes or omissions; use them alongside the lectures and recommended textbooks.
 
-The LaTeX sources are available, but the custom style package `learningnotes.sty` is not included. To compile the sources, replace the package and its custom environments with your own definitions.
+All local course notes use the same style package at `shared/latex/learningnotes.sty`,
+with its logo in `shared/latex/assets/sapienza.png`. Each course loads it through
+`\usepackage[english]{../../../shared/latex/learningnotes}`. Edit the shared package
+once, then recompile each course PDF to apply the change. Local `learningnotes.sty`
+entries are relative symbolic links to that same package, kept for compatibility
+with earlier source snapshots.
+
+The LaTeX sources are available, but the custom style package remains excluded from
+the public repository. To compile a downloaded copy, supply the shared package and
+its logo at these paths, or replace the package and its custom environments with
+your own definitions.
 
 🐛 Found an error? [Open an issue](https://github.com/teoang/msc-data-science/issues).
