@@ -1,13 +1,45 @@
 \documentclass[a4paper,12pt,oneside]{report}
-\usepackage[english]{learningnotes}
+\usepackage[english]{../../../shared/latex/learningnotes}
 \usepackage{needspace}
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.18}
 \hypersetup{linktoc=all}
+\setcounter{secnumdepth}{3}
+
 \newcommand{\exerciseheading}[1]{%
   \par\Needspace{5\baselineskip}\noindent\textbf{#1}\par\nobreak}
 \newcommand{\solutionheading}[1]{%
   \par\Needspace{5\baselineskip}\noindent
   \begingroup\setlength{\fboxsep}{1pt}%
   \colorbox{yellow}{\strut\textbf{#1}}\endgroup\par\nobreak}
+
+% Computational problems are stated in definition-coloured boxes.
+\newtcolorbox{framedproblem}[1]{definitionbox,title={Problem:\enspace #1}}
+\newcommand{\ED}{\operatorname{ED}}
+\newcommand{\LCS}{\operatorname{LCS}}
+\newcommand{\OPT}{\mathrm{OPT}}
+
+% Line colours for plots, checked for colour-vision deficiencies.
+\definecolor{PlotRed}{HTML}{C0392B}
+\definecolor{PlotBlue}{HTML}{2F5BD3}
+\definecolor{PlotGreen}{HTML}{2E8B3E}
+
+% Coloured underline: tracks which term becomes what in an expansion.
+\newcommand{\cul}[2]{%
+  \tikz[baseline=(cul.base)]{%
+    \node[inner sep=0pt,outer sep=0pt] (cul) {$\displaystyle #2$};
+    \draw[#1,line width=1.2pt]
+      ([yshift=-2.5pt]cul.south west) -- ([yshift=-2.5pt]cul.south east);}}
+
+% Yellow lecture banner, as in the FSL notes before the chapter reorganization.
+\newcommand{\lecturebanner}[1]{%
+  \Needspace{6\baselineskip}%
+  \begin{tcolorbox}[colback=yellow!20,colframe=yellow!60!black,
+    boxrule=0.4pt,arc=1mm,left=5pt,right=5pt,top=3pt,bottom=3pt,
+    before skip=6pt,after skip=6pt]
+  \small\textbf{#1}
+  \end{tcolorbox}}
+\newcommand{\lecturestart}[1]{\lecturebanner{Start of lecture #1}}
 
 \notestitle{ADM}
 \notessubtitle{Algorithmic Methods of Data Mining}
@@ -19,30 +51,1977 @@
 \makenotestitle
 \notescontents
 
-\chapter{Introduction}
+\chapter{Introduction to data mining}
 
-Lecture notes will be added here as we work through the course slides.
+\lecturestart{24 September}
 
-% Replace the placeholder above with the first agreed lecture notes.
-% Reuse the FSL environments as needed:
-%
-% \section{Topic title}
-%
-% \begin{frameddefn}{Definition title}
-% Definition text.
-% \end{frameddefn}
-%
-% \begin{framedexample}{Example title}
-% Worked example.
-% \end{framedexample}
-%
-% \begin{framedalgo}{Algorithm title}
-% Algorithm and complexity analysis.
-% \end{framedalgo}
-%
-% \exerciseheading{Exercise title}
-% Exercise statement.
-% \solutionheading{Solution}
-% Worked solution.
+\section{Course organization}
+
+The course has two parts. The first part brings everyone to the same
+level, especially those who have not studied computer science before:
+basic computer architecture, data structures (different problems call
+for different ways of storing data), algorithms (how to solve a problem
+quickly, or even optimally, and how to measure its complexity), and
+programming, practised in the lab, in the homeworks and in the
+hackathon. The second part covers data mining topics: text mining,
+clustering and graphs.
+
+\section{What is data mining?}
+
+Huge amounts of data are produced in every field: social networks,
+for instance, both contain and generate an enormous quantity of data.
+These data hide patterns that we would like to find, but the amount is
+far too large to inspect by hand. Data mining tools let us explore
+data that we could not otherwise process.
+
+\begin{frameddefn}{Data mining}\label{def:data-mining}
+\emph{Data mining} is the use of efficient techniques for the analysis
+of very large collections of data and the extraction of useful and
+possibly unexpected patterns in data.
+\end{frameddefn}
+
+We will meet two kinds of tasks:
+\begin{itemize}
+  \item \textbf{Descriptive tasks} summarize the data and reveal their
+    structure, for example groups of similar objects.
+  \item \textbf{Predictive tasks} use the data to predict something
+    unknown, for example whether a person will click on an advertisement.
+\end{itemize}
+
+\section{Structured, unstructured and semi-structured data}
+
+Data come with different amounts of organization.
+
+\begin{frameddefn}{Structured, unstructured and semi-structured data}
+\label{def:data-structure-levels}
+\begin{itemize}
+  \item \emph{Structured data} have a clean, fixed form. For example,
+    a university's student records store a name, a surname and a
+    student ID for every student. These are the best data we can hope
+    for.
+  \item \emph{Unstructured data} have no predefined form, for example
+    text and pages found on the internet. Most of the data we meet are
+    of this kind.
+  \item \emph{Semi-structured data} lie in between: they have some
+    structure, but it can be modified freely. Spreadsheets (Excel) and
+    XML files are typical examples.
+\end{itemize}
+\end{frameddefn}
+
+\begin{notebox}[Data cleaning]
+Data must be cleaned before they are analysed: if the data are dirty,
+the algorithm will not work. Cleaning used to be very hard to do by
+hand; today software tools help, but we should still check that the
+result is correct. Semi-structured data are especially prone to errors,
+because their structure is easy to break.
+\end{notebox}
+
+\lecturestart{28 September}
+
+\section{Types of data}
+
+Data are very heterogeneous. Common types include:
+\begin{itemize}
+  \item \textbf{Table (record) data}, such as spreadsheets; also images
+    and time series.
+  \item \textbf{Transaction data}: each record is a transaction between
+    two parties, such as a credit-card payment or a shopping basket.
+  \item \textbf{Document data}: Wikipedia pages, tweets, \ldots
+  \item \textbf{Network data}: the web, where pages are linked to one
+    another. Google works with these graphs, and Wikipedia's internal
+    links form one as well.
+  \item \textbf{Genomic sequences}: databases of DNA sequences, often
+    used to find correlations with diseases.
+  \item \textbf{Climate data}.
+  \item \textbf{Behavioural data}: everything recorded about us, for
+    example by smartphones.
+\end{itemize}
+
+\section{Data as mathematical objects}
+
+\subsection{Records, attributes and sparsity}
+
+In table data, each \emph{row} describes an object (for example a
+person) and each \emph{column} describes an \emph{attribute} of the
+object.
+
+\begin{frameddefn}{Sparsity}\label{def:sparsity}
+A data table is \emph{sparse} when most of its cells are empty (or
+zero). The \emph{sparsity} of a table describes how many of its cells
+are filled, that is, whether many or few values are missing.
+\end{frameddefn}
+
+Attributes can be of different types:
+\begin{itemize}
+  \item \textbf{Binary}: two possible values, such as yes/no.
+  \item \textbf{Categorical}: values in a finite set of classes, such
+    as a colour or a school grade like ``good'' or ``bad''.
+  \item \textbf{Numeric}: numbers, either \emph{discrete} (counts) or
+    \emph{continuous} (time, length, temperature).
+\end{itemize}
+We can also move between types: a numeric attribute can be turned into
+a categorical one by grouping values into classes, and categories can
+be encoded as numbers.
+
+\subsection{Numeric records as points and vectors}
+
+To analyse data with algorithms, we represent them as mathematical
+objects. Suppose a table has $2000$ rows (people) and $7$ numeric
+attributes. Each row is then an element of $\R^7$, which we can view
+either as a \emph{point} in a $7$-dimensional space or as a
+\emph{vector} starting from the origin.
+
+\begin{center}
+\begin{tikzpicture}[scale=0.95]
+  \draw[->] (0,0) -- (2.7,0) node[right] {\small $x_1$};
+  \draw[->] (0,0) -- (0,2.3) node[above] {\small $x_2$};
+  \foreach \x/\y in {0.6/1.4,1.1/0.9,1.6/1.7,2.1/0.6,1.3/1.95}
+    \fill[NotesBlue] (\x,\y) circle (1.7pt);
+  \node at (1.3,-0.5) {\small rows as points};
+  \begin{scope}[xshift=5cm]
+    \draw[->] (0,0) -- (2.7,0) node[right] {\small $x_1$};
+    \draw[->] (0,0) -- (0,2.3) node[above] {\small $x_2$};
+    \foreach \x/\y in {0.6/1.4,1.1/0.9,1.6/1.7,2.1/0.6,1.3/1.95}
+      \draw[->,thick,NotesBlue] (0,0) -- (\x,\y);
+    \node at (1.3,-0.5) {\small rows as vectors};
+  \end{scope}
+\end{tikzpicture}
+\end{center}
+
+\subsection{Document data}
+
+A text contains many words. We represent a document as a vector with
+one dimension per word of the vocabulary; each entry counts how many
+times that word appears in the document.
+
+\begin{framedexample}{Documents as word-count vectors}
+\label{ex:document-vectors}
+\begin{center}
+\begin{tabular}{lcccc}
+  \toprule
+  & word 1 & word 2 & word 3 & $\cdots$\\
+  \midrule
+  Document 1 & 10 & 7 & 1 & $\cdots$\\
+  Document 2 & 15 & 5 & 0 & $\cdots$\\
+  \bottomrule
+\end{tabular}
+\end{center}
+The vocabulary is large, and each document uses only a small part of
+it. Most entries are therefore $0$, so document data have a very high
+\hyperref[def:sparsity]{sparsity}.
+\end{framedexample}
+
+\subsection{Transaction data}
+
+Each transaction has an identifier (TID) and the set of items it
+involves.
+
+\begin{framedexample}{A transaction table}\label{ex:transactions}
+\begin{center}
+\begin{tabular}{cl}
+  \toprule
+  TID & Items\\
+  \midrule
+  1 & bread, coke, milk\\
+  2 & milk, apples\\
+  3 & carrots\\
+  4 & chocolate, honey\\
+  \bottomrule
+\end{tabular}
+\end{center}
+\end{framedexample}
+
+\subsection{Ordered data and graph data}
+
+In \emph{ordered data} the order of the entries is essential. A genomic
+sequence such as \texttt{GGTTCCGCTTCA}\ldots{} is an ordered string of
+characters; time series are another example. In \emph{graph data},
+objects are nodes and relations are edges. The classic example is the
+web graph, whose nodes are pages and whose edges are links.
+
+\chapter{Analysis of algorithms}
+
+\section{Problems and algorithms}
+
+A computational \emph{problem} specifies which inputs are allowed and
+which output each input should produce. An \emph{algorithm} is a finite
+sequence of steps that produces the required output for every input.
+Our first problem is finding the maximum of an array.
+
+\begin{framedproblem}{Max-Find}\label{prob:max-find}
+\textbf{Input:} an array $A=(A[1],A[2],\ldots,A[n])$ of $n$ numbers.\\
+\textbf{Output:} the maximum value in $A$.
+\end{framedproblem}
+
+\begin{notebox}[Indexing]
+In pseudocode we index arrays from $1$, so $A[i]$ is the $i$-th
+element. In Python, indexing starts from $0$: for
+$\vec{x}=(x_1,x_2,x_3)$ we have \texttt{x[0]}${}=x_1$. The length of
+the array is \texttt{n = len(A)}.
+\end{notebox}
+
+\Needspace{12\baselineskip}
+\begin{framedalgo}{Max-Find}\label{alg:max-find}
+\begin{algorithmic}[1]
+  \Function{MaxFind}{$A$}
+    \State $\mathit{max}\gets A[1]$
+    \For{$i=1$ \textbf{to} $n$}
+      \If{$\mathit{max}<A[i]$}
+        \State $\mathit{max}\gets A[i]$
+      \EndIf
+    \EndFor
+    \State \Return $\mathit{max}$
+  \EndFunction
+\end{algorithmic}
+\end{framedalgo}
+
+The loop may also start from $i=2$, since comparing $A[1]$ with itself
+is useless. For every algorithm we always ask two questions:
+\begin{enumerate}
+  \item \textbf{Correctness:} does it solve my problem?
+  \item \textbf{Efficiency:} how fast is it?
+\end{enumerate}
+
+\section{Correctness}
+
+Testing an algorithm on some inputs is not enough: it may work only on
+the inputs we tried. To show that an algorithm is \emph{wrong}, a single
+counterexample suffices. To show that it is \emph{correct}, we need a
+proof, typically by induction on the number of steps performed.
+
+\begin{framedprop}{Correctness of Max-Find}\label{prop:max-find-correct}
+After the iteration with index $i$, the variable $\mathit{max}$ in
+Algorithm~\ref{alg:max-find} equals
+\[
+  \max\{A[1],\ldots,A[i]\}.
+\]
+In particular, when the loop ends ($i=n$), the algorithm returns the
+maximum of $A$.
+\end{framedprop}
+
+\begin{proof}
+We use induction on $i$.
+
+\emph{Base case} ($i=1$): $\mathit{max}=A[1]$, which is the maximum of
+$\{A[1]\}$.
+
+\emph{Inductive step}: assume that after iteration $i$ we have
+$\mathit{max}=\max\{A[1],\ldots,A[i]\}$. In iteration $i+1$,
+\[
+  A=\bigl[\underbrace{A[1],A[2],\ldots,A[i]}_{\text{maximum}=\mathit{max}},
+     A[i+1],\ldots,A[n]\bigr].
+\]
+If $A[i+1]>\mathit{max}$, then $A[i+1]$ becomes the new maximum;
+otherwise we keep the previous one. In both cases
+$\mathit{max}=\max\{A[1],\ldots,A[i+1]\}$.
+\end{proof}
+
+\section{Efficiency: counting steps}
+
+How long an algorithm takes depends on many things: the program, but
+also the input, the programming language, the software, the operating
+system and the hardware. To compare algorithms, we ignore all of these
+and look only at the algorithm itself: we count how many elementary
+steps it performs.
+
+\begin{frameddefn}{Running time}\label{def:running-time}
+The \emph{running time} $T(n)$ of an algorithm is the number of steps
+it requires on an input of size $n$. Unless stated otherwise, we
+consider the \emph{worst case}: the largest number of steps over all
+inputs of size $n$.
+\end{frameddefn}
+
+\begin{framedexample}{Counting the steps of Max-Find}
+\label{ex:max-find-steps}
+\begin{algorithmic}
+  \State $\mathit{max}\gets A[1]$ \Comment{$1$ step}
+  \For{$i=1$ \textbf{to} $n$} \Comment{$n$ steps}
+    \If{$\mathit{max}<A[i]$} \Comment{$n$ steps}
+      \State $\mathit{max}\gets A[i]$ \Comment{$k\leq n$ steps}
+    \EndIf
+  \EndFor
+  \State \Return $\mathit{max}$ \Comment{$1$ step}
+\end{algorithmic}
+Hence $T(n)=2n+k+2$. The number $k$ of updates depends on the input:
+\begin{itemize}
+  \item \emph{Best case}: the maximum is $A[1]$, so the update never
+    runs ($k=0$).
+  \item \emph{Worst case}: the array is sorted in increasing order, so
+    the update runs every time ($k=n$).
+\end{itemize}
+In the worst case,
+\[
+  T(n)=2n+n+2=3n+2.
+\]
+\end{framedexample}
+
+The same algorithm can be written with a \texttt{while} loop:
+
+\begin{framedexample}{Max-Find with a while loop}\label{ex:max-find-while}
+\begin{algorithmic}
+  \State $\mathit{max}\gets A[1]$ \Comment{$1$ step}
+  \While{$i\leq n$} \Comment{$n$ steps}
+    \If{$A[i]>\mathit{max}$} \Comment{$n$ steps}
+      \State $\mathit{max}\gets A[i]$ \Comment{$\leq n$ steps}
+    \EndIf
+    \State $i\gets i+1$ \Comment{$n$ steps}
+  \EndWhile
+  \State \Return $\mathit{max}$ \Comment{$1$ step}
+\end{algorithmic}
+In the worst case $T(n)=4n+2$.
+\end{framedexample}
+
+Both versions are correct and do the same thing, and both running
+times are linear functions of $n$. The exact constants depend on how we
+count: initializing $i$ is one more step, and the loop test runs once
+more when it finally fails. Such details change only the constants,
+which is why we will learn to ignore them.
+
+\lecturestart{29 September}
+
+\section{Asymptotic notation}
+
+In the previous section we counted the steps of two versions of
+Max-Find, one with a \texttt{for} loop and one with a \texttt{while}
+loop, and obtained $T(n)=3n+2$ and $T(n)=4n+2$. Which one is faster?
+The exact numbers depend on how we count, so comparing them directly
+tells us little. What matters is how the running time changes as the
+input grows: if $n$ doubles, both running times roughly double. In this
+sense, both \emph{grow like $n$}.
+
+Asymptotic (``big O'') notation makes this idea precise. It ignores
+constant factors and lower-order terms: the $+2$ can be dropped, and
+$4n$ grows faster than $3n$ only by a constant factor, which makes no
+real difference.
+
+\begin{frameddefn}{$O$, $\Omega$ and $\Theta$}\label{def:asymptotic}
+Let $T,g:\N\to\R_{\geq0}$.
+\begin{itemize}
+  \item $T(n)=O(g(n))$ if there are constants $c>0$ and $n_0$ such
+    that $T(n)\leq c\,g(n)$ for all $n\geq n_0$:
+    $g$ is an \emph{upper bound} on the growth of $T$.
+  \item $T(n)=\Omega(g(n))$ if there are constants $c>0$ and $n_0$
+    such that $T(n)\geq c\,g(n)$ for all $n\geq n_0$:
+    $g$ is a \emph{lower bound}.
+  \item $T(n)=\Theta(g(n))$ if both $T(n)=O(g(n))$ and
+    $T(n)=\Omega(g(n))$: $T$ grows exactly like $g$, up to constants.
+\end{itemize}
+\end{frameddefn}
+
+Informally, $O$ means ``at most'', $\Omega$ means ``at least'' and
+$\Theta$ means ``exactly'', always up to constant factors and for large
+$n$. The running time of Max-Find is $T(n)=\Theta(n)$: it grows like a
+linear function of $n$.
+
+\begin{framedprop}{Combining upper and lower bounds}
+\label{prop:theta-from-bounds}
+\[
+  T(n)=O(g(n))\ \text{and}\ T(n)=\Omega(g(n))
+  \iff T(n)=\Theta(g(n)).
+\]
+\end{framedprop}
+
+This is the asymptotic version of ``$x\leq3$ and $x\geq3$ imply
+$x=3$''. For instance, $T(n)=O(n^3)$ and $T(n)=\Omega(n^3)$ give
+$T(n)=\Theta(n^3)$.
+
+Upper bounds are not unique: if $T(n)=\Theta(n^2)$, then also
+$T(n)=O(n^2)$, $T(n)=O(n^3)$, $T(n)=O(n^3\log n)$, and so on.
+
+\begin{framedexample}{The dominant term}\label{ex:dominant-term}
+Let $T(n)=4n^3+10n^2+200n+7$. How fast does this function grow?
+
+The plot compares the three terms that depend on $n$.
+
+\begin{center}
+\begin{tikzpicture}
+\begin{axis}[
+  width=11cm,height=6.5cm,
+  xmin=0,xmax=10,ymin=0,ymax=4000,
+  xtick={0,2,...,10},ytick={0,1000,...,4000},
+  scaled y ticks=false,
+  yticklabel style={/pgf/number format/1000 sep={\,}},
+  xlabel={$n$},ylabel={number of steps},
+  axis lines=left,grid=major,grid style={black!10},
+  label style={font=\small},tick label style={font=\small},
+  domain=0:10,samples=101,clip=false]
+  \addplot[thick,PlotRed] {4*x^3};
+  \addplot[thick,PlotBlue] {200*x};
+  \addplot[thick,PlotGreen] {10*x^2};
+  \node[right,font=\small] at (axis cs:10,4000) {$4n^3$};
+  \node[right,font=\small] at (axis cs:10,2000) {$200n$};
+  \node[right,font=\small] at (axis cs:10,1000) {$10n^2$};
+  \draw[dashed,black!45] (axis cs:5,0) -- (axis cs:5,1180);
+  \node[above,font=\footnotesize] at (axis cs:5,1180) {$n=5$};
+  \addplot[only marks,mark=*,mark size=2pt,PlotRed] coordinates {(5,500)};
+  \addplot[only marks,mark=*,mark size=2pt,PlotBlue] coordinates {(5,1000)};
+  \addplot[only marks,mark=*,mark size=2pt,PlotGreen] coordinates {(5,250)};
+  \addplot[only marks,mark=*,mark size=2pt,black] coordinates {(7.0711,1414.2)};
+  \node[anchor=north west,font=\footnotesize]
+    at (axis cs:7.2,1390) {$n=\sqrt{50}\approx7.1$};
+\end{axis}
+\end{tikzpicture}
+\end{center}
+
+For small $n$, a lower-order term can be the largest. At $n=5$ we
+have
+\[
+  200n=1000,\qquad 4n^3=500,\qquad 10n^2=250.
+\]
+As $n$ grows, however, the cubic term overtakes $200n$ at
+$n=\sqrt{50}\approx7.1$ and dominates from then on, so it determines
+the running time.
+
+\textbf{Upper bound.} For $n\geq1$, every power of $n$ in $T(n)$ is at
+most $n^3$, so
+\[
+  T(n)\leq 4n^3+10n^3+200n^3+7n^3=221\,n^3.
+\]
+Hence $T(n)=O(n^3)$, with $c=221$ and $n_0=1$.
+
+\textbf{Lower bound.} All the terms are non-negative, so
+\[
+  T(n)\geq 4n^3.
+\]
+Hence $T(n)=\Omega(n^3)$, with $c=4$ and $n_0=1$.
+
+\textbf{Conclusion.} Therefore, by
+Proposition~\ref{prop:theta-from-bounds}, $T(n)=\Theta(n^3)$.
+
+\textbf{Other upper bounds.} For $n\geq1$,
+\[
+  T(n)\leq221\,n^3\leq221\,n^4\leq221\,n^5,
+\]
+so we also have $T(n)=O(n^4)$ and $T(n)=O(n^5)$. However,
+$T(n)\neq\Theta(n^4)$: since $T(n)/n^4\leq221/n\to0$, no constant
+$c>0$ gives $T(n)\geq c\,n^4$ for all large $n$.
+\end{framedexample}
+
+When analysing an algorithm we are mostly interested in the
+\emph{upper bound}, that is, in the worst case. Often we do not know
+exactly how many times a step runs. In
+Algorithm~\ref{alg:max-find}, we do not know in advance how many
+times the update $\mathit{max}\gets A[i]$ will run, but in the worst
+case (a sorted array) it runs $n$ times, so it never runs more than $n$
+times. Bounding each step from above gives an upper bound on $T(n)$.
+
+\subsection{Comparing growth rates}
+
+\begin{framedprop}{Growth rates}\label{prop:growth-rates}
+For large $n$ (that is, up to constants and eventually):
+\begin{itemize}
+  \item $n^c\leq n^d$ for $c\leq d$;
+  \item $\log^c n=(\log n)^c\leq n^d$ for all constants $c,d>0$;
+  \item $n^c\leq d^n$ for every constant $c$ and every $d>1$;
+  \item more generally, $n^c\leq d^{an^b}$ for $d>1$ and constants
+    $a,b>0$.
+\end{itemize}
+Consequently,
+\begin{align*}
+  1&\leq\log\log n\leq\log n\leq\log^2 n\leq\sqrt n\leq n\\
+   &\leq n\log\log n\leq n\log n\leq n\sqrt n\leq n^2\leq n^3\leq 2^n.
+\end{align*}
+\end{framedprop}
+
+For example, $(\log n)^{10}$ and $\sqrt n$: the logarithm raised to
+any power always loses eventually, so $\sqrt n$ grows faster.
+
+\begin{notebox}[The base of the logarithm does not matter]
+Changing the base of a logarithm only multiplies it by a constant:
+\[
+  \log_2 n=\frac{\log_{10}n}{\log_{10}2}
+          =\underbrace{\frac{1}{\log_{10}2}}_{\text{constant}}
+           \cdot\log_{10}n.
+\]
+Asymptotically all bases are equivalent, so we simply write
+$O(\log n)$.
+\end{notebox}
+
+An exponential running time means that the algorithm is extremely slow:
+an algorithm with exponential running time is hopeless except for tiny
+inputs. Ideally we would like logarithmic or linear running times.
+
+\begin{center}
+\begin{tabular}{rcccc}
+  \toprule
+  $n$ & $\log_2 n$ & $n\log_2 n$ & $n^2$ & $2^n$\\
+  \midrule
+  $10$   & $3.3$  & $33$    & $10^2$ & $\approx1.0\cdot10^{3}$\\
+  $100$  & $6.6$  & $664$   & $10^4$ & $\approx1.3\cdot10^{30}$\\
+  $1000$ & $10.0$ & $9966$  & $10^6$ & $\approx1.1\cdot10^{301}$\\
+  \bottomrule
+\end{tabular}
+\end{center}
+
+\section{Lower bounds and optimal algorithms}
+
+Max-Find is correct and runs in time $\Theta(n)$. Could we do better,
+say $O(\sqrt n)$? No: any correct algorithm must read every element,
+because an element it never reads could be the maximum. With $n$
+elements to read, no algorithm can beat $\Omega(n)$.
+
+\begin{frameddefn}{Lower bound and optimal algorithm}
+\label{def:optimal-algorithm}
+A problem has \emph{lower bound} $\Omega(g(n))$ if every algorithm
+that solves it needs $\Omega(g(n))$ steps in the worst case. An
+algorithm is (asymptotically) \emph{optimal} if its running time
+matches a lower bound for the problem.
+\end{frameddefn}
+
+\begin{framedexample}{Max-Find is optimal}\label{ex:max-find-optimal}
+Max-Find (Algorithm~\ref{alg:max-find}) runs in $O(n)$, as we computed
+in Example~\ref{ex:max-find-steps}, and the problem requires
+$\Omega(n)$, so Max-Find is \emph{optimal}.
+\end{framedexample}
+
+\section{Prefix sums}
+
+\begin{framedproblem}{Prefix sums}\label{prob:prefix-sums}
+\textbf{Input:} an array $A$ of length $n$.\\
+\textbf{Output:} an array $S$ of length $n$ such that, for every $i$,
+\[
+  S[i]=\sum_{j=1}^{i}A[j].
+\]
+\end{framedproblem}
+
+For example, $A=[3,6,-2,-5,8]$ gives $S=[3,9,7,2,10]$.
+
+\subsection{A quadratic algorithm}
+
+The direct approach computes each sum from scratch.
+
+\Needspace{14\baselineskip}
+\begin{framedalgo}{Prefix sums, direct version}\label{alg:prefix-slow}
+\begin{algorithmic}[1]
+  \State $n\gets\mathrm{length}(A)$ \Comment{$1$ step}
+  \For{$i=1$ \textbf{to} $n$} \Comment{$n$ steps}
+    \State $S[i]\gets0$ \Comment{$n$ steps}
+    \For{$j=1$ \textbf{to} $i$} \Comment{$i$ times for the $i$-th element}
+      \State $S[i]\gets S[i]+A[j]$ \Comment{$i$ times}
+    \EndFor
+  \EndFor
+  \State \Return $S$ \Comment{$1$ step}
+\end{algorithmic}
+\end{framedalgo}
+
+The inner loop runs once for the first element, twice for the second,
+and $n$ times for the last. Each of its two lines therefore runs
+\[
+  1+2+3+\cdots+n=\sum_{i=1}^{n}i=\frac{n(n+1)}{2}
+\]
+times, and
+\[
+  T(n)=1+n+n+2\cdot\frac{n(n+1)}{2}+1=n^2+3n+2=\Theta(n^2).
+\]
+
+\begin{notebox}[A quicker upper bound]
+We do not need the exact sum. For every $i$, the inner loop runs at
+most $n$ times, so
+\[
+  T(n)\leq 2n+n\cdot(2n)+2=O(n^2).
+\]
+Bounding each loop by its largest possible number of iterations is
+often enough to obtain an upper bound.
+\end{notebox}
+
+\subsection{Closing the gap}
+
+Is this algorithm optimal? No: the lower bound for the problem is
+$\Omega(n)$ (we must read every element), while our algorithm takes
+$\Theta(n^2)$. There is a \emph{gap}, and we can try to close it by
+finding a better algorithm. The key observation is that each prefix
+sum extends the previous one:
+\[
+  S[i]=\sum_{j=1}^{i}A[j]=\sum_{j=1}^{i-1}A[j]+A[i]=S[i-1]+A[i].
+\]
+
+\Needspace{10\baselineskip}
+\begin{framedalgo}{Prefix sums, fast version}\label{alg:prefix-fast}
+\begin{algorithmic}[1]
+  \State $n\gets\mathrm{length}(A)$
+  \State $S[1]\gets A[1]$
+  \For{$i=2$ \textbf{to} $n$}
+    \State $S[i]\gets S[i-1]+A[i]$ \Comment{$n-1$ times}
+  \EndFor
+  \State \Return $S$
+\end{algorithmic}
+\end{framedalgo}
+
+Now $T(n)=\Theta(n)$, which matches the lower bound: the fast version
+is optimal.
+
+\section{An open gap: matrix multiplication}
+
+Let $A,B\in\R^{n\times n}$ and $C=AB$. Each entry is
+\[
+  C[i,j]=\sum_{k=1}^{n}A[i,k]\,B[k,j].
+\]
+Computing one entry takes $n$ multiplications, and there are $n^2$
+entries, so the direct algorithm runs in $\Theta(n^3)$.
+
+A lower bound is $\Omega(n^2)$: the output matrix $C$ has $n^2$ values,
+and we must compute each of them. For many years, researchers have
+tried to close the gap between $n^2$ and $n^3$. The gap has been
+reduced, but it has not yet been closed.
+
+\begin{notebox}[For reference]
+Strassen's algorithm (1969) multiplies two $n\times n$ matrices in
+$O(n^{\log_2 7})\approx O(n^{2.81})$ operations. The best known
+exponent today is about $2.37$, still above the lower bound $2$.
+\end{notebox}
+
+\chapter{Recursion}
+
+\section{Fibonacci numbers}
+
+\begin{frameddefn}{Fibonacci sequence}\label{def:fibonacci}
+\[
+  \mathrm{fib}(n)=
+  \begin{cases}
+    1, & n=0\text{ or }n=1,\\
+    \mathrm{fib}(n-1)+\mathrm{fib}(n-2), & n\geq2.
+  \end{cases}
+\]
+\end{frameddefn}
+
+\begin{center}
+\begin{tabular}{c|cccccccccc}
+  $n$ & 0 & 1 & 2 & 3 & 4 & 5 & 6 & 7 & 8 & 9\\
+  \hline
+  $\mathrm{fib}(n)$ & 1 & 1 & 2 & 3 & 5 & 8 & 13 & 21 & 34 & 55
+\end{tabular}
+\end{center}
+
+The definition is \emph{recursive}: it defines $\mathrm{fib}(n)$ in
+terms of smaller values. It translates directly into a recursive
+algorithm, one that calls itself.
+
+\Needspace{12\baselineskip}
+\begin{framedalgo}{Recursive Fibonacci}\label{alg:fib-recursive}
+\begin{algorithmic}[1]
+  \Function{Fibonacci}{$n$}
+    \If{$n=0$ \textbf{or} $n=1$} \Comment{$1$ step}
+      \State \Return $1$ \Comment{at most $1$ step}
+    \EndIf
+    \State $f_1\gets$ \Call{Fibonacci}{$n-1$} \Comment{$T(n-1)$ steps}
+    \State $f_2\gets$ \Call{Fibonacci}{$n-2$} \Comment{$T(n-2)$ steps}
+    \State \Return $f_1+f_2$ \Comment{$1$ step}
+  \EndFunction
+\end{algorithmic}
+\end{framedalgo}
+
+\subsection{Running time of the recursive algorithm}
+
+Let $T(n)$ be the number of steps for input $n$. Counting the steps of
+Algorithm~\ref{alg:fib-recursive} gives a \emph{recurrence}:
+\[
+  T(n)=
+  \begin{cases}
+    2, & n=0\text{ or }n=1,\\
+    T(n-1)+T(n-2)+3, & n\geq2.
+  \end{cases}
+\]
+The formula is recursive. How can we solve it? A first idea is to
+expand it. The recurrence holds for \emph{every} $n\geq2$, so we can
+apply it to the terms on the right as well: replacing $n$ with $n-1$
+gives $T(n-1)=T(n-2)+T(n-3)+3$, and replacing $n$ with $n-2$ gives
+$T(n-2)=T(n-3)+T(n-4)+3$. In the computations below, each underlined
+term is replaced, in the next line, by the expression underlined in the
+same colour.
+
+\textbf{First expansion.}
+\begin{align*}
+  T(n)&=\cul{PlotRed}{T(n-1)}+\cul{PlotBlue}{T(n-2)}+3\\
+      &=\cul{PlotRed}{\bigl[T(n-2)+T(n-3)+3\bigr]}
+        +\cul{PlotBlue}{\bigl[T(n-3)+T(n-4)+3\bigr]}+3\\
+      &=T(n-2)+2T(n-3)+T(n-4)+9.
+\end{align*}
+
+\textbf{Second expansion.} We expand each of the three terms again:
+\begin{align*}
+  T(n)&=\cul{PlotRed}{T(n-2)}+\cul{PlotBlue}{2T(n-3)}
+        +\cul{PlotGreen}{T(n-4)}+9\\
+      &=\cul{PlotRed}{\bigl[T(n-3)+T(n-4)+3\bigr]}
+        +\cul{PlotBlue}{2\bigl[T(n-4)+T(n-5)+3\bigr]}\\
+      &\qquad+\cul{PlotGreen}{\bigl[T(n-5)+T(n-6)+3\bigr]}+9\\
+      &=T(n-3)+3T(n-4)+3T(n-5)+T(n-6)+21=\cdots
+\end{align*}
+The expansion stops when the arguments reach $0$ or $1$. After two
+expansions the smallest argument is already $n-6$, and the number of
+terms keeps growing: we may suspect that $T(n)$ is exponential.
+
+\begin{framedprop}{The recursive algorithm is exponential}
+\label{prop:fib-exponential}
+The running time of Algorithm~\ref{alg:fib-recursive} satisfies
+\[
+  T(n)=\Omega\bigl(2^{n/2}\bigr)=\Omega\bigl((\sqrt2)^n\bigr).
+\]
+\end{framedprop}
+
+\begin{proof}
+$T$ is non-decreasing: $T(1)=T(0)$, and for $n\geq2$ we have
+$T(n)\geq T(n-1)$. \Needspace{14\baselineskip}
+Replacing $T(n-1)$ with the smaller $T(n-2)$,
+\[
+  T(n)=T(n-1)+T(n-2)+3\geq 2\,\cul{PlotRed}{T(n-2)}+3.
+\]
+Applying the same inequality repeatedly,
+\begin{align*}
+  T(n)&\geq 2\,\cul{PlotRed}{\bigl(2T(n-4)+3\bigr)}+3
+        =4\,\cul{PlotBlue}{T(n-4)}+9\\
+      &\geq 4\,\cul{PlotBlue}{\bigl(2T(n-6)+3\bigr)}+9
+        =8\,\cul{PlotGreen}{T(n-6)}+21\\
+      &\geq 8\,\cul{PlotGreen}{\bigl(2T(n-8)+3\bigr)}+21=16T(n-8)+45\\
+      &\;\;\vdots\\
+      &\geq 2^iT(n-2i)+3(2^i-1)\geq 2^iT(n-2i)
+      \qquad\text{after $i$ steps.}
+\end{align*}
+For even $n$, take $i=n/2$:
+\[
+  T(n)\geq 2^{n/2}\,T(0)=2\cdot2^{n/2}=2(\sqrt2)^n.
+\]
+For odd $n$, take $i=(n-1)/2$ and use $T(1)=2$ in the same way.
+\end{proof}
+
+Why is it so slow? To compute $\mathrm{fib}(n)$, the algorithm makes
+two calls, $\mathrm{fib}(n-1)$ and $\mathrm{fib}(n-2)$, each of which
+makes two more calls, and so on. It computes the same values a lot of
+times, again and again: the work roughly doubles at each level of the
+recursion tree.
+
+\begin{center}
+\begin{tikzpicture}[
+  level distance=1.25cm,
+  level 1/.style={sibling distance=6.2cm},
+  level 2/.style={sibling distance=3.1cm},
+  level 3/.style={sibling distance=1.55cm},
+  every node/.style={font=\small,inner sep=2pt},
+  r2/.style={fill=NotesExample!55,rounded corners=2pt},
+  r3/.style={fill=NotesProposition!55,rounded corners=2pt}]
+  \node {$f(n)$}
+    child {node {$f(n-1)$}
+      child {node[r2] {$f(n-2)$}
+        child {node[r3,font=\footnotesize] {$f(n-3)$}}
+        child {node[font=\footnotesize] {$f(n-4)$}}}
+      child {node[r3] {$f(n-3)$}
+        child {node[font=\footnotesize] {$f(n-4)$}}
+        child {node[font=\footnotesize] {$f(n-5)$}}}}
+    child {node[r2] {$f(n-2)$}
+      child {node[r3] {$f(n-3)$}
+        child {node[font=\footnotesize] {$f(n-4)$}}
+        child {node[font=\footnotesize] {$f(n-5)$}}}
+      child {node {$f(n-4)$}
+        child {node[font=\footnotesize] {$f(n-5)$}}
+        child {node[font=\footnotesize] {$f(n-6)$}}}};
+\end{tikzpicture}
+
+{\small Here $f(k)$ stands for a call to $\mathrm{fib}(k)$. Already in
+the first levels, $f(n-2)$ is computed twice and $f(n-3)$ three times.}
+\end{center}
+
+\subsection{Avoiding repeated work}
+
+There are two ways to fix the problem:
+\begin{itemize}
+  \item \textbf{Store the values} (memoization): using some memory, we
+    compute each $\mathrm{fib}(k)$ once and look it up afterwards.
+  \item \textbf{Compute bottom-up}: start from the base cases and fill
+    the table from left to right, $1+1=2$, $2+1=3$, $3+2=5$,
+    $5+3=8$, \ldots, each value being the sum of the previous two.
+\end{itemize}
+
+\Needspace{14\baselineskip}
+\begin{framedalgo}{Iterative Fibonacci}\label{alg:fib-iterative}
+\begin{algorithmic}[1]
+  \Function{FibonacciIterative}{$n$}
+    \If{$n\leq1$}
+      \State \Return $1$
+    \EndIf
+    \State $\mathit{previous}\gets1$ \Comment{$\mathrm{fib}(0)$}
+    \State $\mathit{current}\gets1$ \Comment{$\mathrm{fib}(1)$}
+    \For{$i=2$ \textbf{to} $n$}
+      \State $\mathit{new}\gets\mathit{previous}+\mathit{current}$
+      \State $\mathit{previous}\gets\mathit{current}$
+      \State $\mathit{current}\gets\mathit{new}$
+    \EndFor
+    \State \Return $\mathit{current}$
+  \EndFunction
+\end{algorithmic}
+\end{framedalgo}
+
+The loop runs $n-1$ times with a constant amount of work per iteration,
+so the running time is $T(n)=O(n)$: this algorithm is linear.
+
+\begin{notebox}[Indexing and closed form]
+The slides use the convention $F_0=0$, $F_1=1$ (their iterative
+algorithm returns $n$ for $n\leq1$ and starts from $0$ and $1$). With
+that convention $\mathrm{fib}(n)=F_{n+1}$, so the two sequences differ
+only by a shift. There is also a closed formula, which we do not prove:
+\[
+  F_n=\frac{1}{\sqrt5}\left[\left(\frac{1+\sqrt5}{2}\right)^{n}
+     -\left(\frac{1-\sqrt5}{2}\right)^{n}\right],
+  \qquad
+  \mathrm{fib}(n)=F_{n+1}.
+\]
+\end{notebox}
+
+\lecturestart{1 October}
+
+\section{Binary search}
+
+\begin{framedproblem}{Search}\label{prob:search}
+\textbf{Input:} an array $A$ of $n$ numbers and a value $x$.\\
+\textbf{Output:} \textsc{true} if $x$ is in $A$, \textsc{false}
+otherwise.
+\end{framedproblem}
+
+We could compare $x$ with every element, with linear complexity.
+If $A$ is \emph{sorted}, we do not need to check all the elements: we
+look at the central element and compare it with $x$. If $x$ is larger,
+it can only be in the right half; if smaller, only in the left half.
+We then repeat on that half.
+
+\begin{framedexample}{Searching a sorted array}\label{ex:binary-search}
+Let $A=[1,3,7,10,13,24,30,33,39,55]$ and $x=39$.
+\begin{enumerate}
+  \item The central element is $A[5]=13<39$, so we keep the right part
+    $[24,30,33,39,55]$.
+  \item Its central element is $33<39$, so we keep $[39,55]$.
+  \item Its central element is $39=x$: found.
+\end{enumerate}
+\end{framedexample}
+
+\Needspace{16\baselineskip}
+\begin{framedalgo}{Binary search}\label{alg:binary-search}
+\begin{algorithmic}[1]
+  \Function{BinarySearch}{$A,x$}
+    \State $n\gets\mathrm{len}(A)$
+    \If{$n=0$}
+      \State \Return \textsc{false}
+    \EndIf
+    \If{$x<A[1]$ \textbf{or} $x>A[n]$} \Comment{$x$ outside the range of $A$}
+      \State \Return \textsc{false}
+    \EndIf
+    \State $\mathit{mid}\gets\lceil n/2\rceil$
+    \If{$x=A[\mathit{mid}]$}
+      \State \Return \textsc{true}
+    \ElsIf{$x<A[\mathit{mid}]$}
+      \State \Return \Call{BinarySearch}{$A[1,\ldots,\mathit{mid}-1],x$}
+    \Else
+      \State \Return \Call{BinarySearch}{$A[\mathit{mid}+1,\ldots,n],x$}
+    \EndIf
+  \EndFunction
+\end{algorithmic}
+\end{framedalgo}
+
+The \emph{ceiling} $\lceil y\rceil$ is the smallest integer greater
+than or equal to $y$: for example, $\lceil3\rceil=3$ and
+$\lceil3.1\rceil=4$.
+
+\begin{framedexample}{An unsuccessful search}\label{ex:binary-search-fail}
+Let $A=[13,17]$ and $x=15$.
+\begin{enumerate}
+  \item Since $13<15<17$, $x$ lies within the range of $A$.
+  \item The central element is $A[1]=13<15$ (here
+    $\mathit{mid}=\lceil2/2\rceil=1$), so we keep the right part $[17]$.
+  \item Now $15<17$, so $x$ is outside the range of $[17]$: the
+    algorithm returns \textsc{false}.
+\end{enumerate}
+\end{framedexample}
+
+\subsection{Running time}
+
+Every line of Algorithm~\ref{alg:binary-search} takes constant time,
+except the recursive call. The call works on an array of half the size,
+so it takes $T(n/2)$ steps instead of $T(n)$:
+\[
+  T(n)=
+  \begin{cases}
+    c_1, & n\leq1,\\
+    T(n/2)+c_2, & \text{otherwise},
+  \end{cases}
+\]
+where $c_1$ and $c_2$ are constants. For $n\geq2$,
+\begin{align*}
+  T(n)&=T\!\left(\tfrac n2\right)+c_2
+       =T\!\left(\tfrac n4\right)+2c_2
+       =T\!\left(\tfrac n8\right)+3c_2
+       =\cdots
+       =T\!\left(\tfrac{n}{2^i}\right)+i\,c_2.
+\end{align*}
+We stop when the array has size $1$, that is, when $n/2^i=1$, or
+$i=\log_2 n$. Then $T(n/2^i)=T(1)=c_1$ and
+\[
+  T(n)=c_1+c_2\log_2 n=\Theta(\log n).
+\]
+
+\begin{notebox}[Subarrays]
+We treat $A[1,\ldots,\mathit{mid}-1]$ as a view of the original array,
+described by its first and last index. Copying the subarray at every
+call would cost linear time and destroy the logarithmic bound.
+\end{notebox}
+
+We cannot do better than $\Theta(\log n)$, but we are not able to prove
+this yet. Splitting into three parts instead of two does not help
+asymptotically: the recurrence becomes $T(n)=T(n/3)+c_2'$, so
+$T(n)=O(\log_3 n)$, and $O(\log_3 n)=O(\log_2 n)$ because
+$\log_3 n=\log_2 n/\log_2 3$.
+
+\chapter{Complexity classes}
+
+\section{The traveling salesman problem}
+
+We want to visit all the nodes of a weighted graph, starting from a
+node and coming back to it, while minimizing the total cost. Every
+order of visit gives a tour, and different tours have different costs.
+
+\begin{framedproblem}{Traveling salesman problem (TSP)}\label{prob:tsp}
+\textbf{Input:} $n$ cities and the cost of travelling between each pair
+of them.\\
+\textbf{Output:} a tour that visits every city exactly once and returns
+to the starting city, with minimum total cost.
+\end{framedproblem}
+
+\begin{framedexample}{Four cities}\label{ex:tsp-four}
+\begin{center}
+\begin{tikzpicture}[city/.style={circle,draw,fill=gray!15,
+    minimum size=7mm,inner sep=0pt}]
+  \node[city] (A) at (0,2.2) {$A$};
+  \node[city] (B) at (3.4,2.2) {$B$};
+  \node[city] (C) at (3.4,0) {$C$};
+  \node[city] (D) at (0,0) {$D$};
+  \draw (A) -- node[above] {2} (B);
+  \draw (B) -- node[right] {3} (C);
+  \draw (C) -- node[below] {2} (D);
+  \draw (D) -- node[left] {4} (A);
+  \draw (A) -- node[pos=0.22,above right=-1pt] {5} (C);
+  \draw (B) -- node[pos=0.22,above left=-1pt] {6} (D);
+\end{tikzpicture}
+\end{center}
+Starting from $A$, there are $3!=6$ orders of visit, which give three
+distinct tours (each one can be travelled in two directions):
+\begin{align*}
+  A\,B\,C\,D\,A&:\ 2+3+2+4=11,\\
+  A\,B\,D\,C\,A&:\ 2+6+2+5=15,\\
+  A\,C\,B\,D\,A&:\ 5+3+6+4=18.
+\end{align*}
+The optimal tour costs $11$. In the lecture graph with eight cities,
+two tours cost $15$ and $21$.
+\end{framedexample}
+
+The brute-force approach tries all tours:
+with $n$ cities there are $(n-1)!$ orders of visit, and
+\[
+  n!=1\cdot2\cdot3\cdots(n-1)\cdot n\geq1\cdot2\cdot2\cdots2=2^{n-1},
+\]
+so the factorial grows even faster than an exponential: this is not
+good at all. No known algorithm finds the shortest tour quickly.
+
+\section{Decision problems, P and NP}
+
+We usually study \emph{decision problems}, whose answer is yes or no.
+An optimization problem such as minimizing costs or maximizing profits
+becomes a decision problem by fixing a threshold. For TSP: \emph{is
+there a tour that visits all the nodes with total cost at most $14$?}
+If the answer is yes, we can ask whether we can do better, for example
+cost at most $13$.
+
+\begin{frameddefn}{The class P}\label{def:class-p}
+$\mathrm{P}$ is the class of problems that we can solve in
+\emph{polynomial time} (poly-time), that is, in time $O(n^k)$ for some
+constant $k$.
+\end{frameddefn}
+
+\begin{frameddefn}{The class NP}\label{def:class-np}
+$\mathrm{NP}$ is the class of problems for which, if someone gives us
+a candidate solution, we can verify in polynomial time whether the
+answer is \textsc{yes}.
+\end{frameddefn}
+
+\begin{framedexample}{Easy to verify}\label{ex:np-verify}
+\begin{itemize}
+  \item \emph{Rubik's cube}: it is easy to check whether a cube is
+    solved.
+  \item \emph{TSP}: given a tour, we add up its costs and check whether
+    the total is at most $14$.
+  \item \emph{Sudoku}: it is easy to check whether a filled grid is
+    correct.
+\end{itemize}
+What these problems have in common is that, given a solution, we can
+verify in poly-time whether it is correct, even though finding one may
+be hard.
+\end{framedexample}
+
+Max-Find and binary search are in $\mathrm{P}$. Every problem in
+$\mathrm{P}$ is also in $\mathrm{NP}$: if we can solve a problem
+quickly, we can verify an answer by solving it ourselves. Hence
+$\mathrm{P}\subseteq\mathrm{NP}$.
+
+\begin{notebox}[What NP stands for]
+NP stands for \emph{nondeterministic polynomial time}, not ``non
+polynomial''. A problem in NP may well be easy: every problem in P is
+in NP.
+\end{notebox}
+
+Are there problems in NP that are not in P? Nobody knows.
+\begin{center}
+\emph{Is $\mathrm{P}=\mathrm{NP}$, or is $\mathrm{P}\subsetneq\mathrm{NP}$?
+We don't know.}
+\end{center}
+This is one of the most important open questions in computer science.
+
+\begin{center}
+\begin{tikzpicture}
+  \draw[fill=gray!12] (0,0) ellipse (3.6cm and 2.0cm);
+  \node at (-1.7,1.35) {NP};
+  \draw[fill=NotesProposition!45] (1.35,-0.1) circle (1.3cm);
+  \node at (1.35,0.8) {P};
+  \node[font=\footnotesize,align=center] at (1.35,-0.2) {Max-Find\\binary search};
+  \draw[fill=NotesTheorem!45] (-1.45,-0.15) circle (1.05cm);
+  \node[font=\footnotesize,align=center] at (-1.45,-0.15) {TSP\\SAT\\Knapsack};
+  \node[font=\small] (npc) at (-3.7,-1.9) {NP-complete};
+  \draw[->] (npc) -- (-1.9,-1.05);
+  \node[font=\small] at (0,-2.45) {if $\mathrm{P}\neq\mathrm{NP}$};
+  \begin{scope}[xshift=7cm]
+    \draw[fill=NotesProposition!45] (0,0) circle (1.6cm);
+    \node at (0,0) {$\mathrm{P}=\mathrm{NP}$};
+    \node[font=\small] at (0,-2.45) {if $\mathrm{P}=\mathrm{NP}$};
+  \end{scope}
+\end{tikzpicture}
+\end{center}
+
+\section{Reductions and NP-completeness}
+
+Some problems in NP are as hard as any other problem in NP.
+
+\begin{frameddefn}{NP-complete problem}\label{def:np-complete}
+A problem $X$ is \emph{NP-complete} if:
+\begin{enumerate}
+  \item $X\in\mathrm{NP}$;
+  \item every problem $Y\in\mathrm{NP}$ can be \emph{reduced} in
+    polynomial time to $X$.
+\end{enumerate}
+\end{frameddefn}
+
+A reduction of $Y$ to $X$ solves $Y$ using an algorithm for $X$ plus a
+polynomial amount of extra work.
+
+\begin{framedexample}{Max-Find and sorting}\label{ex:reduction-sort-max}
+If we can sort an array in poly-time, we can also find its maximum in
+poly-time: sort it and take the last element. Max-Find reduces to
+sorting.
+
+The converse also holds: if we can find the maximum, we put it in the
+last position and repeat on the remaining elements, until the whole
+array is sorted. This uses $n$ calls to Max-Find, a polynomial amount
+of work, so sorting reduces to Max-Find.
+\end{framedexample}
+
+Surprisingly, NP-complete problems exist, such as \emph{SAT} (Boolean
+satisfiability), which we will not study in detail. If
+$\mathrm{P}=\mathrm{NP}$, the classes collapse: NP-complete problems
+would be solvable in polynomial time, like every other problem in NP.
+
+\begin{notebox}[Are TSP, Sudoku and Rubik's cube NP-complete?]
+Complexity classes describe how the cost grows with the input size, so
+we must consider generalized versions of these puzzles:
+\begin{itemize}
+  \item the decision version of TSP (``is there a tour of cost at most
+    $k$?'') is NP-complete;
+  \item Sudoku on $n^2\times n^2$ grids (``can this partially filled
+    grid be completed?'') is NP-complete;
+  \item for the $n\times n\times n$ Rubik's cube, deciding whether a
+    position can be solved in at most $k$ moves is NP-complete
+    (proved in 2018).
+\end{itemize}
+The classic $9\times9$ Sudoku and $3\times3\times3$ cube have a fixed
+size, so asymptotic statements do not apply to them directly.
+\end{notebox}
+
+\lecturestart{5 October}
+
+\begin{framedcor}{Solving one NP-complete problem}\label{cor:np-complete}
+Let $X$ be NP-complete. If $X$ can be solved in poly-time, then every
+problem in $\mathrm{NP}$ can be solved in poly-time. Equivalently, if
+some $Y\in\mathrm{NP}$ cannot be solved in poly-time, then neither can
+$X$.
+\end{framedcor}
+
+SAT was the first problem proved to be NP-complete: every problem in
+$\mathrm{NP}$ can be reduced to SAT (the Cook--Levin theorem). To show
+that a new problem is NP-complete, we no longer need to reduce every
+problem in NP to it.
+
+\begin{framedprop}{Proving NP-completeness}\label{prop:prove-npc}
+To prove that a problem $X$ is NP-complete, show that:
+\begin{enumerate}
+  \item $X\in\mathrm{NP}$;
+  \item there is a problem $Y$ already known to be NP-complete and a
+    poly-time reduction of $Y$ to $X$.
+\end{enumerate}
+\end{framedprop}
+
+This works because reductions compose: every problem in NP reduces to
+$Y$, and $Y$ reduces to $X$, so every problem in NP reduces to $X$.
+The composition of two polynomials is still a polynomial.
+
+\begin{center}
+\begin{tikzpicture}[>=Stealth,
+  box/.style={draw,rounded corners,inner sep=5pt,fill=NotesTheorem!35}]
+  \node (y1) at (-3.2,0.9) {$Y_1$};
+  \node (y2) at (-3.2,0.1) {$Y_2$};
+  \node (y3) at (-3.2,-0.75) {$\vdots$};
+  \node[box] (sat) at (0,0) {SAT};
+  \node[box] (x) at (3.4,0) {$X$};
+  \node (z) at (6.2,0) {$Z$};
+  \draw[->] (y1) -- (sat);
+  \draw[->] (y2) -- (sat);
+  \draw[->] (y3) -- (sat);
+  \draw[->,thick] (sat) -- node[above,font=\small] {poly-time} (x);
+  \draw[->,thick] (x) -- node[above,font=\small] {poly-time} (z);
+  \node[font=\small,align=center] at (-3.2,-1.6) {every problem\\in NP};
+\end{tikzpicture}
+\end{center}
+
+\section{Some NP-complete problems}
+
+\subsection{Knapsack}
+
+We want to fill a backpack with the most valuable set of items without
+exceeding its capacity.
+
+\begin{framedproblem}{Knapsack}\label{prob:knapsack}
+\textbf{Input:} a set of items $I=\{1,2,\ldots,n\}$, where item $i$
+has a weight $w_i$ and a value $v_i$, and a budget $B$.\\
+\textbf{Output:} a subset of items $S\subseteq I$ such that
+\[
+  \sum_{i\in S}w_i\leq B
+  \qquad\text{that maximizes}\qquad
+  \sum_{i\in S}v_i.
+\]
+\end{framedproblem}
+
+\begin{framedexample}{A knapsack instance}\label{ex:knapsack}
+Let $B=55$ and
+\begin{center}
+\begin{tabular}{c|ccccccc}
+  $i$   & 1  & 2  & 3 & 4  & 5  & 6  & 7\\
+  \hline
+  $w_i$ & 10 & 20 & 6 & 30 & 15 & 20 & 50\\
+  $v_i$ & 10 & 15 & 8 & 17 & 12 & 17 & 20
+\end{tabular}
+\end{center}
+We must maximize $\sum_{i\in S}v_i$ subject to the constraint
+$\sum_{i\in S}w_i\leq55$. One feasible solution is $S=\{1,2,3,5\}$,
+with total weight $51$ and total value $45$. A solution taken ``at
+random'' like this one is probably not the best: in
+Example~\ref{ex:greedy-knapsack} we will find one of value $47$.
+\end{framedexample}
+
+\subsection{Set cover}
+
+Suppose we want to rob a casino: we need people who can do different
+things.
+
+\begin{framedproblem}{Set cover}\label{prob:set-cover}
+\textbf{Input:} a task that requires the skills $s_1,\ldots,s_n$, and
+$m$ experts $E_1,\ldots,E_m$, where each $E_i\subseteq\{1,\ldots,n\}$
+is the subset of skills that expert $i$ has.\\
+\textbf{Output:} the smallest number of experts that together cover
+all the skills.
+\end{framedproblem}
+
+In general, the skills are elements $e_1,\ldots,e_n$ and the experts
+are sets $S_1,\ldots,S_m$ of elements. We want the minimum number of
+sets whose union contains all the elements.
+
+\begin{framedexample}{Covering six skills}\label{ex:set-cover}
+\begin{center}
+\begin{tabular}{c|cccccc}
+      & $s_1$ & $s_2$ & $s_3$ & $s_4$ & $s_5$ & $s_6$\\
+  \hline
+  $E_1$ & $\times$ &  & $\times$ & $\times$ &  & \\
+  $E_2$ & $\times$ & $\times$ &  &  &  & \\
+  $E_3$ &  & $\times$ &  &  & $\times$ & \\
+  $E_4$ & $\times$ &  &  & $\times$ &  & $\times$\\
+  $E_5$ &  &  & $\times$ &  &  & $\times$
+\end{tabular}
+\end{center}
+We must take $E_3$, because it is the only expert with skill $s_5$.
+$E_3$ covers $s_2$ and $s_5$; no single other expert covers all of
+$s_1,s_3,s_4,s_6$, so we need at least $3$ experts. One optimal
+solution is $\{E_3,E_4,E_5\}$.
+\end{framedexample}
+
+A heuristic method: take $E_3$, then repeatedly take the expert who
+covers the largest number of skills not yet covered. Such solutions
+are not optimal in general.
+
+\subsection{Subset sum}
+
+\begin{framedproblem}{Subset sum}\label{prob:subset-sum}
+\textbf{Input:} a list of integers.\\
+\textbf{Output:} a nonempty sublist whose elements sum to $0$, if one
+exists.
+\end{framedproblem}
+
+For the list $[3,7,-3,-8,10,-16,2,9]$, the sublists $[3,-3]$ and
+$[7,9,-16]$ both sum to $0$.
+
+\subsection{Maximum clique}
+
+\begin{framedproblem}{Maximum clique}\label{prob:max-clique}
+\textbf{Input:} a graph.\\
+\textbf{Output:} a largest \emph{clique}, that is, a largest set of
+nodes that are all connected to one another.
+\end{framedproblem}
+
+\begin{center}
+\begin{tikzpicture}[v/.style={circle,draw,fill=gray!15,minimum size=5mm,
+    inner sep=0pt},
+  k/.style={very thick,NotesTheorem!80!black}]
+  \node[v] (a) at (0,0) {};
+  \node[v] (b) at (2,0) {};
+  \node[v] (c) at (2,1.8) {};
+  \node[v] (d) at (0,1.8) {};
+  \node[v] (e) at (3.8,0.9) {};
+  \node[v] (f) at (-1.8,0.9) {};
+  \node[v] (g) at (3.8,2.4) {};
+  \draw[k] (a)--(b) (b)--(c) (c)--(d) (d)--(a) (a)--(c) (b)--(d);
+  \draw (b)--(e) (c)--(e) (e)--(g) (c)--(g) (f)--(a) (f)--(d);
+\end{tikzpicture}
+
+{\small The thick edges form a clique of size $4$, the largest in this
+graph.}
+\end{center}
+
+\Needspace{9\baselineskip}
+\begin{framedprop}{Some NP-complete problems}\label{prop:npc-examples}
+The decision versions of Knapsack, Set cover, Subset sum and Max clique
+are NP-complete.
+\end{framedprop}
+
+We do not prove this: each proof is a poly-time reduction from a known
+NP-complete problem (Proposition~\ref{prop:prove-npc}).
+
+\section{NP-hard problems}
+
+\begin{frameddefn}{NP-hard problem}\label{def:np-hard}
+A problem $X$ is \emph{NP-hard} if every problem in $\mathrm{NP}$ can
+be reduced to $X$ in polynomial time. Unlike an NP-complete problem,
+$X$ does not have to belong to $\mathrm{NP}$.
+\end{frameddefn}
+
+NP-hard problems are more general: NP-complete means NP-hard and in
+NP. For example, the optimization versions of Knapsack and TSP (find
+the best solution, not just answer yes or no) are NP-hard.
+
+\begin{notebox}[Minimum spanning tree]
+The minimum spanning tree problem is \emph{not} NP-hard (unless
+$\mathrm{P}=\mathrm{NP}$): Kruskal's and Prim's algorithms solve it in
+polynomial time. Its relative, the Steiner tree problem, which must
+connect only a given subset of the nodes, is NP-hard.
+\end{notebox}
+
+\chapter{Approximation and heuristics}
+
+For NP-complete and NP-hard problems we do not know fast exact
+algorithms. Two ways out are approximation algorithms, which come with
+a guarantee, and heuristics, which do not.
+
+\section{Approximation algorithms}
+
+\begin{frameddefn}{$c$-approximation algorithm}\label{def:approximation}
+Let $c\geq1$. For an input $I$, let $\OPT_I$ be the value of an optimal
+solution. A \emph{$c$-approximation algorithm} returns, for every input
+$I$, a solution whose value is
+\begin{itemize}
+  \item at most $c\cdot\OPT_I$, for a \emph{minimization} problem;
+  \item at least $\OPT_I/c$, for a \emph{maximization} problem.
+\end{itemize}
+\end{frameddefn}
+
+\begin{framedexample}{Reading the guarantee}\label{ex:approximation}
+\begin{itemize}
+  \item \emph{TSP (minimization)}: suppose that for an input $I$ the
+    optimal tour costs $\OPT_I=5000$. A $2$-approximation algorithm
+    guarantees a tour of cost at most $10\,000$: it may cost more than
+    $5000$, but we are sure that it does not exceed $10\,000$. For
+    $c=1.1$, the tour costs at most $1.1\cdot5000=5500$, no more than
+    $10\%$ above the optimum.
+  \item \emph{Knapsack (maximization)}: if $\OPT_I=1000$, a
+    $1.1$-approximation guarantees a value of at least
+    $1000/1.1\approx909$.
+\end{itemize}
+\end{framedexample}
+
+\subsection{Guarantees without knowing the optimum}
+
+How can we prove that a solution is a $c$-approximation if we cannot
+find the optimal solution? We may not find $\OPT_I$, but we can often
+find a \emph{lower bound} $L\leq\OPT_I$ (for a minimization problem).
+Then
+\[
+  \frac{\text{output}}{\OPT_I}\leq\frac{\text{output}}{L}.
+\]
+
+\begin{framedexample}{Using a lower bound}\label{ex:lower-bound-ratio}
+\begin{center}
+\begin{tikzpicture}[v/.style={circle,draw,fill=gray!15,minimum size=6mm,
+    inner sep=0pt}]
+  \node[v] (A) at (0,1.8) {$A$};
+  \node[v] (T) at (2.2,1.8) {};
+  \node[v] (B) at (2.2,0) {$B$};
+  \node[v] (L) at (0,0) {};
+  \draw (A) -- node[above] {2} (T);
+  \draw (T) -- node[right] {8} (B);
+  \draw (A) -- node[above right=-2pt] {6} (B);
+  \draw (A) -- node[left] {4} (L);
+  \draw (L) -- node[below] {3} (B);
+\end{tikzpicture}
+\end{center}
+Suppose every solution must travel from $A$ to $B$. Every route from
+$A$ to $B$ costs at least $6$, so $\OPT_I\geq6$: $6$ is a lower bound.
+If our algorithm outputs a solution of cost $17$, is it good?
+\[
+  \frac{\text{output}}{\OPT_I}=\frac{17}{\OPT_I}\leq\frac{17}{6}
+  \approx2.83,
+\]
+so our solution is at most $17/6$ times the optimum.
+\end{framedexample}
+
+\lecturestart{8 October}
+
+\subsection{How well can we approximate?}
+
+Different problems behave very differently:
+\begin{itemize}
+  \item For \emph{set cover}, where we minimize the number of sets, a
+    simple greedy algorithm is, at worst, an $O(\log n)$-approximation.
+  \item Many other problems cannot be approximated well in poly-time.
+    For \emph{max clique}, no polynomial-time algorithm can guarantee
+    even a factor like $\sqrt n$, unless $\mathrm{P}=\mathrm{NP}$.
+\end{itemize}
+Some approximation algorithms are also very inefficient. This is why
+there is another approach: heuristics.
+
+\section{Heuristics}
+
+A \emph{heuristic} is a method that usually finds good solutions
+quickly, but without any guarantee on their quality.
+
+\subsection{A greedy heuristic for knapsack}
+
+For each item, consider the value per unit of weight
+\[
+  r_i=\frac{v_i}{w_i}.
+\]
+We start putting into the backpack the items with the largest $r_i$,
+and keep adding items as long as the constraint is satisfied. This
+usually gives a good solution, but not always the optimal one.
+
+\Needspace{12\baselineskip}
+\begin{framedalgo}{Greedy knapsack}\label{alg:greedy-knapsack}
+\begin{algorithmic}[1]
+  \State sort the items so that $r_{i_1}\geq r_{i_2}\geq\cdots\geq r_{i_n}$
+  \State $S\gets\varnothing$, $W\gets0$
+  \For{$k=1$ \textbf{to} $n$}
+    \If{$W+w_{i_k}\leq B$}
+      \State $S\gets S\cup\{i_k\}$, $W\gets W+w_{i_k}$
+    \EndIf
+  \EndFor
+  \State \Return $S$
+\end{algorithmic}
+\end{framedalgo}
+
+\begin{framedexample}{Greedy on the knapsack instance}
+\label{ex:greedy-knapsack}
+For the instance in Example~\ref{ex:knapsack},
+\[
+  r_1=1,\quad r_2=\tfrac34,\quad r_3=\tfrac43,\quad r_4=\tfrac{17}{30},
+  \quad r_5=\tfrac45,\quad r_6=\tfrac{17}{20},\quad r_7=\tfrac25.
+\]
+Item $3$ has the largest ratio, so it is the first one we add. The
+order is $3,1,6,5,2,4,7$:
+\begin{itemize}
+  \item add $3$ (weight $6$), $1$ (weight $16$), $6$ (weight $36$) and
+    $5$ (weight $51$);
+  \item items $2$, $4$ and $7$ no longer fit ($51+20>55$).
+\end{itemize}
+The result is $S=\{1,3,5,6\}$, with weight $51$ and value $47$. Trying
+all subsets shows that $47$ is optimal for this instance.
+\end{framedexample}
+
+The greedy solution is not optimal in general.
+
+\begin{framedexample}{When greedy fails}\label{ex:greedy-fails}
+Let $B=100$, ten items with $w_1=\cdots=w_{10}=50$ and
+$v_1=\cdots=v_{10}=50$ (each with ratio $1$), and an item $0$ with
+$w_0=51$ and $v_0=52$, whose ratio is slightly larger than $1$.
+Greedy takes item $0$ first, and then no other item fits
+($51+50>100$): the value is $52$. Taking two items of weight $50$
+gives value $100$.
+\end{framedexample}
+
+No known algorithm solves knapsack in poly-time: it is NP-complete. If
+we could ``break'' the items and take a fraction of one of them (the
+\emph{fractional} knapsack), the greedy algorithm would be perfect: we
+fill the remaining capacity with a fraction of the next item.
+
+\subsection{Greedy algorithms and meta-heuristics}
+
+\begin{frameddefn}{Greedy algorithm}\label{def:greedy}
+A \emph{greedy} algorithm makes, at each step, the choice that is best
+for now, hoping that it will also work well in the future, and
+continues in the same way.
+\end{frameddefn}
+
+The knapsack heuristic above and the set cover heuristic are both
+greedy algorithms. Greediness is an example of a \emph{meta-heuristic}:
+a general strategy, a wider class that includes many heuristics.
+Another example is \emph{local search}: starting from a solution, such
+as a tour, we try small modifications (for example, exchanging two of
+its edges for two others) and keep those that improve it, searching
+for the optimal one.
+
+\chapter{Distance measures}
+
+\section{Why distances?}
+
+Many problems ask us to find distances or similarities between
+objects. For example, given some documents and a query, we want the
+documents most similar to the query; or we want groups of similar
+documents, a \emph{cluster}. The input is a set of objects and the
+output a group of them. To do this we use different kinds of
+distances: a function that measures the distance between two elements
+defines a relation between them.
+
+\section{Distance functions}
+
+\begin{frameddefn}{Distance function}\label{def:distance}
+Let $U$ be a universe of elements (documents, objects, strings, \ldots).
+A \emph{distance function} is a map
+\[
+  d:U\times U\longrightarrow\R,
+\]
+taking two elements and returning a number, which satisfies, for all
+$x,y,z\in U$:
+\begin{enumerate}
+  \item $d(x,y)\geq0$, and $d(x,y)=0$ if and only if $x=y$;
+  \item $d(x,y)=d(y,x)$ (symmetry);
+  \item $d(x,y)\leq d(x,z)+d(z,y)$ (triangle inequality).
+\end{enumerate}
+\end{frameddefn}
+
+\begin{center}
+\begin{tikzpicture}[p/.style={circle,fill=black,inner sep=1.5pt}]
+  \node[p,label=above:$x$] (x) at (0,1.6) {};
+  \node[p,label=right:$y$] (y) at (2.4,0.6) {};
+  \node[p,label=below:$z$] (z) at (0,0) {};
+  \draw (x) -- (y) (x) -- (z) (z) -- (y);
+  \begin{scope}[xshift=5cm,yshift=0.8cm]
+    \node[p,label=above:$x$] (x2) at (0,0) {};
+    \node[p,label=above:$z$] (z2) at (1.3,0) {};
+    \node[p,label=above:$y$] (y2) at (2.6,0) {};
+    \draw (x2) -- (z2) -- (y2);
+    \node[font=\small] at (1.3,-0.6) {equality when $z$ lies between};
+  \end{scope}
+\end{tikzpicture}
+\end{center}
+
+In the next lectures we will see different distances depending on the
+data. We should define distances that make sense for the problem: what
+does it mean for two objects to be ``close''? It depends on the
+problem we are considering.
+
+\section{\texorpdfstring{$L_p$}{Lp} distances}
+
+\begin{framedexample}{Restaurants near me}\label{ex:euclidean}
+We are designing an app like Google Maps to find restaurants near us.
+A good distance is the Euclidean one. For $U=\R^m$,
+$\vec x=[x_1,\ldots,x_m]$ and $\vec y=[y_1,\ldots,y_m]$,
+\[
+  d(\vec x,\vec y)=\sqrt{\sum_{j=1}^{m}(x_j-y_j)^2}.
+\]
+This is the \emph{Euclidean distance}, or $L_2$ distance. It is
+clearly non-negative and symmetric; it also satisfies the triangle
+inequality, but we do not prove it.
+\end{framedexample}
+
+\begin{frameddefn}{$L_p$ distance}\label{def:lp-distance}
+For a constant $p\geq1$,
+\[
+  d_p(\vec x,\vec y)
+  =\left(\sum_{j=1}^{m}\abs{x_j-y_j}^p\right)^{1/p}
+  =\norm{\vec x-\vec y}_p.
+\]
+\end{frameddefn}
+
+Changing $p$ gives different distances, which weigh the differences
+between coordinates differently:
+\begin{itemize}
+  \item $p=2$: the Euclidean distance.
+  \item $p=1$: the \emph{Manhattan distance},
+    $\sum_j\abs{x_j-y_j}$.
+  \item $p\to\infty$: the $L_\infty$ distance,
+    $\displaystyle d_\infty(\vec x,\vec y)
+      =\max_{i\in\{1,\ldots,m\}}\abs{x_i-y_i}$.
+  \item ``$L_0$'': the number of coordinates in which the vectors
+    differ, $\abs{\{i:x_i\neq y_i\}}$. For binary strings this is the
+    \emph{Hamming distance}: $00110$ and $10100$ differ in $2$
+    positions, and $[3,1,3]$ and $[0,1,3]$ differ in $1$.
+\end{itemize}
+
+\begin{framedexample}{Comparing $L_p$ distances}\label{ex:lp-distances}
+Let
+\[
+  \vec x=[3,7,0,2,1],\qquad
+  \vec y=[4,5,10,7,3],\qquad
+  \vec z=[5,2,5,6,5].
+\]
+The coordinate differences are $\abs{\vec x-\vec y}=[1,2,10,5,2]$ and
+$\abs{\vec x-\vec z}=[2,5,5,4,4]$.
+\begin{center}
+\begin{tabular}{ccc}
+  \toprule
+  $p$ & $\norm{\vec x-\vec y}_p$ & $\norm{\vec x-\vec z}_p$\\
+  \midrule
+  $1$ & $1+2+10+5+2=20$ & $2+5+5+4+4=20$\\
+  $2$ & $(1+4+100+25+4)^{1/2}\approx11.58$
+      & $(4+25+25+16+16)^{1/2}\approx9.27$\\
+  $3$ & $(1+8+1000+125+8)^{1/3}\approx10.45$
+      & $(8+125+125+64+64)^{1/3}\approx7.28$\\
+  $\infty$ & $10$ & $5$\\
+  \bottomrule
+\end{tabular}
+\end{center}
+With $p=1$ the two distances are equal. As $p$ increases, both
+distances decrease, and the larger differences weigh more: $\vec y$
+differs from $\vec x$ by $10$ in one coordinate, so it ends up farther
+than $\vec z$, whose differences are moderate everywhere.
+\end{framedexample}
+
+\section{Distances between sets}
+
+So far we have worked with vectors. Now imagine that we want to
+compare the customers of a supermarket based on what they bought.
+
+\begin{framedexample}{Shopping baskets}\label{ex:baskets}
+Each letter is a product: the first person bought apples ($A$),
+bananas ($B$), carrots ($C$) and donuts ($D$):
+\[
+  P_1=\{A,B,C,D\},\qquad
+  P_2=\{A,E,G,H\},\qquad
+  P_3=\{B,C,E,F\}.
+\]
+Intuitively, persons $1$ and $3$ are more similar than persons $1$
+and $2$.
+\end{framedexample}
+
+\subsection{Counting common items}
+
+A first idea is to look at the elements in common:
+\[
+  \abs{P_1\cap P_2}=1,\qquad\abs{P_1\cap P_3}=2.
+\]
+Is this a good distance? We should check the three properties.
+Symmetry certainly holds, but the larger the value, the \emph{closer}
+the two sets: this is a similarity, not a distance.
+
+\begin{notebox}[Distance and similarity]
+It is often more natural to talk about \emph{similarity} than about
+distance. The two notions are closely related, but they go in opposite
+directions: a large similarity means a small distance. Here we do not
+see a ``natural'' distance function, and we cannot simply take the
+negative of the similarity, because distances cannot be negative.
+\end{notebox}
+
+\subsection{Sets as binary vectors}
+
+A second idea is to write each set as a binary vector, with one
+coordinate per product, and use the $L_1$ distance:
+\begin{center}
+\begin{tabular}{c|cccccccc}
+      & $A$ & $B$ & $C$ & $D$ & $E$ & $F$ & $G$ & $H$\\
+  \hline
+  $P_1$ & 1 & 1 & 1 & 1 & 0 & 0 & 0 & 0\\
+  $P_2$ & 1 & 0 & 0 & 0 & 1 & 0 & 1 & 1\\
+  $P_3$ & 0 & 1 & 1 & 0 & 1 & 1 & 0 & 0
+\end{tabular}
+\end{center}
+Then $\abs{P_1-P_2}=[0,1,1,1,1,0,1,1]$ and
+$\abs{P_1-P_3}=[1,0,0,1,1,1,0,0]$, so
+\[
+  \norm{P_1-P_2}_1=6,\qquad\norm{P_1-P_3}_1=4.
+\]
+This is how we can turn the comparison into a distance. In general,
+\[
+  \norm{P-Q}_1=\abs{P}+\abs{Q}-2\abs{P\cap Q}=\abs{P\mathbin{\triangle}Q},
+\]
+the size of the \emph{symmetric difference} $P\mathbin{\triangle}Q$,
+the elements in exactly one of the two sets.
+
+\subsection{Normalizing the intersection}
+
+Back to the first idea: the size of the intersection alone is
+misleading. Two pairs of sets can have intersections of the same size,
+but if the sets in the second pair are smaller, the intersection is a
+larger fraction of them, so they are more similar.
+
+\begin{center}
+\begin{tikzpicture}
+  \begin{scope}
+    \clip (0,0) circle (1.1);
+    \fill[NotesExample!60] (1.7,0) circle (1.1);
+  \end{scope}
+  \draw (0,0) circle (1.1) (1.7,0) circle (1.1);
+  \node at (0.85,-1.5) {\small $1$};
+  \begin{scope}[xshift=5.2cm]
+    \begin{scope}
+      \clip (0,0) circle (0.65);
+      \fill[NotesExample!60] (0.7,0) circle (0.65);
+    \end{scope}
+    \draw (0,0) circle (0.65) (0.7,0) circle (0.65);
+    \node at (0.35,-1.5) {\small $2$};
+  \end{scope}
+\end{tikzpicture}
+
+{\small Same intersection, different set sizes: the sets in pair $2$
+are more similar, because their intersection is a larger fraction of
+them.}
+\end{center}
+
+We can normalize the intersection in several ways:
+\[
+  \frac{\abs{P\cap Q}}{\max\{\abs P,\abs Q\}},\qquad
+  \frac{\abs{P\cap Q}}{\abs{P\cup Q}},\qquad
+  \frac{\abs{P\cap Q}}{\abs P+\abs Q}.
+\]
+
+\begin{frameddefn}{Jaccard similarity}\label{def:jaccard}
+The \emph{Jaccard similarity} of two finite sets $P$ and $Q$ is
+\[
+  J(P,Q)=\frac{\abs{P\cap Q}}{\abs{P\cup Q}},
+\]
+where $\abs{\cdot}$ is the cardinality (not the absolute value).
+\end{frameddefn}
+
+The Jaccard similarity is symmetric and lies between $0$ and $1$. For
+the baskets in Example~\ref{ex:baskets},
+\[
+  J(P_1,P_2)=\frac{\abs{\{A\}}}{\abs{\{A,B,C,D,E,G,H\}}}=\frac17,
+  \qquad
+  J(P_1,P_3)=\frac{\abs{\{B,C\}}}{\abs{\{A,B,C,D,E,F\}}}=\frac26=\frac13,
+\]
+so $P_1$ is more similar to $P_3$, as expected.
+
+\begin{frameddefn}{Jaccard distance}\label{def:jaccard-distance}
+We turn the Jaccard similarity into a distance by taking
+\[
+  d_J(P,Q)=1-\frac{\abs{P\cap Q}}{\abs{P\cup Q}}
+          =\frac{\abs{P\cup Q}-\abs{P\cap Q}}{\abs{P\cup Q}}
+          =\frac{\abs{P\mathbin{\triangle}Q}}{\abs{P\cup Q}}
+          =\frac{\abs{P\setminus Q}+\abs{Q\setminus P}}{\abs{P\cup Q}}.
+\]
+\end{frameddefn}
+
+\begin{center}
+\begin{tikzpicture}
+  \fill[NotesExample!60,even odd rule] (0,0) circle (1) (1.3,0) circle (1);
+  \draw (0,0) circle (1) (1.3,0) circle (1);
+  \node at (-0.4,0) {$P$};
+  \node at (1.7,0) {$Q$};
+\end{tikzpicture}
+
+{\small The symmetric difference $P\mathbin{\triangle}Q$: everything
+except the intersection.}
+\end{center}
+
+One can prove that the Jaccard distance $d_J$ is a distance in the
+sense of Definition~\ref{def:distance}. For the baskets,
+$d_J(P_1,P_2)=6/7$ and $d_J(P_1,P_3)=4/6=2/3$.
+
+\chapter{Distances between strings}
+
+\lecturestart{12 October}
+
+\section{Why compare strings?}
+
+Biological data are sequences of bases such as
+\texttt{CTAGGATCGGAC}, and DNA sequences have particular properties: we
+may want to know how ``similar'' two parts of DNA are. Search engines
+need similarity between strings too: if we type ``Sceince'' instead
+of ``Science'' on Google, it still understands what we mean.
+
+\begin{framedexample}{Which strings are closer?}\label{ex:three-strings}
+\[
+  X=\texttt{CTAGGAT},\qquad
+  Y=\texttt{CCAGAGT},\qquad
+  Z=\texttt{AGCCCTA}.
+\]
+Which pair is more similar, $X$ and $Y$, or $X$ and $Z$? We would say
+$X$ and $Y$. The answer is intuitive, but which property are we using?
+How do we define a ``distance measure'' between strings?
+\end{framedexample}
+
+\section{First attempts}
+
+\begin{itemize}
+  \item \textbf{Compare letter by letter}, as with the Hamming or $L_1$
+    distance. But what if the strings have different lengths?
+  \item \textbf{Count how many times each character appears.}
+    Biologically, \texttt{AAGGGTT} and \texttt{TGAAGTG} are very
+    different, even though they contain exactly the same characters.
+  \item \textbf{Look at common pieces}: \texttt{CATGAGG} and
+    \texttt{CAGAGT} share \texttt{CA} and \texttt{GAG}, even though
+    they have different lengths.
+  \item \textbf{Count modifications}: take the second string and count
+    how many changes are needed to make it equal to the first. For
+    \texttt{SAPIENZA} and \texttt{SAAPIEMZA}, we delete the extra
+    \texttt{A} and replace \texttt{M} with \texttt{N}: two changes, so
+    the distance is $2$.
+\end{itemize}
+
+\begin{framedexample}{Letters as numbers}\label{ex:letters-numbers}
+Associate each letter with its position in the alphabet ($A=1$,
+$C=3$, $G=7$, $T=20$) and subtract:
+\[
+  \begin{array}{r@{\quad}cccc}
+    \texttt{CAGT}: & 3 & 1 & 7 & 20\\
+    \texttt{ACTT}: & 1 & 3 & 20 & 20\\
+    \hline
+    \text{difference}: & 2 & 2 & 13 & 0
+  \end{array}
+  \qquad\Longrightarrow\qquad 2+2+13+0=17.
+\]
+The larger the number, the farther the strings; this distance is
+symmetric. However:
+\begin{itemize}
+  \item comparing \texttt{SAPIENZA} with \texttt{SSAPIENZA}, typed
+    with an extra \texttt{S} by mistake, shifts every letter: the two
+    words are almost identical, but the distance explodes;
+  \item the distance between $A$ and $T$ is larger than between $A$
+    and $B$ only because of the alphabetical order.
+\end{itemize}
+This is why such a distance cannot work well.
+\end{framedexample}
+
+We go back to the two previous ideas: common pieces (subsequences) and
+modifications (edit operations). Consider sequences over an alphabet.
+
+\section{Subsequences}
+
+\begin{frameddefn}{Subsequence}\label{def:subsequence}
+A \emph{subsequence} of a sequence $S$ is a sequence that contains a
+subset of the characters of $S$ in the same order, not necessarily
+consecutive.
+\end{frameddefn}
+
+\begin{framedexample}{Subsequences}\label{ex:subsequences}
+For $S=\texttt{ATCGGACTGA}$, all of the following are subsequences:
+\texttt{ATCGGACTGA} itself, \texttt{ACGGCTA}, \texttt{AAA}, and the
+empty string.
+\end{framedexample}
+
+\begin{frameddefn}{Common subsequence}\label{def:common-subsequence}
+Given two sequences $S$ and $T$, a \emph{common subsequence} is a
+sequence that is a subsequence of both $S$ and $T$.
+\end{frameddefn}
+
+For $S=\texttt{ATGCATG}$ and $T=\texttt{AGACTAG}$, \texttt{AAT} and
+\texttt{AGAG} are common subsequences, and so is the empty string.
+
+\subsection{The longest common subsequence}
+
+\begin{frameddefn}{Longest common subsequence (LCS)}\label{def:lcs}
+The \emph{longest common subsequence} of $S$ and $T$ is a common
+subsequence of maximum length. We write $\LCS(S,T)$ for its length.
+\end{frameddefn}
+
+We can define the similarity of two strings as the length of their
+LCS.
+
+\begin{framedexample}{Longest common subsequences}\label{ex:lcs}
+\begin{itemize}
+  \item For \texttt{ATGA} and \texttt{TAG}, both \texttt{AG} and
+    \texttt{TG} are longest common subsequences: the LCS need not be
+    unique, and here none is longer than $2$.
+  \item Compare \texttt{SAPEMZA} with \texttt{SAPIENZA} and with
+    \texttt{SALERNO}:
+    \[
+      \LCS(\texttt{SAPIENZA},\texttt{SAPEMZA})=6\ (\texttt{SAPEZA}),
+      \qquad
+      \LCS(\texttt{SAPEMZA},\texttt{SALERNO})=3\ (\texttt{SAE}).
+    \]
+    \texttt{SAPEMZA} has more in common with \texttt{SAPIENZA} than
+    with \texttt{SALERNO}.
+  \item In Example~\ref{ex:three-strings},
+    $\LCS(X,Y)=5$ (for example \texttt{CAGGT}) while $\LCS(X,Z)=3$
+    (\texttt{CTA}), which confirms our intuition.
+  \item For \texttt{CAGTGACCGATAC} and \texttt{GACCAGTCAGCAC} it is
+    already hard to find the LCS by hand. Its length is $8$, for
+    example \texttt{CAGTGCAC}.
+\end{itemize}
+\end{framedexample}
+
+Checking all subsequences is not an option: a string of length $k$ has
+up to $2^k$ subsequences, one for each subset of its positions, so
+brute force needs about $2^{\min\{\abs S,\abs T\}}$ checks.
+
+\section{Edit distance}
+
+How do we compare two strings? Option 1: transform one string into the
+other. Option 2: look at their subsequences. The two options turn out
+to be closely related.
+
+\begin{frameddefn}{Edit distance}\label{def:edit-distance}
+Given two sequences $S$ and $T$, the \emph{edit distance} $\ED(S,T)$
+is the minimum number of insertions and deletions of characters needed
+to transform $S$ into $T$.
+\end{frameddefn}
+
+\begin{framedexample}{Transforming a string}\label{ex:edit-distance}
+Let $S=\texttt{CATGA}$ and $T=\texttt{ACTGC}$:
+\[
+  \texttt{CATGA}
+  \xrightarrow{\text{delete }\texttt{C}}\texttt{ATGA}
+  \xrightarrow{\text{insert }\texttt{C}}\texttt{ACTGA}
+  \xrightarrow{\text{insert }\texttt{C}}\texttt{ACTGAC}
+  \xrightarrow{\text{delete }\texttt{A}}\texttt{ACTGC}.
+\]
+Four changes suffice, and in fact $\ED(S,T)=4$.
+\end{framedexample}
+
+We could also delete all the letters one by one and insert the new
+ones, but that is not the shortest way. When the strings are longer,
+it is hard to see the minimum number of steps.
+
+The edit distance is symmetric, $\ED(S,T)=\ED(T,S)$, because we can
+perform all the steps in reverse: each insertion becomes a deletion
+and vice versa.
+
+\begin{notebox}[Substitutions]
+Some definitions also allow \emph{substitutions}, replacing one
+character with another at cost $1$. With insertions and deletions
+only, a substitution costs $2$: one deletion and one insertion.
+\end{notebox}
+
+\subsection{Edit distance and LCS}
+
+A natural strategy for transforming $S$ into $T$: find an LCS, delete
+everything else from $S$, leaving only the LCS, and then insert the
+characters of $T$ that are missing.
+
+\begin{framedprop}{Edit distance from the LCS}\label{prop:ed-lcs}
+\[
+  \ED(S,T)
+  =\underbrace{\bigl(\abs S-\LCS(S,T)\bigr)}_{\text{characters to delete}}
+  +\underbrace{\bigl(\abs T-\LCS(S,T)\bigr)}_{\text{characters to insert}}
+  =\abs S+\abs T-2\LCS(S,T).
+\]
+\end{framedprop}
+
+\begin{proof}[Why it holds]
+The strategy above uses exactly $\abs S+\abs T-2\LCS(S,T)$ operations,
+so $\ED(S,T)$ is at most this number. Conversely, in any sequence of
+insertions and deletions, the characters of $S$ that are never deleted
+appear in $T$ in the same order: they form a common subsequence, of
+some length $k\leq\LCS(S,T)$. We must then delete at least $\abs S-k$
+characters and insert at least $\abs T-k$, so at least
+$\abs S+\abs T-2k\geq\abs S+\abs T-2\LCS(S,T)$ operations are needed.
+\end{proof}
+
+For Example~\ref{ex:edit-distance}, $\LCS(\texttt{CATGA},\texttt{ACTGC})=3$
+(for example \texttt{CTG}), so $\ED=5+5-2\cdot3=4$.
+
+\section{A recursive formula for the edit distance}
+
+The optimal algorithm for computing the edit distance is not obvious.
+We now write a recursive formula, the starting point of
+\emph{dynamic programming}.
+
+\begin{notebox}[Notation]
+Consider two strings $S$ and $T$ with $\abs S=n$ and $\abs T=m$:
+\[
+  S=[S[1],S[2],\ldots,S[n]],\qquad T=[T[1],\ldots,T[m]].
+\]
+We write $S^i=[S[1],\ldots,S[i]]$ and $T^j=[T[1],\ldots,T[j]]$ for the
+\emph{prefixes} of length $i$ and $j$ (the superscript is not a power).
+\end{notebox}
+
+\begin{framedprop}{Recurrence for the edit distance}\label{prop:ed-recurrence}
+\[
+  \ED(S^i,T^j)=
+  \begin{cases}
+    j, & \text{if } i=0,\\
+    i, & \text{if } j=0,\\
+    \ED(S^{i-1},T^{j-1}), & \text{if } S[i]=T[j],\\
+    \min\bigl\{\ED(S^i,T^{j-1}),\,\ED(S^{i-1},T^j)\bigr\}+1,
+      & \text{if } S[i]\neq T[j].
+  \end{cases}
+\]
+\end{framedprop}
+
+\begin{itemize}
+  \item If one string is empty, we must insert (or delete) all the
+    characters of the other.
+  \item If the last characters are equal, we do not need to modify
+    them: we can ignore them and consider the distance between
+    $S^{i-1}$ and $T^{j-1}$. For example,
+    \[
+      \ED(\texttt{CATGCAT\,T},\texttt{ACCTAGAC\,T})
+      =\ED(\texttt{CATGCAT},\texttt{ACCTAGAC}).
+    \]
+  \item If the last characters differ, one of them must go: either we
+    remove the last character of $S$, giving $\ED(S^{i-1},T^j)+1$, or
+    we remove the last character of $T$ (equivalently, we insert it at
+    the end of $S$), giving $\ED(S^i,T^{j-1})+1$. For
+    \texttt{CATGCAT\,T} and \texttt{ACCTAGAC\,A}, we remove either the
+    \texttt{T} or the \texttt{A}. We take the better of the two
+    options.
+\end{itemize}
+
+\begin{framedexample}{Small edit distances}\label{ex:small-ed}
+\begin{itemize}
+  \item $\ED(\texttt{TGA},\texttt{TTA})=2$: we must remove
+    \texttt{G} and add \texttt{T}. Also $\ED(\texttt{TG},\texttt{TT})=2$,
+    because we have to remove a character and then add one.
+  \item For \texttt{CAG} and \texttt{TGA}, the last characters
+    differ. Either we remove \texttt{G} from \texttt{CAG}, which leaves
+    \texttt{CA} and \texttt{TGA} ($+1$); or we remove \texttt{A} from
+    \texttt{TGA}, which leaves \texttt{CAG} and \texttt{TG} ($+1$),
+    whose last characters are now equal. Both options lead to
+    $\ED(\texttt{CAG},\texttt{TGA})=4$.
+\end{itemize}
+\end{framedexample}
+
+\Needspace{14\baselineskip}
+\begin{framedalgo}{Recursive edit distance}\label{alg:ed-recursive}
+\begin{algorithmic}[1]
+  \Function{ED}{$S^i,T^j$}
+    \If{$i=0$}
+      \State \Return $j$
+    \ElsIf{$j=0$}
+      \State \Return $i$
+    \ElsIf{$S[i]=T[j]$}
+      \State \Return \Call{ED}{$S^{i-1},T^{j-1}$}
+    \Else
+      \State \Return $1+\min\bigl\{$\Call{ED}{$S^i,T^{j-1}$},
+        \Call{ED}{$S^{i-1},T^j$}$\bigr\}$
+    \EndIf
+  \EndFunction
+\end{algorithmic}
+\end{framedalgo}
+
+Written directly as a recursive algorithm, this formula has an
+exponential running time.
+
+\begin{notebox}[The same problem as Fibonacci]
+As with the recursive Fibonacci algorithm
+(Proposition~\ref{prop:fib-exponential}), the recursion solves the
+same subproblems again and again. There are only $(n+1)(m+1)$
+different subproblems $\ED(S^i,T^j)$, so storing each value once
+(dynamic programming) avoids the repeated work.
+\end{notebox}
 
 \end{document}
