@@ -360,6 +360,7 @@ The same algorithm can be written with a \texttt{while} loop:
 \begin{framedexample}{Max-Find with a while loop}\label{ex:max-find-while}
 \begin{algorithmic}
   \State $\mathit{max}\gets A[1]$ \Comment{$1$ step}
+  \State $i\gets1$
   \While{$i\leq n$} \Comment{$n$ steps}
     \If{$A[i]>\mathit{max}$} \Comment{$n$ steps}
       \State $\mathit{max}\gets A[i]$ \Comment{$\leq n$ steps}
