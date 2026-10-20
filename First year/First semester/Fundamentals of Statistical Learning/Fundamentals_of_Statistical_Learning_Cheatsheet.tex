@@ -114,6 +114,12 @@ For a group $B_j$ of the partition\begingroup\renewcommand{\thefootnote}{\fnsymb
 \]
 \end{framedthm}
 
+\begin{frameddefn}{Prior and posterior}
+In Bayes' theorem, $P(B_j)$ is the probability of $B_j$ before
+observing $A$, called the \textbf{prior}. Its update $P(B_j\mid A)$
+after observing $A$ is called the \textbf{posterior}.
+\end{frameddefn}
+
 \notesheading{Random variables}
 
 \begingroup
@@ -623,12 +629,31 @@ The \textbf{mixed joint function} of $(X,P)$ is
   q(k,p)=b(k\mid p)\,\pi(p),
   \qquad k=0,\ldots,n,\quad 0<p<1.
 \]
-It gives the probability of a count and an interval:
+It gives the probability that $X$ equals $k$ and, at the same time,
+$P$ falls in an interval $(a,b)$:
 \[
   \Pr(X=k,\ a<P<b)=\int_a^b q(k,p)\,dp,
   \qquad 0\leq a<b\leq1.
 \]
 \end{frameddefn}
+
+\begin{framedprop}{Marginal PMF in the mixed model}
+\label{prop:mixed-marginal-pmf}
+The marginal PMF of $X$, denoted by $m(k)$, is
+\[
+  m(k)=\Pr(X=k)=\int_0^1 b(k\mid p)\,\pi(p)\,dp,
+  \qquad k=0,\ldots,n.
+\]
+\end{framedprop}
+
+\begin{framedprop}{Posterior density in the mixed model}
+Let $k$ be a count with $m(k)>0$. Given $X=k$, the latent variable
+$P$ has the \textbf{posterior density}
+\[
+  f_{P\mid X}(p\mid k)=\frac{b(k\mid p)\,\pi(p)}{m(k)},
+  \qquad 0<p<1.
+\]
+\end{framedprop}
 
 \begin{frameddefn}{Bivariate copula}
 A \textbf{copula} is a joint CDF of two random variables with

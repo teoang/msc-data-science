@@ -22,22 +22,24 @@
 <details>
 <summary><strong>Fundamentals of Statistical Learning · Lecture checklist</strong></summary>
 
-- [ ] **24 September** — Crash course exercises; completeness to verify.
+- [ ] **24 September** — Crash course exercises.
 - [x] **25 September** — Random variables, PMF, PDF and CDF.
-- [ ] **30 September** — PMF/PDF/CDF relations and quantiles; lecture boundaries to verify.
-- [ ] **1 October** — Simulation, pseudorandom generators and LCG; material included, review pending.
-- [ ] **2 October** — LCG in R, histogram and consecutive-pair checks, quantile transform and population generation; blackboard material on distances, loss, risk and convergence integrated. Recent additions marked in red, pending Matteo's review.
-- [x] **7 October** — Random vectors, joint/marginal/conditional distributions, independence, copulas and IID samples; likelihood and empirical CDF clarified and reviewed.
-- [ ] **8 October** — Transformations of continuous random variables, the example Y = X² and its simulation in R (Topic 06, Part II, slides 4–8); explanations added, pending Matteo's review.
-- [ ] **9 October** — Scheduled lecture; notes to cover.
-- [ ] **14 October** — Continuous and mixed random vectors are collected in chapter 4; exponential waiting times, memorylessness, the printer example, and Beta distribution theory are under Common univariate distributions (§3.9). Density estimation and penalization are in chapter 6; the worked normalization/CDF/quantile/transformation exercise is in the random-variable exercise appendix. 
+- [ ] **30 September** — The quantile function; gallery of univariate distributions: Bernoulli, Binomial, Poisson and Uniform.
+- [ ] **1 October** — Quantile and probability transforms, exponential families; Simulation, Part I: why simulate, physical simulators, true and pseudorandom numbers, first definitions of random vectors and random samples, pseudorandom generators.
+- [ ] **2 October** — Pseudorandom generators and seeds in R, distances between densities, loss, risk and convergence (a first definition of learning), the LCG, generating discrete variables and the inverse-transform method in R.
+- [x] **7 October** — Random vectors, joint/marginal/conditional distributions, independence, copulas and IID samples; likelihood and empirical CDF.
+- [ ] **8 October** — Transformations of continuous random variables, the example Y = X² and its simulation in R (Topic 06, Part II, slides 4–8).
+- [ ] **9 October** — Recap of Y = X², computing a quantile function numerically, and density estimation: empirical CDF, histograms and kernel density estimation.
+- [ ] **14 October** — Continuous random vectors, the exponential distribution (waiting times, memorylessness, the printer example), conditional densities, the exam-style exercise, and the setup of the mixed random vector with the Beta distribution.
+- [ ] **15 October** — Mixed random vector: joint model, Beta-Binomial marginal, posterior and conjugacy; stopping time of a stream of uniforms and the geometric distribution.
+- [ ] **16 October** — Mixing trick, Normal, Student's t, Laplace and Gamma distributions, scale mixtures and finite mixtures.
 
 </details>
 
 <details>
 <summary><strong>Fundamentals of Statistical Learning · Topics in lecture order</strong></summary>
 
-Compiled from Flavia's handwritten notes up to 16 October, in the order the topics were covered. Her notes start with random variables and date only the last lecture, so earlier topics are listed in order without dates.
+Compiled from Flavia's handwritten notes up to 16 October, in the order the topics were covered. The lecture checklist above gives the date of each lecture.
 
 **Random variables (Topic 03)**
 
@@ -157,13 +159,6 @@ Compiled from Flavia's handwritten notes up to 16 October, in the order the topi
 ## About
 
 I write these notes in English to organize what I learn and work through the material in my own words. They are works in progress and may contain mistakes or omissions; use them alongside the lectures and recommended textbooks.
-
-All local course notes use the same style package at `shared/latex/learningnotes.sty`,
-with its logo in `shared/latex/assets/sapienza.png`. Each course loads it through
-`\usepackage[english]{../../../shared/latex/learningnotes}`. Edit the shared package
-once, then recompile each course PDF to apply the change. Local `learningnotes.sty`
-entries are relative symbolic links to that same package, kept for compatibility
-with earlier source snapshots.
 
 The LaTeX sources are available, but the custom style package remains excluded from
 the public repository. To compile a downloaded copy, supply the shared package and

@@ -425,6 +425,7 @@ that $A$ and $B$ are independent before conditioning.
 \section{Bayes' theorem}
 
 \subsection{The law of total probability}
+\label{sec:total-probability}
 Let $B_1,\ldots,B_m$ form a partition of the sample space, with
 $P(B_i)>0$. The events $A\cap B_i$ are disjoint and together make
 up $A$. Addition of their probabilities and the multiplication
@@ -455,9 +456,17 @@ $P(B_j\mid A)=P(B_j\cap A)/P(A)$. The multiplication rule
 replaces its numerator by $P(A\mid B_j)P(B_j)$, and total
 probability supplies the denominator.
 \end{proof}
-We start with the probability $P(B_j)$ before observing $A$,
-called the \textbf{prior}, and update it to $P(B_j\mid A)$,
-called the \textbf{posterior}. For example, a disease is a group
+
+\begin{frameddefn}{Prior and posterior}
+\label{def:prior-posterior}
+In
+\hyperref[thm:bayes]{Bayes' theorem~\ref{thm:bayes}},
+$P(B_j)$ is the probability of $B_j$ before observing $A$, called
+the \textbf{prior}. Its update $P(B_j\mid A)$ after observing $A$
+is called the \textbf{posterior}.
+\end{frameddefn}
+
+For example, a disease is a group
 and a positive test is the observed event; their probabilities
 are worked out in the exercise appendix.
 
@@ -3074,7 +3083,8 @@ The \textbf{mixed joint function} of $(X,P)$ is
   q(k,p)=b(k\mid p)\,\pi(p),
   \qquad k=0,\ldots,n,\quad 0<p<1.
 \]
-It gives the probability of a count and an interval:
+It gives the probability that $X$ equals $k$ and, at the same time,
+$P$ falls in an interval $(a,b)$:
 \[
   \Pr(X=k,\ a<P<b)=\int_a^b q(k,p)\,dp,
   \qquad 0\leq a<b\leq1.
@@ -3111,29 +3121,93 @@ It is normalized because
 \]
 
 \subsubsection{Marginalization and conditioning in the mixed model}
-To describe $X$ alone, average over the unknown success probability.
-Its marginal PMF, denoted by $m(k)$, is
+We observe $X$ but never $P$, so $\Pr(X=k)$ must account for every
+possible value of $P$. To see where the integral comes from,
+imagine for a second that $P$ took only the values
+$p_1,p_2,\ldots$, each with positive probability. Then the
+\hyperref[sec:total-probability]{law of total probability of
+Section~\ref{sec:total-probability}} would give
 \[
-  m(k)=\Pr(X=k)=\int_0^1 b(k\mid p)\,\pi(p)\,dp.
+  \Pr(X=k)=\sum_i
+    \underbrace{\Pr(X=k\mid P=p_i)}_{b(k\mid p_i)}\,\Pr(P=p_i).
 \]
-This is the continuous version of summing over an unobserved
-component. Conversely, summing $q(k,p)$ over $k$ recovers $\pi(p)$.
+For a continuous $P$, the probability that $P$ falls near $p$ is
+approximately $\pi(p)\,dp$, so
+\[
+  \Pr(P=p_i)\ \rightsquigarrow\ \pi(p)\,dp,
+  \qquad
+  \sum_i\ \rightsquigarrow\ \int_0^1.
+\]
+
+\begin{framedprop}{Marginal PMF in the mixed model}
+\label{prop:mixed-marginal-pmf}
+The marginal PMF of $X$, denoted by $m(k)$, is
+\[
+  m(k)=\Pr(X=k)=\int_0^1 b(k\mid p)\,\pi(p)\,dp,
+  \qquad k=0,\ldots,n.
+\]
+\end{framedprop}
+\begin{proof}
+The event $\{0<P<1\}$ is certain. Taking this interval in the
+\hyperref[def:mixed-joint-function]{mixed joint function of
+Definition~\ref{def:mixed-joint-function}}
+gives
+\[
+  \Pr(X=k)=\Pr(X=k,\ 0<P<1)=\int_0^1 q(k,p)\,dp
+    =\int_0^1 b(k\mid p)\,\pi(p)\,dp.
+  \qedhere
+\]
+\end{proof}
+
+Conversely, summing $q(k,p)$ over $k$ recovers $\pi(p)$.
 
 After observing $X=k$, we want to update the distribution of $P$.
-For $m(k)>0$, its \textbf{posterior density} is
+
+\begin{framedprop}{Posterior density in the mixed model}
+\label{prop:mixed-posterior}
+Let $k$ be a count with $m(k)>0$. Given $X=k$, the latent variable
+$P$ has the \textbf{posterior density}
 \[
-  f_{P\mid X}(p\mid k)=\frac{b(k\mid p)\,\pi(p)}{m(k)}.
+  f_{P\mid X}(p\mid k)=\frac{b(k\mid p)\,\pi(p)}{m(k)},
+  \qquad 0<p<1.
 \]
+\end{framedprop}
+\begin{proof}
+Since $\Pr(X=k)=m(k)>0$, we can condition on the event $\{X=k\}$
+with the
+\hyperref[def:conditional-probability]{definition of conditional
+probability}. For $0\leq a<b\leq1$, the
+\hyperref[def:mixed-joint-function]{mixed joint function of
+Definition~\ref{def:mixed-joint-function}} in the numerator and the
+\hyperref[prop:mixed-marginal-pmf]{marginal PMF of
+Proposition~\ref{prop:mixed-marginal-pmf}} in the denominator give
+\[
+  \Pr(a<P<b\mid X=k)=\frac{\Pr(X=k,\ a<P<b)}{\Pr(X=k)}
+  =\int_a^b \frac{q(k,p)}{m(k)}\,dp.
+\]
+The function $q(k,p)/m(k)=b(k\mid p)\,\pi(p)/m(k)$ therefore gives
+the probability of every interval, so it is the density of $P$
+given $X=k$.
+\end{proof}
+
 The count $k$ is now fixed, while $p$ varies. The numerator gives
 more weight to values of $p$ that make the observed count likely;
 the denominator normalizes those weights to integrate to $1$.
-This is Bayes' rule for a discrete observation and a continuous
-latent variable.
+
+\begin{notebox}[Bayes' rule]
+The posterior density is
+\hyperref[thm:bayes]{Bayes' theorem~\ref{thm:bayes}} for a discrete
+observation and a continuous latent variable:
+\[
+  P(B_j\mid A)=\frac{P(A\mid B_j)\,P(B_j)}{\sum_i P(A\mid B_i)\,P(B_i)}
+  \qquad\rightsquigarrow\qquad
+  f_{P\mid X}(p\mid k)=\frac{b(k\mid p)\,\pi(p)}{m(k)}.
+\]
+\end{notebox}
 
 The Beta family is especially useful in this binomial model:
 after observing a count, its posterior also belongs to the Beta
-family. This property is called \textbf{conjugacy}; identifying
-the updated parameters is one of the final exercise questions.
+family. This property is called \textbf{conjugacy}.
 
 
 Equivalently, the same joint function can be written in the other
@@ -3143,8 +3217,7 @@ order:
 \]
 The first factorization uses a conditional PMF and a marginal PDF;
 the second uses a conditional PDF and a marginal PMF. Both describe
-the same joint distribution. A conditional factorization by itself
-does not assert independence.
+the same joint distribution.
 
 \exerciseheading{Questions left to work through.}
 To complete the example, determine:
