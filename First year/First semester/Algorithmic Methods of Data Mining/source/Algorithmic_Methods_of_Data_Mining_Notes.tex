@@ -2057,4 +2057,596 @@ different subproblems $\ED(S^i,T^j)$, so storing each value once
 (dynamic programming) avoids the repeated work.
 \end{notebox}
 
+\chapter{Text mining}
+
+\lecturestart{20 October}
+
+\section{From documents to vectors}
+
+How can we turn a text into something on which we can perform
+calculations? Suppose we want to find documents about similar topics.
+Before choosing a distance or a similarity function, we need a numerical
+representation of each document.
+
+\begin{frameddefn}{Corpus and vocabulary}\label{def:corpus-vocabulary}
+A \emph{corpus} is a collection of documents. Its \emph{vocabulary} is
+the set of distinct terms appearing in those documents, after any
+preprocessing. We fix an order for the vocabulary and use the same order
+for every document.
+\end{frameddefn}
+
+\begin{framedexample}{Counting words in two documents}\label{ex:document-counts}
+Consider the documents
+\begin{align*}
+  D_1&:\quad\text{``today we started at three''},\\
+  D_2&:\quad\text{``we played three by three''}.
+\end{align*}
+For this example, we keep all the words. In the vocabulary order
+\[
+  (\texttt{at},\texttt{by},\texttt{played},\texttt{started},
+    \texttt{three},\texttt{today},\texttt{we}),
+\]
+their word counts are
+\begin{center}
+\begin{tabular}{c|rrrrrrr}
+  & \texttt{at} & \texttt{by} & \texttt{played} & \texttt{started}
+  & \texttt{three} & \texttt{today} & \texttt{we}\\\hline
+  $D_1$ & 1 & 0 & 0 & 1 & 1 & 1 & 1\\
+  $D_2$ & 0 & 1 & 1 & 0 & 2 & 0 & 1
+\end{tabular}
+\end{center}
+Each entry counts how many times a term occurs in a document. For
+example, the entry for \texttt{three} in $D_2$ is $2$, because that word
+appears twice. Reading the rows gives the vectors
+\[
+  \mathbf d_1=(1,0,0,1,1,1,1),\qquad
+  \mathbf d_2=(0,1,1,0,2,0,1).
+\]
+The common coordinate order is essential: a coordinate must refer to
+the same word in both documents for a comparison to make sense.
+\end{framedexample}
+
+\begin{frameddefn}{Count-vector representation}\label{def:document-vector}
+Let the ordered vocabulary be $(t_1,\ldots,t_m)$. We represent document
+$D_i$ by the vector $\mathbf d_i\in\mathbb R^m$, where
+\[
+  d_{ij}=\text{number of occurrences of term $t_j$ in document $D_i$}.
+\]
+Thus every term defines one coordinate, and every document becomes a
+point in the same $m$-dimensional space. This is a basic
+\emph{vector space model} of documents.
+\end{frameddefn}
+
+This representation records which terms occur and how often, but it
+does not preserve their order in the text. Consequently, identical
+count vectors do not necessarily imply identical meanings.
+
+\section{Why document length can distort a comparison}
+
+Now that documents are points, we can compare them using the $L_2$
+distance already introduced in Definition~\ref{def:euclidean}.
+For a two-dimensional illustration, keep only the coordinates
+$(\texttt{three},\texttt{we})$ from Example~\ref{ex:document-counts}:
+\[
+  \mathbf u_1=(1,1),\qquad \mathbf u_2=(2,1).
+\]
+These are two-coordinate views of the documents, rather than their
+complete vectors. Their distance is
+\[
+  \norm{\mathbf u_1-\mathbf u_2}_2
+  =\sqrt{(1-2)^2+(1-1)^2}=1.
+\]
+We would like closeness between points to reflect similarity between
+documents. However, raw word counts introduce a difficulty.
+
+\begin{framedexample}{Repeating a document ten times}\label{ex:document-length}
+Here $D_1$ is the original five-word document:
+\[
+  D_1:\quad\text{``today we started at three''}.
+\]
+Construct $D_3$ by repeating this \emph{entire sentence ten times
+inside a single document}:
+\[
+  D_3:\quad\underbrace{\text{``today we started at three''}\;\cdots\;
+    \text{``today we started at three''}}_{\text{10 copies of the sentence, 50 words in total}}.
+\]
+Using the same vocabulary order as before, compare the counts:
+\begin{center}
+\begin{tabular}{c|rrrrrrr}
+  & \texttt{at} & \texttt{by} & \texttt{played} & \texttt{started}
+  & \texttt{three} & \texttt{today} & \texttt{we}\\\hline
+  $D_1$ & 1 & 0 & 0 & 1 & 1 & 1 & 1\\
+  $D_3$ & 10 & 0 & 0 & 10 & 10 & 10 & 10
+\end{tabular}
+\end{center}
+Thus $D_3$ is one longer document, not a collection of ten separate
+documents. Every term now occurs ten times as often:
+\[
+  \mathbf d_3=10\mathbf d_1.
+\]
+In particular, \texttt{three} occurs ten times and \texttt{we} occurs
+ten times, so the two-coordinate view becomes $\mathbf u_3=(10,10)$.
+Its distance from the original is
+\[
+  \norm{\mathbf u_1-\mathbf u_3}_2
+  =\sqrt{(1-10)^2+(1-10)^2}=9\sqrt2.
+\]
+Yet $D_3$ repeats exactly the same content: it adds no new information
+and does not change the topic. Every word retains the same proportion
+of the total text. The large distance is caused by the increase in
+length, rather than by a change in word composition.
+\end{framedexample}
+
+\section{Removing the effect of length: normalization}
+
+The idea is to rescale the counts so that multiplying every count by
+the same factor does not change the representation. A first way to do
+this is to divide each count by the total number of terms in the
+document: we then compare \emph{relative frequencies}.
+
+\begin{framedexample}{From counts to proportions}
+As in Example~\ref{ex:document-length}, the documents are
+\[
+  D_1:\quad\text{``today we started at three''},
+\]
+\[
+  D_3:\quad\underbrace{\text{``today we started at three''}\;\cdots\;
+    \text{``today we started at three''}}_{\text{10 copies of the sentence, 50 words in total}}.
+\]
+\begin{center}
+\begin{tabular}{c|rrrrrrr}
+  & \texttt{at} & \texttt{by} & \texttt{played} & \texttt{started}
+  & \texttt{three} & \texttt{today} & \texttt{we}\\\hline
+  $D_1$ & 1 & 0 & 0 & 1 & 1 & 1 & 1\\
+  $D_3$ & 10 & 0 & 0 & 10 & 10 & 10 & 10
+\end{tabular}
+\end{center}
+Document $D_1$ contains five words and $D_3$ contains fifty. For the
+coordinates $(\texttt{three},\texttt{we})$, dividing by the respective
+document lengths gives
+\[
+  D_1:\quad\left(\frac15,\frac15\right)=(0.2,0.2),\qquad
+  D_3:\quad\left(\frac{10}{50},\frac{10}{50}\right)=(0.2,0.2).
+\]
+The representations now agree. Notice that the denominators count
+\emph{all} the terms in each document, not just the two displayed
+coordinates.
+\end{framedexample}
+
+More generally, we can divide a nonzero document vector by its norm.
+\begin{frameddefn}{Document-vector normalization}\label{def:document-normalization}
+For a nonzero vector $\mathbf d$ and a chosen norm, its normalized
+version is
+\[
+  \widehat{\mathbf d}=\frac{\mathbf d}{\norm{\mathbf d}}.
+\]
+Each coordinate is divided by the same positive number, and the
+resulting vector has norm $1$.
+\end{frameddefn}
+
+For a complete vector of nonnegative term counts, the $L_1$ norm is
+the sum of all counts, hence the total number of terms counted in the
+document. Normalizing with $L_1$ therefore gives the relative
+frequencies used above. Normalizing with $L_2$ instead gives a vector
+of Euclidean norm $1$; these are two different choices of scale.
+
+Both choices remove a uniform multiplication of the counts. Indeed,
+for $c>0$ and $\mathbf d\neq\mathbf0$,
+\[
+  \frac{c\mathbf d}{\norm{c\mathbf d}}
+  =\frac{c\mathbf d}{c\norm{\mathbf d}}
+  =\frac{\mathbf d}{\norm{\mathbf d}}.
+\]
+Thus repeating $D_1$ ten times yields the same normalized vector.
+Geometrically, normalization rescales the vector without changing its
+direction. A document with no counted terms has the zero vector and
+cannot be normalized by this formula.
+
+\section{Comparing directions: cosine similarity}
+
+Normalization suggests a geometric way to compare documents: two
+vectors can have different lengths while pointing in the same direction.
+Now, we can consider another idea: compare the \emph{angle} between
+the vectors. If their counts are proportional, their relative word
+composition is the same and the angle is zero.
+
+\begin{framedexample}{Same direction, different lengths}
+As before, keep only the coordinates $(\texttt{three},\texttt{we})$:
+\[
+  \mathbf u_1=(1,1),\qquad \mathbf u_3=(10,10).
+\]
+Draw each vector as an arrow starting at the origin. The arrow for
+$\mathbf u_3$ is ten times as long, but points in exactly the same
+direction as $\mathbf u_1$: the angle between them is $0^\circ$.
+Now consider $\mathbf u_2=(2,1)$. Here \texttt{three} occurs twice as
+often as \texttt{we}, so its arrow points more towards the
+\texttt{three} axis and forms a positive angle with $\mathbf u_1$.
+\begin{center}
+\begin{tikzpicture}[>=stealth,font=\small]
+  \begin{scope}[scale=0.24]
+    \draw[->] (0,0) -- (12,0) node[right] {\texttt{three}};
+    \draw[->] (0,0) -- (0,12) node[above] {\texttt{we}};
+    \draw[->,PlotBlue,line width=1.3pt] (0,0) -- (10,10)
+      node[above right] {$\mathbf u_3=(10,10)$};
+    \draw[->,PlotRed,line width=2pt] (0,0) -- (1,1);
+    \node[anchor=north west] at (1.3,2.3) {$\mathbf u_1=(1,1)$};
+    \draw[densely dotted] (1,1) -- (1.3,2.3);
+    \node[align=center] at (5,-2.8) {Same direction\\$\theta=0^\circ$};
+  \end{scope}
+  \begin{scope}[xshift=7cm,scale=1.15]
+    \draw[->] (0,0) -- (2.65,0) node[right] {\texttt{three}};
+    \draw[->] (0,0) -- (0,2.5) node[above] {\texttt{we}};
+    \fill[PlotBlue!12] (0,0) -- (26.565:0.75)
+      arc[start angle=26.565,end angle=45,radius=0.75] -- cycle;
+    \draw[->,PlotRed,line width=1.3pt] (0,0) -- (1,1)
+      node[above left] {$\mathbf u_1=(1,1)$};
+    \draw[->,PlotBlue,line width=1.3pt] (0,0) -- (2,1)
+      node[above right] {$\mathbf u_2=(2,1)$};
+    \draw (26.565:0.75) arc[start angle=26.565,end angle=45,radius=0.75];
+    \node at (35.8:1) {$\theta$};
+    \node[align=center] at (1.1,-0.58) {Different directions\\$\theta\approx18.4^\circ$};
+  \end{scope}
+\end{tikzpicture}
+\end{center}
+\end{framedexample}
+
+The smaller the angle, the more similar the proportions of terms in
+the two vectors. We turn this idea into a numerical similarity by
+taking the cosine of that angle.
+
+\begin{frameddefn}{Cosine similarity}\label{def:cosine-similarity}
+For two nonzero document vectors $\mathbf u$ and $\mathbf v$, let
+$\theta$ be the angle between them. Their \emph{cosine similarity} is
+\[
+  \operatorname{sim}_{\cos}(\mathbf u,\mathbf v)=\cos\theta.
+\]
+\end{frameddefn}
+
+For nonnegative count vectors, the angle lies between $0^\circ$ and
+$90^\circ$, so the similarity lies between $0$ and $1$:
+\begin{itemize}
+  \item At $0^\circ$, the similarity is $1$: the vectors point in the
+    same direction, and their counts are proportional.
+  \item Between $0^\circ$ and $90^\circ$, the similarity lies strictly
+    between $1$ and $0$. As the angle increases, the similarity decreases.
+  \item At $90^\circ$, the similarity is $0$: there is no coordinate
+    with a positive count in both vectors. For complete document
+    vectors, this means that the documents share no counted terms.
+\end{itemize}
+In particular, $D_1$ and its tenfold repetition $D_3$ have cosine
+similarity $1$. This measures similarity of word composition; as with
+the count representation itself, it does not capture word order or
+guarantee identical meanings. A zero vector has no direction, so the
+similarity above is not defined for an empty count vector.
+
+\subsection{Computing cosine similarity from coordinates}
+
+We do not need to measure the angle first. For two nonzero vectors
+$\mathbf u,\mathbf v\in\mathbb R^m$, we can compute its cosine directly
+from their coordinates:
+\[
+  \operatorname{sim}_{\cos}(\mathbf u,\mathbf v)
+  =\frac{\mathbf u\cdot\mathbf v}{\norm{\mathbf u}_2\norm{\mathbf v}_2}
+  =\frac{\sum_{j=1}^{m}u_jv_j}
+    {\sqrt{\sum_{j=1}^{m}u_j^2}\sqrt{\sum_{j=1}^{m}v_j^2}}.
+\]
+The numerator is the \emph{dot product}: multiply corresponding
+coordinates, then add the results. The denominator is the product of
+the two $L_2$ norms.
+
+\begin{framedexample}{Computing the similarity step by step}
+Take the two vectors from the right-hand graph, in the coordinate order
+$(\texttt{three},\texttt{we})$:
+\[
+  \mathbf u_1=(1,1),\qquad\mathbf u_2=(2,1).
+\]
+\textbf{Step 1: compute the dot product.}
+Multiply the counts for the same word and add:
+\[
+  \mathbf u_1\cdot\mathbf u_2
+  =\underbrace{1\cdot2}_{\texttt{three}}
+   +\underbrace{1\cdot1}_{\texttt{we}}=3.
+\]
+Each term compares the count of one word in the first document with
+the count of that same word in the second.
+
+\textbf{Step 2: compute the two $L_2$ norms.}
+\[
+  \norm{\mathbf u_1}_2=\sqrt{1^2+1^2}=\sqrt2,\qquad
+  \norm{\mathbf u_2}_2=\sqrt{2^2+1^2}=\sqrt5.
+\]
+\textbf{Step 3: divide the dot product by the product of the norms.}
+\[
+  \operatorname{sim}_{\cos}(\mathbf u_1,\mathbf u_2)
+  =\frac{3}{\sqrt2\sqrt5}
+  =\frac{3}{\sqrt{10}}\approx0.949.
+\]
+The result is close to $1$: the vectors point in similar directions,
+although their word proportions differ. This is the cosine of the
+angle of approximately $18.4^\circ$ shown in the graph.
+\end{framedexample}
+
+\section{Why some words should count more than others}
+
+We can now compare documents using cosine similarity. However, in
+the count representation every occurrence has the same weight,
+regardless of which word it belongs to. A common word can therefore
+create a similarity that tells us little about the documents' topics.
+
+\begin{framedexample}{A similarity caused by a common word}
+Consider two short documents:
+\[
+  D_A:\quad\text{``the cat''},\qquad
+  D_B:\quad\text{``the dog''}.
+\]
+Using the vocabulary order $(\texttt{the},\texttt{cat},\texttt{dog})$,
+we obtain
+\[
+  \mathbf d_A=(1,1,0),\qquad\mathbf d_B=(1,0,1).
+\]
+Their dot product is
+\[
+  \mathbf d_A\cdot\mathbf d_B
+  =\underbrace{1\cdot1}_{\texttt{the}}
+   +\underbrace{1\cdot0}_{\texttt{cat}}
+   +\underbrace{0\cdot1}_{\texttt{dog}}=1.
+\]
+Both vectors have $L_2$ norm $\sqrt2$, so
+\[
+  \operatorname{sim}_{\cos}(\mathbf d_A,\mathbf d_B)
+  =\frac{1}{\sqrt2\sqrt2}=\frac12.
+\]
+The similarity comes entirely from \texttt{the}, a word that provides
+little information about what these documents discuss.
+\end{framedexample}
+
+A first solution is to remove \emph{stopwords}: very common words,
+such as articles and prepositions, that are often uninformative for
+the comparison. In the example, removing \texttt{the} leaves
+\[
+  D_A:\quad\text{``cat''},\qquad D_B:\quad\text{``dog''}.
+\]
+With the vocabulary order $(\texttt{cat},\texttt{dog})$, the vectors
+become
+\[
+  \mathbf d_A=(1,0),\qquad\mathbf d_B=(0,1).
+\]
+Their dot product is zero and both norms are $1$, so their cosine
+similarity is now $0$: they share no remaining terms.
+
+This suggests a more general idea: words are not all equally
+informative. Instead of only removing certain words, we can assign
+different weights to the terms, so that informative words contribute
+more to the comparison.
+
+\section{Weighting terms by their rarity: IDF}
+
+A word that appears in almost every document does little to distinguish
+documents from one another. A word found in only a few documents can
+be more characteristic. For example, in a corpus of cooking texts,
+\texttt{food} might occur almost everywhere, whereas \texttt{guanciale}
+might appear only in recipes using that ingredient.
+
+\begin{framedexample}{Counting documents rather than occurrences}
+Suppose our corpus contains $100$ documents:
+\begin{center}
+\begin{tabular}{l|r}
+  Term & Documents containing the term\\\hline
+  \texttt{food} & 100\\
+  \texttt{pasta} & 20\\
+  \texttt{guanciale} & 2
+\end{tabular}
+\end{center}
+These are counts of \emph{documents}, not occurrences. If
+\texttt{guanciale} occurs ten times in one recipe, that recipe still
+contributes only $1$ to the count of documents containing the term.
+\end{framedexample}
+
+\textbf{Step 1: count the documents containing each term.}
+Let $N$ be the total number of documents. For a term $t$, write
+$\operatorname{df}(t)$ for its \emph{document frequency}: the number
+of documents containing it.
+
+\textbf{Step 2: compare the total with that count.}
+Consider the ratio $N/\operatorname{df}(t)$. In our example,
+\[
+  \texttt{food}:\ \frac{100}{100}=1,\qquad
+  \texttt{pasta}:\ \frac{100}{20}=5,\qquad
+  \texttt{guanciale}:\ \frac{100}{2}=50.
+\]
+The rarer the term in the corpus, the larger this ratio.
+
+\textbf{Step 3: take the logarithm of the ratio.}
+The logarithm reduces the differences between the weights while
+preserving their order: rarer terms still receive larger weights.
+
+\begin{frameddefn}{Inverse document frequency}\label{def:idf}
+For a term $t$ appearing in at least one document of a corpus of $N$
+documents, its \emph{inverse document frequency} is
+\[
+  \operatorname{IDF}(t)
+  =\log\left(\frac{N}{\operatorname{df}(t)}\right),
+\]
+where $\operatorname{df}(t)$ is the number of documents containing $t$.
+\end{frameddefn}
+
+\begin{framedexample}{IDF weights for the cooking corpus}
+Using base-$10$ logarithms, the weights are
+\begin{center}
+\begin{tabular}{l|c|c}
+  Term & $N/\operatorname{df}(t)$ & $\operatorname{IDF}(t)$\\\hline
+  \texttt{food} & $100/100=1$ & $\log_{10}(1)=0$\\
+  \texttt{pasta} & $100/20=5$ & $\log_{10}(5)\approx0.699$\\
+  \texttt{guanciale} & $100/2=50$ & $\log_{10}(50)\approx1.699$
+\end{tabular}
+\end{center}
+Thus \texttt{guanciale} receives more weight than \texttt{pasta}.
+The word \texttt{food}, present in every document, receives weight
+$0$: under this formula it provides no information for distinguishing
+the documents in this corpus.
+\end{framedexample}
+
+\section{Combining term frequency and rarity: TF-IDF}
+
+We now combine two pieces of information. The \emph{term frequency}
+(TF) describes how often a term occurs in one particular document;
+IDF describes how rare that term is across the entire corpus. Here
+we use the raw occurrence count as TF, consistently with our count
+vectors.
+
+\begin{frameddefn}{TF-IDF weight}\label{def:tf-idf}
+Let $\operatorname{TF}(t,D)$ be the number of occurrences of term $t$
+in document $D$. Its \emph{TF-IDF weight} is
+\[
+  \operatorname{TF\!\text{-}\!IDF}(t,D)
+  =\operatorname{TF}(t,D)\cdot\operatorname{IDF}(t).
+\]
+\end{frameddefn}
+
+\begin{framedexample}{From counts to TF-IDF weights}
+\textbf{Step 1: keep the same corpus of $100$ documents.}
+Using the base-$10$ logarithms from the previous example,
+\[
+  \operatorname{IDF}(\texttt{food})=0,\qquad
+  \operatorname{IDF}(\texttt{pasta})\approx0.699,\qquad
+  \operatorname{IDF}(\texttt{guanciale})\approx1.699.
+\]
+\textbf{Step 2: choose a document $D$ in this corpus.}
+Suppose its counts for these terms are
+\begin{center}
+\begin{tabular}{l|r}
+  Term & TF in document $D$\\\hline
+  \texttt{food} & 4\\
+  \texttt{pasta} & 3\\
+  \texttt{guanciale} & 2
+\end{tabular}
+\end{center}
+In the coordinate order
+$(\texttt{food},\texttt{pasta},\texttt{guanciale})$, the corresponding
+count vector is $\mathbf d=(4,3,2)$. These are the three coordinates
+we are following in the example.
+
+\textbf{Step 3: multiply each count by its term's IDF.}
+\begin{center}
+\begin{tabular}{l|r|r|l}
+  Term & TF & IDF & TF-IDF\\\hline
+  \texttt{food} & 4 & 0 & $4\cdot0=0$\\
+  \texttt{pasta} & 3 & $\approx0.699$ & $3\log_{10}(5)\approx2.097$\\
+  \texttt{guanciale} & 2 & $\approx1.699$ & $2\log_{10}(50)\approx3.398$
+\end{tabular}
+\end{center}
+The weighted vector is therefore
+\[
+  \mathbf d_{\text{TF-IDF}}\approx(0,\;2.097,\;3.398).
+\]
+Although \texttt{guanciale} occurs less often than \texttt{pasta} in
+this document, it receives a larger weight because it is rarer in
+the corpus. The term \texttt{food} receives weight zero because it
+appears in every document.
+\end{framedexample}
+
+TF depends on the particular document being represented. IDF depends
+on the corpus: for a fixed corpus, a term has the same IDF in every
+document. We can then compare the weighted document vectors using
+the same cosine-similarity formula as before, provided neither
+weighted vector is zero.
+
+\section{Using document vectors for search}
+
+We can use \hyperref[def:tf-idf]{TF-IDF} vectors to build a search engine. A \emph{query} is
+the text entered by the user. Given a query and a positive integer
+$k$, our goal is to return the $k$ documents most similar to that
+query (or all documents if the corpus contains fewer than $k$).
+For example, $k=3$ asks for the three highest-scoring results.
+
+The first step is to represent the query as a vector in the
+\emph{same space} as the documents: the same vocabulary, the same
+coordinate order and the same IDF weights.
+
+\begin{framedexample}{Turning a query into a vector}
+Suppose the user searches for
+\[
+  Q:\quad\text{``pasta guanciale''}.
+\]
+Keep the coordinate order
+$(\texttt{food},\texttt{pasta},\texttt{guanciale})$ from the cooking
+example.
+
+\textbf{Step 1: count the query terms.}
+The query contains no occurrence of \texttt{food}, one occurrence of
+\texttt{pasta} and one of \texttt{guanciale}. Its count vector is
+\[
+  \mathbf q_{\text{counts}}=(0,1,1).
+\]
+\textbf{Step 2: apply the same IDF weights as for the documents.}
+Use the IDF values already computed from the corpus, rather than
+recomputing IDF from the query:
+\[
+  \mathbf q_{\text{TF-IDF}}
+  \approx(0\cdot0,\;1\cdot0.699,\;1\cdot1.699)
+  =(0,\;0.699,\;1.699).
+\]
+As before, we display the three coordinates being followed in this
+example; any other vocabulary terms absent from the query have
+coordinate zero.
+
+\textbf{Step 3: compare the query with each document.}
+For each document $D_i$, assign the score
+\[
+  \operatorname{score}(D_i)
+  =\operatorname{sim}_{\cos}
+    \bigl(\mathbf q_{\text{TF-IDF}},\mathbf d_{i,\text{TF-IDF}}\bigr).
+\]
+Here both vectors use the full common vocabulary and are assumed to
+be nonzero. A higher score means that the document's direction is
+closer to the query's direction. Sort the documents by decreasing
+score and return the first $k$.
+\end{framedexample}
+
+The query is therefore treated as a small document. Representing it
+with the same coordinates and corpus-based IDF weights lets us use
+the same cosine-similarity calculation for retrieval.
+
+\subsection{The cost of searching every document}
+
+The simplest search procedure follows four steps:
+\begin{enumerate}
+  \item Compute cosine similarity between the query and every document.
+  \item Store each document's score.
+  \item Sort the documents by decreasing score.
+  \item Return the first $k$ results.
+\end{enumerate}
+Suppose the corpus contains $N$ documents and the vocabulary contains
+$m$ terms. We analyse the direct implementation that scans all $m$
+coordinates of each document vector.
+
+\textbf{First cost: computing all scores.}
+Each vector has $m$ coordinates. Scanning all of them to compare the
+query with one document takes $\Theta(m)$ time. Repeating this for
+all $N$ documents takes
+\[
+  \Theta(Nm).
+\]
+\begin{framedexample}{A large corpus}
+With one million documents and a vocabulary of one hundred thousand
+terms, the direct implementation examines
+\[
+  10^6\cdot10^5=10^{11}
+\]
+pairs of coordinates for every query. Each pair contains the query
+weight and the document weight for the same vocabulary term.
+\end{framedexample}
+
+\textbf{Second cost: sorting the scores.}
+An efficient comparison-based sorting algorithm sorts the $N$ scores
+in $O(N\log N)$ time. Thus computing all scores and sorting them gives
+the overall bound
+\[
+  O(Nm+N\log N).
+\]
+This procedure works, but repeats substantial work whenever a new
+query arrives. The next question is which work can be performed once,
+while preparing the documents, and which must wait until the query
+is known.
+
 \end{document}

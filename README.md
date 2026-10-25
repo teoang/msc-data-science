@@ -10,7 +10,7 @@
 
 | Course | Notes | Status |
 | --- | --- | --- |
-| Fundamentals of Statistical Learning | [📖 Open PDF](First%20year/First%20semester/Fundamentals%20of%20Statistical%20Learning/Fundamentals_of_Statistical_Learning_Notes.pdf) · [📋 Cheatsheet PDF](First%20year/First%20semester/Fundamentals%20of%20Statistical%20Learning/Fundamentals_of_Statistical_Learning_Cheatsheet.pdf) | 🟡 In progress |
+| Fundamentals of Statistical Learning | [📖 Open PDF](First%20year/First%20semester/Fundamentals%20of%20Statistical%20Learning/Fundamentals_of_Statistical_Learning_Notes.pdf) · [📋 Cheatsheet PDF](First%20year/First%20semester/Fundamentals%20of%20Statistical%20Learning/Fundamentals_of_Statistical_Learning_Cheatsheet.pdf) | 🚨 Major rewrite |
 | Fundamentals of Data Science | [📖 Open PDF](First%20year/First%20semester/Fundamentals%20of%20Data%20Science/Fundamentals_of_Data_Science_Notes.pdf) | 🟡 In progress |
 | Algorithmic Methods of Data Mining | [📖 Open PDF](First%20year/First%20semester/Algorithmic%20Methods%20of%20Data%20Mining/Algorithmic_Methods_of_Data_Mining_Notes.pdf) | 🟡 In progress |
 
@@ -153,6 +153,13 @@ Compiled from Flavia's handwritten notes up to 16 October, in the order the topi
 23. Distances between strings: first attempts and their problems.
 24. Subsequences, common subsequences and the longest common subsequence.
 25. Edit distance, its relation to the LCS, and its recursive formula (start of dynamic programming).
+
+**20 October · In progress**
+
+26. Text mining: corpus, vocabulary and document count vectors; document length and L1/L2 normalization.
+27. Cosine similarity: geometric interpretation and step-by-step computation from coordinates.
+28. Stopwords, document frequency, IDF and TF-IDF weights, with worked examples.
+29. Query vectors, cosine scores and top-k retrieval; direct-search cost O(Nm + N log N).
 
 </details>
 
