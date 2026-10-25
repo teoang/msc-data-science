@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="740" height="340" viewBox="0 0 740 340">
+<title>Darts: hitting point and distance</title>
+<desc>A target of radius 10 cm, an inner disc of radius 5 cm, and the point (3,4), whose distance from the centre is 5 cm.</desc>
+<circle cx="180" cy="174" r="140" fill="#f7fafc" stroke="#24344a" stroke-width="2"/>
+<circle cx="180" cy="174" r="70" fill="#cce9fa" stroke="#2782ad" stroke-width="1.5"/>
+<line x1="22" y1="174" x2="340" y2="174" stroke="#b6c0cc" stroke-width="1"/>
+<line x1="180" y1="326" x2="180" y2="30" stroke="#b6c0cc" stroke-width="1"/>
+<line x1="222" y1="118" x2="222" y2="174" stroke="#7c8d9f" stroke-width="1" stroke-dasharray="4 4"/>
+<line x1="180" y1="118" x2="222" y2="118" stroke="#7c8d9f" stroke-width="1" stroke-dasharray="4 4"/>
+<line x1="180" y1="174" x2="222" y2="118" stroke="#c45816" stroke-width="3"/>
+<polygon points="222,118 219.10694618255934,127.57236854751174 213.62058126327213,123.45759485804632" fill="#c45816"/>
+<line x1="180" y1="174" x2="320" y2="174" stroke="#24344a" stroke-width="1.7"/>
+<polygon points="320,174 310.6062728715262,177.42897807455452 310.6062728715262,170.57102192544548" fill="#24344a"/>
+<circle cx="222" cy="118" r="4" fill="#c45816" stroke="#c45816" stroke-width="1"/>
+<circle cx="180" cy="174" r="3" fill="#24344a" stroke="#24344a" stroke-width="1"/>
+<text x="159" y="192" font-family="Helvetica,Arial,sans-serif" font-size="13" fill="#24344a">O</text>
+<text x="250" y="108" font-family="Helvetica,Arial,sans-serif" font-size="15" fill="#24344a" font-weight="bold">P = (3,4)</text>
+<text x="135" y="139" font-family="Helvetica,Arial,sans-serif" font-size="14" fill="#a9440d" font-weight="bold">X = 5</text>
+<text x="185" y="210" font-family="Helvetica,Arial,sans-serif" font-size="14" fill="#24344a">r = 10 cm</text>
+<text x="198" y="191" font-family="Helvetica,Arial,sans-serif" font-size="12" fill="#24344a">3</text>
+<text x="231" y="151" font-family="Helvetica,Arial,sans-serif" font-size="12" fill="#24344a">4</text>
+<text x="390" y="60" font-family="Helvetica,Arial,sans-serif" font-size="19" fill="#24344a" font-weight="bold">One point, one distance</text>
+<text x="390" y="98" font-family="Helvetica,Arial,sans-serif" font-size="16" fill="#24344a" font-weight="bold">Outcome: P = (3,4)</text>
+<text x="390" y="122" font-family="Helvetica,Arial,sans-serif" font-size="14" fill="#24344a">The dart lands at this point.</text>
+<text x="390" y="168" font-family="Helvetica,Arial,sans-serif" font-size="16" fill="#a9440d" font-weight="bold">Random variable: X(P) = 5 cm</text>
+<text x="390" y="192" font-family="Helvetica,Arial,sans-serif" font-size="14" fill="#24344a">The distance from P to O.</text>
+<text x="390" y="238" font-family="Helvetica,Arial,sans-serif" font-size="15" fill="#216b92" font-weight="bold">Blue region: distance at most 5 cm</text>
+<text x="390" y="262" font-family="Helvetica,Arial,sans-serif" font-size="14" fill="#24344a">All points in the inner disc.</text>
+<text x="390" y="286" font-family="Helvetica,Arial,sans-serif" font-size="14" fill="#24344a">This is the preimage of [0,5].</text>
+</svg>

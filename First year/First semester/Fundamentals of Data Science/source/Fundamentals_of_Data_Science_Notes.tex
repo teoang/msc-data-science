@@ -1,6 +1,8 @@
 \documentclass[a4paper,12pt,oneside]{report}
-\usepackage[english]{learningnotes}
+\usepackage[english]{../../../../latex-setup/learningnotes}
 \usepackage{needspace}
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.18}
 \hypersetup{linktoc=all}
 \newcommand{\exerciseheading}[1]{%
   \par\Needspace{5\baselineskip}\noindent\textbf{#1}\par\nobreak}
@@ -319,16 +321,31 @@ Independence is between observations; it does not require $X$ and $Y$
 within one observation to be independent. The i.i.d. assumption can fail,
 for example when successive observations form a time series.
 
+\begin{notebox}[Notation from the next section on]
+From the next section on we follow the notation of the slides, which
+comes from \emph{Machine Learning Refined}. Each input has $N$
+coordinates and the dataset contains $P$ points: compared with the
+notation above, $N=p$ and $P=n$.
+\begin{itemize}
+  \item $x_p\in\mathbb{R}^{N}$ is the $p$-th point, for $p=1,\ldots,P$.
+  \item For a single vector without a point index, such as $u$ or $x$,
+        the subscripts $1,\ldots,N$ number its coordinates, as in the
+        axis labels $x_1,x_2$ of the figures.
+  \item When both indices are needed, $x_{n,p}$ is coordinate $n$ of the
+        point $x_p$.
+\end{itemize}
+\end{notebox}
+
 \clearpage
 \section{Data points as vectors}
 
-We now focus on the inputs $x^{(i)}\in\mathbb{R}^{p}$. This space
+We now focus on the inputs $x_p\in\mathbb{R}^{N}$. This space
 supports vector addition and multiplication by real numbers, called
 \emph{scalars}. These operations act coordinate by coordinate:
 \[
-  u+v=(u_1+v_1,\ldots,u_p+v_p)^\top,
+  u+v=(u_1+v_1,\ldots,u_N+v_N)^\top,
   \qquad
-  a u=(a u_1,\ldots,a u_p)^\top.
+  a u=(a u_1,\ldots,a u_N)^\top.
 \]
 An input can be drawn as a point with those coordinates or as a
 \emph{position vector}: an arrow from the origin to that point.
@@ -338,17 +355,17 @@ An input can be drawn as a point with those coordinates or as a
 \begin{frameddefn}{Mean-centered data}\label{def:mean-centering}
 The sample mean input vector and the centered observations are
 \[
-  \bar{x}=\frac{1}{n}\sum_{i=1}^{n}x^{(i)},
+  \bar{x}=\frac{1}{P}\sum_{p=1}^{P}x_p,
   \qquad
-  \widetilde{x}^{(i)}=x^{(i)}-\bar{x}.
+  \widetilde{x}_p=x_p-\bar{x}.
 \]
 The mean of the centered inputs is zero:
-$\frac{1}{n}\sum_{i=1}^{n}\widetilde{x}^{(i)}=0$.
+$\frac{1}{P}\sum_{p=1}^{P}\widetilde{x}_p=0$.
 \end{frameddefn}
 
 Centering subtracts each feature's sample mean from that feature. It is
 reversible if we retain $\bar{x}$, since
-$x^{(i)}=\widetilde{x}^{(i)}+\bar{x}$.
+$x_p=\widetilde{x}_p+\bar{x}$.
 
 \begin{framedexample}{Centering three points}
 For the inputs $(1,1)^\top$, $(3,1)^\top$, and $(2,4)^\top$,
@@ -391,7 +408,7 @@ The \emph{span} of vectors $c_1,\ldots,c_K$ is the set of all their
 linear combinations:
 \[
   \operatorname{span}\{c_1,\ldots,c_K\}
-  =\left\{\sum_{j=1}^{K}a_jc_j:a_1,\ldots,a_K\in\mathbb{R}\right\}.
+  =\left\{\sum_{n=1}^{K}a_nc_n:a_1,\ldots,a_K\in\mathbb{R}\right\}.
 \]
 These vectors form a \emph{spanning set} of a vector space $V$ when
 their span equals $V$: every vector in $V$ can be expressed using them.
@@ -431,7 +448,7 @@ horizontal axis rather than the whole plane.
 \section{Basis}
 
 \begin{frameddefn}{Linear independence}\label{def:linear-independence}
-Vectors $c_1,\ldots,c_K\in\mathbb{R}^{p}$ are \emph{linearly independent}
+Vectors $c_1,\ldots,c_K\in\mathbb{R}^{N}$ are \emph{linearly independent}
 if the only scalars $a_1,\ldots,a_K\in\mathbb{R}$ satisfying
 \[
   a_1c_1+\cdots+a_Kc_K=0
@@ -457,17 +474,17 @@ is redundant because the first two already generate it.
 
 \subsection{Representing observations in a basis}
 
-A basis of $\mathbb{R}^{p}$ contains exactly $p$ vectors, each in
-$\mathbb{R}^{p}$. For a basis $c_1,\ldots,c_p$, every input observation
+A basis of $\mathbb{R}^{N}$ contains exactly $N$ vectors, each in
+$\mathbb{R}^{N}$. For a basis $c_1,\ldots,c_N$, every input observation
 has a unique representation
 \[
-  x^{(i)}=\sum_{j=1}^{p}w_j^{(i)}c_j,
-  \qquad i=1,\ldots,n.
+  x_p=\sum_{n=1}^{N}w_{n,p}c_n,
+  \qquad p=1,\ldots,P.
 \]
-The coefficients $w_j^{(i)}$ are the \emph{weights}, or coordinates,
+The coefficients $w_{n,p}$ are the \emph{weights}, or coordinates,
 of that observation in the chosen basis. The vector
-$w^{(i)}=(w_1^{(i)},\ldots,w_p^{(i)})^\top$ records its representation;
-combining the basis vectors with these weights reconstructs $x^{(i)}$.
+$w_p=(w_{1,p},\ldots,w_{N,p})^\top$ records its representation;
+combining the basis vectors with these weights reconstructs $x_p$.
 
 \Needspace{28\baselineskip}
 \begin{framedexample}{Coordinates in a basis}
@@ -479,8 +496,8 @@ Use the same basis for both observations:
 The two points have different weights:
 \[
 \begin{aligned}
-  x^{(1)}&=\begin{pmatrix}2\\3\end{pmatrix}=2c_1+3c_2,\\[4pt]
-  x^{(2)}&=\begin{pmatrix}4\\1\end{pmatrix}=4c_1+c_2.
+  x_1&=\begin{pmatrix}2\\3\end{pmatrix}=2c_1+3c_2,\\[4pt]
+  x_2&=\begin{pmatrix}4\\1\end{pmatrix}=4c_1+c_2.
 \end{aligned}
 \]
 \begin{center}
@@ -488,22 +505,22 @@ The two points have different weights:
 \toprule
 \textbf{Observation} & \textbf{Weight of $c_1$} & \textbf{Weight of $c_2$} \\
 \midrule
-First & $w_1^{(1)}=2$ & $w_2^{(1)}=3$ \\
-Second & $w_1^{(2)}=4$ & $w_2^{(2)}=1$ \\
+First ($p=1$) & $w_{1,1}=2$ & $w_{2,1}=3$ \\
+Second ($p=2$) & $w_{1,2}=4$ & $w_{2,2}=1$ \\
 \bottomrule
 \end{tabular}
 \end{center}
-For example, $w_2^{(1)}=3$ means that the first observation uses three
-times the second basis vector. The superscript $(i)$ identifies the
-observation; the subscript $j$ identifies the basis vector.
+For example, $w_{2,1}=3$ means that the first observation uses three
+times the second basis vector. In $w_{n,p}$, the first index $n$ identifies the
+basis vector; the second index $p$ identifies the observation.
 \end{framedexample}
 
 \clearpage
 \section{Standard basis}
 
 \begin{frameddefn}{Standard basis}\label{def:standard-basis}
-The \emph{standard basis} of $\mathbb{R}^{p}$ consists of the vectors
-$c_1,\ldots,c_p$, where $c_j$ has a $1$ in position $j$ and zeros
+The \emph{standard basis} of $\mathbb{R}^{N}$ consists of the vectors
+$c_1,\ldots,c_N$, where $c_n$ has a $1$ in position $n$ and zeros
 everywhere else. In $\mathbb{R}^{2}$,
 \[
   c_1=\begin{pmatrix}1\\0\end{pmatrix},\qquad
@@ -514,8 +531,8 @@ everywhere else. In $\mathbb{R}^{2}$,
 Each vector points along one coordinate axis. Consequently, the weights
 in this basis are the entries of the observation itself:
 \[
-  x^{(i)}=x_1^{(i)}c_1+\cdots+x_p^{(i)}c_p
-  \qquad\Longrightarrow\qquad w^{(i)}=x^{(i)}.
+  x_p=x_{1,p}c_1+\cdots+x_{N,p}c_N
+  \qquad\Longrightarrow\qquad w_p=x_p.
 \]
 
 \begin{framedexample}{Reading the weights from the coordinates}
@@ -563,9 +580,9 @@ contributes the second. Their sum is the black arrow.
 The standard basis has two properties:
 \begin{itemize}
   \item \textbf{Different vectors are perpendicular:}
-        $c_j^\top c_k=0$ for $j\ne k$.
+        $c_n^\top c_m=0$ for $n\ne m$.
   \item \textbf{Each vector has unit length:}
-        $\lVert c_j\rVert_2^2=c_j^\top c_j=1$.
+        $\lVert c_n\rVert_2^2=c_n^\top c_n=1$.
 \end{itemize}
 In $\mathbb{R}^{2}$, these follow directly from
 \[
@@ -586,11 +603,11 @@ can collect all these checks in one matrix.
 
 First, place the basis vectors in the columns of $C$:
 \[
-  C=[\,c_1\ \cdots\ c_p\,]
-  \in\mathbb{R}^{p\times p}.
+  C=[\,c_1\ \cdots\ c_N\,]
+  \in\mathbb{R}^{N\times N}.
 \]
 Now compute $C^\top C$. Each entry is a dot product between two columns
-of $C$: the entry in row $j$, column $k$ is $c_j^\top c_k$.
+of $C$: the entry in row $n$, column $m$ is $c_n^\top c_m$.
 We read the result as a table of checks:
 \begin{center}
 \begin{tabularx}{\linewidth}{@{}lXc@{}}
@@ -605,9 +622,9 @@ Off the diagonal & The dot product of two different vectors & $0$ \\
 
 If the diagonal contains only $1$s and every other entry is $0$, both
 checks pass: the basis is orthonormal. That result is the identity
-matrix $I_p$, so the complete test is
+matrix $I_N$ (written $I_{N\times N}$ in the slides), so the complete test is
 \[
-  \boxed{C^\top C=I_p.}
+  \boxed{C^\top C=I_N.}
 \]
 This formula is a compact way to check the lengths and perpendicularity
 of all the basis vectors at once. The standard basis passes the test.
@@ -638,7 +655,7 @@ vectors have length $1$.
 
 In the standard basis, the weights equal the entries of the observation:
 $w=x$. For a different orthonormal basis, the same observation can have
-different weights. The test $C^\top C=I_p$ checks the geometry of the
+different weights. The test $C^\top C=I_N$ checks the geometry of the
 basis; the chosen basis determines the weights.
 
 \clearpage
@@ -649,34 +666,34 @@ represent a point in that basis? For an orthonormal basis, a dot product
 with each basis vector gives the answer.
 
 We know the observation $x$ and choose the basis vectors
-$c_1,\ldots,c_p$. We want to find their weights $w_1,\ldots,w_p$ so that
+$c_1,\ldots,c_N$. We want to find their weights $w_1,\ldots,w_N$ so that
 their weighted sum gives $x$. Put the basis vectors in the columns of
 $C$ and the weights in $w$. Matrix multiplication performs that sum:
 \[
-  Cw=w_1c_1+\cdots+w_pc_p=x.
+  Cw=w_1c_1+\cdots+w_Nc_N=x.
 \]
 Thus $x=Cw$ is the compact form of a linear combination. Multiplying
 both sides by $C^\top$ gives
 \[
-  C^\top x=C^\top Cw=I_pw=w.
+  C^\top x=C^\top Cw=I_Nw=w.
 \]
 Therefore the coordinates are
 \[
-  \boxed{w=C^\top x,\qquad w_j=c_j^\top x.}
+  \boxed{w=C^\top x,\qquad w_n=c_n^\top x.}
 \]
-The weight $w_j$ tells us how far to move along the unit vector $c_j$.
+The weight $w_n$ tells us how far to move along the unit vector $c_n$.
 A positive weight follows its direction; a negative weight goes in the
 opposite direction. Perpendicular basis vectors do not contribute to
 this dot product, so it picks out just the weight we want.
 
-For every observation $x^{(i)}$, the same calculation gives
-$w^{(i)}=C^\top x^{(i)}$. With a complete orthonormal basis, combining
+For every observation $x_p$, the same calculation gives
+$w_p=C^\top x_p$. With a complete orthonormal basis, combining
 these weights with the basis vectors gives the original observation:
 \[
-  Cw^{(i)}=CC^\top x^{(i)}=x^{(i)}.
+  Cw_p=CC^\top x_p=x_p.
 \]
 Here $C$ is square and its columns form a basis of all of
-$\mathbb{R}^p$, so $CC^\top=I_p$ as well as $C^\top C=I_p$.
+$\mathbb{R}^N$, so $CC^\top=I_N$ as well as $C^\top C=I_N$.
 
 \clearpage
 \begin{framedexample}{Finding the weights of the point $(2,3)$}
@@ -866,13 +883,13 @@ add the results. For these weights, the result is
 Squaring makes each contribution nonnegative, so errors on different
 coordinates cannot cancel each other.
 
-For a point with $p$ coordinates, we call this sum $h(w)$:
+For a point with $N$ coordinates, we call this sum $h(w)$:
 \[
   h(w)=\lVert Cw-x\rVert_2^2
-      =\sum_{j=1}^{p}\bigl((Cw)_j-x_j\bigr)^2.
+      =\sum_{n=1}^{N}\bigl((Cw)_n-x_n\bigr)^2.
 \]
-Here $(Cw)_j$ is the $j$th coordinate of the reconstructed point and
-$x_j$ is the corresponding coordinate of the original point.
+Here $(Cw)_n$ is the $n$th coordinate of the reconstructed point and
+$x_n$ is the corresponding coordinate of the original point.
 \emph{Least squares} means choosing the weights that make $h(w)$ as
 small as possible.
 
@@ -939,11 +956,11 @@ weight to several weights, finding their best values together.
 This will give one equation for each weight.
 
 If $C$ has $K$ columns, we need $K$ weights $w_1,\ldots,w_K$.
-With a complete basis, $K=p$; with fewer directions, $K<p$.
+With a complete basis, $K=N$; with fewer directions, $K<N$.
 
 To find the weights that minimise $h$, we compute a derivative with
-respect to each weight. The derivative $\partial h/\partial w_j$
-describes how the error changes when we change $w_j$ slightly while
+respect to each weight. The derivative $\partial h/\partial w_n$
+describes how the error changes when we change $w_n$ slightly while
 keeping the other weights fixed.
 
 The vector collecting all these derivatives is called the
@@ -960,7 +977,7 @@ the gradient to zero finds the unique minimum.
 Recall the squared reconstruction error:
 \[
   h(w)=\lVert Cw-x\rVert_2^2
-      =\sum_{j=1}^{p}\bigl((Cw)_j-x_j\bigr)^2.
+      =\sum_{n=1}^{N}\bigl((Cw)_n-x_n\bigr)^2.
 \]
 Differentiating this function with respect to the weights gives
 \[
@@ -1052,16 +1069,16 @@ the first is $3d$, the second $6d$. We would need only one weight
 per point. This is the benefit we will explore when choosing fewer
 directions.
 
-For $n$ observations, write $x^{(i)}$ for point $i$ and $w^{(i)}$
+For $P$ observations, write $x_p$ for point $p$ and $w_p$
 for its weight vector. Find the weights one point at a time by solving
 the same normal equations as before:
 \[
-  C^\top Cw^{(i)}=C^\top x^{(i)},\qquad i=1,\ldots,n.
+  C^\top Cw_p=C^\top x_p,\qquad p=1,\ldots,P.
 \]
 
 \clearpage
 Let us carry out this calculation for both points in the table.
-Each weight vector has two entries, $w_1^{(i)}$ and $w_2^{(i)}$,
+Each weight vector has two entries, $w_{1,p}$ and $w_{2,p}$,
 one for each column of $C$. The matrix on the left is the same for
 both points, so we compute it once:
 \[
@@ -1071,52 +1088,52 @@ both points, so we compute it once:
   =\begin{pmatrix}5&4\\4&5\end{pmatrix}.
 \]
 
-\textbf{First point: $x^{(1)}=(3,3)^\top$.}
+\textbf{First point: $x_1=(3,3)^\top$.}
 Compute the right-hand side using this point:
 \[
-  C^\top x^{(1)}
+  C^\top x_1
   =\begin{pmatrix}2\cdot3+1\cdot3\\1\cdot3+2\cdot3\end{pmatrix}
   =\begin{pmatrix}9\\9\end{pmatrix}.
 \]
 The normal equations are therefore
 \[
   \begin{cases}
-    5w_1^{(1)}+4w_2^{(1)}=9,\\
-    4w_1^{(1)}+5w_2^{(1)}=9.
+    5w_{1,1}+4w_{2,1}=9,\\
+    4w_{1,1}+5w_{2,1}=9.
   \end{cases}
 \]
 To solve the system, subtract the second equation from the first.
-This gives $w_1^{(1)}-w_2^{(1)}=0$, so the weights are equal.
-Substituting into the first equation gives $9w_1^{(1)}=9$, hence
-$w^{(1)}=(1,1)^\top$. These weights reconstruct the first point:
-$Cw^{(1)}=(3,3)^\top$.
+This gives $w_{1,1}-w_{2,1}=0$, so the weights are equal.
+Substituting into the first equation gives $9w_{1,1}=9$, hence
+$w_1=(1,1)^\top$. These weights reconstruct the first point:
+$Cw_1=(3,3)^\top$.
 
-\textbf{Second point: $x^{(2)}=(6,6)^\top$.}
+\textbf{Second point: $x_2=(6,6)^\top$.}
 Keep the same $C^\top C$, and compute the right-hand side for this point:
 \[
-  C^\top x^{(2)}
+  C^\top x_2
   =\begin{pmatrix}2\cdot6+1\cdot6\\1\cdot6+2\cdot6\end{pmatrix}
   =\begin{pmatrix}18\\18\end{pmatrix}.
 \]
 This gives a separate system for the second point's weights:
 \[
   \begin{cases}
-    5w_1^{(2)}+4w_2^{(2)}=18,\\
-    4w_1^{(2)}+5w_2^{(2)}=18.
+    5w_{1,2}+4w_{2,2}=18,\\
+    4w_{1,2}+5w_{2,2}=18.
   \end{cases}
 \]
-Solving in the same way gives $w_1^{(2)}-w_2^{(2)}=0$.
-The first equation then becomes $9w_1^{(2)}=18$, hence
-$w^{(2)}=(2,2)^\top$. These weights reconstruct the second point:
-$Cw^{(2)}=(6,6)^\top$.
+Solving in the same way gives $w_{1,2}-w_{2,2}=0$.
+The first equation then becomes $9w_{1,2}=18$, hence
+$w_2=(2,2)^\top$. These weights reconstruct the second point:
+$Cw_2=(6,6)^\top$.
 
-Multiplying $Cw^{(i)}$ reconstructs point $i$ from its weights. To
+Multiplying $Cw_p$ reconstructs point $p$ from its weights. To
 assess all the reconstructions together, add their squared errors
 and divide by the number of observations:
 \[
   \text{average reconstruction error}
-  =\frac{1}{n}\sum_{i=1}^{n}
-    \lVert Cw^{(i)}-x^{(i)}\rVert_2^2.
+  =\frac{1}{P}\sum_{p=1}^{P}
+    \lVert Cw_p-x_p\rVert_2^2.
 \]
 Each term is the error for one observation. Changing that observation's
 weights affects only its own term, so finding the best weights for
@@ -1125,19 +1142,19 @@ each point separately also minimises the average error.
 \clearpage
 \section{Using fewer directions: subspaces}
 
-A basis of $\mathbb{R}^p$ has exactly $p$ linearly independent vectors.
-Using more than $p$ vectors can still give a spanning set, but those
-vectors cannot all be independent. Using fewer than $p$ independent
+A basis of $\mathbb{R}^N$ has exactly $N$ linearly independent vectors.
+Using more than $N$ vectors can still give a spanning set, but those
+vectors cannot all be independent. Using fewer than $N$ independent
 vectors gives a different possibility: we can represent only part of
 the original space.
 
-Let $K<p$ be the number of directions we keep. The vectors
-$c_1,\ldots,c_K$ still have $p$ entries; we now place them in a
+Let $K<N$ be the number of directions we keep. The vectors
+$c_1,\ldots,c_K$ still have $N$ entries; we now place them in a
 rectangular matrix
 \[
-  C=[\,c_1\ \cdots\ c_K\,]\in\mathbb{R}^{p\times K}.
+  C=[\,c_1\ \cdots\ c_K\,]\in\mathbb{R}^{N\times K}.
 \]
-Combining its columns gives a \emph{subspace} of $\mathbb{R}^p$.
+Combining its columns gives a \emph{subspace} of $\mathbb{R}^N$.
 
 \begin{frameddefn}{Subspace spanned by the columns}\label{def:column-subspace}
 The space generated by $c_1,\ldots,c_K$ is the set of all their linear
@@ -1150,7 +1167,7 @@ If the columns are linearly independent, $S$ has dimension $K$ and they
 form a basis of $S$. This set contains the origin and is closed under
 vector addition and multiplication by scalars.
 
-A subspace of dimension $p-1$ is called a \emph{hyperplane}.
+A subspace of dimension $N-1$ is called a \emph{hyperplane}.
 \end{frameddefn}
 
 In two dimensions, keeping one direction gives a line through the
@@ -1173,7 +1190,7 @@ require $w=2$ and its second would require $w=0$.
 \end{framedexample}
 
 We now store just $K$ weights for an observation that originally had
-$p$ coordinates. This is dimensionality reduction. It can be useful
+$N$ coordinates. This is dimensionality reduction. It can be useful
 when the observations lie on, or close to, a smaller subspace. An
 observation outside that subspace cannot be recovered exactly; next
 we find its closest available approximation.
@@ -1188,14 +1205,14 @@ the closest point on the line. This replaces exact reconstruction
 with the best approximation available in the chosen directions.
 
 More generally, $C$ contains $K$ chosen directions for points with
-$p$ original coordinates. Their combinations $Cw$ form the subspace
+$N$ original coordinates. Their combinations $Cw$ form the subspace
 $S$. We write $w_*$ for the weights that minimise the squared error,
 and $\hat{x}=Cw_*$ for the resulting reconstruction. The star marks
 the best weights; the hat distinguishes the reconstruction from
 the original point $x$.
 
 \begin{frameddefn}{Orthogonal projection}\label{def:orthogonal-projection}
-Let the columns of $C\in\mathbb{R}^{p\times K}$ be linearly independent
+Let the columns of $C\in\mathbb{R}^{N\times K}$ be linearly independent
 and span $S$. The orthogonal projection of $x$ onto $S$ is
 \[
   \hat{x}=Cw_*,\qquad
@@ -1290,8 +1307,8 @@ Using the normal equations gives
 \[
   C^\top r=C^\top x-C^\top Cw_*=0.
 \]
-Row $j$ of $C^\top$ is $c_j^\top$, so entry $j$ of this equation is
-$c_j^\top r=0$. This is a zero dot product: the residual is perpendicular
+Row $n$ of $C^\top$ is $c_n^\top$, so entry $n$ of this equation is
+$c_n^\top r=0$. This is a zero dot product: the residual is perpendicular
 to each chosen direction and to every combination of them.
 In the diagonal-line example, this check is
 \[
@@ -1312,7 +1329,7 @@ With a fixed $C$, the two steps are:
 \textbf{Step} & \textbf{What we do} \\
 \midrule
 Encoding & Find the $K$ weights $w_*$ that best represent $x$. \\
-Decoding & Compute $\hat{x}=Cw_*$, returning to $p$ coordinates. \\
+Decoding & Compute $\hat{x}=Cw_*$, returning to $N$ coordinates. \\
 \bottomrule
 \end{tabularx}
 \end{center}
@@ -1337,8 +1354,8 @@ and the reconstruction is exact.
 
 We still want the closest reconstruction in a chosen subspace. We can
 simplify the calculation by using $K$ perpendicular unit vectors as
-its basis. Put these vectors in the columns of $C$; each has $p$
-coordinates, so $C$ has $p$ rows and $K$ columns.
+its basis. Put these vectors in the columns of $C$; each has $N$
+coordinates, so $C$ has $N$ rows and $K$ columns.
 The diagonal entries of $C^\top C$ are their squared lengths, all $1$;
 the other entries are dot products between different vectors, all $0$.
 Therefore
@@ -1351,7 +1368,7 @@ directions with these weights to reconstruct the point:
 \[
   \boxed{w_*=C^\top x,\qquad \hat{x}=Cw_*=CC^\top x.}
 \]
-Weight $j$ is the dot product $c_j^\top x$: the signed amount of $x$
+Weight $n$ is the dot product $c_n^\top x$: the signed amount of $x$
 along that unit direction. Multiplying each direction by its weight
 and adding the results gives the projection $\hat{x}$.
 
@@ -1395,9 +1412,9 @@ $CC^\top x=C(C^\top x)$. For our point,
 
 With orthonormal columns, $CC^\top$ is called a projection matrix:
 multiplying a point by it returns its closest point in $S$.
-For $K<p$, it keeps the part along the chosen directions and leaves
-out the perpendicular residual. For $K=p$, a complete orthonormal
-basis gives $CC^\top=I_p$, so every point is recovered exactly.
+For $K<N$, it keeps the part along the chosen directions and leaves
+out the perpendicular residual. For $K=N$, a complete orthonormal
+basis gives $CC^\top=I_N$, so every point is recovered exactly.
 
 \Needspace{10\baselineskip}
 \subsection{From three coordinates to two}
@@ -1467,7 +1484,277 @@ length of these residuals is the dataset's reconstruction error.
 
 \chapter{Principal Component Analysis}\label{chap:pca}
 
-% Deferred PCA chapter: Fundamentals_of_Data_Science_PCA.tmp.tex.
+\begin{tcolorbox}[colback=yellow!20,colframe=yellow!60!black,
+  boxrule=0.4pt,arc=1mm,left=5pt,right=5pt,top=3pt,bottom=3pt,
+  before skip=0pt,after skip=0pt]
+\small\textbf{Start of lecture 02 (Spinelli)}
+\end{tcolorbox}
+
+\section{Why learn directions from the data?}
+
+Principal Component Analysis (PCA) chooses directions from the data
+to describe each observation with fewer numbers while retaining as
+much variation as possible.
+
+Use mean-centred observations $x_p$: subtract each feature's mean
+first, and add the mean vector back after reconstruction.
+
+\begin{framedexample}{Three points, one line}\label{ex:pca-three-points}
+Suppose our observations are
+\[
+  x_1=(-2,-2)^\top,\qquad
+  x_2=(0,0)^\top,\qquad
+  x_3=(2,2)^\top.
+\]
+Their mean is $(0,0)^\top$, so they are already centred.
+
+\begin{center}
+\begin{tikzpicture}[font=\small,x=0.45cm,y=0.45cm]
+  \draw[-{Stealth},black!35] (-3,0)--(3,0) node[right] {$x_1$};
+  \draw[-{Stealth},black!35] (0,-3)--(0,3) node[above] {$x_2$};
+  \draw[NotesBlue,thick] (-2.7,-2.7)--(2.7,2.7);
+  \foreach \t in {-2,0,2} {\fill (\t,\t) circle (2.4pt);}
+\end{tikzpicture}
+\end{center}
+
+All three lie on the diagonal line through the origin, where the two coordinates are equal. Its two sides belong to the same
+line: $x=t(1,1)^\top$ gives our points for $t=-2$, $0$, or $2$.
+The sign distinguishes the two sides of the origin.
+
+One number specifies a point's position along this line and lets us
+recover both original coordinates exactly. The two features contain
+the same information.
+\end{framedexample}
+
+The line is stored once for the dataset, while each point needs one
+coordinate. This removes redundancy and can reduce storage and
+computation or enable two- and three-dimensional plots. For points
+near a line, reconstruction is approximate: we seek the line with
+the smallest average error.
+
+\Needspace{12\baselineskip}
+\section{Choosing directions by reconstruction error}
+
+For $P$ observations with $N$ features, choose $K<N$ coordinates per
+point. Put the $K$ directions in the columns of
+$C\in\mathbb{R}^{N\times K}$. Every observation uses the same $C$,
+but has its own $K$-entry coordinate vector $w_p$.
+
+\begin{frameddefn}{Principal Component Analysis}\label{def:pca}
+For mean-centred data, PCA chooses $K$ perpendicular unit directions
+and coordinates for each observation to minimise the average squared
+reconstruction error:
+\[
+  \min_{C,w_1,\ldots,w_P}
+    \frac1P\sum_{p=1}^{P}\lVert Cw_p-x_p\rVert_2^2,
+  \qquad C^\top C=I_K.
+\]
+Here $Cw_p$ reconstructs $x_p$. The constraint enforces
+perpendicular unit columns; $I_K$ is the $K\times K$ identity matrix.
+PCA is unsupervised: it learns directions from input observations
+without using target labels.
+\end{frameddefn}
+
+The squared norm adds the squared errors in all original coordinates.
+The sum includes all observations, and division by $P$ gives their
+average. For a given orthonormal $C$, the best coordinates are
+$w_p=C^\top x_p$, so the reconstruction is $CC^\top x_p$.
+
+Substituting these coordinates into the objective leaves a function
+of the chosen directions alone:
+\[
+  g(C)=\frac1P\sum_{p=1}^{P}
+    \lVert CC^\top x_p-x_p\rVert_2^2,
+  \qquad C^\top C=I_K.
+\]
+For each candidate $C$, its coordinates have already been chosen as
+well as possible. We compare the resulting values of $g(C)$ and
+seek the smallest one.
+
+\Needspace{33\baselineskip}
+\begin{framedexample}{The same data, two choices of direction}\label{ex:pca-reconstruction-choice}
+Return to the three observations in Example~\ref{ex:pca-three-points}.
+Keep one direction, so $K=1$ and $C$ has one column. Compare the
+horizontal axis with this diagonal line.
+
+\begin{center}
+\begin{tikzpicture}[font=\small]
+  \begin{scope}[x=0.5cm,y=0.5cm]
+    \node[above] at (0,3.15) {Horizontal};
+    \draw[-{Stealth},black!30] (0,-2.8)--(0,2.8);
+    \draw[-{Stealth},NotesBlue,thick] (-2.8,0)--(2.8,0);
+    \draw[black!65,thin] (0,0)--(2,2);
+    \draw[black!45,thin] (1.75,0)--(1.75,0.25)--(2,0.25);
+    \foreach \t in {-2,2} {
+      \draw[orange!85!black,dashed] (\t,0)--(\t,\t);
+      \draw[NotesBlue,thick] (\t,0) circle (3.6pt);
+    }
+    \draw[NotesBlue,thick] (0,0) circle (3.6pt);
+    \foreach \t in {-2,0,2} {\fill (\t,\t) circle (2pt);}
+  \end{scope}
+  \begin{scope}[shift={(5.6cm,0)},x=0.5cm,y=0.5cm]
+    \node[above] at (0,3.15) {Diagonal};
+    \draw[-{Stealth},black!30] (-2.8,0)--(2.8,0);
+    \draw[-{Stealth},black!30] (0,-2.8)--(0,2.8);
+    \draw[NotesBlue,thick] (-2.6,-2.6)--(2.6,2.6);
+    \foreach \t in {-2,0,2} {
+      \draw[NotesBlue,thick] (\t,\t) circle (3.6pt);
+      \fill (\t,\t) circle (2pt);
+    }
+  \end{scope}
+\end{tikzpicture}
+\end{center}
+
+Black dots are original points; blue circles are reconstructions.
+Dashed segments show the discarded parts. The reconstructions are
+\begin{center}
+\begin{tabular}{@{}ccc@{}}
+\toprule
+\textbf{Original} & \textbf{Horizontal} & \textbf{Diagonal} \\
+\midrule
+$(-2,-2)^\top$ & $(-2,0)^\top$ & $(-2,-2)^\top$ \\
+$(0,0)^\top$ & $(0,0)^\top$ & $(0,0)^\top$ \\
+$(2,2)^\top$ & $(2,0)^\top$ & $(2,2)^\top$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+For $(2,2)^\top$, horizontal projection gives $(2,0)^\top$, so its
+squared error is
+\[
+  \lVert(2,2)^\top-(2,0)^\top\rVert_2^2=0^2+2^2=4.
+\]
+The negative point also has error $4$, and the origin has error $0$.
+The average horizontal error is therefore $(4+0+4)/3=8/3$.
+Diagonal projection reconstructs every point exactly, with average
+error $0$. Both choices use one number per point.
+\end{framedexample}
+
+\clearpage
+\section{Measuring variation along a direction}
+
+We now connect reconstruction error to how much the observations
+spread along a chosen direction. First consider keeping just one
+direction $c$, so $C=c$ and each encoding is a single number
+$w_p=c^\top x_p$. We compare unit vectors: otherwise simply
+doubling $c$ would double the coordinates and make their spread look
+larger without changing the direction.
+
+\begin{frameddefn}{Variance along a unit direction}\label{def:pca-directional-variance}
+Let $c$ have length $1$. Because the observations are centred, their
+encoded coordinates $w_p=c^\top x_p$ also have mean $0$.
+Their empirical variance, with the $1/P$ convention used here, is
+\[
+  V(c)=\frac1P\sum_{p=1}^{P}w_p^2
+      =\frac1P\sum_{p=1}^{P}\bigl(c^\top x_p\bigr)^2.
+\]
+Variance is the average squared deviation from the mean. Here that
+mean is zero, so each deviation is the encoded coordinate itself.
+Larger $V(c)$ means greater spread.
+\end{frameddefn}
+
+\begin{framedexample}{Computing the spread in the two directions}\label{ex:pca-variance-choice}
+Use the same three observations and compare the unit directions
+\[
+  c_h=\begin{pmatrix}1\\0\end{pmatrix},\qquad
+  c_d=\frac1{\sqrt2}\begin{pmatrix}1\\1\end{pmatrix}.
+\]
+The diagonal vector $(1,1)^\top$ has length $\sqrt2$. Dividing by
+$\sqrt2$ makes its length $1$, so both choices use the same unit of
+distance. For $x_3=(2,2)^\top$, its diagonal coordinate is
+\[
+  w_3=c_d^\top x_3
+     =\frac2{\sqrt2}+\frac2{\sqrt2}=2\sqrt2.
+\]
+Encoding all three observations gives
+\begin{center}
+\begin{tabular}{@{}lccc@{}}
+\toprule
+\textbf{Direction} & $w_1$ & $w_2$ & $w_3$ \\
+\midrule
+Horizontal & $-2$ & $0$ & $2$ \\
+Diagonal & $-2\sqrt2$ & $0$ & $2\sqrt2$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+Both rows have mean zero. Squaring and averaging gives
+\[
+  V(c_h)=\frac{(-2)^2+0^2+2^2}{3}=\frac83,
+\]
+\[
+  V(c_d)=\frac{(-2\sqrt2)^2+0^2+(2\sqrt2)^2}{3}=\frac{16}{3}.
+\]
+The diagonal retains more of the original spread. Its negative and
+positive coordinates describe opposite sides of the same line.
+\end{framedexample}
+
+\clearpage
+\section{Why maximum variance gives minimum error}
+
+For a unit direction $c$, write one observation as the sum of its
+reconstruction $\hat{x}=cw$, where $w=c^\top x$, and its residual
+$r=x-\hat{x}$. The residual is perpendicular to the chosen line.
+The original vector, its reconstruction, and its residual therefore
+form a right triangle, as in the horizontal projection diagram in
+Example~\ref{ex:pca-reconstruction-choice}.
+
+By Pythagoras, the squared lengths satisfy
+\[
+  \lVert x\rVert_2^2=\lVert\hat{x}\rVert_2^2+\lVert r\rVert_2^2.
+\]
+Since $c$ has length $1$, the squared length of $\hat{x}=cw$ is
+$w^2$. Thus
+\[
+  \lVert r\rVert_2^2=\lVert x\rVert_2^2-w^2
+                   =\lVert x\rVert_2^2-(c^\top x)^2.
+\]
+For example, projecting $(2,2)^\top$ horizontally gives
+$\hat{x}=(2,0)^\top$ and $r=(0,2)^\top$: the squared lengths are
+$8=4+4$.
+
+\subsection{From one point to the whole dataset}
+
+Call the average squared reconstruction error $E(c)$. Applying the
+same identity to every observation and averaging gives
+\[
+\begin{aligned}
+  E(c)
+    &=\frac1P\sum_{p=1}^{P}
+        \lVert x_p-cc^\top x_p\rVert_2^2 \\
+    &=\underbrace{\frac1P\sum_{p=1}^{P}
+        \lVert x_p\rVert_2^2}_{\text{fixed by the data}}
+      -\underbrace{\frac1P\sum_{p=1}^{P}
+        \bigl(c^\top x_p\bigr)^2}_{V(c):\ \text{variance retained}}.
+\end{aligned}
+\]
+The first term stays the same when we change direction. Increasing
+the second term therefore decreases the reconstruction error by
+exactly the same amount.
+
+For our three observations, the fixed term is
+\[
+  \frac{\lVert(-2,-2)^\top\rVert_2^2+\lVert(0,0)^\top\rVert_2^2
+        +\lVert(2,2)^\top\rVert_2^2}{3}
+  =\frac{8+0+8}{3}=\frac{16}{3}.
+\]
+The two choices consequently give
+\[
+  E(c_h)=\frac{16}{3}-\frac83=\frac83,\qquad
+  E(c_d)=\frac{16}{3}-\frac{16}{3}=0.
+\]
+These are precisely the errors computed from the reconstructed points.
+
+\enlargethispage{\baselineskip}
+\begin{frameddefn}{First principal direction}\label{def:pca-first-direction}
+The first principal direction is a unit vector $c$ that maximises
+the variance $V(c)$ of the centred observations along it.
+Equivalently, it minimises the average squared error $E(c)$ of
+reconstruction using one direction.
+\end{frameddefn}
+
+\medskip
+{\small\textit{Source: Spinelli, Lecture 02 (PCA), slides 8--12.}}
+
+% Separate PCA draft: Fundamentals_of_Data_Science_PCA.tmp.tex.
 
 \chapter{Optimization}\label{chap:optimization}
 
@@ -1529,13 +1816,15 @@ global maximum value, respectively.
 \Needspace{22\baselineskip}
 \begin{framedexample}{The bottom of a parabola}
 Suppose we want to choose $w$ to minimize $g(w)=w^2$. The horizontal
-axis shows the input $w$; the vertical axis shows its score $g(w)$.
-The green dot marks the bottom of the curve.
+axis shows the input $w$; the vertical axis shows the function value.
 
 \begin{center}
-\begin{tikzpicture}[font=\small,x=1.4cm,y=0.55cm]
+\begin{minipage}[t]{0.48\linewidth}
+\centering
+$g(w)=w^2$\par\smallskip
+\begin{tikzpicture}[font=\small,x=0.85cm,y=0.55cm]
   \draw[-{Stealth},black!50] (-2.5,0)--(2.6,0) node[right] {$w$};
-  \draw[-{Stealth},black!50] (0,-0.5)--(0,4.8) node[above] {$g(w)$};
+  \draw[-{Stealth},black!50] (0,-0.5)--(0,4.8);
   \draw[NotesBlue,thick,domain=-2:2,samples=81]
     plot (\x,{\x*\x});
   \foreach \xx in {-2,2} {
@@ -1544,6 +1833,22 @@ The green dot marks the bottom of the curve.
   \node[below left] at (0,0) {$0$};
   \fill[green!60!black] (0,0) circle (2.5pt);
 \end{tikzpicture}
+\end{minipage}\hfill
+\begin{minipage}[t]{0.48\linewidth}
+\centering
+$-g(w)=-w^2$\par\smallskip
+\begin{tikzpicture}[font=\small,x=0.85cm,y=0.55cm]
+  \draw[-{Stealth},black!50] (-2.5,0)--(2.6,0) node[right] {$w$};
+  \draw[-{Stealth},black!50] (0,-4.8)--(0,0.5);
+  \draw[NotesBlue,thick,domain=-2:2,samples=81]
+    plot (\x,{-\x*\x});
+  \foreach \xx in {-2,2} {
+    \draw[black!50] (\xx,-0.08)--(\xx,0.08) node[above] {$\xx$};
+  }
+  \node[above left] at (0,0) {$0$};
+  \fill[green!60!black] (0,0) circle (2.5pt);
+\end{tikzpicture}
+\end{minipage}
 \end{center}
 
 For example, $g(-2)=4$, $g(0)=0$, and $g(2)=4$.
@@ -1691,10 +1996,609 @@ tell us what it means to be a minimum or maximum; derivatives will
 help us find candidate optimum points without comparing every
 possible input individually.
 
-\medskip
-{\small\textit{Source: Spinelli, Lecture 03 (Optimization), slides 2--11.}}
-\par\smallskip
-{\small\textit{Additional explanations: Watt, Borhani, and Katsaggelos,
-Machine Learning Refined (2016), Sections 1.4, 2.1.1, and 2.2.1.}}
+\clearpage
+\section{Using the derivative to find candidate optima}
+
+We now want to find possible minimum points by solving an equation.
+With one adjustable number $w$, we use the derivative $g'(w)$, also
+written $\frac{\mathrm{d}g}{\mathrm{d}w}$. It tells us how $g$ changes
+when we change $w$ slightly. On the graph, it is the slope of the
+\emph{tangent line}: the straight line that follows the direction
+of the curve at the point we are examining.
+
+If $g'(w)>0$, moving slightly to the right increases $g$.
+If $g'(w)<0$, the same movement decreases $g$.
+If $g'(w)=0$, the tangent is horizontal. Let us see what happens
+at the bottom of a parabola.
+
+\Needspace{25\baselineskip}
+\begin{framedexample}{A horizontal tangent at the minimum}
+Suppose we want to minimise $g(w)=w^2+1$. The blue curve shows
+the objective, and the green line is its tangent at $w=0$.
+
+\begin{center}
+\begin{tikzpicture}[font=\small,x=1.25cm,y=0.65cm]
+  \draw[-{Stealth},black!50] (-2.4,0)--(2.6,0) node[right] {$w$};
+  \draw[-{Stealth},black!50] (0,-0.3)--(0,5.6) node[above] {$g(w)$};
+  \draw[NotesBlue,thick,domain=-2:2,samples=81]
+    plot (\x,{\x*\x+1});
+  \draw[green!60!black,thick] (-1.7,1)--(1.7,1);
+  \node[green!50!black,right] at (1.7,1) {slope $0$};
+  \fill[green!60!black] (0,1) circle (2.5pt);
+  \node[below left] at (0,0) {$0$};
+  \node[above left] at (0,1) {$1$};
+\end{tikzpicture}
+\end{center}
+
+Differentiate $w^2$ to obtain $2w$; the constant $1$ contributes
+zero. To find where the slope is zero, solve
+\[
+  g'(w)=2w=0\qquad\Longrightarrow\qquad w_*=0.
+\]
+This point is a global minimum because $w^2+1\geq1$ for every $w$,
+and $g(0)=1$.
+\end{framedexample}
+
+Assume that the derivative exists and that we can move a little
+to either side of the input. At a local minimum, neither direction
+can lower $g$. A nonzero slope would let us lower it by moving in
+one of those directions. The slope must therefore be zero.
+
+\begin{frameddefn}{Stationary point and first-order condition}\label{def:first-order-scalar}
+An input $w_*$ is a \emph{stationary point} if
+\[
+  g'(w_*)=0.
+\]
+For a differentiable function, every local minimum or local maximum
+inside the input domain satisfies this equation. It is called the
+\emph{first-order condition}. Here ``inside'' means that small moves
+to both sides are allowed.
+\end{frameddefn}
+
+\clearpage
+\section{Why a zero derivative is not enough}
+
+Solving $g'(w)=0$ gives us points to check. A horizontal tangent
+can occur at a minimum, at a maximum, or at a point that is neither.
+The next three curves show these possibilities.
+
+\Needspace{34\baselineskip}
+\begin{framedexample}{Three stationary points with different meanings}
+Consider $g(w)=w^2$, $g(w)=-w^2$, and $g(w)=w^3$.
+Each graph has a horizontal tangent at $w=0$.
+
+\begin{center}
+\begin{tikzpicture}[font=\small,x=1cm,y=0.65cm]
+  \begin{scope}
+    \node at (0,2.8) {$g(w)=w^2$};
+    \draw[-{Stealth},black!50] (-1.5,0)--(1.65,0) node[right] {$w$};
+    \draw[-{Stealth},black!50] (0,-2.2)--(0,2.2);
+    \draw[NotesBlue,thick,domain=-1.25:1.25,samples=81]
+      plot (\x,{\x*\x});
+    \draw[green!60!black,thick] (-0.7,0)--(0.7,0);
+    \fill[green!60!black] (0,0) circle (2.5pt);
+    \node[below left] at (0,0) {$0$};
+    \node at (0,-2.8) {minimum};
+  \end{scope}
+  \begin{scope}[xshift=4.5cm]
+    \node at (0,2.8) {$g(w)=-w^2$};
+    \draw[-{Stealth},black!50] (-1.5,0)--(1.65,0) node[right] {$w$};
+    \draw[-{Stealth},black!50] (0,-2.2)--(0,2.2);
+    \draw[NotesBlue,thick,domain=-1.25:1.25,samples=81]
+      plot (\x,{-\x*\x});
+    \draw[green!60!black,thick] (-0.7,0)--(0.7,0);
+    \fill[orange!90!black] (0,0) circle (2.5pt);
+    \node[below left] at (0,0) {$0$};
+    \node at (0,-2.8) {maximum};
+  \end{scope}
+  \begin{scope}[xshift=9cm]
+    \node at (0,2.8) {$g(w)=w^3$};
+    \draw[-{Stealth},black!50] (-1.5,0)--(1.65,0) node[right] {$w$};
+    \draw[-{Stealth},black!50] (0,-2.2)--(0,2.2);
+    \draw[NotesBlue,thick,domain=-1.25:1.25,samples=81]
+      plot (\x,{\x*\x*\x});
+    \draw[green!60!black,thick] (-0.7,0)--(0.7,0);
+    \fill[black] (0,0) circle (2.5pt);
+    \node[below left] at (0,0) {$0$};
+    \node at (0,-2.8) {neither};
+  \end{scope}
+\end{tikzpicture}
+\end{center}
+
+For $g(w)=w^2$, solving $g'(w)=2w=0$ gives $w=0$.
+Every value of $w^2$ is nonnegative, so this is a minimum.
+
+For $g(w)=-w^2$, solving $g'(w)=-2w=0$ also gives $w=0$.
+Every value of $-w^2$ is nonpositive, so this is a maximum.
+
+For $g(w)=w^3$, the first-order equation is
+\[
+  g'(w)=3w^2=0\qquad\Longrightarrow\qquad w=0.
+\]
+Choose any small positive number $\varepsilon$. On opposite sides
+of $0$, the function takes values
+\[
+  g(-\varepsilon)=-\varepsilon^3<g(0)=0
+  <\varepsilon^3=g(\varepsilon).
+\]
+We can make these inputs as close to $0$ as we want. There are
+therefore both smaller and larger values near $0$, so it is neither
+a minimum nor a maximum. It is a \emph{stationary point of inflection}:
+the tangent is horizontal and the curve changes how it bends,
+but it keeps rising through the point.
+\end{framedexample}
+
+The first-order condition is \emph{necessary} at a differentiable
+interior minimum, but it is not \emph{sufficient}: every such minimum
+has zero derivative, while some points with zero derivative are not
+minima. We must still examine the function around each candidate.
+
+\clearpage
+\section{Several weights: a system of first-order equations}
+
+We now make the same search with several adjustable weights.
+Write them as the vector $w=(w_1,\ldots,w_N)^\top$, where $N$ is
+the number of weights. The objective $g(w)$ still returns a single
+score, but that score now depends on all $N$ entries.
+
+To check the effect of one weight, vary $w_j$ while keeping the
+others fixed. The resulting rate of change is the \emph{partial
+derivative} $\frac{\partial g}{\partial w_j}$. The index $j$ identifies
+the weight being varied, from $1$ to $N$.
+
+\begin{frameddefn}{Gradient}\label{def:optimization-gradient}
+For a differentiable function $g$ of $N$ weights, the \emph{gradient}
+collects its $N$ partial derivatives in one column vector:
+\[
+  \nabla g(w)=
+  \begin{pmatrix}
+    \dfrac{\partial g}{\partial w_1}(w)\\[4pt]
+    \dfrac{\partial g}{\partial w_2}(w)\\
+    \vdots\\
+    \dfrac{\partial g}{\partial w_N}(w)
+  \end{pmatrix}.
+\]
+The $j$th entry measures how $g$ changes when we vary $w_j$ while
+keeping the other weights fixed.
+\end{frameddefn}
+
+At a differentiable local minimum inside the input domain, every
+entry must be zero. Otherwise, changing one weight in the appropriate
+direction would lower the score.
+
+\begin{frameddefn}{First-order system}\label{def:first-order-system}
+A stationary point $w_*$ satisfies the $N$ equations
+\[
+  \begin{cases}
+    \dfrac{\partial g}{\partial w_1}(w_*)=0,\\[5pt]
+    \dfrac{\partial g}{\partial w_2}(w_*)=0,\\
+    \hfill\vdots\\
+    \dfrac{\partial g}{\partial w_N}(w_*)=0.
+  \end{cases}
+  \qquad\Longleftrightarrow\qquad
+  \nabla g(w_*)=\mathbf{0}_{N\times1}.
+\]
+The right-hand side is a column vector of $N$ zeros. The equations
+set every partial derivative to zero, not the value of $g$.
+\end{frameddefn}
+
+When we can solve these equations directly, we obtain an
+\emph{analytic solution}, also called a \emph{closed-form solution}.
+The next example shows the calculation with two weights.
+
+\Needspace{34\baselineskip}
+\begin{framedexample}{Two weights, two equations}
+Suppose we want to minimise
+\[
+  g(w_1,w_2)=(w_1-1)^2+(w_2+2)^2+1.
+\]
+The surface is a bowl. The green plane is its horizontal tangent
+at the green point $(w_1,w_2)=(1,-2)$.
+
+\begin{center}
+\begin{tikzpicture}
+\begin{axis}[
+  width=10cm,height=6cm,view={135}{25},
+  xlabel={$w_1$},ylabel={$w_2$},zlabel={$g(w_1,w_2)$},
+  label style={font=\small},tick label style={font=\small},
+  xmin=-0.5,xmax=2.5,ymin=-3.5,ymax=-0.5,zmin=0,zmax=5.5,
+  xtick={0,1,2},ytick={-3,-2,-1},ztick={1,3,5},
+  domain=-0.5:2.5,y domain=-3.5:-0.5,
+  axis lines=box,grid=major,grid style={black!12}]
+  \addplot3[surf,shader=flat,opacity=0.5,samples=2,
+    domain=-0.2:2.2,y domain=-3.2:-0.8,
+    colormap={FlatTangent}{color=(NotesDefinition) color=(NotesDefinition)}]
+    {1};
+  \addplot3[mesh,thin,samples=15,
+    colormap={NotesBowl}{color=(NotesBlue) color=(NotesBlue)}]
+    {(x-1)^2+(y+2)^2+1};
+  \addplot3[only marks,mark=*,mark size=2.5pt,green!60!black]
+    coordinates {(1,-2,1)};
+\end{axis}
+\end{tikzpicture}
+\end{center}
+
+Differentiate with respect to $w_1$, keeping $w_2$ fixed. The term
+$(w_2+2)^2$ is then constant and contributes zero. Reversing the roles
+of the weights gives the other partial derivative:
+\[
+  \frac{\partial g}{\partial w_1}=2(w_1-1),\qquad
+  \frac{\partial g}{\partial w_2}=2(w_2+2).
+\]
+Set both equal to zero and solve the two equations:
+\[
+  \begin{cases}
+    2(w_1-1)=0\quad\Longrightarrow\quad w_1=1,\\
+    2(w_2+2)=0\quad\Longrightarrow\quad w_2=-2.
+  \end{cases}
+\]
+Thus $w_*=(1,-2)^\top$. Both squares vanish there, so $g(w_*)=1$.
+Every other value is at least $1$: this candidate is a global minimum.
+\end{framedexample}
+
+\clearpage
+With several weights, a zero gradient can also identify a point
+that is neither a minimum nor a maximum. One direction may lead
+to larger values while another leads to smaller ones.
+
+\begin{frameddefn}{Saddle point}\label{def:saddle-point}
+A \emph{saddle point} of a differentiable function is a stationary
+point with both smaller and larger function values arbitrarily
+nearby. It is therefore neither a local minimum nor a local maximum.
+\end{frameddefn}
+
+\Needspace{28\baselineskip}
+\begin{framedexample}{Zero gradient at a saddle point}
+Consider the two-weight objective $g(w_1,w_2)=w_1^2-w_2^2$.
+Its first-order equations are
+\[
+  \frac{\partial g}{\partial w_1}=2w_1=0,\qquad
+  \frac{\partial g}{\partial w_2}=-2w_2=0.
+\]
+They give the stationary point $w_*=(0,0)^\top$, with $g(w_*)=0$.
+To examine this point, let $t$ be a small change in one weight.
+The graph shows the function along the two coordinate directions:
+$g(t,0)=t^2$ when we change only $w_1$, and $g(0,t)=-t^2$ when
+we change only $w_2$.
+
+\begin{center}
+\begin{tikzpicture}[font=\small,x=1.5cm,y=0.8cm]
+  \draw[-{Stealth},black!50] (-1.8,0)--(2,0) node[right] {$t$};
+  \draw[-{Stealth},black!50] (0,-2.3)--(0,2.5) node[above] {objective value};
+  \draw[NotesBlue,thick,domain=-1.4:1.4,samples=81]
+    plot (\x,{\x*\x});
+  \draw[orange!90!black,thick,domain=-1.4:1.4,samples=81]
+    plot (\x,{-\x*\x});
+  \node[NotesBlue,right] at (1.4,1.96) {$g(t,0)=t^2$};
+  \node[orange!90!black,right] at (1.4,-1.96) {$g(0,t)=-t^2$};
+  \fill[black] (0,0) circle (2.5pt);
+  \node[below left] at (0,0) {$0$};
+\end{tikzpicture}
+\end{center}
+
+For any nonzero $t$, changing only $w_1$ raises the value above $0$,
+while changing only $w_2$ lowers it below $0$. These changes can be
+as small as we want. The point $(0,0)^\top$ is a saddle point,
+even though both partial derivatives are zero.
+\end{framedexample}
+
+\clearpage
+\section{Approximating a function near one point}
+
+Solving $g'(w)=0$ can become difficult when $g$ is complicated.
+Another useful way to study the objective is to replace a small part
+of its graph with a simpler shape: its tangent line. This approximation
+helps us predict how a small change in a weight will affect the score.
+
+Choose a starting input $w_0$. We know the value $g(w_0)$ and the
+slope $g'(w_0)$ there. Moving from $w_0$ to a nearby input $w$ changes
+the input by $w-w_0$. Multiplying this change by the slope gives the
+predicted change in the function.
+
+\begin{frameddefn}{First-order Taylor approximation}\label{def:first-order-taylor}
+The \emph{first-order Taylor approximation} of $g$ at $w_0$ is
+\[
+  h(w)=g(w_0)+g'(w_0)(w-w_0).
+\]
+The function $h$ is the tangent line. It has the same value and the
+same slope as $g$ at $w_0$. For inputs close to $w_0$, we use
+$g(w)\approx h(w)$.
+\end{frameddefn}
+
+\Needspace{26\baselineskip}
+\begin{framedexample}{Using a tangent line to predict a nearby value}
+Take $g(w)=w^2+1$ and choose $w_0=1$. The green line touches the
+blue curve at $(1,2)$ and follows its slope there.
+
+\begin{center}
+\begin{tikzpicture}[font=\small,x=1.8cm,y=0.6cm]
+  \draw[-{Stealth},black!50] (-0.3,0)--(2.7,0) node[right] {$w$};
+  \draw[-{Stealth},black!50] (0,-0.3)--(0,6.7) node[above] {value};
+  \draw[NotesBlue,thick,domain=0:2.3,samples=81]
+    plot (\x,{\x*\x+1});
+  \draw[green!60!black,thick] (0,0)--(2.3,4.6);
+  \draw[black!35,dashed] (1,0)--(1,2)--(0,2);
+  \fill[green!60!black] (1,2) circle (2.5pt);
+  \node[below] at (1,0) {$w_0=1$};
+  \node[left] at (0,2) {$2$};
+  \node[NotesBlue,right] at (2.3,6.29) {$g(w)$};
+  \node[green!50!black,right] at (2.3,4.6) {$h(w)$};
+\end{tikzpicture}
+\end{center}
+
+At the chosen input, $g(1)=2$ and $g'(1)=2$. Substituting these
+numbers into the approximation gives
+\[
+  h(w)=2+2(w-1)=2w.
+\]
+For the nearby input $w=1.1$, the line predicts $h(1.1)=2.2$.
+The actual value is $g(1.1)=1.1^2+1=2.21$, so the prediction is close.
+
+Farther away, at $w=2$, the line predicts $4$, while the function
+gives $5$. The tangent describes the function near the chosen point;
+it does not replace the whole curve.
+\end{framedexample}
+
+\clearpage
+\subsection{From a tangent line to a tangent plane}
+
+With $N$ weights, the starting input $w_0$ is a vector.
+The displacement $w-w_0$ contains the change in each weight.
+Each partial derivative predicts the effect of its corresponding
+change, and we add these contributions:
+\[
+  \nabla g(w_0)^\top(w-w_0)
+  =\sum_{j=1}^{N}\frac{\partial g}{\partial w_j}(w_0)
+    (w_j-w_{0,j}).
+\]
+Here $w_{0,j}$ is the $j$th entry of the starting vector $w_0$.
+The product on the left is a dot product: it multiplies matching
+entries of the two vectors and sums the results.
+
+\begin{frameddefn}{Tangent hyperplane}\label{def:tangent-hyperplane}
+For a differentiable function of several weights, the first-order
+Taylor approximation at $w_0$ is
+\[
+  h(w)=g(w_0)+\nabla g(w_0)^\top(w-w_0).
+\]
+Its graph is the \emph{tangent hyperplane}. It passes through the
+point $(w_0,g(w_0))$ and has the same partial derivatives as $g$
+there. For nearby inputs, $g(w)\approx h(w)$.
+\end{frameddefn}
+
+For one input, the graph is a line with two coordinates: the weight
+and the function value. For two inputs, it is a plane with three
+coordinates: two weights and the function value. In general, this
+flat graph has dimension $N$ in a space with $N+1$ coordinates.
+
+We can collect the constants and write the same model as
+\[
+  h(w)=a+b^\top w,\qquad
+  a=g(w_0)-\nabla g(w_0)^\top w_0,\quad b=\nabla g(w_0).
+\]
+The vector $b$ contains the slopes, while the scalar $a$ sets the
+height of the graph when $w=0$. This is an \emph{affine hyperplane}:
+the constant term allows it to be shifted away from the origin.
+
+\Needspace{32\baselineskip}
+\begin{framedexample}{A tangent plane for two weights}
+Use the objective $g(w_1,w_2)=(w_1-1)^2+(w_2+2)^2+1$ and
+choose the starting weights $w_0=(2,-1)^\top$. The green plane
+touches the blue surface at this point.
+
+\begin{center}
+\begin{tikzpicture}
+\begin{axis}[
+  width=10cm,height=6cm,view={45}{25},
+  xlabel={$w_1$},ylabel={$w_2$},zlabel={value},
+  label style={font=\small},tick label style={font=\small},
+  xmin=0.5,xmax=3.5,ymin=-2.5,ymax=0.5,zmin=-1,zmax=14,
+  xtick={1,2,3},ytick={-2,-1,0},ztick={0,3,6,9,12},
+  domain=0.5:3.5,y domain=-2.5:0.5,
+  axis lines=box,grid=major,grid style={black!12}]
+  \addplot3[surf,shader=flat,opacity=0.65,draw=green!60!black,samples=2,
+    domain=1:3,y domain=-2:0,
+    colormap={SlopingTangent}{color=(NotesDefinition) color=(NotesDefinition)}]
+    {1+2*x+2*y};
+  \addplot3[mesh,thin,samples=15,
+    colormap={SecondBowl}{color=(NotesBlue) color=(NotesBlue)}]
+    {(x-1)^2+(y+2)^2+1};
+  \addplot3[only marks,mark=*,mark size=2.5pt,green!60!black]
+    coordinates {(2,-1,3)};
+\end{axis}
+\end{tikzpicture}
+\end{center}
+
+First compute the function value and the partial derivatives at
+the starting weights:
+\[
+  g(2,-1)=1^2+1^2+1=3,\qquad
+  \nabla g(2,-1)=
+  \begin{pmatrix}2(2-1)\\2(-1+2)\end{pmatrix}
+  =\begin{pmatrix}2\\2\end{pmatrix}.
+\]
+The tangent model is therefore
+\[
+  h(w_1,w_2)=3+2(w_1-2)+2(w_2+1)=1+2w_1+2w_2.
+\]
+In the form $h(w)=a+b^\top w$, we have $a=1$ and $b=(2,2)^\top$.
+Checking the starting point gives $h(2,-1)=3$, exactly as required.
+
+Changing both weights by $0.1$ gives $(2.1,-0.9)^\top$.
+The plane predicts $3.4$, while the actual function value is
+$1.1^2+1.1^2+1=3.42$.
+\end{framedexample}
+
+\clearpage
+\section{Choosing the direction of fastest change}
+
+The tangent model helps us choose how to change several weights
+together. With one weight, we can move left or right; the sign of
+the slope determines which way increases the function. With two
+or more weights, there are infinitely many directions to consider.
+
+Let $d=(d_1,\ldots,d_N)^\top$ describe a direction. To compare
+directions fairly, give them the same Euclidean length:
+\[
+  \|d\|=\sqrt{d_1^2+\cdots+d_N^2}=1.
+\]
+Such a vector is called a \emph{unit direction}. If $\alpha>0$ is
+the distance we choose to move, the new weights are $w_0+\alpha d$.
+All the directions being compared then produce steps of length
+$\alpha$.
+
+For the affine model $h(w)=a+b^\top w$, this move gives
+\[
+  h(w_0+\alpha d)=a+b^\top w_0+\alpha b^\top d.
+\]
+The first two terms are fixed. The predicted change is
+$\alpha b^\top d$, so the direction with the largest dot product
+$b^\top d$ gives the largest increase; the smallest gives the largest
+decrease.
+
+Assume $b\ne0$ and let $\theta$ be the angle between $b$ and $d$.
+The dot product satisfies
+\[
+  b^\top d=\|b\|\,\|d\|\cos\theta=\|b\|\cos\theta.
+\]
+The length $\|b\|$ is fixed. The largest value occurs when
+$\cos\theta=1$, so $d$ points along $b$. The smallest occurs when
+$\cos\theta=-1$, so $d$ points opposite to $b$.
+
+\begin{frameddefn}{Steepest ascent and steepest descent}\label{def:steepest-directions}
+At an input $w_0$ where $\nabla g(w_0)\ne0$, the Euclidean unit
+directions of fastest local increase and decrease are
+\[
+  d_{\mathrm{ascent}}=
+  \frac{\nabla g(w_0)}{\|\nabla g(w_0)\|},\qquad
+  d_{\mathrm{descent}}=
+  -\frac{\nabla g(w_0)}{\|\nabla g(w_0)\|}.
+\]
+The largest rate of increase per unit distance is $\|\nabla g(w_0)\|$.
+The gradient itself points in the ascent direction, and its negative
+points in the descent direction. Dividing by the length makes these
+vectors unit directions.
+\end{frameddefn}
+
+The tangent model has the same slopes as the original function at
+$w_0$, so these are also the fastest \emph{local} directions for $g$.
+A sufficiently small step opposite to a nonzero gradient lowers $g$;
+a large step can increase it. Choosing a direction and choosing how
+far to move are therefore separate parts of the search.
+
+At a stationary point, the gradient is zero and the tangent model
+is horizontal. It gives no preferred direction: we must examine more
+than this first-order approximation to understand the function there.
+
+\Needspace{32\baselineskip}
+\begin{framedexample}{Equal step lengths, different changes}
+For $g(w_1,w_2)=(w_1-1)^2+(w_2+2)^2+1$ at $w_0=(2,-1)^\top$,
+the tangent model is $h(w)=1+2w_1+2w_2$ and $b=(2,2)^\top$.
+Compare the following unit directions. The dot product gives the
+change in $h$ per unit distance.
+
+\begin{center}
+\begin{tabular}{ccc}
+\toprule
+Unit direction $d$ & $b^\top d$ & Effect on $h$\\
+\midrule
+$(1,0)^\top$ & $2$ & increase\\[3pt]
+$(0,1)^\top$ & $2$ & increase\\[3pt]
+$(1,-1)^\top/\sqrt{2}$ & $0$ & no change\\[3pt]
+$(1,1)^\top/\sqrt{2}$ & $2\sqrt{2}$ & fastest increase\\[3pt]
+$(-1,-1)^\top/\sqrt{2}$ & $-2\sqrt{2}$ & fastest decrease\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+The gradient length is $\sqrt{2^2+2^2}=2\sqrt{2}$. Dividing the
+negative gradient by this length gives
+\[
+  d_{\mathrm{descent}}=
+  \frac{1}{\sqrt{2}}\begin{pmatrix}-1\\-1\end{pmatrix}.
+\]
+A step of length $\alpha$ in this direction gives the new weights
+\[
+  w_0+\alpha d_{\mathrm{descent}}
+  =\begin{pmatrix}2-\alpha/\sqrt{2}\\-1-\alpha/\sqrt{2}\end{pmatrix}.
+\]
+The tangent model predicts the value $3-2\sqrt{2}\alpha$.
+Substituting the new weights into the actual objective gives
+\[
+  g(w_0+\alpha d_{\mathrm{descent}})
+  =2\left(1-\frac{\alpha}{\sqrt{2}}\right)^2+1
+  =3-2\sqrt{2}\alpha+\alpha^2.
+\]
+For $\alpha=0.1$, the predicted value is about $2.717$, and the
+actual value is about $2.727$. Both are below the starting value $3$.
+The extra $\alpha^2$ term shows the part that the tangent model
+does not capture.
+\end{framedexample}
+
+\clearpage
+\section{Level curves and the gradient}
+
+We can also view a two-weight objective from above. Instead of
+drawing its height, we connect inputs with the same function value,
+as a map connects places at the same altitude.
+
+\begin{frameddefn}{Level set and level curve}\label{def:level-set}
+For a fixed score $c$, the \emph{level set} of $g$ is
+\[
+  \{w:g(w)=c\}.
+\]
+With two inputs, these sets are usually drawn as \emph{level curves}.
+Every point on one curve has the same score $c$. Different curves
+correspond to different scores.
+\end{frameddefn}
+
+\Needspace{32\baselineskip}
+\begin{framedexample}{Reading the gradient on a contour map}
+For $g(w_1,w_2)=(w_1-1)^2+(w_2+2)^2+1$, the level curves are
+circles centred at the minimum $(1,-2)^\top$, where $g=1$.
+The black point $w_0=(2,-1)^\top$ has score $3$.
+
+\begin{center}
+\begin{tikzpicture}[font=\small,x=1cm,y=1cm]
+  \draw[-{Stealth},black!35] (-1.4,0)--(3.8,0) node[right] {$w_1$};
+  \draw[-{Stealth},black!35] (0,-4.4)--(0,0.7) node[above] {$w_2$};
+  \foreach \rr in {1,1.414214,2}
+    {\draw[NotesBlue!70,thick] (1,-2) circle (\rr);}
+  \node[fill=NotesPaper,inner sep=1pt,right] at (1.6,-2.8) {$g=2$};
+  \node[fill=NotesPaper,inner sep=1pt,right] at (1.2,-3.4) {$g=3$};
+  \node[fill=NotesPaper,inner sep=1pt,right] at (2.6,-3.2) {$g=5$};
+  \fill[green!60!black] (1,-2) circle (2.5pt);
+  \node[below left] at (1,-2) {$g=1$};
+  \draw[black!55,dashed] (1.4,-0.4)--(2.6,-1.6);
+  \draw[black!55,thin] (1.2,0.05)--(1.4,-0.4);
+  \node[above left] at (1.4,0.05) {tangent};
+  \draw[-{Stealth},orange!90!black,thick] (2,-1)--(2.8,-0.2);
+  \node[orange!90!black,right] at (2.8,-0.2) {ascent};
+  \draw[-{Stealth},green!60!black,thick] (2,-1)--(1.45,-1.55);
+  \node[green!50!black,below right] at (1.45,-1.55) {descent};
+  \draw[black!70] (2.12,-0.88)--(2.24,-1)--(2.12,-1.12);
+  \fill[black] (2,-1) circle (2.5pt);
+  \node[above left] at (2,-1) {$w_0$};
+\end{tikzpicture}
+\end{center}
+
+The gradient $(2,2)^\top$ points outward, towards larger scores;
+its negative points inward, towards smaller scores.
+The dashed tangent direction $t=(1,-1)^\top$ is perpendicular to it:
+\[
+  \nabla g(w_0)^\top t=2\cdot1+2\cdot(-1)=0.
+\]
+Moving along the level curve keeps the score constant, so the
+first-order change in its tangent direction is zero.
+\end{framedexample}
+
+Where the gradient is nonzero, it is perpendicular to the level
+curve. In higher dimensions, it is perpendicular to the surface
+of constant function value.
+
+\smallskip
+{\small\textit{Sources: Spinelli, Lecture 03 (Optimization), slides 2--29;
+Watt, Borhani, and Katsaggelos, Machine Learning Refined (2016),
+Sections 1.4, 2.1.1--2.1.2, and 2.2.1.}}
 
 \end{document}

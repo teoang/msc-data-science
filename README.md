@@ -10,14 +10,14 @@
 
 | Course | Notes | Status |
 | --- | --- | --- |
-| Fundamentals of Statistical Learning | [📖 Open PDF](First%20year/First%20semester/Fundamentals%20of%20Statistical%20Learning/Fundamentals_of_Statistical_Learning_Notes.pdf) · [📋 Cheatsheet PDF](First%20year/First%20semester/Fundamentals%20of%20Statistical%20Learning/Fundamentals_of_Statistical_Learning_Cheatsheet.pdf) | 🟡 In progress |
+| Fundamentals of Statistical Learning | [📖 Open PDF](First%20year/First%20semester/Fundamentals%20of%20Statistical%20Learning/Fundamentals_of_Statistical_Learning_Notes.pdf) · [📋 Cheatsheet PDF](First%20year/First%20semester/Fundamentals%20of%20Statistical%20Learning/source/Fundamentals_of_Statistical_Learning_Cheatsheet.pdf) | 🟡 In progress |
 | Fundamentals of Data Science | [📖 Open PDF](First%20year/First%20semester/Fundamentals%20of%20Data%20Science/Fundamentals_of_Data_Science_Notes.pdf) | 🟡 In progress |
 | Algorithmic Methods of Data Mining | [📖 Open PDF](First%20year/First%20semester/Algorithmic%20Methods%20of%20Data%20Mining/Algorithmic_Methods_of_Data_Mining_Notes.pdf) | 🟡 In progress |
 
 ### Fundamentals of Statistical Learning · R examples
 
-- [01_lcg.R](First%20year/First%20semester/Fundamentals%20of%20Statistical%20Learning/Code/01_lcg.R) — Define the generator, with step-by-step comments and a numerical example.
-- [02_histogram.R](First%20year/First%20semester/Fundamentals%20of%20Statistical%20Learning/Code/02_histogram.R) — Generate values and compare their histogram with the uniform PDF.
+- [01_lcg.R](First%20year/First%20semester/Fundamentals%20of%20Statistical%20Learning/R_exercises/01_lcg.R) — Define the generator, with step-by-step comments and a numerical example.
+- [02_histogram.R](First%20year/First%20semester/Fundamentals%20of%20Statistical%20Learning/R_exercises/02_histogram.R) — Generate values and compare their histogram with the uniform PDF.
 
 <details>
 <summary><strong>Fundamentals of Statistical Learning · Lecture checklist</strong></summary>

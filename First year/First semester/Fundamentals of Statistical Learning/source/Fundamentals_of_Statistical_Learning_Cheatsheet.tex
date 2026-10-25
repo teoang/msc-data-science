@@ -1,5 +1,5 @@
 \documentclass[12pt,a4paper,oneside]{report}
-\usepackage[english]{../../../shared/latex/learningnotes}
+\usepackage[english]{../../../../latex-setup/learningnotes}
 % The shared style is made for the notes; a cheatsheet needs narrower
 % margins and no running headers.
 \geometry{margin=18mm}
@@ -586,8 +586,16 @@ is the corresponding PDF. The constant $c$ is the
 
 \begin{framedprop}{Marginal PDFs}
 \label{prop:marginal-pdfs}
-The marginal densities are obtained by integrating out the
-other variable:
+Let $\underline{X}=(X_1,\ldots,X_p)^{\mathsf T}$ have joint PDF
+$f_{\underline{X}}$. The density of any subset of components is
+obtained by integrating out the remaining ones. Reordering the
+components if necessary, the first $k<p$ components have density
+\[
+  f_{X_1,\ldots,X_k}(x_1,\ldots,x_k)
+    =\int_{\mathbb R^{p-k}}
+       f_{\underline{X}}(x_1,\ldots,x_p)\,dx_{k+1}\cdots dx_p.
+\]
+In particular, for $p=2$ with components $(X,Y)$,
 \[
   f_X(x)=\int_{\mathbb R}f_{X,Y}(x,y)\,dy,
   \qquad

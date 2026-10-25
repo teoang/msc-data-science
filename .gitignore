@@ -1,0 +1,36 @@
+# Everything is published except the private and generated files below.
+
+# Course reference materials (slides, textbooks, handwritten notes) remain local.
+references/
+
+# Local LaTeX style and assets.
+/latex-setup/
+
+# Independent homework repository.
+/First year/First semester/Algorithmic Methods of Data Mining/adm-homework1/
+
+# Notes for AI agents remain local.
+AGENTS.md
+
+# Local backups.
+older/
+
+# LaTeX build output.
+build/
+*.aux
+*.bbl
+*.bcf
+*.blg
+*.fdb_latexmk
+*.fls
+*.log
+*.out
+*.run.xml
+*.synctex.gz
+*.toc
+
+# R and macOS files.
+.Rhistory
+.RData
+.Rproj.user/
+.DS_Store
