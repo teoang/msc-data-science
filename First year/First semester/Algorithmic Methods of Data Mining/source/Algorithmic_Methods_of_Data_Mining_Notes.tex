@@ -49,6 +49,25 @@
 \begin{document}
 
 \makenotestitle
+
+\thispagestyle{empty}
+\begin{tcolorbox}[
+  examplebox,unbreakable,title={Acknowledgements},
+  colframe=blue!35!black,coltitle=white,
+  arc=5mm,outer arc=5mm,left=3mm,right=3mm,top=3mm,bottom=3mm,
+  boxed title style={
+    colback=blue!35!black,colframe=blue!35!black,
+    arc=3mm,outer arc=3mm,
+    frame code={
+      \path[fill=tcbcolframe,draw=tcbcolframe,rounded corners=3mm]
+        (frame.south west) rectangle (frame.north east);
+    }}]
+Thanks to \href{https://github.com/flaviac18-hub}{Flavia} for sharing
+her handwritten notes for Algorithmic Methods of Data Mining,
+which made this document possible.
+\end{tcolorbox}
+\clearpage
+
 \notescontents
 
 \chapter{Introduction to data mining}
@@ -3570,7 +3589,7 @@ Now replace $T(n/4)$ using the same recurrence:
 \end{align*}
 
 \Needspace{12\baselineskip}
-\textbf{One more expansion makes the pattern visible.}
+\textbf{Third expansion.}
 \begin{align*}
   T(n)&=8\,\cul{PlotGreen}{T(n/8)}+3c_2n+7c_3\\
       &=8\,\cul{PlotGreen}{\left[2T(n/16)+c_2\frac n8+c_3\right]}
