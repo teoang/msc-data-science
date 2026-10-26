@@ -2913,20 +2913,72 @@ It can finish sooner if one list is exhausted early.
 
 \subsection{Query cost: the lengths of the relevant lists}
 
-Let $n_t=\abs{L(t)}$ be the length of the posting list for query term
-$t$. Instead of scanning every document and every vocabulary term,
-we work with the lists selected by the query.
+We now measure the work needed to answer a query after the inverted
+index has already been built. Let $n_t=\abs{L(t)}$ be the length of
+the \hyperref[def:inverted-index]{posting list} for query term $t$:
+the number of documents containing that term. We work with the lists
+selected by the query.
 
 For several terms, we can apply the two-list algorithm repeatedly.
 Start with the shortest posting list and intersect the current
 result with each of the other lists. Stop if the result becomes empty.
-In our example, start with $L(E)$:
+
+\begin{framedexample}{The cost of a three-term query}
+Take $Q=\{A,C,E\}$, with
 \[
-  [2,4]\cap[1,2,4,5]=[2,4],\qquad
+  L(A)=[1,2,4,5],\quad L(C)=[1,4,5,6],\quad L(E)=[2,4].
+\]
+\textbf{Step 1: count the lengths of the relevant lists.}
+\begin{center}
+\begin{tabular}{c|c}
+  Term & Posting-list length\\\hline
+  $A$ & $n_A=4$\\
+  $C$ & $n_C=4$\\
+  $E$ & $n_E=2$
+\end{tabular}
+\end{center}
+Their sum is $n_A+n_C+n_E=4+4+2=10$. The lists for $B,D,F,G$ are
+not needed for this query.
+
+\textbf{Step 2: start with the shortest list, $L(E)$, and intersect it
+with $L(A)$.}
+\[
+  [2,4]\cap[1,2,4,5]=[2,4].
+\]
+The pairs of current identifiers compared by the two pointers are
+\[
+  (2,1)\ \longrightarrow\ (2,2)\ \longrightarrow\ (4,4).
+\]
+First advance past $1$ in $L(A)$. Then output $2$ and advance both
+pointers; next output $4$ and advance both again. The first list is
+now exhausted. We made three comparisons and obtained $R=[2,4]$.
+
+\textbf{Step 3: intersect the intermediate result with $L(C)$.}
+\[
   [2,4]\cap[1,4,5,6]=[4].
 \]
-The intermediate result never grows: it is always a subset of the
-shortest initial list.
+This time the comparisons are
+\[
+  (2,1)\ \longrightarrow\ (2,4)\ \longrightarrow\ (4,4).
+\]
+Advance past $1$ in $L(C)$, then past $2$ in the intermediate
+result. Finally output $4$ and advance both pointers. The intermediate
+list is exhausted. These are three more comparisons, and the final
+answer is document $D_4$.
+
+\textbf{Step 4: relate the work to the list lengths.}
+The first intersection has the bound $O(2+4)$; the second also has
+the bound $O(2+4)$. The intermediate list never grows: it starts with
+at most two identifiers and intersections can only remove them.
+We performed six identifier comparisons in this example.
+
+The general bound below is proportional to the sum of the original
+posting-list lengths, which here is $10$.
+\end{framedexample}
+
+\textbf{Why starting with the shortest list gives the total bound.}
+The intermediate result is always a subset of the shortest initial
+list, so its length never exceeds that list's length.
 
 To see the total bound, let $s$ be the shortest list length and let
 $r=\abs Q$. Intersecting an intermediate result with another list of
@@ -2945,18 +2997,9 @@ $O\bigl(r+\sum_{t\in Q}n_t\bigr)$, assuming constant-time dictionary
 lookups. The bound concerns sorted-list intersection; it does not
 include building the index offline.
 
-\begin{framedexample}{Reading only the relevant lists}
-For $Q=\{A,C,E\}$, the list lengths are $4,4,2$: their sum is $10$.
-The query works with these lists, without opening each original
-document or reading the lists for $B,D,F,G$.
 In a much larger corpus, rare query terms can have short lists,
 making the online search far cheaper than a full corpus scan.
 If the terms occur in almost every document, their lists are long
 and the advantage is smaller.
-\end{framedexample}
-
-The offline index changes how we access the corpus: a term leads us
-directly to its documents. Boolean AND retrieval then reduces to
-intersecting the corresponding sorted posting lists.
 
 \end{document}
