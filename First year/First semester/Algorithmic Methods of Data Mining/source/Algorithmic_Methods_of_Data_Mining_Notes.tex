@@ -2980,10 +2980,20 @@ posting-list lengths, which here is $10$.
 The intermediate result is always a subset of the shortest initial
 list, so its length never exceeds that list's length.
 
-To see the total bound, let $s$ be the shortest list length and let
-$r=\abs Q$. Intersecting an intermediate result with another list of
-length $n_t$ costs at most $O(s+n_t)$. Since every other list has
-length at least $s$,
+Let $s$ be the length of the shortest initial list and $n_t$ the
+length of the next posting list. The intermediate result has length
+at most $s$, so intersecting it with that next list costs $O(s+n_t)$.
+Since the next list cannot be shorter than the shortest initial list,
+$s\leq n_t$. Therefore
+\[
+  s+n_t\leq2n_t,\qquad O(s+n_t)=O(n_t).
+\]
+
+\Needspace{14\baselineskip}
+To see the total bound, let $r=\abs Q$, the number of query terms
+and hence the number of posting lists. One list is used as the
+starting point, leaving $r-1$ lists to intersect with the current
+result. Since each of these other lists has length at least $s$,
 \[
   (r-1)s\leq\sum_{t\in Q\setminus\{t_*\}}n_t,
 \]
@@ -2992,11 +3002,19 @@ total intersection time is
 \[
   O\left(\sum_{t\in Q}n_t\right).
 \]
-Including the lookup of the $r$ query terms gives
-$O\bigl(r+\sum_{t\in Q}n_t\bigr)$, assuming constant-time dictionary
-lookups. The bound concerns sorted-list intersection; it does not
-include building the index offline.
-
+To retrieve the lists, look up each of the $r$ query terms in the
+inverted index. With a hash-table dictionary, each lookup takes
+$O(1)$ expected time, giving $O(r)$ expected time for all lookups.
+Retrieving a list here means obtaining a reference to the stored
+list, rather than copying or scanning its entries. Scanning the
+entries is counted in the intersection cost.
+The overall expected query cost is therefore
+\[
+  \boxed{O\left(
+    \underbrace{r}_{\text{retrieve the lists}}
+    +\underbrace{\sum_{t\in Q}n_t}_{\text{intersect the lists}}
+  \right)}.
+\]
 In a much larger corpus, rare query terms can have short lists,
 making the online search far cheaper than a full corpus scan.
 If the terms occur in almost every document, their lists are long
