@@ -3837,117 +3837,13 @@ greater than $v$. Once the two parts are sorted, placing them in this
 order produces a sorted array. As before, an array with zero or one
 element is already sorted and is returned immediately.
 
-\begin{framedexample}{Partitioning around the pivot $11$}\label{ex:quicksort-partition}
-Start with
-\[
-  A=[11,9,2,16,7,1,8,0,13,15,3].
-\]
-\textbf{Step 1: choose a pivot.}
-Suppose the random index is $p=1$, so $v=A[1]=11$.
-
-\textbf{Step 2: compare each remaining element with $11$.}
-The values $9,2,7,1,8,0,3$ go into $A_1$, and $16,13,15$ go into
-$A_2$. Thus
-\[
-  A_1=[9,2,7,1,8,0,3],\qquad A_2=[16,13,15].
-\]
-\textbf{Step 3: sort the two parts recursively.}
-The calls return
-\[
-  A'_1=[0,1,2,3,7,8,9],\qquad A'_2=[13,15,16].
-\]
-\textbf{Step 4: concatenate the results and the pivot.}
-\[
-  [\,A'_1,11,A'_2\,]=[0,1,2,3,7,8,9,11,13,15,16].
-\]
-\begin{center}
-\begin{tikzpicture}[>=stealth,font=\small,
-  part/.style={draw,rounded corners,fill=PlotBlue!8,
-    minimum height=0.65cm},
-  pivot/.style={part,draw=PlotGreen,fill=PlotGreen!15}]
-  \node[part] (a) at (0,0) {$[11,9,2,16,7,1,8,0,13,15,3]$};
-  \node[part] (l) at (-3.7,-1.3) {$[9,2,7,1,8,0,3]$};
-  \node[pivot] (v) at (0,-1.3) {$11$};
-  \node[part] (r) at (3.7,-1.3) {$[16,13,15]$};
-  \node[part] (sl) at (-3.7,-2.8) {$[0,1,2,3,7,8,9]$};
-  \node[part] (sr) at (3.7,-2.8) {$[13,15,16]$};
-  \node[pivot] (out) at (0,-4.1) {$[0,1,2,3,7,8,9,11,13,15,16]$};
-  \draw[->] (a) -- (l) node[midway,above left] {$\leq11$};
-  \draw[->] (a) -- (v);
-  \draw[->] (a) -- (r) node[midway,above right] {$>11$};
-  \draw[->] (l) -- (sl) node[midway,left,font=\scriptsize] {QuickSort};
-  \draw[->] (r) -- (sr) node[midway,right,font=\scriptsize] {QuickSort};
-  \draw[->] (sl) -- (out);
-  \draw[->] (v) -- (out);
-  \draw[->] (sr) -- (out);
-\end{tikzpicture}
-\end{center}
-\end{framedexample}
-
-\subsection{Following the recursive calls}
-
-The previous example showed what the two recursive calls return.
-We can now follow the choices that produce those results.
-
-\begin{framedexample}{Continuing the same QuickSort execution}\label{ex:quicksort-trace}
-\textbf{Step 1: sort $A_1=[9,2,7,1,8,0,3]$ using pivot $3$.}
-Partitioning gives
-\[
-  [2,1,0]\quad\boxed{3}\quad[9,7,8].
-\]
-\textbf{Step 2: sort $[2,1,0]$ using pivot $1$.}
-The partition is
-\[
-  [0]\quad\boxed{1}\quad[2].
-\]
-Both recursive inputs have one element, so they are returned as they
-are. Concatenating gives $[0,1,2]$.
-
-\textbf{Step 3: sort $[9,7,8]$ using pivot $7$.}
-
-The partition is
-\[
-  [\,]\quad\boxed{7}\quad[9,8].
-\]
-The empty array is a base case.
-
-Sorting $[9,8]$ with pivot $9$ gives
-\[
-  [8]\quad\boxed{9}\quad[\,],
-\]
-so this recursive call returns $[8,9]$.
-
-Combining this result with pivot $7$ gives
-\[
-  [\,]\quad\boxed{7}\quad[8,9]
-  \quad\longrightarrow\quad[7,8,9].
-\]
-
-\textbf{Step 4: return the sorted first part.}
-Join the results from Steps 2 and 3 around the pivot from Step 1:
-\[
-  [0,1,2]\quad\boxed{3}\quad[7,8,9]
-  \quad\longrightarrow\quad [0,1,2,3,7,8,9].
-\]
-\textbf{Step 5: sort the original second part, $A_2=[16,13,15]$.}
-Choose pivot $15$. Its partition is
-$[13]\quad\boxed{15}\quad[16]$, so the call returns $[13,15,16]$.
-
-\textbf{Step 6: return to the original pivot $11$.}
-We now have the two sorted results needed to finish:
-\[
-  [0,1,2,3,7,8,9]\quad\boxed{11}\quad[13,15,16].
-\]
-The final array is $[0,1,2,3,7,8,9,11,13,15,16]$.
-\end{framedexample}
-
 \subsection{The QuickSort algorithm}
 
 Indices start at $1$. Appending to the temporary arrays is assumed
 to take amortized constant time. The final concatenation copies the
 two sorted parts and the pivot into the returned array.
 
-\Needspace{29\baselineskip}
+\Needspace{23\baselineskip}
 \begin{framedalgo}{Randomized QuickSort}\label{alg:randomized-quicksort}
 \begin{algorithmic}[1]
   \Function{QuickSort}{$A$}
@@ -3978,6 +3874,80 @@ The test $i\neq p$ excludes the selected pivot from both recursive
 inputs. Other occurrences of the same value are kept in $A_1$.
 Each recursive input has fewer than $n$ elements, so the algorithm
 eventually reaches its base cases.
+
+\subsection{Following the recursive calls}
+
+We now run QuickSort on the 13-element array that MergeSort sorted in
+Example~\ref{ex:mergesort-thirteen}.
+
+\Needspace{22\baselineskip}
+\begin{framedexample}{QuickSort on the 13-element array}\label{ex:quicksort-trace}
+Each row is one level of recursive calls, and the circled values are
+the random pivots. Once a pivot or a one-element array is placed, it
+never moves again: the dashed arrows carry it to the sorted result.
+\begin{center}
+\begin{tikzpicture}[>=stealth,font=\small,x=1.05cm,y=1cm,
+  sub/.style={draw=PlotBlue!75!black,rounded corners,fill=PlotBlue!14,
+    minimum height=0.6cm,inner sep=0pt},
+  done/.style={draw=PlotGreen!60!black,rounded corners,
+    fill=PlotGreen!16,minimum height=0.6cm,minimum width=0.75cm,
+    inner sep=0pt},
+  final/.style={done,very thick,fill=PlotGreen!30},
+  chosen/.style={circle,draw=PlotGreen!60!black,thick,fill=white,
+    inner sep=0pt,minimum size=0.55cm},
+  piv/.style={circle,draw=PlotGreen!60!black,very thick,
+    fill=PlotGreen!30,inner sep=0pt,minimum size=0.6cm},
+  drop/.style={->,dashed,draw=black!40}]
+  % An array drawn over columns #4..#5 (style #1, name #2, height #3).
+  % Column c is the final position of the c-th smallest value.
+  \newcommand{\qsarr}[6][sub]{%
+    \node[#1,minimum width={(#5-#4+1)*1.05cm-0.15cm}]
+      (#2) at ({(#4+#5)/2},#3) {};
+    \foreach \v [count=\c from #4] in {#6} \node at (\c,#3) {$\v$};}
+  % Level 0: pivot 11.
+  \qsarr{r0}{0}{1}{13}{2,10,7,16,3,8,9,1,11,13,14,20,17}
+  \node[chosen] at (9,0) {$11$};
+  % Level 1: pivots 7 and 14.
+  \qsarr{a}{-1.4}{1}{7}{2,10,7,3,8,9,1}
+  \node[chosen] at (3,-1.4) {$7$};
+  \node[piv] (p11) at (8,-1.4) {$11$};
+  \qsarr{b}{-1.4}{9}{13}{16,13,14,20,17}
+  \node[chosen] at (11,-1.4) {$14$};
+  % Level 2: pivots 2, 9 and 17.
+  \qsarr{aa}{-2.7}{1}{3}{2,3,1}
+  \node[chosen] at (1,-2.7) {$2$};
+  \node[piv] (p7) at (4,-2.7) {$7$};
+  \qsarr{ab}{-2.7}{5}{7}{10,8,9}
+  \node[chosen] at (7,-2.7) {$9$};
+  \node[done] (d13) at (9,-2.7) {$13$};
+  \node[piv] (p14) at (10,-2.7) {$14$};
+  \qsarr{bb}{-2.7}{11}{13}{16,20,17}
+  \node[chosen] at (13,-2.7) {$17$};
+  % Level 3: only pivots and one-element arrays remain.
+  \node[done] (d1) at (1,-4) {$1$};
+  \node[piv] (p2) at (2,-4) {$2$};
+  \node[done] (d3) at (3,-4) {$3$};
+  \node[done] (d8) at (5,-4) {$8$};
+  \node[piv] (p9) at (6,-4) {$9$};
+  \node[done] (d10) at (7,-4) {$10$};
+  \node[done] (d16) at (11,-4) {$16$};
+  \node[piv] (p17) at (12,-4) {$17$};
+  \node[done] (d20) at (13,-4) {$20$};
+  % Sorted result.
+  \qsarr[final]{f}{-5.5}{1}{13}{1,2,3,7,8,9,10,11,13,14,16,17,20}
+  \draw[->] (r0) -- (a)
+    node[pos=0.6,above left,inner sep=1pt,font=\scriptsize] {$\leq11$};
+  \draw[->] (r0) -- (b)
+    node[pos=0.6,above right,inner sep=1pt,font=\scriptsize] {$>11$};
+  \foreach \p/\c in {r0/p11,a/aa,a/p7,a/ab,b/d13,b/p14,b/bb,
+      aa/d1,aa/p2,aa/d3,ab/d8,ab/p9,ab/d10,bb/d16,bb/p17,bb/d20}
+    \draw[->] (\p) -- (\c);
+  \foreach \n/\c in {p11/8,p7/4,d13/9,p14/10,d1/1,p2/2,d3/3,d8/5,
+      p9/6,d10/7,d16/11,p17/12,d20/13}
+    \draw[drop] (\n.south) -- (\c,-5.2);
+\end{tikzpicture}
+\end{center}
+\end{framedexample}
 
 \section{The cost of QuickSort}
 
