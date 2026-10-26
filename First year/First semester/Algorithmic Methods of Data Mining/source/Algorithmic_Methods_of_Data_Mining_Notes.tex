@@ -2063,6 +2063,25 @@ different subproblems $\ED(S^i,T^j)$, so storing each value once
 
 \section{Bytes, addresses and consecutive memory locations}
 
+\textbf{What is memory for?}
+While a program runs, it needs somewhere to keep the data it is
+working with: numbers, text, lists and the intermediate results of
+calculations. Main memory (RAM) provides this working space, so the
+processor can read the data, perform operations and store the results
+for later steps of the program.
+
+For example, after executing \texttt{x = 5}, Python must keep the
+object representing $5$ available. A later instruction such as
+\texttt{print(x)} can retrieve it, and \texttt{x + 2} can use it to
+compute $7$. Understanding how data are arranged and reached in
+memory will help us explain the cost of operations such as accessing
+an element of a list.
+
+\begin{frameddefn}{Bit and byte}\label{def:bit-byte}
+A \emph{bit} is a binary digit, either $0$ or $1$.
+A \emph{byte} consists of eight bits.
+\end{frameddefn}
+
 Imagine memory as numbered cells, drawn vertically below. Each cell
 holds one byte. The number on the left is its address: it identifies
 the cell, while the contents are stored inside it.
@@ -2084,11 +2103,6 @@ the cell, while the contents are stored inside it.
 The address and the contents are different things: the label $1000$
 tells us where the first displayed byte is, not what value it holds.
 We use illustrative decimal addresses throughout these drawings.
-
-\begin{frameddefn}{Bit and byte}\label{def:bit-byte}
-A \emph{bit} is a binary digit, either $0$ or $1$.
-A \emph{byte} consists of eight bits.
-\end{frameddefn}
 
 \begin{frameddefn}{Memory address}\label{def:memory-address}
 In byte-addressable memory, a \emph{memory address} identifies the
@@ -3211,5 +3225,405 @@ In a much larger corpus, rare query terms can have short lists,
 making the online search far cheaper than a full corpus scan.
 If the terms occur in almost every document, their lists are long
 and the advantage is smaller.
+
+\chapter{Sorting}
+
+\lecturestart{26 October}
+
+\section{The sorting problem}
+
+\emph{Sorting} means arranging elements in order. We begin with a
+simple goal: given a list of numbers, arrange them from smallest to
+largest.
+
+\begin{framedexample}{The same numbers, in a different order}
+\begin{center}
+\begin{tikzpicture}[font=\small,>=stealth]
+  \node[draw,rounded corners,fill=PlotBlue!8,
+    minimum width=5cm,minimum height=0.8cm] (before) at (0,0)
+    {$[5,\ 2,\ 4,\ 2,\ 1]$};
+  \node[anchor=east] at (-2.8,0) {Before:};
+  \node[draw,rounded corners,fill=PlotGreen!8,
+    minimum width=5cm,minimum height=0.8cm] (after) at (0,-1.7)
+    {$[1,\ 2,\ 2,\ 4,\ 5]$};
+  \node[anchor=east] at (-2.8,-1.7) {After:};
+  \draw[->,thick] (before.south) -- (after.north);
+\end{tikzpicture}
+\end{center}
+The result must satisfy two conditions:
+\begin{enumerate}
+  \item Each number is less than or equal to the next one.
+  \item The elements remain the same: only their order changes.
+    In particular, both occurrences of $2$ must remain in the result.
+\end{enumerate}
+\end{framedexample}
+
+With five numbers, we can easily do this by hand. A computer needs
+precise instructions that also work for millions of elements. We
+will study different algorithms for the same sorting problem,
+examining how they work and how much time they require.
+
+\section{MergeSort: first understand Merge}
+
+The first sorting algorithm we study is \emph{MergeSort}. Its input
+is an array $A$; its output contains the same elements in sorted
+order. For example, we may start from
+\[
+  A=[2,10,7,16,3,8,9,1,11,13,14,20,17].
+\]
+\begin{framedproblem}{Merging two sorted arrays}
+\textbf{Input:} two arrays $A_1$ and $A_2$, each already sorted in
+nondecreasing order.
+
+\textbf{Output:} one sorted array containing all the elements of both
+arrays, preserving every occurrence of each value.
+\end{framedproblem}
+
+Before studying the complete algorithm, we focus on the function
+\textsc{Merge}, which combines two arrays that are already sorted.
+
+\begin{framedexample}{The input and output of Merge}
+Consider the following separate example of a call to
+$\textsc{Merge}(A_1,A_2)$:
+\[
+  A_1=[2,4,7,10,13],\qquad A_2=[1,3,5,6,8,9,16,17].
+\]
+Both input arrays are already sorted. We want one array containing
+all their values, in order:
+\begin{center}
+\begin{tikzpicture}[font=\small,>=stealth]
+  \node[draw,rounded corners,fill=PlotBlue!8,align=center,
+    minimum height=0.85cm] (left) at (-3.1,0)
+    {$A_1$\\$[2,4,7,10,13]$};
+  \node[draw,rounded corners,fill=PlotRed!8,align=center,
+    minimum height=0.85cm] (right) at (3.1,0)
+    {$A_2$\\$[1,3,5,6,8,9,16,17]$};
+  \node[draw,rounded corners,fill=PlotGreen!8,
+    minimum width=2.2cm,minimum height=0.7cm] (merge) at (0,-1.45)
+    {\textsc{Merge}};
+  \node[draw,rounded corners,fill=PlotGreen!8,
+    minimum height=0.75cm] (result) at (0,-2.85)
+    {$[1,2,3,4,5,6,7,8,9,10,13,16,17]$};
+  \draw[->,thick] (left.south) -- (merge.north west);
+  \draw[->,thick] (right.south) -- (merge.north east);
+  \draw[->,thick] (merge.south) -- (result.north);
+\end{tikzpicture}
+\end{center}
+The first array has $5$ elements and the second has $8$, so the
+output must contain $5+8=13$ elements.
+\end{framedexample}
+
+\subsection{How Merge works: always take the smaller current element}
+
+Because both input arrays are sorted, the smallest element still
+available in each array is its first unprocessed element. To choose
+the next output value, we only need to compare those two elements.
+
+Place a pointer $i$ at the start of $A_1$ and a pointer $j$ at the
+start of $A_2$. Create an empty output array $B$. At each step:
+\begin{enumerate}
+  \item Compare $A_1[i]$ and $A_2[j]$.
+  \item Append the smaller value to $B$.
+  \item Advance only the pointer of the array from which we took it.
+\end{enumerate}
+If the two values are equal, take the one from $A_1$ first. The other
+occurrence remains available in $A_2$, so neither occurrence is lost.
+
+\begin{framedexample}{Following Merge on the two arrays}\label{ex:merge-steps}
+Start with
+\[
+  A_1=[2,4,7,10,13],\qquad A_2=[1,3,5,6,8,9,16,17],\qquad B=[\,].
+\]
+\textbf{Step 1: compare $2$ and $1$.}
+\[
+  A_1=[\boxed{2},4,7,10,13],\qquad
+  A_2=[\boxed{1},3,5,6,8,9,16,17].
+\]
+Take $1$ from $A_2$: $B=[1]$. Advance its pointer to $3$; the
+pointer in $A_1$ stays at $2$.
+
+\textbf{Step 2: compare $2$ and $3$.}
+\[
+  A_1=[\boxed{2},4,7,10,13],\qquad
+  A_2=[1,\boxed{3},5,6,8,9,16,17].
+\]
+Take $2$ from $A_1$: $B=[1,2]$. Advance its pointer to $4$.
+
+\textbf{Step 3: compare $4$ and $3$.}
+\[
+  A_1=[2,\boxed{4},7,10,13],\qquad
+  A_2=[1,\boxed{3},5,6,8,9,16,17].
+\]
+Take $3$ from $A_2$: $B=[1,2,3]$. Advance its pointer to $5$.
+
+\textbf{Continue with the same rule.}
+The following rows show the current values before each remaining
+comparison and the output after taking the smaller one:
+\begin{center}
+\small
+\begin{tabular}{rr|c|l}
+  $A_1[i]$ & $A_2[j]$ & Take & Output $B$\\\hline
+  $4$ & $5$ & $4$ & $[1,2,3,4]$\\
+  $7$ & $5$ & $5$ & $[1,2,3,4,5]$\\
+  $7$ & $6$ & $6$ & $[1,2,3,4,5,6]$\\
+  $7$ & $8$ & $7$ & $[1,2,3,4,5,6,7]$\\
+  $10$ & $8$ & $8$ & $[1,2,3,4,5,6,7,8]$\\
+  $10$ & $9$ & $9$ & $[1,2,3,4,5,6,7,8,9]$\\
+  $10$ & $16$ & $10$ & $[1,2,3,4,5,6,7,8,9,10]$\\
+  $13$ & $16$ & $13$ & $[1,2,3,4,5,6,7,8,9,10,13]$
+\end{tabular}
+\end{center}
+\textbf{When one input is exhausted, copy the rest of the other.}
+After taking $13$, $A_1$ is exhausted. The remaining values in $A_2$
+are $16,17$. They are already sorted and can be appended directly:
+\[
+  B=[1,2,3,4,5,6,7,8,9,10,13,16,17].
+\]
+\end{framedexample}
+
+The algorithm below uses indices starting at $1$. The output array
+$B$ has space for $\abs{A_1}+\abs{A_2}$ elements, and $k$ indicates
+the next output position to fill.
+
+\Needspace{30\baselineskip}
+\begin{framedalgo}{Merge two sorted arrays}\label{alg:merge}
+\begin{algorithmic}[1]
+  \Function{Merge}{$A_1,A_2$}
+    \State $n_1\gets\abs{A_1}$, $n_2\gets\abs{A_2}$
+    \State Allocate an array $B$ of length $n_1+n_2$
+    \State $i\gets1$, $j\gets1$, $k\gets1$
+    \While{$i\leq n_1$ and $j\leq n_2$}
+      \If{$A_1[i]\leq A_2[j]$}
+        \State $B[k]\gets A_1[i]$
+        \State $i\gets i+1$
+      \Else
+        \State $B[k]\gets A_2[j]$
+        \State $j\gets j+1$
+      \EndIf
+      \State $k\gets k+1$
+    \EndWhile
+    \While{$i\leq n_1$}
+      \State $B[k]\gets A_1[i]$
+      \State $i\gets i+1$, $k\gets k+1$
+    \EndWhile
+    \While{$j\leq n_2$}
+      \State $B[k]\gets A_2[j]$
+      \State $j\gets j+1$, $k\gets k+1$
+    \EndWhile
+    \State \Return $B$
+  \EndFunction
+\end{algorithmic}
+\end{framedalgo}
+
+\subsection{Why the result is sorted, and how much Merge costs}
+
+At every step, the next value must be the smaller of the two current
+elements: all later elements of each input are at least as large as
+that input's current element. Appending the smaller one therefore
+keeps $B$ sorted. Each input element is copied exactly once,
+including the remaining suffix after an input is exhausted, so the
+output contains all the original elements.
+
+\Needspace{17\baselineskip}
+Let $n_1=\abs{A_1}$ be the number of elements in the first array and
+$n_2=\abs{A_2}$ the number of elements in the second. Merge copies
+each of these elements into $B$ exactly once: $n_1$ copies come from
+$A_1$ and $n_2$ from $A_2$, for a total of $n_1+n_2$ copies.
+The pointers only move forwards, and each copy and pointer update
+takes constant time. Its running time is therefore
+\[
+  \boxed{T_{\mathrm{Merge}}(n_1,n_2)=\Theta(n_1+n_2).}
+\]
+In our example, $n_1=5$ and $n_2=8$, so Merge copies $5+8=13$
+elements into the output. Even if one input is exhausted early,
+the remaining elements of the other still have to be copied.
+
+The separate output array uses $\Theta(n_1+n_2)$ additional space;
+the three indices require only constant extra space.
+
+\section{MergeSort: split, sort the halves, and merge}
+
+Merge combines two arrays that are already sorted. To sort an arbitrary
+array $A$, we first split it into two halves and sort each half using
+MergeSort itself. We then pass the two sorted results to Merge.
+
+\textbf{When can we stop splitting?} An array with zero or one element
+is already sorted, so we return it immediately. This is the base case.
+
+For $n>1$, let $m=\lceil n/2\rceil$. Using indices starting at $1$,
+the two halves are
+\[
+  A_1=A[1,\ldots,m],\qquad A_2=A[m+1,\ldots,n].
+\]
+The first half contains $m$ elements and the second contains $n-m$.
+For our $13$-element input, $m=7$: the halves contain positions
+$1$ through $7$ and positions $8$ through $13$.
+
+\Needspace{20\baselineskip}
+\begin{framedalgo}{MergeSort}\label{alg:mergesort}
+\begin{algorithmic}[1]
+  \Function{MergeSort}{$A$}
+    \State $n\gets\abs{A}$ \Comment{$\Theta(1)$}
+    \If{$n\leq1$} \Comment{$\Theta(1)$}
+      \State \Return $A$ \Comment{$\Theta(1)$}
+    \EndIf
+    \State $m\gets\lceil n/2\rceil$ \Comment{$\Theta(1)$}
+    \State $A_1\gets A[1,\ldots,m]$ \Comment{$\Theta(m)$ to copy}
+    \State $A_2\gets A[m+1,\ldots,n]$ \Comment{$\Theta(n-m)$ to copy}
+    \State $A_1\gets\Call{MergeSort}{A_1}$ \Comment{$T(m)$}
+    \State $A_2\gets\Call{MergeSort}{A_2}$ \Comment{$T(n-m)$}
+    \State \Return $\Call{Merge}{A_1,A_2}$ \Comment{$\Theta(n)$}
+  \EndFunction
+\end{algorithmic}
+\end{framedalgo}
+
+The two recursive calls return sorted arrays. Only then do we call
+Merge, whose input requirement is now satisfied. Each recursive call
+works on a smaller array, eventually reaching the base case.
+
+\begin{framedexample}{MergeSort on four elements}\label{ex:mergesort-four}
+Consider $A=[4,1,3,2]$.
+\begin{enumerate}
+  \item Split it into $[4,1]$ and $[3,2]$.
+  \item To sort $[4,1]$, split it into $[4]$ and $[1]$. Both are
+    already sorted, so Merge returns $[1,4]$.
+  \item To sort $[3,2]$, split it into $[3]$ and $[2]$. Merge
+    returns $[2,3]$.
+  \item Merge the sorted halves $[1,4]$ and $[2,3]$: take $1$,
+    then $2$, then $3$, and finally copy the remaining $4$.
+    The result is $[1,2,3,4]$.
+\end{enumerate}
+\begin{center}
+\begin{tikzpicture}[>=stealth,font=\small,
+  arr/.style={draw,rounded corners,minimum height=0.6cm,
+    minimum width=1.1cm,fill=PlotBlue!8},
+  sorted/.style={arr,fill=PlotGreen!10}]
+  \node[arr] (a) at (0,0) {$[4,1,3,2]$};
+  \node[arr] (l) at (-2.6,-1.1) {$[4,1]$};
+  \node[arr] (r) at (2.6,-1.1) {$[3,2]$};
+  \node[arr] (l1) at (-3.6,-2.2) {$[4]$};
+  \node[arr] (l2) at (-1.6,-2.2) {$[1]$};
+  \node[arr] (r1) at (1.6,-2.2) {$[3]$};
+  \node[arr] (r2) at (3.6,-2.2) {$[2]$};
+  \node[sorted] (sl) at (-2.6,-3.4) {$[1,4]$};
+  \node[sorted] (sr) at (2.6,-3.4) {$[2,3]$};
+  \node[sorted] (out) at (0,-4.6) {$[1,2,3,4]$};
+  \draw[->] (a) -- (l) node[midway,above left] {split};
+  \draw[->] (a) -- (r);
+  \draw[->] (l) -- (l1);
+  \draw[->] (l) -- (l2);
+  \draw[->] (r) -- (r1);
+  \draw[->] (r) -- (r2);
+  \draw[->] (l1) -- (sl);
+  \draw[->] (l2) -- (sl);
+  \draw[->] (r1) -- (sr);
+  \draw[->] (r2) -- (sr);
+  \draw[->] (sl) -- (out) node[midway,below left] {Merge};
+  \draw[->] (sr) -- (out);
+\end{tikzpicture}
+\end{center}
+\end{framedexample}
+
+\subsection{Running time: expanding the recurrence}
+
+Let $T(n)$ be the number of steps for an array of $n$ elements.
+Assume first that $n$ is a power of $2$, so $m=n-m=n/2$.
+Counting the steps of Algorithm~\ref{alg:mergesort} gives a
+\emph{recurrence}:
+\[
+  T(n)=
+  \begin{cases}
+    c_1, & n\leq1,\\
+    2T(n/2)+c_2n+c_3, & n>1,
+  \end{cases}
+\]
+Here $c_1$ is the base-case cost, $c_2n$ accounts for copying the
+halves and merging, and $c_3$ is the remaining constant work.
+The constants are positive and independent of $n$.
+We solve this recurrence by repeatedly substituting it into itself.
+As in the earlier recurrence expansions, a term and its replacement
+are underlined in the same colour.
+
+\Needspace{17\baselineskip}
+\textbf{First expansion.}
+Apply the recurrence to an input of size $n/2$:
+\[
+  T(n/2)=2T(n/4)+c_2\frac n2+c_3.
+\]
+Substitute this expression for $T(n/2)$ and distribute the outer $2$:
+\begin{align*}
+  T(n)&=2\,\cul{PlotRed}{T(n/2)}+c_2n+c_3\\
+      &=2\,\cul{PlotRed}{\left[2T(n/4)+c_2\frac n2+c_3\right]}
+        +c_2n+c_3\\
+      &=4T(n/4)+c_2n+2c_3+c_2n+c_3\\
+      &=4T(n/4)+2c_2n+3c_3.
+\end{align*}
+There are now four subproblems of size $n/4$. The two linear
+contributions add up to $2c_2n$, and the constant contributions
+add up to $3c_3$.
+
+\Needspace{13\baselineskip}
+\textbf{Second expansion.}
+Now replace $T(n/4)$ using the same recurrence:
+\begin{align*}
+  T(n)&=4\,\cul{PlotBlue}{T(n/4)}+2c_2n+3c_3\\
+      &=4\,\cul{PlotBlue}{\left[2T(n/8)+c_2\frac n4+c_3\right]}
+        +2c_2n+3c_3\\
+      &=8T(n/8)+c_2n+4c_3+2c_2n+3c_3\\
+      &=8T(n/8)+3c_2n+7c_3.
+\end{align*}
+
+\Needspace{12\baselineskip}
+\textbf{One more expansion makes the pattern visible.}
+\begin{align*}
+  T(n)&=8\,\cul{PlotGreen}{T(n/8)}+3c_2n+7c_3\\
+      &=8\,\cul{PlotGreen}{\left[2T(n/16)+c_2\frac n8+c_3\right]}
+        +3c_2n+7c_3\\
+      &=16T(n/16)+4c_2n+15c_3.
+\end{align*}
+
+\textbf{The general pattern.}
+Each substitution doubles the number of subproblems and halves
+their size. At each level, the linear work adds up to $c_2n$:
+\[
+  1\cdot c_2n
+  =2\cdot c_2\frac n2
+  =4\cdot c_2\frac n4
+  =\cdots=c_2n.
+\]
+After expanding $i$ levels, we therefore have
+\[
+  \boxed{T(n)=2^iT\!\left(\frac{n}{2^i}\right)
+    +i\,c_2n+(2^i-1)c_3.}
+\]
+Here $2^iT(n/2^i)$ is the work still to be expanded, $i\,c_2n$
+accounts for the $i$ levels already expanded, and the constant work
+comes from $1+2+4+\cdots+2^{i-1}=2^i-1$ calls at those levels.
+For example, taking $i=1$ gives the original recurrence; taking
+$i=2$ gives $4T(n/4)+2c_2n+3c_3$, as above.
+
+\Needspace{20\baselineskip}
+\textbf{When do we stop?}
+We reach the base case when each remaining subproblem has size $1$:
+\[
+  \frac{n}{2^i}=1
+  \quad\Longrightarrow\quad 2^i=n
+  \quad\Longrightarrow\quad i=\log_2 n.
+\]
+Substituting $i=\log_2 n$ and $T(1)=c_1$ gives
+\begin{align*}
+  T(n)&=nT(1)+c_2n\log_2 n+(n-1)c_3\\
+      &=c_1n+c_2n\log_2 n+c_3(n-1).
+\end{align*}
+The first and last terms are linear in $n$. The dominant term is
+$c_2n\log_2 n$, so
+\[
+  \boxed{T(n)=\Theta(n\log n).}
+\]
+For a general $n$, the two recursive sizes are $\lceil n/2\rceil$
+and $\lfloor n/2\rfloor$. The number of levels is
+$\lceil\log_2 n\rceil$, and the same asymptotic bound holds.
+
+\chapter{Randomized Algorithms}
 
 \end{document}
