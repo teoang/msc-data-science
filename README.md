@@ -154,12 +154,15 @@ Compiled from Flavia's handwritten notes up to 16 October, in the order the topi
 24. Subsequences, common subsequences and the longest common subsequence.
 25. Edit distance, its relation to the LCS, and its recursive formula (start of dynamic programming).
 
-**20 October · In progress**
+**20 October**
 
 26. Text mining: corpus, vocabulary and document count vectors; document length and L1/L2 normalization.
 27. Cosine similarity: geometric interpretation and step-by-step computation from coordinates.
 28. Stopwords, document frequency, IDF and TF-IDF weights, with worked examples.
 29. Query vectors, cosine scores and top-k retrieval; direct-search cost O(Nm + N log N).
+30. Offline corpus preparation and online query processing.
+31. Boolean AND search; inverted indexes and sorted posting lists.
+32. Posting-list intersections with pointers, algorithm and query-cost analysis.
 
 </details>
 
