@@ -2712,7 +2712,6 @@ be a nonempty set of query terms. A Boolean AND query returns
   R(Q)=\{i:Q\subseteq T_i\}.
 \]
 Thus a document qualifies precisely when it contains every query term.
-Repeated occurrences do not affect whether it qualifies.
 \end{frameddefn}
 
 This search asks a membership question, rather than assigning cosine
@@ -2721,8 +2720,9 @@ qualifying document identifiers.
 
 \subsection{A direct scan}
 
-A first algorithm visits each document, checks whether it contains
-every query term, and adds its identifier to the result if it does.
+A first approach to answering this query is to visit each document,
+check whether it contains every query term, and add its identifier
+to the result if it does.
 For a large corpus this inspects many documents that contain none of
 the query terms. We would like to find the relevant documents without
 starting a new scan of the entire corpus each time.
@@ -2805,11 +2805,65 @@ lists from left to right, using a \emph{pointer} to mark the current
 position in each list.
 
 \begin{framedexample}{Following the pointers}\label{ex:posting-pointers}
-Again take the query $Q=\{A,C,E\}$ and the lists
+The query is $Q=\{A,C,E\}$: we want documents containing all three
+terms. The posting lists are
 \[
   L(A)=[1,2,4,5],\quad L(C)=[1,4,5,6],\quad L(E)=[2,4].
 \]
-Start at the first element of each list:
+Each number identifies a document. Put a pointer at the first element
+of each list; the boxed entries below show the current positions.
+
+\textbf{Step 1: the pointers read $1,1,2$.}
+\[
+\begin{aligned}
+  L(A)&=[\boxed{1},2,4,5],\\
+  L(C)&=[\boxed{1},4,5,6],\\
+  L(E)&=[\boxed{2},4].
+\end{aligned}
+\]
+Document $1$ contains $A$ and $C$, but not $E$. In $L(E)$ we are
+already at $2$; since the list is sorted, no later entry can be $1$.
+Thus $1$ cannot be a result. Advance the two pointers reading $1$
+(those in $L(A)$ and $L(C)$), leaving the pointer in $L(E)$ at $2$.
+
+\textbf{Step 2: the pointers now read $2,4,2$.}
+\[
+\begin{aligned}
+  L(A)&=[1,\boxed{2},4,5],\\
+  L(C)&=[1,\boxed{4},5,6],\\
+  L(E)&=[\boxed{2},4].
+\end{aligned}
+\]
+Document $2$ contains $A$ and $E$, but not $C$. In $L(C)$ we are
+already at $4$, so we cannot find $2$ further along that list.
+Discard $2$: advance the pointers in $L(A)$ and $L(E)$, leaving the
+pointer in $L(C)$ at $4$.
+
+\textbf{Step 3: the pointers now read $4,4,4$.}
+\[
+\begin{aligned}
+  L(A)&=[1,2,\boxed{4},5],\\
+  L(C)&=[1,\boxed{4},5,6],\\
+  L(E)&=[2,\boxed{4}].
+\end{aligned}
+\]
+All three pointers read the same identifier: document $4$ contains
+$A$, $C$ and $E$. Add it to the result, giving $R=[4]$, then advance
+all three pointers.
+
+\textbf{Step 4: the list for $E$ is exhausted.}
+\[
+\begin{aligned}
+  L(A)&=[1,2,4,\boxed{5}],\\
+  L(C)&=[1,4,\boxed{5},6],\\
+  L(E)&=[2,4]\quad\text{(pointer past the last entry)}.
+\end{aligned}
+\]
+The other pointers read $5$, but $L(E)$ has no entries left. No
+further identifier can occur in all three lists, so we stop. The
+final result is $R=[4]$: return document $D_4$.
+
+\textbf{Summary of the pointer movements.}
 \begin{center}
 \begin{tabular}{c|ccc|l}
   Step & $L(A)$ & $L(C)$ & $L(E)$ & Action\\\hline
@@ -2819,22 +2873,6 @@ Start at the first element of each list:
   $4$ & $5$ & $5$ & exhausted & Stop.
 \end{tabular}
 \end{center}
-\textbf{Why can we discard $1$ at Step 1?}
-The current value in $L(E)$ is $2$. Because that list is sorted, all
-its remaining identifiers are at least $2$: it cannot contain $1$.
-Therefore $1$ cannot belong to the intersection.
-
-\textbf{Why can we discard $2$ at Step 2?}
-The current value in $L(C)$ is already $4$, so no remaining element
-of that list can be $2$.
-
-\textbf{Why do we output $4$?}
-All three current identifiers agree, so document $4$ contains all
-three query terms. We then move past it in every list.
-
-\textbf{Why do we stop?}
-Once $L(E)$ is exhausted, no further identifier can appear in all
-three lists. The final result is $\{4\}$.
 \end{framedexample}
 
 For a fixed small number of lists, this gives a simple rule: if all
@@ -2848,6 +2886,7 @@ For two lists, there are only three cases: the current identifiers
 are equal, the left one is smaller, or the right one is smaller.
 The following algorithm makes each case explicit.
 
+\Needspace{20\baselineskip}
 \begin{framedalgo}{Intersect two sorted posting lists}\label{alg:posting-intersection}
 \begin{algorithmic}[1]
   \Function{Intersect}{$L,M$}
