@@ -3256,6 +3256,13 @@ and the advantage is smaller.
 simple goal: given a list of numbers, arrange them from smallest to
 largest.
 
+\begin{framedproblem}{Sorting}
+\textbf{Input:} an array $A$ of numbers, not necessarily sorted.
+
+\textbf{Output:} an array containing the same elements as $A$ in
+nondecreasing order, preserving every occurrence of each value.
+\end{framedproblem}
+
 \begin{framedexample}{The same numbers, in a different order}
 \begin{center}
 \begin{tikzpicture}[font=\small,>=stealth]
@@ -3290,13 +3297,6 @@ For example, we may start from
 \[
   A=[2,10,7,16,3,8,9,1,11,13,14,20,17].
 \]
-\begin{framedproblem}{MergeSort}
-\textbf{Input:} an array $A$ of numbers, not necessarily sorted.
-
-\textbf{Output:} an array containing the same elements as $A$ in
-nondecreasing order, preserving every occurrence of each value.
-\end{framedproblem}
-
 \subsection{How Merge works: always take the smaller current element}
 
 \Needspace{10\baselineskip}
@@ -3497,46 +3497,72 @@ $1$ through $7$ and positions $8$ through $13$.
 \end{algorithmic}
 \end{framedalgo}
 
-\Needspace{25\baselineskip}
-\begin{framedexample}{MergeSort on four elements}\label{ex:mergesort-four}
-Consider $A=[4,1,3,2]$.
-\begin{enumerate}
-  \item Split it into $[4,1]$ and $[3,2]$.
-  \item To sort $[4,1]$, split it into $[4]$ and $[1]$. Both are
-    already sorted, so Merge returns $[1,4]$.
-  \item To sort $[3,2]$, split it into $[3]$ and $[2]$. Merge
-    returns $[2,3]$.
-  \item Merge the sorted halves $[1,4]$ and $[2,3]$: take $1$,
-    then $2$, then $3$, and finally copy the remaining $4$.
-    The result is $[1,2,3,4]$.
-\end{enumerate}
+\Needspace{34\baselineskip}
+\begin{framedexample}{MergeSort on the 13-element array}\label{ex:mergesort-thirteen}
+MergeSort on $A=[2,10,7,16,3,8,9,1,11,13,14,20,17]$. Blue arrays
+are still unsorted; green arrays are sorted.
 \begin{center}
 \begin{tikzpicture}[>=stealth,font=\small,
-  arr/.style={draw,rounded corners,minimum height=0.6cm,
-    minimum width=1.1cm,fill=PlotBlue!8},
-  sorted/.style={arr,fill=PlotGreen!10}]
-  \node[arr] (a) at (0,0) {$[4,1,3,2]$};
-  \node[arr] (l) at (-2.6,-1.1) {$[4,1]$};
-  \node[arr] (r) at (2.6,-1.1) {$[3,2]$};
-  \node[arr] (l1) at (-3.6,-2.2) {$[4]$};
-  \node[arr] (l2) at (-1.6,-2.2) {$[1]$};
-  \node[arr] (r1) at (1.6,-2.2) {$[3]$};
-  \node[arr] (r2) at (3.6,-2.2) {$[2]$};
-  \node[sorted] (sl) at (-2.6,-3.4) {$[1,4]$};
-  \node[sorted] (sr) at (2.6,-3.4) {$[2,3]$};
-  \node[sorted] (out) at (0,-4.6) {$[1,2,3,4]$};
-  \draw[->] (a) -- (l) node[midway,above left] {split};
-  \draw[->] (a) -- (r);
-  \draw[->] (l) -- (l1);
-  \draw[->] (l) -- (l2);
-  \draw[->] (r) -- (r1);
-  \draw[->] (r) -- (r2);
-  \draw[->] (l1) -- (sl);
-  \draw[->] (l2) -- (sl);
-  \draw[->] (r1) -- (sr);
-  \draw[->] (r2) -- (sr);
-  \draw[->] (sl) -- (out) node[midway,below left] {Merge};
-  \draw[->] (sr) -- (out);
+  arr/.style={draw=PlotBlue!75!black,rounded corners,
+    minimum height=0.55cm,inner sep=2.5pt,fill=PlotBlue!14},
+  sorted/.style={arr,draw=PlotGreen!60!black,fill=PlotGreen!16},
+  pass/.style={->,dashed,draw=black!45}]
+  % Split: each array is divided at position ceil(n/2).
+  \node[arr] (s0) at (0,0) {$[2,10,7,16,3,8,9,1,11,13,14,20,17]$};
+  \node[arr] (s1a) at (-3,-1.15) {$[2,10,7,16,3,8,9]$};
+  \node[arr] (s1b) at (3.5,-1.15) {$[1,11,13,14,20,17]$};
+  \node[arr] (s2a) at (-4.5,-2.3) {$[2,10,7,16]$};
+  \node[arr] (s2b) at (-1,-2.3) {$[3,8,9]$};
+  \node[arr] (s2c) at (2,-2.3) {$[1,11,13]$};
+  \node[arr] (s2d) at (5,-2.3) {$[14,20,17]$};
+  \node[arr] (s3a) at (-5.5,-3.45) {$[2,10]$};
+  \node[arr] (s3b) at (-3.5,-3.45) {$[7,16]$};
+  \node[arr] (s3c) at (-1.5,-3.45) {$[3,8]$};
+  \node[sorted] (s3d) at (0,-3.45) {$[9]$};
+  \node[arr] (s3e) at (1.5,-3.45) {$[1,11]$};
+  \node[sorted] (s3f) at (3,-3.45) {$[13]$};
+  \node[arr] (s3g) at (4.5,-3.45) {$[14,20]$};
+  \node[sorted] (s3h) at (6,-3.45) {$[17]$};
+  \foreach \x/\v in {-6/2,-5/10,-4/7,-3/16,-2/3,-1/8,1/1,2/11,4/14,5/20}
+    \node[sorted] (b\v) at (\x,-4.6) {$[\v]$};
+  % Merge: pairs of sorted arrays are combined.
+  \node[sorted] (m3a) at (-5.5,-5.75) {$[2,10]$};
+  \node[sorted] (m3b) at (-3.5,-5.75) {$[7,16]$};
+  \node[sorted] (m3c) at (-1.5,-5.75) {$[3,8]$};
+  \node[sorted] (m3d) at (0,-5.75) {$[9]$};
+  \node[sorted] (m3e) at (1.5,-5.75) {$[1,11]$};
+  \node[sorted] (m3f) at (3,-5.75) {$[13]$};
+  \node[sorted] (m3g) at (4.5,-5.75) {$[14,20]$};
+  \node[sorted] (m3h) at (6,-5.75) {$[17]$};
+  \node[sorted] (m2a) at (-4.5,-6.9) {$[2,7,10,16]$};
+  \node[sorted] (m2b) at (-1,-6.9) {$[3,8,9]$};
+  \node[sorted] (m2c) at (2,-6.9) {$[1,11,13]$};
+  \node[sorted] (m2d) at (5,-6.9) {$[14,17,20]$};
+  \node[sorted] (m1a) at (-3,-8.05) {$[2,3,7,8,9,10,16]$};
+  \node[sorted] (m1b) at (3.5,-8.05) {$[1,11,13,14,17,20]$};
+  \node[sorted,very thick,fill=PlotGreen!30]
+    (m0) at (0,-9.2) {$[1,2,3,7,8,9,10,11,13,14,16,17,20]$};
+  % Split arrows.
+  \foreach \p/\c in {s0/s1a,s0/s1b,s1a/s2a,s1a/s2b,s1b/s2c,s1b/s2d,
+      s2a/s3a,s2a/s3b,s2b/s3c,s2b/s3d,s2c/s3e,s2c/s3f,s2d/s3g,s2d/s3h,
+      s3a/b2,s3a/b10,s3b/b7,s3b/b16,s3c/b3,s3c/b8,s3e/b1,s3e/b11,
+      s3g/b14,s3g/b20}
+    \draw[->] (\p) -- (\c);
+  % One-element arrays are already sorted and are returned unchanged.
+  \foreach \a/\b in {s3d/m3d,s3f/m3f,s3h/m3h}
+    \draw[pass] (\a) -- (\b);
+  % Merge arrows.
+  \foreach \c/\p in {b2/m3a,b10/m3a,b7/m3b,b16/m3b,b3/m3c,b8/m3c,
+      b1/m3e,b11/m3e,b14/m3g,b20/m3g,
+      m3a/m2a,m3b/m2a,m3c/m2b,m3d/m2b,m3e/m2c,m3f/m2c,m3g/m2d,m3h/m2d,
+      m2a/m1a,m2b/m1a,m2c/m1b,m2d/m1b,m1a/m0,m1b/m0}
+    \draw[->] (\c) -- (\p);
+  \draw[decorate,decoration={brace,amplitude=5pt},thick]
+    (-7,-4.9) -- (-7,0.3)
+    node[midway,left=8pt,rotate=90,anchor=south] {split};
+  \draw[decorate,decoration={brace,amplitude=5pt},thick]
+    (-7,-9.5) -- (-7,-5.45)
+    node[midway,left=8pt,rotate=90,anchor=south] {Merge};
 \end{tikzpicture}
 \end{center}
 \end{framedexample}
@@ -3748,8 +3774,6 @@ $1,2,3,4,5,6$, each with probability $1/6$. Thus
     +4\cdot\frac16+5\cdot\frac16+6\cdot\frac16\\
     &=\frac{1+2+3+4+5+6}{6}=\frac{21}{6}=3.5.
 \end{align*}
-An individual roll is always an integer; $3.5$ describes the average.
-
 \textbf{Step 2: the sum of two fair independent dice.}
 Let $X=Y_1+Y_2$. There are $6\cdot6=36$ equally likely ordered pairs
 of faces. The table shows the sum for each pair:
@@ -3782,7 +3806,7 @@ sum of the expected values. Hence
 
 For a randomized algorithm, the running time on a fixed input is
 also a random variable. Its expected running time averages over the
-algorithm's random choices. The input itself can stay exactly the same.
+algorithm's random choices.
 
 \section{QuickSort: choose a pivot and partition}
 
@@ -3790,10 +3814,10 @@ QuickSort sorts an array by choosing one of its elements as a
 \emph{pivot}. It compares the remaining elements with that pivot and
 separates them into two smaller arrays.
 
+\Needspace{12\baselineskip}
 \begin{frameddefn}{Pivot and partition}\label{def:quicksort-pivot}
 Choose an index $p$ uniformly from $\{1,\ldots,n\}$ and let $v=A[p]$
-be the pivot value. Excluding this selected occurrence of the pivot,
-form
+be the pivot value. Excluding $A[p]$, form
 \[
   A_1=[\text{elements of }A\text{ that are }\leq v],\qquad
   A_2=[\text{elements of }A\text{ that are }>v].
@@ -3827,9 +3851,6 @@ $A_2$. Thus
 \[
   A_1=[9,2,7,1,8,0,3],\qquad A_2=[16,13,15].
 \]
-These parts need not be sorted yet. What partitioning establishes is
-their position relative to the pivot.
-
 \textbf{Step 3: sort the two parts recursively.}
 The calls return
 \[
@@ -3883,10 +3904,24 @@ Both recursive inputs have one element, so they are returned as they
 are. Concatenating gives $[0,1,2]$.
 
 \textbf{Step 3: sort $[9,7,8]$ using pivot $7$.}
-The partition is $[\,]\quad\boxed{7}\quad[9,8]$.
-The empty array is a base case. Sorting $[9,8]$ with pivot $9$
-gives $[8]\quad\boxed{9}\quad[\,]$, hence $[8,9]$.
-The result for this branch is $[7,8,9]$.
+
+The partition is
+\[
+  [\,]\quad\boxed{7}\quad[9,8].
+\]
+The empty array is a base case.
+
+Sorting $[9,8]$ with pivot $9$ gives
+\[
+  [8]\quad\boxed{9}\quad[\,],
+\]
+so this recursive call returns $[8,9]$.
+
+Combining this result with pivot $7$ gives
+\[
+  [\,]\quad\boxed{7}\quad[8,9]
+  \quad\longrightarrow\quad[7,8,9].
+\]
 
 \textbf{Step 4: return the sorted first part.}
 Join the results from Steps 2 and 3 around the pivot from Step 1:
@@ -3967,13 +4002,13 @@ $\Theta(n\log n)$ time.
 
 \Needspace{10\baselineskip}
 \textbf{The worst case.}
-If the pivot is always the smallest value, the recursive sizes are
-$0$ and $n-1$. The next nonempty call has size $n-1$, then $n-2$,
-and so on. The number of pivot comparisons is
+If the pivot is always an extreme value (the smallest or the largest),
+one recursive input is empty and the other has $n-1$ elements. The
+next nonempty call has size $n-1$, then $n-2$, and so on. The number
+of pivot comparisons is
 \[
   (n-1)+(n-2)+\cdots+1=\frac{n(n-1)}2=\Theta(n^2).
 \]
-Always choosing the largest value gives the same cost.
 
 \Needspace{25\baselineskip}
 \begin{center}
@@ -3981,7 +4016,7 @@ Always choosing the largest value gives the same cost.
   size/.style={draw,rounded corners,minimum width=0.6cm,
     minimum height=0.55cm,fill=PlotBlue!8}]
   \node[font=\small\bfseries] at (-3,0.6) {Balanced pivots};
-  \node[font=\small\bfseries] at (3.5,0.6) {Always the smallest pivot};
+  \node[font=\small\bfseries] at (3.5,0.6) {Always an extreme pivot};
   \node[size] (a) at (-3,-0.2) {$7$};
   \node[size] (l) at (-4.3,-1.4) {$3$};
   \node[size] (r) at (-1.7,-1.4) {$3$};
@@ -4015,74 +4050,17 @@ an extreme pivot at every non-base call is
   \frac2n\cdot\frac2{n-1}\cdots\frac22
   =\frac{2^{n-1}}{n!}.
 \]
+This probability tends to $0$ very quickly as $n$ grows.
 Randomization allows this bad execution, but does not force it.
-To obtain an expected-time bound, we average the work of all possible
-pivot choices.
 
-\subsection{Why the expected cost is $O(n\log n)$}
+\subsection{The expected cost}
 
-We can count comparisons by looking at pairs of values.
-Conceptually label the values in sorted order
-$z_1<z_2<\cdots<z_n$. These labels help the analysis; the algorithm
-still starts from its unsorted input.
-
-\textbf{Step 1: when are two values compared?}
-Take $z_i<z_j$. They are compared only if one becomes a pivot while
-both are still in the same subproblem. A pivot strictly between them
-separates them into different branches, so they will never be compared.
-A pivot outside their interval keeps them together in one branch.
-
-\Needspace{17\baselineskip}
-\begin{framedexample}{Will $2$ and $5$ be compared?}\label{ex:quicksort-pair}
-For the values $1,2,3,4,5,6$, focus on the interval $[2,3,4,5]$.
-\begin{itemize}
-  \item If its first selected pivot is $2$ or $5$, that pivot is
-    compared with the other endpoint.
-  \item If it is $3$ or $4$, the endpoints enter different branches.
-\end{itemize}
-Each of the four values is equally likely to be the first pivot
-selected from this interval. Two choices lead to the comparison:
-\[
-  \Prob(2\text{ and }5\text{ are compared})=\frac24=\frac12.
-\]
-\end{framedexample}
-
-\textbf{Step 2: write the probability for a general pair.}
-The interval from $z_i$ to $z_j$ contains $j-i+1$ values. The two
-endpoints are the favourable first pivots, so
-\[
-  \Prob(z_i\text{ and }z_j\text{ are compared})=\frac2{j-i+1}.
-\]
-
-\textbf{Step 3: add the expected contributions.}
-Let $I_{ij}$ be $1$ if this pair is compared and $0$ otherwise.
-Its expected contribution to the comparison count is
-\[
-  \E[I_{ij}]=1\cdot\frac2{j-i+1}+0\cdot
-    \left(1-\frac2{j-i+1}\right)=\frac2{j-i+1}.
-\]
-Each pair is compared at most once, because a selected pivot is
-removed from subsequent calls. Thus the total comparison count $C$
-is the sum of these $0$--$1$ contributions. By linearity of expectation,
-\[
-  \E[C]=\sum_{i=1}^{n-1}\sum_{j=i+1}^{n}\frac2{j-i+1}.
-\]
-For a fixed $i$, the denominators are $2,3,\ldots,n-i+1$. This is
-bounded by twice the harmonic sum
-$H_n=1+\frac12+\cdots+\frac1n$, which satisfies $H_n\leq1+\ln n$.
-Summing over at most $n$ choices of $i$ gives
-\[
-  \E[C]\leq2nH_n\leq2n(1+\ln n)=O(n\log n).
-\]
-A non-base call on $m$ elements makes $m-1$ pivot comparisons and
-does $O(m)$ total work. Since $m\leq2(m-1)$ for $m\geq2$, its work
-is bounded by a constant times its comparison count. The base cases
-add $O(n)$ work. Therefore
+Averaging over the random pivot choices, one can prove that the
+expected running time of QuickSort is $O(n\log n)$:
 \[
   \boxed{\E[T(n)]=O(n\log n),\qquad
     T_{\mathrm{worst}}(n)=\Theta(n^2).}
 \]
-The expectation is over the uniformly random pivot choices for a
-fixed input of distinct values.
+We do not prove the expected bound here.
 
 \end{document}
