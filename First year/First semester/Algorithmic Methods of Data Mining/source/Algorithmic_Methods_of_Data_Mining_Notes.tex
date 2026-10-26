@@ -3434,10 +3434,6 @@ takes constant time. Its running time is therefore
 \[
   \boxed{T_{\mathrm{Merge}}(n_1,n_2)=\Theta(n_1+n_2).}
 \]
-In our example, $n_1=5$ and $n_2=8$, so Merge copies $5+8=13$
-elements into the output. Even if one input is exhausted early,
-the remaining elements of the other still have to be copied.
-
 The separate output array uses $\Theta(n_1+n_2)$ additional space;
 the three indices require only constant extra space.
 
