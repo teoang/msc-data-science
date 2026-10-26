@@ -2057,9 +2057,201 @@ different subproblems $\ED(S^i,T^j)$, so storing each value once
 (dynamic programming) avoids the repeated work.
 \end{notebox}
 
+\chapter{Memory and data representation}
+
+\lecturestart{19 October}
+
+\section{Bytes, addresses and consecutive memory locations}
+
+Imagine memory as numbered cells, drawn vertically below. Each cell
+holds one byte. The number on the left is its address: it identifies
+the cell, while the contents are stored inside it.
+\begin{center}
+\begin{tikzpicture}[font=\small,>=stealth]
+  \node[anchor=east] at (-0.25,0.4) {Address};
+  \node at (1.25,0.4) {Contents};
+  \foreach \i in {0,...,3} {
+    \pgfmathtruncatemacro{\address}{1000+\i}
+    \draw[fill=PlotBlue!7] (0,-0.5*\i) rectangle (2.5,-0.5*\i-0.5);
+    \node[anchor=east] at (-0.25,-0.5*\i-0.25) {$\address$};
+    \node at (1.25,-0.5*\i-0.25) {1 byte};
+  }
+  \node at (1.25,-2.3) {$\vdots$};
+  \draw[->] (3.3,-0.1) -- (3.3,-1.9)
+    node[midway,right,align=left] {Increasing\\addresses};
+\end{tikzpicture}
+\end{center}
+The address and the contents are different things: the label $1000$
+tells us where the first displayed byte is, not what value it holds.
+We use illustrative decimal addresses throughout these drawings.
+
+\begin{frameddefn}{Bit and byte}\label{def:bit-byte}
+A \emph{bit} is a binary digit, either $0$ or $1$.
+A \emph{byte} consists of eight bits.
+\end{frameddefn}
+
+\begin{frameddefn}{Memory address}\label{def:memory-address}
+In byte-addressable memory, a \emph{memory address} identifies the
+location of one byte. The address specifies \emph{where} data are
+stored; the contents are the data stored at that location.
+\end{frameddefn}
+
+\begin{framedexample}{A block occupying eight consecutive bytes}
+Suppose a piece of data occupies eight bytes starting at address
+$1000$. Follow the addresses down the drawing:
+\begin{center}
+\begin{tikzpicture}[font=\small,>=stealth]
+  \node[anchor=east] at (-0.25,0.35) {Address};
+  \foreach \i in {0,...,7} {
+    \pgfmathtruncatemacro{\address}{1000+\i}
+    \pgfmathtruncatemacro{\byteindex}{\i+1}
+    \draw[fill=PlotBlue!10] (0,-0.38*\i) rectangle (2,-0.38*\i-0.38);
+    \node[anchor=east] at (-0.25,-0.38*\i-0.19) {$\address$};
+    \node at (1,-0.38*\i-0.19) {byte \byteindex};
+  }
+  \draw[thick,PlotBlue] (2.2,0) -- (2.45,0) -- (2.45,-3.04) -- (2.2,-3.04);
+  \node[anchor=west,align=left] at (2.7,-1.52) {One piece of data\\occupying 8 bytes};
+  \draw[fill=PlotRed!10] (0,-3.04) rectangle (2,-3.54);
+  \node[anchor=east,text=PlotRed] at (-0.25,-3.29) {$1008$};
+  \node at (1,-3.29) {next block};
+  \draw[->,PlotRed] (4.5,-3.29) -- (2.15,-3.29);
+  \node[anchor=west,text=PlotRed] at (4.5,-3.29) {starts here};
+  \node at (1,-3.85) {$\vdots$};
+\end{tikzpicture}
+\end{center}
+The starting byte is already the first of the eight, so the last
+byte is at $1000+7=1007$. The first address \emph{after} the block is
+\[
+  1000+8=\boxed{1008}.
+\]
+If a second eight-byte block starts immediately afterwards, its
+starting address is $1008$.
+\end{framedexample}
+
+This explains why a memory diagram can show addresses advancing in
+blocks: it may label the start of each block rather than drawing
+every individual byte. For eight-byte blocks placed consecutively,
+the starting addresses would be $1000,1008,1016,\ldots$.
+
+\section{Python names refer to objects}
+
+Now consider the Python assignment \texttt{x = 5}. We distinguish
+the name \texttt{x}, the object representing the integer $5$, and
+the address where that object is stored.
+
+\begin{frameddefn}{Reference to an object}\label{def:object-reference}
+A Python variable name is associated with an object through a
+\emph{reference}. In our diagrams, an arrow from the name to the
+object represents that reference.
+\end{frameddefn}
+
+\Needspace{23\baselineskip}
+\begin{framedexample}{Following the reference in \texttt{x = 5}}
+\textbf{Step 1: an object represents the integer $5$.}
+The drawing shows its type, \texttt{int}, and its value, $5$.
+
+\textbf{Step 2: the name \texttt{x} is associated with that object.}
+The arrow lets us follow the reference from the name to the object.
+\begin{center}
+\begin{tikzpicture}[font=\small,>=stealth]
+  \node[draw,rounded corners,fill=PlotRed!8,minimum width=1cm,
+    minimum height=0.7cm] (name) at (0,0) {\texttt{x}};
+  \node[above=0.35cm of name] {Variable name};
+  \node[draw,rounded corners,fill=PlotBlue!8,align=left,
+    minimum width=2.8cm,minimum height=1.1cm] (object) at (5,0)
+    {type: \texttt{int}\\value: $5$};
+  \node[above=0.35cm of object] {Object in memory};
+  \node[below=0.2cm of object] {address: $1000$};
+  \draw[->,thick] (name.east) -- node[above] {reference} (object.west);
+\end{tikzpicture}
+\end{center}
+The address $1000$ is illustrative. It identifies the object's
+location, while $5$ is the object's value and \texttt{x} is its name
+in this example.
+
+\textbf{Step 3: evaluate \texttt{print(x)}.}
+Python looks up the object associated with \texttt{x}. Following the
+arrow reaches the integer object with value $5$, so the output is
+\texttt{5}.
+\end{framedexample}
+
 \chapter{Text mining}
 
 \lecturestart{20 October}
+
+\section{From raw text to terms}
+
+A search engine receives a query and looks for the top $k$ most
+related documents in a collection, or \emph{corpus}. We will turn
+this into a nearest-neighbour problem, but first we need to turn
+each document's text into terms that we can compare and count.
+
+\begin{frameddefn}{Text preprocessing}\label{def:text-preprocessing}
+\emph{Text preprocessing} transforms a document, initially a sequence
+of characters, into a sequence of words or terms suitable for the
+analysis that follows.
+\end{frameddefn}
+
+\begin{center}
+\begin{tikzpicture}[font=\small,>=stealth]
+  \node[draw,rounded corners,fill=PlotBlue!8,align=center,
+    minimum width=2.8cm,minimum height=0.9cm] (raw) at (0,0)
+    {Document\\characters};
+  \node[draw,rounded corners,fill=PlotGreen!8,align=center,
+    minimum width=3cm,minimum height=0.9cm] (process) at (4.2,0)
+    {Preprocessing};
+  \node[draw,rounded corners,fill=PlotBlue!8,align=center,
+    minimum width=3cm,minimum height=0.9cm] (terms) at (8.5,0)
+    {Sequence of\\words or terms};
+  \draw[->,thick] (raw.east) -- (process.west);
+  \draw[->,thick] (process.east) -- (terms.west);
+\end{tikzpicture}
+\end{center}
+
+\textbf{1. Tokenization.}
+Split the text into units called \emph{tokens}. For example, the
+document
+\begin{center}
+  ``Today is Monday and the weather is awesome.''
+\end{center}
+can be split into the word tokens
+\begin{center}
+  \texttt{Today}, \texttt{is}, \texttt{Monday}, \texttt{and},
+  \texttt{the}, \texttt{weather}, \texttt{is}, \texttt{awesome}.
+\end{center}
+The input was a string of characters; the output is now a sequence
+of separate terms.
+
+\textbf{2. Stopword removal.}
+Remove words on a chosen \emph{stopword list}, such as
+\texttt{the}, \texttt{is}, \texttt{to} and \texttt{and}. These words
+are often too common to help distinguish document topics. Depending
+on the list, a phrase such as ``to be or not to be'' can lose most
+of its words. We will later examine how common words affect cosine
+similarity.
+
+\textbf{3. Text normalization.}
+Map different written forms to a common form when they should match.
+For example,
+\[
+  \texttt{U.S.A.}\longrightarrow\texttt{USA},\qquad
+  \texttt{Monday}\longrightarrow\texttt{monday}.
+\]
+The first transformation removes punctuation within an abbreviation;
+the second ignores capitalization. Other choices concern accents
+and hyphens. This normalization acts on the text; the vector
+normalization introduced later rescales numerical coordinates.
+
+\textbf{4. Stemming.}
+Reduce related word forms to a common \emph{stem}, using rules that
+remove affixes such as suffixes. For example,
+\[
+  \texttt{playing},\ \texttt{plays},\ \texttt{play}
+  \quad\longrightarrow\quad\texttt{play}.
+\]
+The aim is to count these forms together instead of treating each
+as a completely separate term. \texttt{NLTK} is a Python toolkit
+for text-processing operations.
 
 \section{From documents to vectors}
 
