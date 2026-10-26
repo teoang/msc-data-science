@@ -185,3 +185,13 @@ its logo at these paths, or replace the package and its custom environments with
 your own definitions.
 
 🐛 Found an error? [Open an issue](https://github.com/teoang/msc-data-science/issues).
+
+## License
+
+The notes, LaTeX sources and scripts in this repository are released under the [Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License](https://creativecommons.org/licenses/by-nc-sa/4.0/) (CC BY-NC-SA 4.0). You may share and adapt them as long as you:
+
+- **credit** the author and indicate any changes;
+- do **not** use them for commercial purposes;
+- release any adapted version under the **same license**.
+
+The Sapienza logo and any figures taken from other sources remain the property of their respective owners and are not covered by this license. The full license text is in [LICENSE](LICENSE).
