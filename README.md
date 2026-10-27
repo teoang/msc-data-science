@@ -164,14 +164,21 @@ Compiled from Flavia's handwritten notes up to 16 October, in the order the topi
 31. Boolean AND search; inverted indexes and sorted posting lists.
 32. Posting-list intersections with pointers, algorithm and query-cost analysis.
 
+**22 October**
+
+33. Terms stored as integer identifiers.
+34. Boolean queries with OR and AND NOT: the same pointer merge with different rules, a worked query, and the cost O(|L| + |M|).
+35. Faster ranked search: approximate answers by searching inside one cluster.
+36. Ranked retrieval with an inverted index: (document, TF) postings, scoring only documents that share a query term, precomputed document norms, and the top-K algorithm with a worked example.
+
 **26 October**
 
-33. The sorting problem; Merge: combining two sorted arrays in linear time.
-34. MergeSort: split, sort the halves and merge, with a worked 13-element example.
-35. MergeSort running time: expanding the recurrence 2T(n/2) + cn to Θ(n log n).
-36. Randomized algorithms; expected value with one and two dice.
-37. Randomized QuickSort: pivot, partition and a worked execution.
-38. QuickSort cost: balanced partitions, the Θ(n²) worst case with extreme pivots, and the expected O(n log n) bound (stated without proof).
+37. The sorting problem; Merge: combining two sorted arrays in linear time.
+38. MergeSort: split, sort the halves and merge, with a worked 13-element example.
+39. MergeSort running time: expanding the recurrence 2T(n/2) + cn to Θ(n log n).
+40. Randomized algorithms; expected value with one and two dice.
+41. Randomized QuickSort: pivot, partition and a worked execution.
+42. QuickSort cost: balanced partitions, the Θ(n²) worst case with extreme pivots, and the expected O(n log n) bound (stated without proof).
 
 </details>
 
