@@ -2787,7 +2787,7 @@ document. We can then compare the weighted document vectors using
 the same cosine-similarity formula as before, provided neither
 weighted vector is zero.
 
-\section{Using document vectors for search}
+\section{Using document vectors for search}\label{sec:vector-search}
 
 We can use \hyperref[def:tf-idf]{TF-IDF} vectors to build a search engine. A \emph{query} is
 the text entered by the user. Given a query and a positive integer
@@ -3245,6 +3245,275 @@ In a much larger corpus, rare query terms can have short lists,
 making the online search far cheaper than a full corpus scan.
 If the terms occur in almost every document, their lists are long
 and the advantage is smaller.
+
+\lecturestart{22 October}
+
+\section{Terms as integer identifiers}
+
+Comparing numbers is simpler and cheaper than comparing words.
+Offline, we can sort the vocabulary and give each term an integer
+\emph{identifier}, its position in that order. A document is then
+stored as a sequence of identifiers, and the inverted index uses
+these numbers as keys.
+
+\begin{framedexample}{From words to identifiers}
+In a sorted English vocabulary, \texttt{a} receives $0$, \texttt{aa}
+receives $1$, and so on. Suppose \texttt{is}, \texttt{thursday} and
+\texttt{today} receive the identifiers below.
+\begin{center}
+\begin{tikzpicture}[>=stealth,font=\small,
+  word/.style={draw=PlotBlue!75!black,rounded corners,fill=PlotBlue!14,
+    minimum width=2cm,minimum height=0.6cm},
+  termid/.style={draw=PlotGreen!60!black,rounded corners,fill=PlotGreen!16,
+    minimum width=2cm,minimum height=0.6cm}]
+  \node[anchor=east] at (-1.4,0) {Document};
+  \node[anchor=east] at (-1.4,-1.4) {Stored as};
+  \foreach \x/\w/\n in {0/today/63110,2.6/is/9323,5.2/thursday/57632} {
+    \node[word] (w\n) at (\x,0) {\texttt{\w}};
+    \node[termid] (i\n) at (\x,-1.4) {$\n$};
+    \draw[->] (w\n) -- (i\n);
+  }
+\end{tikzpicture}
+\end{center}
+\end{framedexample}
+
+In the examples we keep letters such as $A,B,C$ for the terms, which
+are easier to read than five-digit numbers.
+
+\section{Boolean queries with OR and NOT}
+
+An AND query intersects posting lists. A Boolean query can also use
+OR and NOT. For example, someone looking for fettuccine with veal,
+but not fettuccine Alfredo, could search for
+\begin{center}
+  \texttt{fettuccine} AND \texttt{vitello} AND NOT \texttt{alfredo}.
+\end{center}
+For two posting lists $L$ and $M$, each operation corresponds to a
+set operation on document identifiers:
+\begin{center}
+\begin{tikzpicture}[font=\small]
+  % L AND M: the overlap.
+  \begin{scope}
+    \clip (-0.45,0) circle (0.75);
+    \fill[PlotBlue!40] (0.45,0) circle (0.75);
+  \end{scope}
+  % L OR M: both circles.
+  \fill[PlotBlue!40] (4.05,0) circle (0.75) (4.95,0) circle (0.75);
+  % L AND NOT M: L without the overlap.
+  \begin{scope}
+    \clip (8.55,0) circle (0.75);
+    \fill[PlotBlue!40,even odd rule] (8.55,0) circle (0.75)
+      (9.45,0) circle (0.75);
+  \end{scope}
+  \foreach \x/\op/\set in {0/AND/{L\cap M},4.5/OR/{L\cup M},
+      9/AND NOT/{L\setminus M}} {
+    \draw (\x-0.45,0) circle (0.75) (\x+0.45,0) circle (0.75);
+    \node at (\x-0.85,0) {$L$};
+    \node at (\x+0.85,0) {$M$};
+    \node[font=\small\bfseries] at (\x,1.1) {$L$ \op\ $M$};
+    \node at (\x,-1.1) {$\set$};
+  }
+\end{tikzpicture}
+\end{center}
+A query containing only NOT, such as NOT $D$, would return almost the
+whole corpus. NOT is therefore used together with AND, as in
+$A$ AND NOT $D$.
+
+\Needspace{16\baselineskip}
+\begin{framedexample}{Evaluating $(A\text{ AND }E)\text{ OR }(C\text{ AND NOT }D)$}
+Using the inverted index of Example~\ref{ex:inverted-index}, evaluate
+the two parts in parentheses first, then combine them with OR.
+\begin{center}
+\begin{tikzpicture}[>=stealth,font=\small,
+  list/.style={draw=PlotBlue!75!black,rounded corners,fill=PlotBlue!14,
+    inner sep=3pt,minimum height=0.6cm},
+  res/.style={draw=PlotGreen!60!black,rounded corners,fill=PlotGreen!16,
+    inner sep=3pt,minimum height=0.6cm}]
+  \node[list] (A) at (-4.9,0) {$L(A)=[1,2,4,5]$};
+  \node[list] (E) at (-1.8,0) {$L(E)=[2,4]$};
+  \node[list] (C) at (1.4,0) {$L(C)=[1,4,5,6]$};
+  \node[list] (D) at (4.7,0) {$L(D)=[1,3,4,6]$};
+  \node[res] (AE) at (-3.35,-1.5) {$L(A)\cap L(E)=[2,4]$};
+  \node[res] (CD) at (3.05,-1.5) {$L(C)\setminus L(D)=[5]$};
+  \node[res,very thick,fill=PlotGreen!30] (R) at (-0.15,-3)
+    {$[2,4]\cup[5]=[2,4,5]$};
+  \draw[->] (A) -- (AE);
+  \draw[->] (E) -- (AE);
+  \draw[->] (C) -- (CD);
+  \draw[->] (D) -- (CD);
+  \draw[->] (AE) -- (R);
+  \draw[->] (CD) -- (R);
+\end{tikzpicture}
+\end{center}
+\end{framedexample}
+
+\Needspace{14\baselineskip}
+\subsection{The same pointers, different rules}
+
+All three operations scan the two sorted lists from left to right
+with one pointer each, as in Algorithm~\ref{alg:posting-intersection}.
+Only the action taken at each step changes:
+\begin{center}
+\small
+\begin{tabular}{l|>{\raggedright\arraybackslash}p{3.2cm}%
+  |>{\raggedright\arraybackslash}p{3.9cm}%
+  |>{\raggedright\arraybackslash}p{3.6cm}}
+  Query & Same identifier & Different identifiers & One list ends\\\hline
+  $L$ AND $M$ & output it; advance both & advance the smaller & stop\\[2pt]
+  $L$ OR $M$ & output it once; advance both & output the smaller; advance it
+    & copy the rest of the other list\\[2pt]
+  $L$ AND NOT $M$ & skip it; advance both & output the smaller only if it
+    is in $L$; advance it & if $M$ ends, copy the rest of $L$; if $L$ ends,
+    stop
+\end{tabular}
+\end{center}
+Every pointer still moves only forwards, so each operation costs
+$O(\abs L+\abs M)$. A query combining several operations therefore
+costs $O\bigl(\sum_{t\in Q}n_t\bigr)$, as for AND.
+
+\section{Faster ranked search}
+
+We return to ranked search (Section~\ref{sec:vector-search}): given a
+query vector $\mathbf q$ and an integer $K$, return the $K$ documents
+with the largest cosine similarity to $\mathbf q$. Scanning every
+document costs $\Theta(Nm)$. Can we avoid looking at every document
+and every term?
+
+\subsection{Searching inside one cluster}
+
+Offline, we can group the documents into \emph{clusters} of similar
+documents and give each cluster a representative vector. Online, we
+first find the cluster whose representative is closest to the query,
+then compute cosine similarities only for the documents in that
+cluster.
+
+\Needspace{14\baselineskip}
+\begin{center}
+\begin{tikzpicture}[>=stealth,font=\small,
+  doc/.style={circle,fill=PlotBlue!70!black,inner sep=1.1pt},
+  cl/.style={draw=PlotBlue!70!black,dashed,fill=PlotBlue!8}]
+  \draw[->] (0,0) -- (7.2,0) node[right] {term $1$};
+  \draw[->] (0,0) -- (0,4.3) node[above] {term $2$};
+  \filldraw[cl] (1.6,3.0) circle (0.75);
+  \filldraw[cl] (3.7,3.4) circle (0.55);
+  \filldraw[cl] (4.0,1.35) circle (0.7);
+  \filldraw[cl] (5.95,1.85) circle (0.7);
+  \node at (0.65,3.75) {$C_1$};
+  \node at (3.7,4.2) {$C_2$};
+  \node at (3.3,0.45) {$C_3$};
+  \node at (6.85,2.6) {$C_4$};
+  \foreach \p in {(1.3,3.3),(1.9,3.4),(1.4,2.6),(2.0,2.8),(1.2,3.0),
+      (3.5,3.5),(3.9,3.2),(3.8,3.7),
+      (3.7,1.6),(4.3,1.1),(3.9,1.0),(4.2,1.7),
+      (5.7,2.2),(6.2,1.6),(6.3,2.1),(5.7,1.6)}
+    \node[doc] at \p {};
+  \draw[->,PlotRed,thick] (0,0) -- (1.75,3.05) node[right] {$\mathbf q_1$};
+  \draw[->,PlotRed,thick] (0,0) -- (4.95,1.6) node[above] {$\mathbf q_2$};
+\end{tikzpicture}
+\end{center}
+For $\mathbf q_1$, the closest documents are clearly in $C_1$. The query
+$\mathbf q_2$ lies between $C_3$ and $C_4$, so its best documents may
+belong to either cluster: searching only one of them can miss good
+results. Clustering makes search faster, but the answer is only
+approximate.
+
+\subsection{Scoring only documents that share a query term}
+
+Write $d_{i,t}$ for the weight of term $t$ in document $D_i$ and $q_t$
+for its weight in the query. All weights are nonnegative, so the dot
+product
+\[
+  \mathbf q\cdot\mathbf d_i=\sum_{t\in Q}q_t\,d_{i,t}
+\]
+is positive only if $D_i$ contains at least one query term. Every other
+document has similarity $0$. The documents that can score are exactly
+those in the posting lists of the query terms.
+
+To compute the weights from the index, we extend each posting list:
+each entry stores a pair $(i,\operatorname{TF}(t,D_i))$ instead of the
+identifier alone. The cosine similarity then splits into a part
+computed online and parts that do not depend on the documents or on
+the query:
+\[
+  \operatorname{sim}_{\cos}(\mathbf q,\mathbf d_i)
+  =\frac{\overbrace{\textstyle\sum_{t\in Q}q_t\,d_{i,t}}^{\text{online,
+      from the posting lists}}}
+    {\underbrace{\norm{\mathbf q}_2}_{\text{same for every }i}\,
+     \underbrace{\norm{\mathbf d_i}_2}_{\text{stored offline}}}.
+\]
+\begin{itemize}
+  \item $\norm{\mathbf q}_2$ is the same for every document, so it does
+    not change the ranking and we can ignore it.
+  \item $\norm{\mathbf d_i}_2$ does not depend on the query: we compute
+    it offline and store it with the document.
+  \item $\operatorname{IDF}(t)=\log(N/n_t)$ depends only on the length
+    $n_t$ of the posting list $L(t)$, so it is also available offline.
+\end{itemize}
+
+\Needspace{22\baselineskip}
+\begin{framedalgo}{Top-$K$ search with an inverted index}\label{alg:ranked-index}
+\begin{algorithmic}[1]
+  \Function{TopK}{$Q,K$}
+    \State $S\gets$ an empty map from documents to scores
+    \For{each term $t\in Q$}
+      \For{each pair $(i,\mathit{tf})$ in $L(t)$}
+        \State $S[i]\gets S[i]+q_t\cdot\mathit{tf}\cdot\operatorname{IDF}(t)$
+          \Comment{missing entries start at $0$}
+      \EndFor
+    \EndFor
+    \For{each document $i$ in $S$}
+      \State $S[i]\gets S[i]/\norm{\mathbf d_i}_2$ \Comment{norm stored offline}
+    \EndFor
+    \State \Return the $K$ documents with the largest scores in $S$
+  \EndFunction
+\end{algorithmic}
+\end{framedalgo}
+
+The loops read each entry of the query's posting lists once, in
+$O\bigl(\sum_{t\in Q}n_t\bigr)$ time. Only the $c\leq\sum_{t\in Q}n_t$
+documents found in those lists receive a score, and sorting them
+costs $O(c\log c)$. When the query terms are rare, this is far less
+than the $\Theta(Nm+N\log N)$ needed to score and sort every document.
+
+\Needspace{26\baselineskip}
+\begin{framedexample}{Scoring the query $Q=\{C,E\}$}\label{ex:ranked-index}
+For simplicity, give every term the same weight: $q_t=1$ for the query
+terms and $d_{i,t}=\operatorname{TF}(t,D_i)$. Take the six documents of
+Example~\ref{ex:inverted-index}, now with repeated terms:
+\[
+\begin{aligned}
+  D_1&:A\,B\,C\,D, & D_2&:A\,B\,E\,G, & D_3&:B\,D\,F,\\
+  D_4&:A\,C\,C\,D\,D\,E, & D_5&:A\,C\,G, & D_6&:C\,C\,C\,D\,G.
+\end{aligned}
+\]
+The posting lists of the query terms store (document, TF) pairs:
+\[
+  L(C)=[(1,1),(4,2),(5,1),(6,3)],\qquad L(E)=[(2,1),(4,1)].
+\]
+Add up the TF values of each document found in these two lists, then
+divide by its stored norm:
+\begin{center}
+\begin{tabular}{c|c|c|c}
+  Document & $\operatorname{TF}(C)+\operatorname{TF}(E)$
+    & $\norm{\mathbf d_i}_2$ (offline) & Score\\\hline
+  $1$ & $1+0=1$ & $\sqrt4=2$ & $0.50$\\
+  $2$ & $0+1=1$ & $\sqrt4=2$ & $0.50$\\
+  $4$ & $2+1=3$ & $\sqrt{10}\approx3.16$ & $\mathbf{0.95}$\\
+  $5$ & $1+0=1$ & $\sqrt3\approx1.73$ & $0.58$\\
+  $6$ & $3+0=3$ & $\sqrt{11}\approx3.32$ & $\mathbf{0.90}$
+\end{tabular}
+\end{center}
+For $K=2$ we return $D_4$ and $D_6$. Document $3$ is never examined,
+because it contains neither $C$ nor $E$. Dividing every score by
+$\norm{\mathbf q}_2=\sqrt2$ would give the exact cosines, with the same
+ranking.
+\end{framedexample}
+
+With TF-IDF weights, the procedure is the same: multiply each TF by
+$\operatorname{IDF}(t)$, computed from the list length $n_t$, and store
+the norms of the TF-IDF vectors. In the example,
+$\operatorname{IDF}(E)=\log(6/2)$ is larger than
+$\operatorname{IDF}(C)=\log(6/4)$, so $E$ would count more than $C$.
 
 \chapter{Sorting}
 
