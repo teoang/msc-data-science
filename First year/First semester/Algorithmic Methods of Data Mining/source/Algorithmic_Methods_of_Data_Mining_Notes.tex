@@ -4354,9 +4354,7 @@ For the scores
 \[
   12,\ 7,\ 20,\ 3,\ 16,\ 9,\ 25,
 \]
-the top $3$ are $20,16,25$. A search engine keeps each document
-identifier together with its score, so it can return the corresponding
-documents.
+the top $3$ are $20,16,25$.
 \end{framedexample}
 
 \textbf{First approach: sort everything.}
@@ -4381,8 +4379,11 @@ $k$ this can help, but finding the same kind of candidate repeatedly
 is expensive. We want a way to keep the smallest retained score
 easy to reach, while updating the candidates quickly.
 
-This motivates \emph{data structures}: the arrangement of the data
-can change the cost of the operations our algorithm needs.
+This motivates \emph{data structures}. An array is only one way to
+organize the candidates. Other data structures support the same
+operations with different costs, each offering its own advantages
+and limitations. We will compare these alternatives to see whether
+they offer a better trade-off for our problem.
 
 \section{An interface and its implementation}
 
@@ -4639,14 +4640,13 @@ list ADT}. Bounds are worst-case bounds for a list of $n$ elements;
 array insertion assumes available capacity.
 \begin{center}
 \small
-\begin{tabular}{lccc}
+\begin{tabular}{lcccc}
 \hline
-Operation & Array & Singly linked & Doubly linked \\
+Data structure & \listgetop{i} & \listsetop{x}{i} & \listinsertop{x}{i} & \listremoveop{i} \\[3pt]
 \hline
-\listgetop{i}       & $\Theta(1)$ & $O(n)$ & $O(n)$ \\
-\listsetop{x}{i}     & $\Theta(1)$ & $O(n)$ & $O(n)$ \\
-\listinsertop{x}{i}  & $O(n)$      & $O(n)$ & $O(n)$ \\
-\listremoveop{i}    & $O(n)$      & $O(n)$ & $O(n)$ \\
+Array & $\Theta(1)$ & $\Theta(1)$ & $O(n)$ & $O(n)$ \\
+Singly linked & $O(n)$ & $O(n)$ & $O(n)$ & $O(n)$ \\
+Doubly linked & $O(n)$ & $O(n)$ & $O(n)$ & $O(n)$ \\
 \hline
 \end{tabular}
 \end{center}
@@ -4732,9 +4732,20 @@ represented as a binary tree satisfying two conditions:
 \end{enumerate}
 \end{frameddefn}
 
-Following a path from the root downwards never increases the
-value. Therefore the root contains a global maximum, and
+\begin{frameddefn}{Binary min-heap}\label{def:binary-min-heap}
+A \emph{binary min-heap} is a data structure that implements the
+\hyperref[def:min-priority-queue]{min-priority queue ADT}. It is
+represented as a complete binary tree in which each parent's value
+is less than or equal to the values of its children.
+\end{frameddefn}
+
+In a max-heap, following a path from the root downwards never
+increases the value. Therefore the root contains a global maximum, and
 $\pqpeekop{Max}$ takes $\Theta(1)$ time.
+
+In a min-heap, values never decrease along a path from the root
+downwards. The root therefore contains a global minimum, and
+$\pqpeekop{Min}$ takes $\Theta(1)$ time.
 
 \begin{framedexample}{A max-heap and its array}\label{ex:heap-array}
 The small labels give positions in \emph{level order}: read each
@@ -5158,20 +5169,21 @@ Section~\ref{sec:vector-search}. To keep the $k$ \emph{largest}
 scores, we repeatedly need the \emph{smallest retained score}:
 it is the weakest candidate and the one a better entry replaces.
 
-We therefore use a \emph{min-heap} of at most $k$ entries.
-Its shape and array representation are the same as for a max-heap,
-but each parent's value is \emph{less than or equal to} its
-children's values. The root is a minimum. Insertions sift up when a child
+We therefore use a \emph{min-heap} of at most $k$ entries
+(Definition~\ref{def:binary-min-heap}). Its array representation
+is the same as for a max-heap. Insertions sift up when a child
 is smaller than its parent; extraction sifts down using the smaller
 child. The operation bounds are unchanged.
 
-\begin{frameddefn}{Which heap should we use?}
-To keep the $k$ largest entries, use a \textbf{min-heap} of retained
-entries: the smallest retained entry is at the root.
+\begin{notebox}[Which heap should we use?]
+To keep the $k$ largest values, use a \textbf{min-heap}: its root
+is the smallest value currently retained, so it is the candidate
+to replace when a larger value arrives.
 
-To keep the $k$ smallest entries, use a \textbf{max-heap} of retained
-entries: the largest retained entry is at the root.
-\end{frameddefn}
+To keep the $k$ smallest values, use a \textbf{max-heap}: its root
+is the largest value currently retained, so it is the candidate
+to replace when a smaller value arrives.
+\end{notebox}
 
 The root should expose the retained candidate that we would discard
 first. It is not necessarily the best result we eventually return.
