@@ -4735,8 +4735,14 @@ represented as a binary tree satisfying two conditions:
 \begin{frameddefn}{Binary min-heap}\label{def:binary-min-heap}
 A \emph{binary min-heap} is a data structure that implements the
 \hyperref[def:min-priority-queue]{min-priority queue ADT}. It is
-represented as a complete binary tree in which each parent's value
-is less than or equal to the values of its children.
+represented as a binary tree satisfying two conditions:
+\begin{enumerate}
+  \item \textbf{Shape:} every level is full except possibly the last,
+    which is filled from left to right. Such a tree is
+    \emph{complete}.
+  \item \textbf{Order:} each parent's value is less than or
+    equal to the values of its children.
+\end{enumerate}
 \end{frameddefn}
 
 In a max-heap, following a path from the root downwards never
