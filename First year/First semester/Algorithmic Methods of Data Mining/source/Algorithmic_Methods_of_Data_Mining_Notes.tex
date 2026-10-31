@@ -32,6 +32,20 @@
     \draw[#1,line width=1.2pt]
       ([yshift=-2.5pt]cul.south west) -- ([yshift=-2.5pt]cul.south east);}}
 
+% Keep each list operation's underline consistent across implementations.
+\definecolor{ListGet}{HTML}{0072B2}
+\definecolor{ListSet}{HTML}{D55E00}
+\definecolor{ListInsert}{HTML}{009E73}
+\definecolor{ListRemove}{HTML}{AA4499}
+\newcommand{\listgetop}[1]{\cul{ListGet}{\operatorname{get}(#1)}}
+\newcommand{\listsetop}[2]{\cul{ListSet}{\operatorname{set}(#1,#2)}}
+\newcommand{\listinsertop}[2]{\cul{ListInsert}{\operatorname{insert}(#1,#2)}}
+\newcommand{\listremoveop}[1]{\cul{ListRemove}{\operatorname{remove}(#1)}}
+% Priority queues reuse the insertion, reading and removal colours.
+\newcommand{\pqinsertop}[1]{\cul{ListInsert}{\operatorname{insert}(#1)}}
+\newcommand{\pqpeekop}[1]{\cul{ListGet}{\operatorname{peek#1}()}}
+\newcommand{\pqextractop}[1]{\cul{ListRemove}{\operatorname{extract#1}()}}
+
 % Yellow lecture banner, as in the FSL notes before the chapter reorganization.
 \newcommand{\lecturebanner}[1]{%
   \Needspace{6\baselineskip}%
@@ -2077,7 +2091,7 @@ different subproblems $\ED(S^i,T^j)$, so storing each value once
 (dynamic programming) avoids the repeated work.
 \end{notebox}
 
-\chapter{Memory and data representation}
+\chapter{Memory and data representation}\label{ch:memory-representation}
 
 \lecturestart{19 October}
 
@@ -2843,7 +2857,7 @@ The query is therefore treated as a small document. Representing it
 with the same coordinates and corpus-based IDF weights lets us use
 the same cosine-similarity calculation for retrieval.
 
-\subsection{The cost of searching every document}
+\subsection{The cost of searching every document}\label{sec:search-all-cost}
 
 The simplest search procedure follows four steps:
 \begin{enumerate}
@@ -3371,7 +3385,7 @@ Every pointer still moves only forwards, so each operation costs
 $O(\abs L+\abs M)$. A query combining several operations therefore
 costs $O\bigl(\sum_{t\in Q}n_t\bigr)$, as for AND.
 
-\section{Faster ranked search}
+\section{Faster ranked search}\label{sec:faster-ranked-search}
 
 We return to ranked search (Section~\ref{sec:vector-search}): given a
 query vector $\mathbf q$ and an integer $K$, return the $K$ documents
@@ -4301,5 +4315,962 @@ expected running time of QuickSort is $O(n\log n)$:
     T_{\mathrm{worst}}(n)=\Theta(n^2).}
 \]
 We do not prove the expected bound here.
+
+\chapter{Data structures}\label{ch:data-structures}
+
+\lecturestart{29 October}
+
+% Keep each new definition and worked drawing together on one page.
+\begingroup
+\tcbset{definitionbox/.append style={unbreakable},
+  examplebox/.append style={unbreakable},
+  algorithmbox/.append style={unbreakable}}
+
+\section{Returning to the top-k problem}
+
+We have already met the \emph{top-$k$ problem} in text mining.
+In Section~\ref{sec:vector-search}, a search engine assigns a score
+to each document and returns the $k$ documents with the largest
+scores. Section~\ref{sec:search-all-cost} sorts all scores, while
+Section~\ref{sec:faster-ranked-search} uses an inverted index to
+reduce the number of documents scored. The last step of
+Algorithm~\ref{alg:ranked-index} still asks us to select the $K$
+highest-scoring documents.
+
+Now we focus on that selection step. Suppose the scores have
+already been computed: how can we select the best $k$ without
+sorting every score?
+
+\begin{framedproblem}{Top-$k$ selection}\label{prob:top-k}
+\textbf{Input:} $n$ numerical scores and an integer $1\leq k\leq n$.
+
+\textbf{Output:} $k$ entries with the largest scores, in any order.
+If scores are tied at the cutoff, any $k$ entries satisfying this
+condition are acceptable.
+\end{framedproblem}
+
+\begin{framedexample}{Three results out of seven}
+For the scores
+\[
+  12,\ 7,\ 20,\ 3,\ 16,\ 9,\ 25,
+\]
+the top $3$ are $20,16,25$. A search engine keeps each document
+identifier together with its score, so it can return the corresponding
+documents.
+\end{framedexample}
+
+\textbf{First approach: sort everything.}
+MergeSort orders the $n$ scores in $O(n\log n)$ time; we then take
+the largest $k$. This works, but also orders scores that we will
+discard.
+
+\textbf{Second approach: keep only $k$ candidates in an array.}
+Keep the first $k$ scores. For each new score, scan the candidate
+array to find its minimum. If the new score is larger, replace that
+minimum. Otherwise discard the new score.
+
+\begin{framedexample}{The candidate we need to replace}
+Suppose the current candidates are $[12,7,20]$. When $16$ arrives,
+we replace $7$, obtaining $[12,16,20]$. When $9$ arrives, we keep
+the candidates unchanged: even the smallest candidate, $12$, is
+better than $9$.
+\end{framedexample}
+
+Each scan costs $\Theta(k)$, giving $O(nk)$ time overall. For small
+$k$ this can help, but finding the same kind of candidate repeatedly
+is expensive. We want a way to keep the smallest retained score
+easy to reach, while updating the candidates quickly.
+
+This motivates \emph{data structures}: the arrangement of the data
+can change the cost of the operations our algorithm needs.
+
+\section{An interface and its implementation}
+
+Think of a car. We can describe it through the operations it
+supports: starting, accelerating, braking and steering. We specify
+what these operations do without specifying the mechanisms that
+make them work.
+
+A petrol car and an electric car support the same operations, but
+carry them out using different internal components. To drive either
+car, we need to understand the controls, not how those components
+work.
+
+\begin{frameddefn}{Abstract data type (ADT)}
+An \emph{abstract data type} (i.e.\ the car in the example above)
+specifies a collection of data, the operations available on it,
+and their meaning. We write ADT for short.
+\end{frameddefn}
+
+\begin{frameddefn}{Data structure}
+A \emph{data structure} (i.e.\ in the example above, the specific way
+the car is built, using a petrol engine or an electric motor) provides a concrete
+implementation: it determines how the data are stored and how
+the operations are performed.
+\end{frameddefn}
+
+The same ADT can have several implementations. All must give the
+specified results, but their operation costs can differ.
+For example, a petrol car and an electric car are both cars: they
+support the same driving operations, even though their internal
+mechanisms differ.
+
+\Needspace{20\baselineskip}
+\section{The list ADT}
+
+\begin{frameddefn}{List (ADT)}\label{def:list-adt}
+A \emph{list} stores a sequence of $n$ elements. Using positions
+$1,\ldots,n$, it supports:
+\begin{enumerate}
+  \item \listgetop{i}: return the element at position $i$;
+  \item \listsetop{x}{i}: replace the element at position $i$
+    with $x$;
+  \item \listinsertop{x}{i}: insert $x$ at position $i$,
+    shifting the old positions $i,\ldots,n$ one place to the right;
+  \item \listremoveop{i}: remove the element at position $i$,
+    shifting later positions one place to the left.
+\end{enumerate}
+For insertion, $1\leq i\leq n+1$; the other operations require
+$1\leq i\leq n$.
+\end{frameddefn}
+
+The index $i$ describes the current position in the sequence.
+
+\subsection{Arrays: reach a position directly}
+
+\begin{frameddefn}{Array}\label{def:array}
+An \emph{array} is a \textbf{data structure} that stores elements in
+equal-sized slots occupying consecutive memory locations. It provides
+one possible implementation of the \hyperref[def:list-adt]{list ADT}.
+\end{frameddefn}
+
+The ADT tells us which operations must be supported; the array
+specifies how the elements are stored so that we can implement
+those operations.
+
+If the first slot starts at address $b$ and each slot uses $w$ bytes,
+slot $i$ starts at
+\[
+  b+(i-1)w.
+\]
+The address can be calculated directly, so accessing a valid position
+takes $\Theta(1)$ time.
+
+\begin{enumerate}
+  \item \listgetop{i} takes $\Theta(1)$ time: calculate the
+    address of slot $i$ and read its element.
+  \item \listsetop{x}{i} takes $\Theta(1)$ time: calculate
+    the address of slot $i$ and replace its element with $x$.
+  \item \listinsertop{x}{i} takes $\Theta(n)$ time in the
+    worst case: inserting at the beginning shifts all $n$ elements
+    one place to the right. We assume that a spare slot is available.
+
+\begin{framedexample}{Inserting into an array}
+Insert $7$ at position $2$ of $[8,3,6,2]$.
+\begin{center}
+\begin{tikzpicture}[font=\small,>=stealth,x=1.35cm,y=1cm]
+  \node[anchor=east] at (-0.6,0) {Before};
+  \foreach \v [count=\i] in {8,3,6,2} {
+    \draw[fill=PlotBlue!10] (\i-1.5,-0.3) rectangle (\i-0.5,0.3);
+    \node at (\i-1,0) {$\v$};
+    \node[above] at (\i-1,0.4) {$\i$};
+  }
+  \draw[dashed] (3.5,-0.3) rectangle (4.5,0.3);
+  \node[above] at (4,0.4) {$5$};
+  \node[anchor=east] at (-0.6,-1.9) {After};
+  \foreach \v [count=\i] in {8,7,3,6,2} {
+    \draw[fill=PlotBlue!10] (\i-1.5,-2.2) rectangle (\i-0.5,-1.6);
+    \node at (\i-1,-1.9) {$\v$};
+  }
+  \draw[very thick,PlotGreen] (0.5,-2.2) rectangle (1.5,-1.6);
+  \foreach \i in {1,2,3}
+    \draw[->,PlotBlue,thick] (\i,-0.4) -- (\i+1,-1.5);
+  \node[align=center] at (2,-2.8)
+    {Move $2$, then $6$, then $3$ to the right; write $7$ in slot $2$.};
+\end{tikzpicture}
+\end{center}
+Moving from right to left prevents overwriting a value before it
+has been copied. We assume that one spare slot is available.
+\end{framedexample}
+
+  \item \listremoveop{i} takes $\Theta(n)$ time in the
+    worst case: removing the first element shifts the remaining
+    $n-1$ elements one place to the left.
+\end{enumerate}
+
+\Needspace{14\baselineskip}
+\subsection{Linked lists: follow references}
+
+\begin{frameddefn}{Singly linked list}\label{def:singly-linked-list}
+A \emph{singly linked list} is a data structure that implements the
+\hyperref[def:list-adt]{list ADT} using nodes. Each node contains an
+element and a reference to the next node. A \emph{head} reference
+identifies the first node; the last node has no successor.
+\end{frameddefn}
+
+\begin{framedexample}{A singly linked list}
+The sequence $[8,3,6]$ is stored in three nodes.
+\begin{center}
+\begin{tikzpicture}[font=\small,>=stealth,
+  cell/.style={draw,rounded corners,fill=PlotBlue!10,
+    minimum width=1.4cm,minimum height=0.75cm}]
+  \node (head) at (-1.8,0) {head};
+  \node[cell] (a) at (0,0) {$8\mid\bullet$};
+  \node[cell] (b) at (3.2,0) {$3\mid\bullet$};
+  \node[cell] (c) at (6.4,0) {$6\mid\bullet$};
+  \node (nil) at (8.5,0) {$\varnothing$};
+  \draw[->,thick] (head) -- (a);
+  \draw[->,thick] (a) -- node[above] {next} (b);
+  \draw[->,thick] (b) -- node[above] {next} (c);
+  \draw[->,thick] (c) -- (nil);
+  \node[below=0.2cm of a] {position $1$};
+  \node[below=0.2cm of b] {position $2$};
+  \node[below=0.2cm of c] {position $3$};
+  \node[align=center] at (3.2,-1.4)
+    {The nodes need not occupy consecutive memory locations.};
+\end{tikzpicture}
+\end{center}
+\end{framedexample}
+
+To reach position $i$, we start at the head and follow $i-1$ links.
+
+\begin{enumerate}
+  \item \listgetop{i} takes $O(n)$ time in the worst case:
+    follow the links to position $i$ and read the element. With a
+    reference to the node already available, reading it takes
+    $\Theta(1)$ time.
+  \item \listsetop{x}{i} takes $O(n)$ time in the worst
+    case: follow the links to position $i$ and replace the element
+    with $x$. With a reference to the node already available, the
+    replacement takes $\Theta(1)$ time.
+  \item \listinsertop{x}{i} takes $O(n)$ time in the worst
+    case: first find the node preceding position $i$. Once that
+    reference is available, inserting the new node takes
+    $\Theta(1)$ time. Inserting at the head also takes $\Theta(1)$ time.
+
+\begin{framedexample}{Inserting after a known node}
+Suppose we already have a reference to the node containing $8$.
+To insert $7$ immediately after it, create a new node and update
+two references:
+\[
+  \mathit{new.next}\gets\mathit{node8.next},\qquad
+  \mathit{node8.next}\gets\mathit{new}.
+\]
+\begin{center}
+\begin{tikzpicture}[font=\small,>=stealth,
+  cell/.style={draw,rounded corners,fill=PlotBlue!10,
+    minimum width=1.3cm,minimum height=0.7cm}]
+  \node[cell] (a) at (0,0) {$8\mid\bullet$};
+  \node[cell] (b) at (5,0) {$3\mid\bullet$};
+  \node[cell,fill=PlotGreen!15] (x) at (2.5,-1.4) {$7\mid\bullet$};
+  \draw[->,dashed,black!45] (a) -- node[above] {old link} (b);
+  \draw[->,very thick,PlotGreen] (x) -- node[below right] {$1$} (b);
+  \draw[->,very thick,PlotGreen] (a) -- node[below left] {$2$} (x);
+\end{tikzpicture}
+\end{center}
+The update takes $\Theta(1)$ time. If we were only given an index,
+we would first have to find the preceding node.
+\end{framedexample}
+
+  \item \listremoveop{i} takes $O(n)$ time in the worst
+    case: first find the node preceding position $i$. With that
+    reference available, bypass the removed node by changing the
+    predecessor's \texttt{next} link in $\Theta(1)$ time. Removing
+    the head takes $\Theta(1)$ time: update the head reference.
+\end{enumerate}
+
+\Needspace{15\baselineskip}
+\subsection{Doubly linked lists and operation costs}
+
+\begin{frameddefn}{Doubly linked list}\label{def:doubly-linked-list}
+A \emph{doubly linked list} is a data structure that implements the
+\hyperref[def:list-adt]{list ADT} using nodes. Each node contains an
+element, a \texttt{next} reference to its successor, and a
+\texttt{previous} reference to its predecessor, when these exist.
+\end{frameddefn}
+
+From a node, we can directly reach both neighbours.
+Finding a node by its index still requires following links.
+
+\begin{framedexample}{A doubly linked list}
+The sequence $[8,3,6]$ has links in both directions between adjacent nodes.
+\begin{center}
+\begin{tikzpicture}[font=\small,>=stealth,
+  cell/.style={draw,rounded corners,fill=PlotBlue!10,
+    minimum width=1.65cm,minimum height=0.7cm}]
+  \node[cell] (a) at (0,0) {$\bullet\mid8\mid\bullet$};
+  \node[cell,fill=PlotGreen!12] (b) at (3.5,0) {$\bullet\mid3\mid\bullet$};
+  \node[cell] (c) at (7,0) {$\bullet\mid6\mid\bullet$};
+  \draw[->,thick] (a.north east) to[bend left=18]
+    node[above] {next} (b.north west);
+  \draw[->,thick] (b.south west) to[bend left=18]
+    node[below] {previous} (a.south east);
+  \draw[->,thick] (b.north east) to[bend left=18]
+    node[above] {next} (c.north west);
+  \draw[->,thick] (c.south west) to[bend left=18]
+    node[below] {previous} (b.south east);
+  \node[align=center] at (3.5,-1.25)
+    {From the middle node, both neighbours are directly accessible.};
+\end{tikzpicture}
+\end{center}
+\end{framedexample}
+
+\begin{enumerate}
+  \item \listgetop{i} takes $O(n)$ time in the worst case
+    to locate position $i$. Reading the element of a node whose
+    reference is already available takes $\Theta(1)$ time.
+  \item \listsetop{x}{i} takes $O(n)$ time in the worst
+    case to locate position $i$. Replacing the element of a known
+    node takes $\Theta(1)$ time.
+  \item \listinsertop{x}{i} takes $O(n)$ time in the worst
+    case to locate the insertion position. Given a reference to the
+    adjacent node, linking in the new node takes $\Theta(1)$ time:
+    update the neighbours' \texttt{next} and \texttt{previous}
+    references, and the head or tail if necessary.
+  \item \listremoveop{i} takes $O(n)$ time in the worst
+    case to locate position $i$. Given a reference to that node,
+    unlinking it takes $\Theta(1)$ time: its \texttt{previous}
+    reference gives direct access to its predecessor. Update the
+    neighbours' links and the head or tail if necessary.
+\end{enumerate}
+
+The following table concerns the \emph{indexed operations of the
+list ADT}. Bounds are worst-case bounds for a list of $n$ elements;
+array insertion assumes available capacity.
+\begin{center}
+\small
+\begin{tabular}{lccc}
+\hline
+Operation & Array & Singly linked & Doubly linked \\
+\hline
+\listgetop{i}       & $\Theta(1)$ & $O(n)$ & $O(n)$ \\
+\listsetop{x}{i}     & $\Theta(1)$ & $O(n)$ & $O(n)$ \\
+\listinsertop{x}{i}  & $O(n)$      & $O(n)$ & $O(n)$ \\
+\listremoveop{i}    & $O(n)$      & $O(n)$ & $O(n)$ \\
+\hline
+\end{tabular}
+\end{center}
+
+The advantage of linked lists appears when the needed references
+are already available: inserting after a known node is constant
+time, and a doubly linked list also removes a known node in constant
+time. These are different requests from finding and removing
+\emph{the element at index $i$}.
+
+\section{The priority queue ADT}
+
+For top-$k$ selection, positions in a sequence are not our main
+concern. We repeatedly need the candidate with an extreme score.
+A priority queue provides operations tailored to that task.
+
+\begin{frameddefn}{Max-priority queue (ADT)}\label{def:max-priority-queue}
+A \emph{max-priority queue} stores entries with comparable
+priorities and supports:
+\begin{enumerate}
+  \item \pqinsertop{x}: add entry $x$;
+  \item \pqpeekop{Max}: return an entry of maximum
+    priority without removing it;
+  \item \pqextractop{Max}: remove and return an entry
+    of maximum priority.
+\end{enumerate}
+The last two operations require a nonempty queue. Equal priorities
+are allowed. For a queue of numbers, each number is its own priority.
+\end{frameddefn}
+
+\begin{frameddefn}{Min-priority queue (ADT)}\label{def:min-priority-queue}
+A \emph{min-priority queue} stores entries with comparable priorities
+and supports:
+\begin{enumerate}
+  \item \pqinsertop{x}: add entry $x$;
+  \item \pqpeekop{Min}: return an entry of minimum priority
+    without removing it;
+  \item \pqextractop{Min}: remove and return an entry of
+    minimum priority.
+\end{enumerate}
+The last two operations require a nonempty queue. Equal priorities
+are allowed. For a queue of numbers, each number is its own priority.
+\end{frameddefn}
+
+The ADT specifies the result of each operation; it does not require
+a particular representation.
+
+We now consider two data structures that can implement the
+\hyperref[def:max-priority-queue]{max-priority queue ADT}: an unsorted
+array and a sorted array. Both support the same three operations,
+but their representation changes the cost of each operation.
+
+\textbf{An unsorted array.}
+Insertion at the end is cheap, but finding the maximum requires a
+scan. Once found, it can be removed by replacing it with the last
+entry: a priority queue does not have to preserve sequence order.
+The scan still makes extraction linear.
+
+\textbf{A sorted array.}
+If the array is in increasing order, the maximum is the last entry.
+Reading or removing it is constant time, but inserting a new entry
+in sorted order may require shifting $\Theta(n)$ entries.
+
+Can we do better than this for our use case?
+
+We would like fast access to the maximum \emph{and} fast updates.
+A binary heap provides that compromise.
+
+\section{Binary heaps}
+
+For the numerical heaps considered here, each node's value is its priority.
+
+\begin{frameddefn}{Binary max-heap}\label{def:binary-max-heap}
+A \emph{binary max-heap} is a data structure that implements the
+\hyperref[def:max-priority-queue]{max-priority queue ADT}. It is
+represented as a binary tree satisfying two conditions:
+\begin{enumerate}
+  \item \textbf{Shape:} every level is full except possibly the last,
+    which is filled from left to right. Such a tree is
+    \emph{complete}.
+  \item \textbf{Order:} each parent's value is greater than or
+    equal to the values of its children.
+\end{enumerate}
+\end{frameddefn}
+
+Following a path from the root downwards never increases the
+value. Therefore the root contains a global maximum, and
+$\pqpeekop{Max}$ takes $\Theta(1)$ time.
+
+\begin{framedexample}{A max-heap and its array}\label{ex:heap-array}
+The small labels give positions in \emph{level order}: read each
+level from left to right, starting at the root.
+\begin{center}
+\begin{tikzpicture}[font=\small,>=stealth,
+  heapnode/.style={circle,draw,fill=PlotBlue!12,minimum size=0.7cm,
+    inner sep=1pt}]
+  \foreach \i/\v/\x/\y in {
+    1/20/0/0,2/12/-3/-1.2,3/16/3/-1.2,
+    4/7/-4.5/-2.4,5/8/-1.5/-2.4,6/9/1.5/-2.4,7/4/4.5/-2.4,
+    8/1/-5.2/-3.6,9/5/-3.8/-3.6,10/2/-2.2/-3.6,
+    11/6/-0.8/-3.6,12/3/0.8/-3.6} {
+    \node[heapnode] (h\i) at (\x,\y) {$\v$};
+    \node[font=\scriptsize,anchor=south west,text=black!65]
+      at (h\i.north east) {$\i$};
+  }
+  \foreach \p/\c in {1/2,1/3,2/4,2/5,3/6,3/7,4/8,4/9,5/10,5/11,6/12}
+    \draw (h\p) -- (h\c);
+  \node[above=0.25cm of h1,text=PlotGreen!60!black]
+    {maximum at the root};
+  \foreach \v [count=\i] in {20,12,16,7,8,9,4,1,5,2,6,3} {
+    \draw[fill=PlotBlue!10] ({(\i-6.5)*0.88-0.44},-5.3)
+      rectangle ({(\i-6.5)*0.88+0.44},-4.7);
+    \node at ({(\i-6.5)*0.88},-5) {$\v$};
+    \node[font=\scriptsize] at ({(\i-6.5)*0.88},-5.6) {$\i$};
+  }
+\end{tikzpicture}
+\end{center}
+For example, $12\geq7,8$ and $16\geq9,4$. The last level is
+filled on the left. The next inserted node occupies position $13$,
+the right child of position $6$.
+\end{framedexample}
+
+Because the shape has no gaps, we can store a heap in an array
+$H[1],\ldots,H[n]$, as in Example~\ref{ex:heap-array}.
+
+\subsection{Store the tree in an array}
+
+With \emph{one-based indexing}, the links are implicit:
+\[
+  \operatorname{parent}(i)=\left\lfloor\frac{i}{2}\right\rfloor
+  \quad(i>1),\qquad
+  \operatorname{left}(i)=2i,\qquad
+  \operatorname{right}(i)=2i+1.
+\]
+A child exists only when its index is at most $n$.
+For example, node $5$ has children $10$ and $11$; node $6$ has
+child $12$, but no child $13$ yet. We calculate these positions
+without storing explicit pointer fields.
+
+At depth $d$, a full level has $2^d$ nodes. A complete tree with
+$n\geq1$ nodes has height $\lfloor\log_2 n\rfloor$, counting
+edges from the root to the deepest leaf. A path up or down therefore
+contains only $O(\log n)$ edges for $n\geq2$.
+
+\subsection{Insertion: move up until the order is restored}
+
+How do we insert a value in the heap while preserving the structure?
+
+First append the new entry in the next free array slot. This
+preserves completeness, but its value might exceed its parent's.
+While that happens, swap the two and continue from the parent.
+This operation is called \emph{sift-up}.
+
+Only the new entry's path to the root can violate the order. Each
+swap moves it one level up, so there are at most $O(\log n)$ swaps.
+
+\begin{framedexample}{Insert $18$ into a smaller max-heap}\label{ex:heap-insert-eighteen}
+Start with $H=[20,12,16,7,8,9,4]$. Append $18$ at position $8$.
+Its path to the root is $8\to4\to2\to1$.
+\begin{center}
+\small
+\begin{tabular}{ll}
+\hline
+Action & Array \\
+\hline
+Append $18$ & $[20,12,16,7,8,9,4,\mathbf{18}]$ \\
+Swap with $7$ & $[20,12,16,\mathbf{18},8,9,4,7]$ \\
+Swap with $12$ & $[20,\mathbf{18},16,12,8,9,4,7]$ \\
+Stop: $18\leq20$ & $[20,18,16,12,8,9,4,7]$ \\
+\hline
+\end{tabular}
+\end{center}
+Both drawings show the entire heap. Green arrows show how $18$ moves up.
+\begin{center}
+\begin{tikzpicture}[font=\small,>=stealth,
+  hn/.style={circle,draw,fill=PlotBlue!10,minimum size=0.65cm,inner sep=1pt},
+  unchanged/.style={},
+  moved/.style={draw=ListInsert,fill=ListInsert!12},
+  inserted/.style={moved,very thick}]
+  \foreach \side/\shift in {a/0,b/6.5} {
+    \begin{scope}[xshift=\shift cm]
+      \foreach \i/\x/\y in {1/0/0,2/-1.3/-1.1,3/1.3/-1.1,
+          4/-2/-2.2,5/-0.65/-2.2,6/0.65/-2.2,7/2/-2.2,
+          8/-2.45/-3.3}
+        \coordinate (\side p\i) at (\x,\y);
+    \end{scope}
+  }
+  \foreach \i/\v/\kind in {1/20/unchanged,2/12/moved,3/16/unchanged,
+      4/7/moved,5/8/unchanged,6/9/unchanged,7/4/unchanged,8/18/inserted}
+    \node[hn,\kind] (a\i) at (ap\i) {$\v$};
+  \foreach \i/\v/\kind in {1/20/unchanged,2/18/inserted,3/16/unchanged,
+      4/12/moved,5/8/unchanged,6/9/unchanged,7/4/unchanged,8/7/moved}
+    \node[hn,\kind] (b\i) at (bp\i) {$\v$};
+  \foreach \p/\c in {1/2,1/3,2/4,2/5,3/6,3/7,4/8} {
+    \draw (a\p) -- (a\c);
+    \draw (b\p) -- (b\c);
+  }
+  \draw[->,very thick,ListInsert] (a8) -- (a4);
+  \draw[->,very thick,ListInsert] (a4) -- (a2);
+  \draw[->,thick] (2.6,-1.5) -- node[above,font=\scriptsize] {sift-up}
+    (3.9,-1.5);
+  \node at (0,0.65) {After appending};
+  \node at (6.5,0.65) {After sift-up};
+\end{tikzpicture}
+\end{center}
+The root remains $20$. Insertion rearranges the path without
+sorting the whole array.
+\end{framedexample}
+
+The heap repair costs $O(\log n)$ in the worst case. With an
+array of sufficient capacity, this is also the insertion cost.
+With a dynamic array that occasionally resizes, the overall
+insertion bound is $O(\log n)$ amortized for $n\geq2$; a resizing
+insertion can itself take $\Theta(n)$ time.
+
+\subsection{Extraction: replace the root and move down}
+
+To extract the maximum:
+\begin{enumerate}
+  \item Save the root's entry to return it.
+  \item Move the last entry to the root and reduce the heap size by
+    one. If the heap is now empty, stop.
+  \item If the entry is smaller than a child, swap it with its
+    \emph{larger} child. Continue downwards until the order is restored.
+\end{enumerate}
+This repair is called \emph{sift-down}. Choosing the larger child
+makes the new parent at least as large as both children. The
+possible violation moves down one path, which has logarithmic length.
+
+\begin{framedexample}{Extract $20$ after the insertion}
+The heap from the previous example is
+$[20,18,16,12,8,9,4,7]$. Save $20$ and put the last entry, $7$,
+at the root. Position $8$ is no longer in the heap.
+\begin{center}
+\small
+\begin{tabular}{ll}
+\hline
+Action & Array \\
+\hline
+Replace root with $7$ & $[\mathbf{7},18,16,12,8,9,4]$ \\
+Swap with $18$ & $[18,\mathbf{7},16,12,8,9,4]$ \\
+Swap with $12$ & $[18,12,16,\mathbf{7},8,9,4]$ \\
+Stop at a leaf & $[18,12,16,7,8,9,4]$ \\
+\hline
+\end{tabular}
+\end{center}
+\begin{center}
+\begin{tikzpicture}[font=\small,>=stealth,
+  hn/.style={circle,draw,fill=PlotBlue!10,minimum size=0.65cm,inner sep=1pt}]
+  \foreach \side/\shift in {a/0,b/6.5} {
+    \begin{scope}[xshift=\shift cm]
+      \foreach \i/\x/\y in {1/0/0,2/-1.3/-1.1,3/1.3/-1.1,
+          4/-2/-2.2,5/-0.65/-2.2,6/0.65/-2.2,7/2/-2.2}
+        \coordinate (\side p\i) at (\x,\y);
+    \end{scope}
+  }
+  \foreach \i/\v in {1/7,2/18,3/16,4/12,5/8,6/9,7/4}
+    \node[hn] (a\i) at (ap\i) {$\v$};
+  \foreach \i/\v in {1/18,2/12,3/16,4/7,5/8,6/9,7/4}
+    \node[hn] (b\i) at (bp\i) {$\v$};
+  \foreach \p/\c in {1/2,1/3,2/4,2/5,3/6,3/7} {
+    \draw (a\p) -- (a\c);
+    \draw (b\p) -- (b\c);
+  }
+  \node at (0,0.65) {Before repair};
+  \node at (6.5,0.65) {After sift-down};
+  \draw[->,very thick,PlotGreen] (a1) -- (a2) -- (a4);
+  \draw[->,thick] (2.7,-1.1) -- (3.8,-1.1);
+\end{tikzpicture}
+\end{center}
+At the first step, choose $18$ rather than $16$. At the second,
+choose $12$ rather than $8$. The returned entry is $20$; the new
+maximum is $18$.
+\end{framedexample}
+
+Extraction takes $O(\log n)$ time in the worst case, assuming
+removing the final array slot does not trigger resizing.
+Reading the maximum alone requires no repair and remains
+$\Theta(1)$.
+
+\subsection{Comparing priority queue implementations}
+
+For a queue containing $n\geq2$ entries, the following bounds
+assume arrays have sufficient capacity and removal does not resize
+them. The sorted array keeps its maximum at the last occupied slot.
+\begin{center}
+\small
+\begin{tabular}{lccc}
+\hline
+Representation & \pqinsertop{x} & \pqpeekop{Max} & \pqextractop{Max} \\[3pt]
+\hline
+Unsorted array & $\Theta(1)$ & $\Theta(n)$ & $\Theta(n)$ \\
+Sorted array   & $O(n)$ & $\Theta(1)$ & $\Theta(1)$ \\
+Binary max-heap & $O(\log n)$ & $\Theta(1)$ & $O(\log n)$ \\
+\hline
+\end{tabular}
+\end{center}
+
+The heap keeps enough order to expose the maximum, without paying
+to keep every entry in sorted order after each insertion.
+
+\section{Sorting with a heap}\label{sec:heapsort}
+
+A max-heap gives us the largest remaining value at every
+extraction. Can we use this operation to sort an entire array?
+We first use a separate output array, then see how to reuse the
+input array itself.
+
+\subsection{Sorting into a second array}
+
+Let $A[1],\ldots,A[n]$ be the input. First turn $A$ into a
+max-heap, using its own storage. One way to do this with the
+operations we already know is to grow a heap one entry at a time:
+for $j=2,\ldots,n$, regard $A[j]$ as the newly appended entry
+and sift it up inside $A[1],\ldots,A[j]$. The later entries
+are untouched. We call this procedure
+$\operatorname{BuildMaxHeapByInsertion}(A)$; it takes
+$O(n\log n)$ time and can be implemented with a loop using
+$O(1)$ extra working space.
+
+Once the max-heap is ready, allocate a second array $B$ of size $n$.
+For $n\geq1$, fill it as follows:
+\begin{enumerate}
+  \item For $j=n,n-1,\ldots,2$, extract the maximum, repairing
+    the remaining heap by sifting down, and store the extracted value in $B[j]$.
+  \item Copy the only remaining value into $B[1]$.
+\end{enumerate}
+The largest value goes into the last position, the next largest
+into the preceding position, and so on: $B[1]\leq\cdots\leq B[n]$.
+There are $n-1$ extractions; the last value needs no repair.
+An empty input is already sorted.
+
+\begin{framedexample}{Fill the output array from right to left}
+Reuse the seven-entry heap from the start of
+Example~\ref{ex:heap-insert-eighteen}, before inserting $18$:
+\[
+H=[20,12,16,7,8,9,4].
+\]
+Each row below shows $B$ after storing one value.
+The symbol $\square$ denotes an output cell that has not yet been filled.
+\begin{center}
+\small
+\begin{tabular}{ll}
+\hline
+Action & Output array $B$ \\
+\hline
+Extract $20$ & $[\square,\square,\square,\square,\square,\square,20]$ \\
+Extract $16$ & $[\square,\square,\square,\square,\square,16,20]$ \\
+Extract $12$ & $[\square,\square,\square,\square,12,16,20]$ \\
+Extract $9$  & $[\square,\square,\square,9,12,16,20]$ \\
+Extract $8$  & $[\square,\square,8,9,12,16,20]$ \\
+Extract $7$  & $[\square,7,8,9,12,16,20]$ \\
+Copy $4$    & $[4,7,8,9,12,16,20]$ \\
+\hline
+\end{tabular}
+\end{center}
+The six extractions return values in decreasing order; placing
+them from right to left produces an increasing array.
+\end{framedexample}
+
+Building the heap takes $O(n\log n)$ time with the method above.
+The $n-1$ extractions take another $O(n\log n)$ time in total,
+so the overall bound is $O(n\log n)$. The second array uses
+$\Theta(n)$ additional space.
+
+\subsection{Reuse the input array: in-place HeapSort}
+
+Can we avoid allocating a second array? Each extraction reduces
+the active heap size by one. We can store the extracted maximum
+in the cell that has just left the heap.
+
+\begin{frameddefn}{In-place sorting}
+An \emph{in-place sorting algorithm} rearranges the entries in
+the input array using $O(1)$ additional working space.
+The storage occupied by the input array itself is not counted
+as additional space.
+\end{frameddefn}
+
+Suppose the active heap occupies $A[1],\ldots,A[m]$.
+Instead of removing its root and allocating space elsewhere:
+\begin{enumerate}
+  \item Swap $A[1]$ with $A[m]$. The maximum is now in its final
+    position, $m$.
+  \item Reduce the active heap size to $m-1$. The physical array
+    still contains $n$ cells.
+  \item Sift down the new root, considering only positions
+    $1,\ldots,m-1$. The sorted suffix must stay outside the repair.
+\end{enumerate}
+Repeat for $m=n,n-1,\ldots,2$. This is \emph{HeapSort}:
+the heap shrinks on the left while the sorted suffix grows on the right.
+
+\begin{framedexample}{HeapSort in the same array}
+Start from the same heap $[20,12,16,7,8,9,4]$.
+In the first pass, swap $20$ with $4$:
+\[
+[\underbrace{4,12,16,7,8,9}_{\text{repair this prefix}}\mid20].
+\]
+Sift-down swaps $4$ with $16$, then with $9$, giving
+$[16,12,9,7,8,4\mid20]$.
+
+Below, every row after the first shows the \emph{completed repair}
+of one pass. All seven cells belong to the same array throughout.
+\begin{center}
+\begin{tikzpicture}[x=0.95cm,y=0.76cm,
+  cell/.style={draw,minimum width=0.95cm,minimum height=0.58cm,
+    inner sep=0pt,font=\small}]
+  \node[draw,fill=PlotBlue!12,minimum width=0.3cm,minimum height=0.25cm]
+    at (0,1) {};
+  \node[anchor=west,font=\small] at (0.25,1) {Active max-heap};
+  \node[draw,fill=yellow!25,minimum width=0.3cm,minimum height=0.25cm]
+    at (4,1) {};
+  \node[anchor=west,font=\small] at (4.25,1) {Sorted suffix};
+  \foreach \r/\m/\vals in {
+    0/7/{20,12,16,7,8,9,4},
+    1/6/{16,12,9,7,8,4,20},
+    2/5/{12,8,9,7,4,16,20},
+    3/4/{9,8,4,7,12,16,20},
+    4/3/{8,7,4,9,12,16,20},
+    5/2/{7,4,8,9,12,16,20},
+    6/1/{4,7,8,9,12,16,20}} {
+    \node[anchor=east,font=\small] at (-0.7,-\r) {$m=\m$};
+    \foreach \v [count=\i from 1] in \vals {
+      \ifnum\i>\m
+        \node[cell,fill=yellow!25] at (\i-1,-\r) {$\v$};
+      \else
+        \node[cell,fill=PlotBlue!12] at (\i-1,-\r) {$\v$};
+      \fi
+    }
+    \draw[very thick] (\m-0.5,-\r-0.43) -- (\m-0.5,-\r+0.43);
+  }
+\end{tikzpicture}
+\end{center}
+At $m=1$, the remaining heap consists only of the minimum, $4$.
+The entire array is now sorted; no further extraction is needed.
+\end{framedexample}
+
+\begin{framedalgo}{In-place HeapSort}\label{alg:heapsort}
+\begin{algorithmic}[1]
+  \Function{HeapSort}{$A$}
+    \State $n\gets\operatorname{length}(A)$
+    \If{$n\leq1$}
+      \State \Return $A$
+    \EndIf
+    \State \Call{BuildMaxHeapByInsertion}{$A$}
+    \For{$m=n,n-1,\ldots,2$}
+      \State swap $A[1]$ and $A[m]$
+      \State \Call{SiftDownPrefix}{$A,1,m-1$}
+    \EndFor
+    \State \Return $A$
+  \EndFunction
+\end{algorithmic}
+\end{framedalgo}
+
+Here $\operatorname{SiftDownPrefix}(A,i,m)$ repairs the heap
+starting at position $i$, using only the first $m$ cells.
+Its children must already root valid max-heaps, as they do after
+the root swap in HeapSort. An iterative implementation makes
+the space bound explicit:
+
+\begin{framedalgo}{Sift down inside the active prefix}
+\begin{algorithmic}[1]
+  \Function{SiftDownPrefix}{$A,i,m$}
+    \While{$2i\leq m$}
+      \State $j\gets2i$ \Comment{left child exists}
+      \If{$j<m$} \Comment{right child also exists}
+        \If{$A[j+1]>A[j]$}
+          \State $j\gets j+1$
+        \EndIf
+      \EndIf
+      \If{$A[i]\geq A[j]$}
+        \State \Return
+      \EndIf
+      \State swap $A[i]$ and $A[j]$
+      \State $i\gets j$
+    \EndWhile
+  \EndFunction
+\end{algorithmic}
+\end{framedalgo}
+
+\textbf{Why it works.}
+At the start of a pass with active size $m$:
+\begin{enumerate}
+  \item $A[1],\ldots,A[m]$ form a max-heap.
+  \item $A[m+1],\ldots,A[n]$ are in increasing order.
+  \item Every value in the heap is less than or equal to every
+    value in the sorted suffix, when that suffix is nonempty.
+\end{enumerate}
+The root is the largest remaining value. Moving it to position
+$m$ extends the sorted suffix by one cell. Sift-down restores
+the heap in the smaller prefix without touching that suffix.
+When only one heap entry remains, these properties imply that
+the entire array is sorted. Equal values cause no difficulty.
+
+\textbf{Time and space.}
+With the insertion-based construction described above, building
+the heap costs $O(n\log n)$. The sorting passes cost
+\[
+  \sum_{m=2}^{n}O(\log m)\;=\;O(n\log n).
+\]
+Thus HeapSort takes $O(n\log n)$ time in the worst case.
+Using iterative sift-up and sift-down, it needs only a constant
+number of indices and a temporary value for swaps: $O(1)$ extra
+working space. The second array $B$ is no longer needed.
+
+\section{Use a heap to select the top k}\label{sec:heap-top-k}
+
+We can now complete the selection step introduced in
+Section~\ref{sec:vector-search}. To keep the $k$ \emph{largest}
+scores, we repeatedly need the \emph{smallest retained score}:
+it is the weakest candidate and the one a better entry replaces.
+
+We therefore use a \emph{min-heap} of at most $k$ entries.
+Its shape and array representation are the same as for a max-heap,
+but each parent's value is \emph{less than or equal to} its
+children's values. The root is a minimum. Insertions sift up when a child
+is smaller than its parent; extraction sifts down using the smaller
+child. The operation bounds are unchanged.
+
+\begin{frameddefn}{Which heap should we use?}
+To keep the $k$ largest entries, use a \textbf{min-heap} of retained
+entries: the smallest retained entry is at the root.
+
+To keep the $k$ smallest entries, use a \textbf{max-heap} of retained
+entries: the largest retained entry is at the root.
+\end{frameddefn}
+
+The root should expose the retained candidate that we would discard
+first. It is not necessarily the best result we eventually return.
+
+\begin{framedalgo}{Keep the $k$ largest scores}\label{alg:heap-top-k}
+\begin{algorithmic}[1]
+  \Function{TopKWithHeap}{$A,k$}
+    \State $Q\gets$ an empty min-priority queue with capacity $k$
+    \For{each entry $x$ in $A$}
+      \If{$\operatorname{size}(Q)<k$}
+        \State $Q.\pqinsertop{x}$
+      \ElsIf{$x>Q.\pqpeekop{Min}$}
+        \State $Q.\pqextractop{Min}$
+        \State $Q.\pqinsertop{x}$
+      \EndIf
+    \EndFor
+    \State \Return the entries stored in $Q$
+  \EndFunction
+\end{algorithmic}
+\end{framedalgo}
+
+\textbf{Why it works.}
+After processing $t$ entries, $Q$ contains the largest $\min(k,t)$
+scores seen so far, allowing any choice among tied entries.
+Until it fills, it keeps every entry. Afterwards, let $m$ be its
+minimum. A new score $x\leq m$ cannot improve the retained scores;
+a score $x>m$ must replace one occurrence of $m$. Both cases
+preserve the claim. At $t=n$, it gives exactly the required result.
+
+\begin{framedexample}{Follow the top-$3$ candidates}\label{ex:heap-top-three}
+Process the scores from our opening example. Arrays below are
+valid min-heap representations; they are not sorted lists.
+\begin{center}
+\small
+\begin{tabular}{cll}
+\hline
+New score & Action & Heap array afterwards \\
+\hline
+$12$ & Insert & $[12]$ \\
+$7$  & Insert and sift up & $[7,12]$ \\
+$20$ & Insert & $[7,12,20]$ \\
+$3$  & Discard: $3\leq7$ & $[7,12,20]$ \\
+$16$ & Replace $7$ & $[12,20,16]$ \\
+$9$  & Discard: $9\leq12$ & $[12,20,16]$ \\
+$25$ & Replace $12$ & $[16,20,25]$ \\
+\hline
+\end{tabular}
+\end{center}
+The three full heaps at the replacement steps are:
+\begin{center}
+\begin{tikzpicture}[font=\small,>=stealth,
+  hn/.style={circle,draw,fill=PlotBlue!10,minimum size=0.7cm,inner sep=1pt}]
+  \foreach \name/\shift/\root/\lv/\rv in
+      {a/0/7/12/20,b/4.2/12/20/16,c/8.4/16/20/25} {
+    \node[hn,fill=PlotGreen!15] (\name r) at (\shift,0) {$\root$};
+    \node[hn] (\name l) at (\shift-0.85,-1.2) {$\lv$};
+    \node[hn] (\name q) at (\shift+0.85,-1.2) {$\rv$};
+    \draw (\name r) -- (\name l);
+    \draw (\name r) -- (\name q);
+  }
+  \draw[->,thick] (1.3,-0.5) -- node[above] {$16$ arrives} (2.9,-0.5);
+  \draw[->,thick] (5.5,-0.5) -- node[above] {$25$ arrives} (7.1,-0.5);
+  \node[align=center] at (4.2,-2)
+    {Each root is the smallest of the three retained scores.};
+\end{tikzpicture}
+\end{center}
+The final candidates have scores $16,20,25$. If the search engine
+must display them in decreasing score order, sort just these three.
+\end{framedexample}
+
+\subsection{Time, space and the search-engine connection}
+
+Each score requires a constant-time size or root check. If retained,
+it causes at most one extraction and one insertion on a heap of
+size at most $k$. Thus the total selection cost is
+\[
+  O\bigl(n\log(k+1)\bigr),
+  \qquad\text{with }O(k)\text{ additional space}.
+\]
+For $k\geq2$, we usually write this as $O(n\log k)$.
+Writing $\log(k+1)$ also covers $k=1$: keeping a single maximum
+requires one linear scan, not zero work.
+Capacity $k$ can be allocated once; no heap growth beyond that
+capacity is needed. If an ordered output is required, sorting the
+$k$ retained entries adds $O(k\log k)$ time.
+
+For example, with $n=10^6$ and $k=10$, heap updates traverse a
+tree of height at most $\lfloor\log_2 10\rfloor=3$, rather than
+ordering a million scores. Every input score is still examined.
+
+In Algorithm~\ref{alg:ranked-index}, the inverted index reduces
+the work needed to \emph{compute} the scores. The heap improves the
+subsequent step that \emph{selects} the best results. If $c$ candidate
+documents receive scores, replacing their full sort with a heap
+changes that selection cost from $O(c\log c)$ to
+$O(c\log(k+1))$, for $1\leq k\leq c$. We still need to compute
+each candidate's complete score before comparing it with the heap
+root. If fewer than $k$ candidates are available, return all of them.
+
+\endgroup
 
 \end{document}
