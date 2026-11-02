@@ -16,6 +16,17 @@
 \notesauthor{Matteo}
 \notesdate{\today}
 
+% Same colours and coloured underline as in the ADM notes.
+\definecolor{PlotRed}{HTML}{C0392B}
+\newcommand{\cul}[2]{%
+  \tikz[baseline=(cul.base)]{%
+    \node[inner sep=0pt,outer sep=0pt] (cul) {$\displaystyle #2$};
+    \draw[#1,line width=1.2pt]
+      ([yshift=-2.5pt]cul.south west) -- ([yshift=-2.5pt]cul.south east);}}
+\newtcolorbox{intuitionbox}{examplebox,title={Developing intuition}}
+\newcommand{\fixedmark}{%
+  \text{\tikz[baseline=-0.6ex]\fill[PlotRed] (0,0) circle (2.5pt);\ fixed}}
+
 \begin{document}
 
 \makenotestitle
@@ -3743,7 +3754,7 @@ cannot be collapsed into one linear map. Successive
 layers can build more complex transformations of the input.
 
 \clearpage
-\section{An example shallow network}
+\section{An example shallow network}\label{sec:example-shallow-network}
 
 We can now write a complete network with one input $x$, one output
 $y$ and a single hidden layer of three neurons. Each hidden neuron
@@ -3966,8 +3977,8 @@ active.
 Between two consecutive joints the activation pattern does not change.
 The inactive units contribute zero, and each active unit contributes a
 line, so $y$ is a line whose slope is the sum of $\phi_k\theta_{k1}$
-over the active units. In the shaded region below, units $1$ and $3$
-are active and unit $2$ is inactive:
+over the active units. In the shaded region below, $h_1$ and $h_3$
+are active and $h_2$ is inactive:
 \begin{center}
 \begin{tikzpicture}[x=1.7cm,y=1.05cm]
   \fill[black!12] (0.5,-1) rectangle (1,1);
@@ -3980,13 +3991,169 @@ For each region between two joints:
 \toprule
 Region & Active units\\
 \midrule
-$0\le x<0.5$   & $3$\\
-$0.5\le x<1$   & $1,3$\\
-$1\le x<1.5$   & $1,2,3$\\
-$1.5\le x\le 2$ & $1,2$\\
+$0\le x<0.5$   & $h_3$\\
+$0.5\le x<1$   & $h_1,h_3$\\
+$1\le x<1.5$   & $h_1,h_2,h_3$\\
+$1.5\le x\le 2$ & $h_1,h_2$\\
 \bottomrule
 \end{tabular}
 \end{center}
+
+\clearpage
+\section{More hidden units}
+
+So far we have worked with a network with only three hidden units.
+How can we generalise it to $D$ hidden units, and what does the
+construction of $y$ look like then?
+
+The four steps stay the same; only the number of terms changes:
+\begin{enumerate}
+  \item compute $D$ linear functions $\theta_{d0}+\theta_{d1}x$,
+        for $d=1,\dots,D$;
+  \item pass each one through the activation, obtaining the hidden
+        units $h_d=a(\theta_{d0}+\theta_{d1}x)$;
+  \item weight each hidden unit, obtaining $\phi_dh_d$;
+  \item add the weighted hidden units and the constant $\phi_0$:
+\end{enumerate}
+\[
+  y=\phi_0+\sum_{d=1}^{D}\phi_dh_d
+   =\phi_0+\sum_{d=1}^{D}\phi_d\,a(\theta_{d0}+\theta_{d1}x).
+\]
+For $D=3$ this is exactly the network of
+\hyperref[sec:example-shallow-network]{Section~\ref*{sec:example-shallow-network}}.
+Each hidden unit has $2$ parameters and the output has $D$ weights and
+$1$ constant, so the network has $3D+1$ parameters ($10$ for $D=3$).
+From now on, $D$ denotes the number of hidden units.
+
+With ReLU, each hidden unit adds at most one joint, so the output has
+at most $D$ joints and at most $D+1$ linear regions. More hidden units
+therefore allow more segments, and a function with more segments can
+follow a curve more closely. In the plots below the dashed curve is a
+target function, and the solid line is a piecewise linear function with
+$5$, $10$ and $20$ linear regions:
+\begin{center}
+\begin{tikzpicture}[x=1.7cm,y=1.05cm]
+  \def\target{0.8*cos(3.4*(\x-0.15) r)+0.12*sin(8*\x r)}
+  \foreach \s/\n/\c/\shift in {0.4/5/UnitTwo/0cm,0.2/10/UnitOne/4.3cm,0.1/20/NotesBlue/8.6cm}{
+    \begin{scope}[xshift=\shift]
+      \draw[black!25,dashed] (0,0)--(2,0);
+      \begin{scope}
+        \clip (0,-1) rectangle (2,1);
+        \draw[\c,line width=1.6pt] plot[samples at={0,\s,...,2.001}] (\x,{\target});
+        \draw[black,thin,dashed,domain=0:2,samples=120] plot (\x,{\target});
+      \end{scope}
+      \draw[black!60] (0,-1) rectangle (2,1);
+      \foreach \t in {0,1,2}{
+        \draw[black!60] (\t,-1)--(\t,-0.94);
+        \node[below,font=\tiny,black!70] at (\t,-1) {$\t$};
+      }
+      \foreach \t in {-1,0,1}{\node[left,font=\tiny,black!70] at (0,\t) {$\t$};}
+      \node[font=\scriptsize,text=\c] at (1,-1.45) {\n\ linear regions};
+    \end{scope}
+  }
+\end{tikzpicture}
+\end{center}
+With enough hidden units, the approximation can be made as accurate as
+we want. This is the content of the following theorem.
+
+\begin{framedthm}{Universal approximation theorem}\label{thm:universal-approximation}
+With enough hidden units, a shallow neural network can describe any
+continuous function on a compact subset of $\mathbb{R}^{D_i}$ to
+arbitrary precision.
+\end{framedthm}
+
+Here $D_i$ is the number of inputs, and a \emph{compact} subset is one
+that is closed and bounded, such as the interval $[0,2]$ used in the
+plots. The theorem says that a suitable network \emph{exists}; it does
+not say how many hidden units are needed, or how to find the
+parameters.
+
+\clearpage
+\section{More outputs}
+
+So far our network has had a single output $y$. Sometimes, however,
+we want several results from the same input, for example two different
+predictions. Instead of building two separate networks, we use a
+single one: the hidden units are computed once, and each output
+combines them with its own weights.
+
+Take one input, four hidden units and two outputs. The hidden units
+are computed as before:
+\[
+  h_d=a(\theta_{d0}+\theta_{d1}x),\qquad d=1,\dots,4.
+\]
+Each output then takes its own weighted sum, with its own weights and
+its own constant:
+\[
+\begin{aligned}
+  y_1&=\phi_{10}+\phi_{11}\cul{PlotRed}{h_1}+\phi_{12}\cul{PlotRed}{h_2}
+       +\phi_{13}\cul{PlotRed}{h_3}+\phi_{14}\cul{PlotRed}{h_4},\\
+  y_2&=\phi_{20}+\phi_{21}\cul{PlotRed}{h_1}+\phi_{22}\cul{PlotRed}{h_2}
+       +\phi_{23}\cul{PlotRed}{h_3}+\phi_{24}\cul{PlotRed}{h_4}.
+\end{aligned}
+\qquad\fixedmark
+\]
+The output weights now have two indices: $\phi_{jd}$ is the weight
+from $h_d$ to $y_j$. In the diagram, each hidden unit therefore has two
+outgoing arrows, one to $y_1$ and one to $y_2$.
+\begin{center}
+\begin{tikzpicture}[font=\small,
+    neuron/.style={circle,draw=NotesBlue,thick,minimum size=0.8cm,inner sep=0pt},
+    edge/.style={-{Stealth},black!70},baseline=(current bounding box.center)]
+  \node[neuron] (x) at (0,0) {$x$};
+  \foreach \k/\yy in {1/1.8,2/0.6,3/-0.6,4/-1.8}{\node[neuron] (h\k) at (2.6,\yy) {$h_{\k}$};}
+  \node[neuron] (y1) at (5.2,0.6) {$y_1$};
+  \node[neuron] (y2) at (5.2,-0.6) {$y_2$};
+  \foreach \k in {1,2,3,4}{
+    \draw[edge] (x)--(h\k);
+    \draw[edge] (h\k)--(y1);
+    \draw[edge] (h\k)--(y2);
+  }
+\end{tikzpicture}
+\hspace{1cm}
+\begin{tikzpicture}[x=2.1cm,y=1.3cm,baseline=(current bounding box.center)]
+  \draw[black!25,dashed] (0,0)--(2,0);
+  \foreach \j in {0.37,1.1,1.5,1.8}{\draw[black!45,densely dotted] (\j,-1)--(\j,1);}
+  \draw[NotesBlue,very thick] plot coordinates
+    {(0,0.15) (0.37,0.15) (1.1,-0.28) (1.5,-0.05) (1.8,0.32) (2,0.4)};
+  \draw[UnitOne,very thick] plot coordinates
+    {(0,-0.45) (0.37,-0.45) (1.1,0.35) (1.5,0.15) (1.8,-0.42) (2,-0.15)};
+  \draw[black!60] (0,-1) rectangle (2,1);
+  \foreach \t in {0,1,2}{
+    \draw[black!60] (\t,-1)--(\t,-0.94);
+    \node[below,font=\tiny,black!70] at (\t,-1) {$\t$};
+  }
+  \foreach \t in {-1,0,1}{\node[left,font=\tiny,black!70] at (0,\t) {$\t$};}
+  \node[NotesBlue,font=\scriptsize,above] at (0.18,0.15) {$y_1$};
+  \node[UnitOne,font=\scriptsize,below] at (0.18,-0.45) {$y_2$};
+  \node[below,font=\scriptsize] at (1,-1.15) {$x$};
+\end{tikzpicture}
+\end{center}
+While $y_1$ and $y_2$ are different functions, they change slope at the same points (the
+dotted lines). The reason is that a joint appears where a hidden unit
+switches on or off. The hidden units are the same for both outputs, so
+the points where they switch are the same too. The weights $\phi_{jd}$
+only decide \emph{how much} and \emph{in which direction} each output
+bends at those points, not \emph{where}.
+
+\begin{intuitionbox}
+Why would we want to calculate more outputs $y$?
+
+Suppose the input $x$ is the hour of the day, from $0$ to $24$, and we
+want to predict two things at that hour: the temperature $y_1$ and the
+humidity $y_2$.
+
+We could build two separate networks, one for each output. But both
+quantities depend on the same moments of the day: sunrise, the hottest
+hours in the early afternoon, sunset. With a single network, the hidden
+units can learn these moments once, and each output then uses them in
+its own way. When the sun rises, for example, the temperature goes up
+while the humidity usually goes down.
+
+This is also why the two outputs change slope at the same times. A
+joint is an hour at which a hidden unit switches on or off, for example
+at sunrise or at sunset, and these hours are the same for both outputs.
+\end{intuitionbox}
 
 \clearpage
 \section{How much can a network represent?}
