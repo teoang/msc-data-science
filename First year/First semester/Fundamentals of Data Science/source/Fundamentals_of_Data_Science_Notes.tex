@@ -1444,7 +1444,7 @@ reducing the number of values we store for each point.
 To try this, we choose fewer directions. Let us return to the small
 dataset we have just encoded.
 
-\begin{framedexample}{Two coordinates, but only one weight}
+\begin{framedexample}{Two coordinates, but only one weight}\label{ex:one-weight}
 Our two observations are
 \[
   x_1=\begin{pmatrix}3\\3\end{pmatrix},\qquad
@@ -1802,7 +1802,7 @@ a basis of the whole original space.
 Let us first return to our diagonal line. We can change the length
 of the vector we use to describe it without changing the line itself.
 
-\begin{framedexample}{The same line, a unit direction}
+\begin{framedexample}{The same line, a unit direction}\label{ex:unit-diagonal}
 We still want to approximate $x=(2,0)^\top$ on the line $x_2=x_1$.
 Previously we used the direction $(1,1)^\top$.
 Its length is $\sqrt{1^2+1^2}=\sqrt2$. Divide by that length to get
@@ -2013,84 +2013,70 @@ weights for each point. But one question remains:
 The observations themselves can give us a clue. If they follow a
 particular pattern, a direction that follows that pattern may let us
 describe them with fewer numbers while losing little information.
-Let us look at a small dataset where we can see this immediately.
+Let us look at small datasets where we can see this immediately.
 
 \begin{framedexample}{Three points, one line}\label{ex:pca-three-points}
-Suppose each observation has two features, and our three observations are
-\[
-  x_1=\begin{pmatrix}-2\\-2\end{pmatrix},\qquad
-  x_2=\begin{pmatrix}0\\0\end{pmatrix},\qquad
-  x_3=\begin{pmatrix}2\\2\end{pmatrix}.
-\]
-Their mean is $(0,0)^\top$, so they are already centred.
+In the previous chapter the direction was given, and we only had to
+find the weights. Now we are given only the observations. Each has
+two features, and we may keep just \textbf{one} direction.
+Which one should it be?
 
-Notice the pattern: in every observation, the two feature values
-are equal. Once we know one value, we already know the other.
-These two features repeat the same information.
-
+Look at three small datasets, all already centred (their mean is
+$(0,0)^\top$):
 \begin{center}
-\begin{tikzpicture}[font=\small,x=0.65cm,y=0.65cm]
-  \draw[-{Stealth},black!40] (-3,0)--(3.2,0) node[right] {feature 1};
-  \draw[-{Stealth},black!40] (0,-3)--(0,3.2) node[above] {feature 2};
-  \draw[NotesBlue,thick] (-2.8,-2.8)--(2.8,2.8);
-  \fill[NotesBlue] (-2,-2) circle (2.5pt)
-    node[below right] {$(-2,-2)$};
-  \fill[NotesBlue] (0,0) circle (2.5pt) node[below right] {$(0,0)$};
-  \fill[NotesBlue] (2,2) circle (2.5pt) node[above left] {$(2,2)$};
+\begin{tikzpicture}[font=\small,x=0.42cm,y=0.42cm]
+  \foreach \dx/\ax/\ay/\bx/\by/\lab in
+    {0/-2/-2/2/2/{(a)},10/-2/0/2/0/{(b)},20/-2/2/2/-2/{(c)}}{
+    \begin{scope}[xshift=\dx*0.42cm]
+      \draw[-{Stealth},black!40] (-3,0)--(3.2,0);
+      \draw[-{Stealth},black!40] (0,-3)--(0,3.2);
+      \draw[NotesBlue,thick] (1.4*\ax,1.4*\ay)--(1.4*\bx,1.4*\by);
+      \fill[NotesBlue] (\ax,\ay) circle (3pt);
+      \fill[NotesBlue] (0,0) circle (3pt);
+      \fill[NotesBlue] (\bx,\by) circle (3pt);
+      \node at (0,-4) {\lab};
+    \end{scope}}
 \end{tikzpicture}
 \end{center}
-
-All three points lie on the same diagonal line through the origin.
-The negative point and the positive point are on opposite sides
-of the origin, but they belong to the same line.
-
-Choose the unit diagonal direction we used in the previous chapter:
-\[
-  c_1=\frac1{\sqrt2}\begin{pmatrix}1\\1\end{pmatrix}.
-\]
-We need just one weight for each point, telling us how far to move
-along that direction:
 \begin{center}
-\begin{tabular}{@{}cc@{}}
+\begin{tabular}{@{}clc@{}}
 \toprule
-\textbf{Original observation} & \textbf{Weight $w_p=c_1^\top x_p$} \\
+ & \textbf{Observations} & \textbf{Direction to keep} \\
 \midrule
-$(-2,-2)^\top$ & $-2\sqrt2$ \\
-$(0,0)^\top$ & $0$ \\
-$(2,2)^\top$ & $2\sqrt2$ \\
+(a) & $(-2,-2)^\top,\ (0,0)^\top,\ (2,2)^\top$ & $(1,1)^\top$, the diagonal \\
+(b) & $(-2,0)^\top,\ (0,0)^\top,\ (2,0)^\top$ & $(1,0)^\top$, the horizontal axis \\
+(c) & $(-2,2)^\top,\ (0,0)^\top,\ (2,-2)^\top$ & $(1,-1)^\top$, the anti-diagonal \\
 \bottomrule
 \end{tabular}
 \end{center}
-The negative weight moves in the opposite direction; the zero
-weight stays at the origin. Decoding recovers the two coordinates
-exactly. For the last point,
-\[
-  c_1w_3=
-  \frac1{\sqrt2}\begin{pmatrix}1\\1\end{pmatrix}2\sqrt2
-  =\begin{pmatrix}2\\2\end{pmatrix}.
-\]
-The direction is shared by all observations. Once we keep it,
-each observation needs one weight instead of two feature values.
+In each dataset the three points lie on one line through the origin.
+If we keep the direction of that line, every point is reached exactly
+with one weight, as in
+\hyperref[ex:one-weight]{Example~\ref*{ex:one-weight}}. Any other
+direction would leave a residual for the nonzero points.
+
+\textbf{The question is the same each time, but the answer changes
+with the data.} No direction is good in general: the good one is the
+direction along which \emph{these} observations move.
+
+From now on we keep dataset (a), so $x_1=(-2,-2)^\top$,
+$x_2=(0,0)^\top$, $x_3=(2,2)^\top$. With the unit diagonal
+$c_1=\frac1{\sqrt2}(1,1)^\top$ of
+\hyperref[ex:unit-diagonal]{Example~\ref*{ex:unit-diagonal}},
+their weights are $w_p=c_1^\top x_p$, that is
+$-2\sqrt2$, $0$, and $2\sqrt2$.
 \end{framedexample}
 
-\paragraph{Why choose the diagonal?}
-We chose it because of the pattern in the data. A horizontal direction
-would also let us store one weight per point, but it would discard
-the second coordinate of the two nonzero observations. The diagonal
-lets us keep both coordinates exactly.
+Here we could find the direction by eye, because the points lie
+\emph{exactly} on a line. Real observations usually lie only
+\emph{close} to a line or plane. Then every direction loses some
+information, and looking at the picture is no longer enough: we need
+a number to compare the candidates.
 
-\textbf{Using fewer numbers is only half the task: we must also
-choose directions that preserve the information in the observations.}
 Principal Component Analysis (PCA) makes this choice from the data.
-It uses the observations together to find shared directions that
-keep as much of their variation as possible. In our example, all
-the movement between observations happens along the diagonal.
-
-Real observations often lie close to a line or plane without lying
-exactly on it. Then some information must be lost. PCA looks for
-directions that make the average squared reconstruction error as
-small as possible. We will write this choice precisely in the next
-section.
+It looks for the directions that make the average squared
+reconstruction error as small as possible. We will write this
+choice precisely in the next section.
 
 \paragraph{What if the cloud is away from the origin?}
 The lines and planes we have used so far pass through the origin.
@@ -2109,7 +2095,8 @@ Suppose the original observations are now
   \begin{pmatrix}12\\22\end{pmatrix}.
 \]
 Their mean is $\mu=(10,20)^\top$. Subtracting $\mu$ from each point
-gives exactly the three centred observations in the first example.
+gives exactly the centred observations of dataset (a) in
+\hyperref[ex:pca-three-points]{Example~\ref*{ex:pca-three-points}}.
 For the last point,
 \[
   x_3=\begin{pmatrix}12\\22\end{pmatrix}
@@ -3279,5 +3266,588 @@ of constant function value.
 {\small\textit{Sources: Spinelli, Lecture 03 (Optimization), slides 2--29;
 Watt, Borhani, and Katsaggelos, Machine Learning Refined (2016),
 Sections 1.4, 2.1.1--2.1.2, and 2.2.1.}}
+
+\chapter{Shallow Neural Networks}\label{chap:shallow-neural-networks}
+
+\begin{tcolorbox}[colback=yellow!20,colframe=yellow!60!black,
+  boxrule=0.4pt,arc=1mm,left=5pt,right=5pt,top=3pt,bottom=3pt,
+  before skip=0pt,after skip=0pt]
+\small\textbf{Start of lecture 05 (Spinelli) --- 2 November 2026}
+\end{tcolorbox}
+
+\section{Choosing features by hand}
+
+In traditional machine learning (e.g., SVMs, Logistic Regression), the model's
+performance depends entirely on the quality of the input features.
+
+Imagine that we want to recognise spam emails. We have the text
+of each message, but a model such as logistic regression needs a
+numerical description. What should those numbers tell it?
+One approach, as we have seen before, is to choose features that we think will help.
+
+\begin{framedexample}{Turning an email into three numbers}\label{ex:spam-manual-features}
+Consider the message
+\begin{quote}
+Buy Viagra now for cheap!!!
+\end{quote}
+We decide to describe it using three features:
+\begin{center}
+\begin{tabular}{@{}lc@{}}
+\toprule
+\textbf{Feature chosen by us} & \textbf{Value} \\
+\midrule
+Contains the word ``viagra'' & $1$ \\
+Number of exclamation marks & $3$ \\
+Contains the word ``cheap'' & $1$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+The message is now represented by
+\[
+  x=\begin{pmatrix}1\\3\\1\end{pmatrix}.
+\]
+Each entry records one measurement. The first and third entries
+are indicators: $1$ means that the word is present, and $0$ would
+mean that it is absent.
+
+\end{framedexample}
+
+Given many emails labelled spam or non-spam, the classifier learns
+how to use these numbers to make its decision. We chose
+what to measure; training learns how those measurements affect
+the prediction.
+
+\begin{frameddefn}{Feature engineering}\label{def:feature-engineering}
+\textbf{Feature engineering} is the process of designing or choosing
+measurements and transformations that turn the original data into
+features for a model.
+\end{frameddefn}
+
+This approach relies on us knowing what information is useful.
+If our chosen measurements leave out an important pattern, the
+classifier cannot use that pattern from the supplied features.
+
+\begin{framedexample}{Different messages, the same description}
+Now consider a suspicious message:
+\begin{quote}
+You have won a prize. Enter your card details now.
+\end{quote}
+It contains neither of our chosen words and no exclamation marks.
+The three features chosen in
+\hyperref[ex:spam-manual-features]{Example~\ref*{ex:spam-manual-features}} give
+\[
+  x=\begin{pmatrix}0\\0\\0\end{pmatrix}.
+\]
+An ordinary message such as ``See you at class tomorrow.'' gives
+exactly the same vector. With only these features, the classifier
+receives the same input for both messages and cannot distinguish
+them. We left out the information that would let it do so.
+\end{framedexample}
+
+\section{Learning the representation}
+
+Could the model learn a useful description of the message as well
+as learning how to classify it? This is the idea behind
+\emph{representation learning}.
+
+The text still needs an initial numerical encoding. The model then
+learns transformations of that input, producing internal features
+that help it perform its task.
+
+\begin{frameddefn}{Representation learning}\label{def:representation-learning}
+\textbf{Representation Learning} is a set of techniques that allows a model
+to automatically learn the most useful features (or ``representations'')
+directly from the raw data.
+\end{frameddefn}
+
+\begin{framedexample}{Learning features that help recognise spam}
+Return to the email task. We supply messages and their spam/non-spam
+labels. During training, a neural network can learn transformations
+that exploit combinations of words and other patterns associated
+with these labels.
+
+We do not need to enumerate every suspicious expression in advance.
+The learned internal description helps the model make its final
+classification:
+\begin{center}
+\begin{tikzpicture}[font=\small]
+  \node[draw=NotesBlue,rounded corners,align=center,
+    text width=2.9cm,minimum height=1.1cm] (input) at (0,0)
+    {Numerical encoding\\of the message};
+  \node[draw=NotesBlue,rounded corners,align=center,
+    text width=2.9cm,minimum height=1.1cm] (representation) at (4,0)
+    {Learned\\representation};
+  \node[draw=NotesBlue,rounded corners,align=center,
+    text width=2.9cm,minimum height=1.1cm] (prediction) at (8,0)
+    {Spam / non-spam\\prediction};
+  \draw[-{Stealth},thick] (input.east)--(representation.west);
+  \draw[-{Stealth},thick] (representation.east)--(prediction.west);
+\end{tikzpicture}
+\end{center}
+Both the transformations producing useful features and the rule
+using those features for classification can be learned during
+training.
+\end{framedexample}
+
+\section{Learning through several layers}
+
+A useful representation can be built through several transformations.
+One layer produces a collection of numbers; the next layer uses
+those numbers as its input and transforms them again.
+This lets later stages combine patterns detected by earlier ones.
+
+\begin{frameddefn}{Deep learning}\label{def:deep-learning}
+\textbf{Deep learning} uses neural networks with multiple successive
+learned layers to build a hierarchy of representations.
+These networks are called \textbf{deep neural networks (DNNs)}.
+Each layer transforms the output of the preceding layer, allowing
+later representations to combine simpler patterns into more
+complex ones.
+\end{frameddefn}
+
+\Needspace{16\baselineskip}
+\begin{center}
+  \includegraphics[width=0.9\linewidth]{assets/neural-network-layers-stanford.jpeg}
+
+  \smallskip
+  {\small Input values pass through two hidden layers before reaching
+  the output layer. Each layer uses the values produced by the previous one.}
+
+\end{center}
+
+\Needspace{26\baselineskip}
+\begin{framedexample}{Recognising a face, layer by layer}
+Imagine a deep neural network learning to recognise a face.
+Its input consists of numbers describing the image's pixels.
+We can understand how increasingly complex representations
+are built by following four stages:
+\begin{enumerate}
+  \item \textbf{Layer 1 (Low-level): simple visual features.}
+  Starting from the raw pixels, this layer learns to detect edges,
+  corners, and colours. These give a first description of local
+  patterns in the image.
+
+  \item \textbf{Layer 2 (Mid-level): shapes and textures.}
+  This layer uses the features from Layer 1. It combines edges
+  into simple shapes and textures, such as an oval, a line,
+  or a patch of skin.
+
+  \item \textbf{Layer 3 (High-level): parts of objects.}
+  This layer combines those shapes into more complex patterns,
+  such as an eye, a nose, or a mouth.
+
+  \item \textbf{Final layer (Abstract): recognising the face.}
+  The final layer combines information about these parts to
+  recognise the overall concept of a face.
+\end{enumerate}
+
+\begin{center}
+  % Goodfellow et al., Deep Learning, Figure 1.2 (introductory slides).
+  \includegraphics[width=0.68\linewidth]{assets/learned-feature-hierarchy.pdf}
+\end{center}
+
+Each stage builds on the previous one: pixels give rise to simple
+features, simple features combine into shapes, and those shapes
+contribute to recognising parts and then the whole face.
+\end{framedexample}
+
+These stages describe how information flows through the network.
+During training, the parameters in different layers can be adjusted
+together.
+
+\clearpage
+\section{A unifying view of models we already know}
+
+We may want a model to predict a number, decide between two classes,
+or choose among several classes. These tasks lead to linear regression,
+binary classification, and multi-class classification, respectively.
+All three can start with the same calculation: combine the input features
+using weights, then transform the result into the output we need.
+
+For one observation, suppose our three features are
+\[
+  x=\begin{pmatrix}2\\1\\3\end{pmatrix}.
+\]
+We multiply each feature by a weight and add the results.
+Each weight controls its feature's contribution; a zero weight leaves
+that feature out of the calculation.
+
+\begin{frameddefn}{Activation function}\label{def:activation-function}
+An \textbf{activation function} transforms the result of a weighted
+combination of inputs. Here, we choose this function according to the
+output we need: a numerical prediction, a probability for one class,
+or probabilities for several classes.
+\end{frameddefn}
+
+\subsection{Linear regression: predicting a number}
+
+\begin{framedexample}{}\label{ex:three-features-linear-prediction}
+Use the input $x=(2,1,3)^\top$ above and, for this example, choose
+weights $\beta=(1,-1,0)^\top$. Their weighted combination is
+\[
+  \beta^\top x=1\cdot2-1\cdot1+0\cdot3=1.
+\]
+In linear regression, this number is already our prediction:
+\[
+  y=\beta^\top x=1.
+\]
+We are predicting a numerical quantity, so we leave the result as it is.
+We can describe this using the \textbf{identity activation}, $g(z)=z$:
+it simply returns the number it receives.
+\begin{center}
+  \includegraphics[width=0.30\linewidth]{assets/linear-regression-slide.pdf}
+\end{center}
+\end{framedexample}
+
+\clearpage
+\subsection{Binary classification: turning a score into a probability}
+
+\begin{framedexample}{}
+Keep the same input and weights as in
+\hyperref[ex:three-features-linear-prediction]{Example~\ref*{ex:three-features-linear-prediction}},
+but now imagine that we must decide
+whether an email is spam. The weighted combination still gives $1$.
+This is a \textbf{score}; it is not yet a probability. With other inputs
+or weights, the score could be negative or greater than one.
+
+We pass it through the \textbf{sigmoid function},
+\[
+  \sigma(z)=\frac{1}{1+e^{-z}},
+\]
+which maps any real score to a number between zero and one:
+\[
+  y=\sigma(\beta^\top x)=\sigma(1)\approx0.73.
+\]
+If class $1$ means spam, the model assigns a spam probability of about
+$73\%$. The calculation now follows this path:
+\[
+  \text{three features}\ \longrightarrow\ \text{one score}
+  \ \longrightarrow\ \text{one probability}.
+\]
+\begin{center}
+  \includegraphics[width=0.40\linewidth]{assets/binary-classification-slide.pdf}
+\end{center}
+\end{framedexample}
+
+\clearpage
+\subsection{Multi-class classification: one score for each class}
+
+\begin{framedexample}{}
+Suppose we use three image features to classify an image as a cat,
+a dog, or a bird. We need a score for each class. Each class therefore
+has its own weights, which we collect as rows of a matrix $W$.
+
+For a simple numerical example, keep $x=(2,1,3)^\top$ and choose
+\[
+ W=\begin{pmatrix}1&0&0\\0&1&0\\0&0&1\end{pmatrix},
+ \qquad
+ Wx=\begin{pmatrix}2\\1\\3\end{pmatrix}
+ \quad\begin{matrix}\text{cat}\\\text{dog}\\\text{bird}.\end{matrix}
+\]
+These are three scores, not three probabilities. The
+\textbf{softmax function} converts the scores into probabilities
+that sum to one. For scores $z_1,\ldots,z_C$, its $c$th output is
+\[
+  \operatorname{softmax}(z)_c
+  =\frac{e^{z_c}}{\sum_{j=1}^{C}e^{z_j}}.
+\]
+In our example, this gives
+\[
+  y=\operatorname{softmax}(Wx)
+  =\frac{1}{e^2+e^1+e^3}
+    \begin{pmatrix}e^2\\e^1\\e^3\end{pmatrix}
+  \approx\begin{pmatrix}0.245\\0.090\\0.665\end{pmatrix}.
+\]
+The highest probability belongs to bird, so that is the predicted class.
+The largest score also receives the largest probability.
+\begin{center}
+  \includegraphics[width=0.43\linewidth]{assets/multiclass-classification-slide.pdf}
+\end{center}
+\end{framedexample}
+
+\clearpage
+\subsection{The same two steps in one formula}
+
+We can write all three calculations with a single formula:
+\[
+  \boxed{y=g(Wx).}
+\]
+First, $Wx$ combines the features to produce the scores. Then $g$
+transforms those scores into the required output. For linear regression,
+$g$ is the identity; for binary classification, it is the sigmoid;
+for multi-class classification, it is the softmax.
+
+The notation $W$ also covers the single-output models: in those cases,
+$W$ is just the row vector previously written as $\beta^\top$.
+
+\begin{center}
+  \includegraphics[width=\linewidth]{assets/unifying-view-slide.pdf}
+\end{center}
+
+\begin{frameddefn}{Input and output dimensions}\label{def:network-input-output-dimensions}
+With $D$ input features and $C$ output scores, the weight matrix has
+$C$ rows and $D$ columns:
+\[
+  x\in\mathbb{R}^{D},\qquad
+  W\in\mathbb{R}^{C\times D},\qquad
+  Wx\in\mathbb{R}^{C}.
+\]
+Each row of $W$ contains the weights used to calculate one output score.
+\end{frameddefn}
+
+\clearpage
+\section{Why we need non-linear activations}
+
+Adding layers gives us more successive calculations. But do more
+calculations necessarily let us represent a more complex function?
+Let us first build a network in which every layer only multiplies
+its input by a weight.
+
+\begin{framedexample}{}
+Take one input number $x$. The first layer multiplies it by $2$,
+the second by $3$, and the third by $4$:
+\[
+  x\ \xrightarrow{\times2}\ 2x
+  \ \xrightarrow{\times3}\ 6x
+  \ \xrightarrow{\times4}\ 24x.
+\]
+We could obtain exactly the same output with a single layer that
+multiplies $x$ by $24$. This works for every input, not just for one
+particular numerical example. Three layers have changed how we
+calculate the answer, but the function is still $y=24x$.
+\end{framedexample}
+
+With several features, matrices replace the individual weights.
+
+\begin{framedexample}{}
+For three matrix layers, the calculation becomes
+\[
+  y=W_3\bigl(W_2(W_1x)\bigr)
+   =(W_3W_2W_1)x
+   =W_{\mathrm{stacked}}x.
+\]
+Here $W_{\mathrm{stacked}}=W_3W_2W_1$ is a single weight matrix
+that combines the effects of all three layers. Multiplying the input
+by this matrix gives the same output as passing it through the
+three layers in sequence.
+\end{framedexample}
+
+The underlying algebraic fact is the same: a composition of linear
+maps is still linear. Let us review what it means for a map to be linear.
+
+\begin{frameddefn}{Linear map}\label{def:linear-map}
+A map $T$ is \textbf{linear} if it preserves linear combinations:
+for any input vectors $u,v$ and scalars $a,b$,
+\[
+  T(au+bv)=aT(u)+bT(v).
+\]
+Thus, combining inputs before applying $T$ gives the same result as
+applying $T$ to each input and then combining the outputs.
+Multiplication by a fixed matrix, $T(x)=Wx$, is a linear map.
+\end{frameddefn}
+
+\clearpage
+\subsection{The algebra behind a stack of linear layers}
+
+\begin{framedprop}{Composition of linear maps}\label{prop:composition-linear-maps}
+Let $T:\mathbb{R}^{D}\to\mathbb{R}^{H}$ and
+$S:\mathbb{R}^{H}\to\mathbb{R}^{C}$ be linear maps.
+Their composition $(S\circ T)(x)=S(T(x))$ is linear.
+Consequently, any finite composition of linear maps is linear.
+\end{framedprop}
+
+\begin{proof}
+Take $u,v\in\mathbb{R}^{D}$ and scalars $a,b$. First use the
+linearity of $T$, then the linearity of $S$:
+\[
+\begin{aligned}
+ (S\circ T)(au+bv)
+   &=S\bigl(T(au+bv)\bigr)\\
+   &=S\bigl(aT(u)+bT(v)\bigr)\\
+   &=aS(T(u))+bS(T(v))\\
+   &=a(S\circ T)(u)+b(S\circ T)(v).
+\end{aligned}
+\]
+This is exactly the condition for linearity. For more maps, apply
+the same argument repeatedly, combining two maps at a time.
+\end{proof}
+
+
+
+\clearpage
+\subsection{What changes when we insert a non-linearity?}
+
+We have just seen that composing linear transformations alone is
+not enough to build a non-linear model. We therefore need to introduce
+non-linearity somewhere in the calculation. How can we do this?
+One way is to introduce the ReLU activation between layers.
+
+\begin{frameddefn}{Rectified Linear Unit (ReLU)}\label{def:relu}
+The \textbf{ReLU activation} is
+\[
+  g(z)=\max(0,z).
+\]
+It returns $z$ when $z>0$ and zero otherwise. For a vector, we apply
+it separately to each entry. Although its name contains ``linear'',
+ReLU is not a linear map: its rule changes at zero
+(it is easy to see that $g(-1)+g(1)\neq g(-1+1)$).
+\begin{center}
+\begin{tikzpicture}[font=\small,x=1.05cm,y=0.8cm]
+  \draw[-{Stealth},black!50] (-3.3,0)--(3.5,0) node[right] {$z$};
+  \draw[-{Stealth},black!50] (0,-0.4)--(0,3.7) node[above] {$g(z)$};
+  \foreach \xx in {-3,-2,-1,1,2,3}{
+    \draw[black!50] (\xx,0.07)--(\xx,-0.07)
+      node[below,black] {$\xx$};
+  }
+  \foreach \yy in {1,2,3}{
+    \draw[black!50] (0.07,\yy)--(-0.07,\yy)
+      node[left,black] {$\yy$};
+  }
+  \node[below left] at (0,0) {$0$};
+  \draw[NotesBlue,thick] (-3.1,0)--(0,0)--(3.1,3.1);
+  \fill[NotesBlue] (0,0) circle (2pt);
+  \node[NotesBlue,above] at (-1.8,0.2) {$g(z)=0$};
+  \node[NotesBlue,left] at (1.8,2.4) {$g(z)=z$};
+\end{tikzpicture}
+\end{center}
+\end{frameddefn}
+
+\begin{framedexample}{}
+Use two scalar layers with weights $2$ and $3$, and insert ReLU
+between them:
+\[
+  y=3g(2x)=3\max(0,2x).
+\]
+For example, let's follow two inputs through the same network:
+\begin{center}
+\begin{tabular}{@{}rrrr@{}}
+\toprule
+Input $x$ & First layer $2x$ & ReLU $g(2x)$ & Output $3g(2x)$\\
+\midrule
+$1$ & $2$ & $2$ & $6$\\
+$-1$ & $-2$ & $0$ & $0$\\
+\bottomrule
+\end{tabular}
+\end{center}
+Is there a single weight $a$ such that $ax=3g(2x)$ for every
+input $x$?
+
+The input $x=1$ would force $a=6$. But then $x=-1$ would give
+$\text{LHS}=-6$, whereas the RHS would give $0$. No single weight works
+for both inputs.
+\end{framedexample}
+
+With non-linear activations between layers, the calculation generally
+cannot be collapsed into one linear map. Successive
+layers can build more complex transformations of the input.
+
+\clearpage
+\section{Measuring prediction errors}
+
+A network produces a prediction. To train it, we compare that
+prediction with the correct answer and assign a numerical penalty.
+This is the role of the loss function introduced in
+\hyperref[def:optimization-objective]{Definition~\ref*{def:optimization-objective}}.
+Training adjusts the weights to reduce the loss over the training
+examples. The appropriate loss depends on what we are predicting.
+
+\subsection{Regression: mean squared error}
+
+\begin{frameddefn}{Mean squared error (MSE)}\label{def:mse}
+For $n$ observations with numerical targets $t_i$ and predictions
+$\widehat y_i$, the \textbf{mean squared error} is
+\[
+  L_{\mathrm{MSE}}=\frac{1}{n}\sum_{i=1}^{n}(\widehat y_i-t_i)^2.
+\]
+We square each prediction error and then take the average.
+\end{frameddefn}
+
+\begin{framedexample}{}
+Suppose a house is worth $200$ thousand euros. A prediction of $190$
+gives squared error $(190-200)^2=100$. A prediction of $150$ gives
+$(150-200)^2=2500$: the larger mistake receives a larger penalty.
+For several houses, MSE averages their squared errors.
+\end{framedexample}
+
+\subsection{Classification: cross-entropy}
+
+For classification, the prediction is a probability or a collection
+of class probabilities. We want the model to assign high probability
+to the correct class. Cross-entropy penalises it when that probability
+is low.
+
+\begin{frameddefn}{Binary and multi-class cross-entropy}\label{def:cross-entropy}
+For one binary-labelled observation, let $t\in\{0,1\}$ be the
+correct label and $p$ the predicted probability of class $1$.
+The \textbf{binary cross-entropy (BCE)} is
+\[
+  \ell_{\mathrm{BCE}}=-\bigl[t\log p+(1-t)\log(1-p)\bigr].
+\]
+For multiple classes, let $p_c$ be the predicted probability of
+class $c$, and $k$ the correct class. The \textbf{cross-entropy (CE)} is
+\[
+  \ell_{\mathrm{CE}}=-\log p_k.
+\]
+Here $\log$ is the natural logarithm. For a dataset, we commonly
+average these per-observation losses.
+\end{frameddefn}
+
+\Needspace{13\baselineskip}
+\begin{framedexample}{}
+An email really is spam, so its label is $t=1$. Its BCE is therefore
+$-\log p$, where $p$ is the predicted spam probability:
+\[
+\begin{array}{c|c}
+ p & -\log p\\\hline
+ 0.9 & 0.105\ \text{approximately}\\
+ 0.1 & 2.303\ \text{approximately}
+\end{array}
+\]
+Assigning low probability to the correct answer receives a much
+larger penalty.
+
+For a cat/dog/bird classifier, the same principle applies. If the
+image really contains a bird and its predicted probabilities are
+$(0.245,0.090,0.665)^\top$, its cross-entropy is
+$-\log(0.665)\approx0.408$. We use the probability assigned to bird,
+because bird is the correct class.
+\end{framedexample}
+
+\section{How much can a network represent?}
+
+The loss measures prediction errors. Capacity concerns how complex
+a relationship the network can represent in the first place.
+
+\begin{frameddefn}{Model capacity, depth, and width}\label{def:network-capacity}
+\textbf{Model capacity} describes the range and complexity of functions
+a model can represent. For a feed-forward network, two architectural
+choices that affect capacity are:
+\begin{itemize}
+  \item \textbf{Depth}: the number of hidden layers.
+  \item \textbf{Width}: the number of neurons in a hidden layer.
+        Different hidden layers may have different widths.
+\end{itemize}
+A hidden layer is an intermediate layer between the input and output.
+Each of its neurons computes one value, so its width determines how
+many values it passes to the next layer.
+\end{frameddefn}
+
+\begin{framedexample}{}
+Compare one hidden layer of $100$ neurons with five hidden layers
+of $20$ neurons each. The first network is wider: it produces $100$
+hidden values at once. The second is deeper: it performs five
+successive hidden transformations, each producing $20$ values.
+Both have $100$ hidden neurons in total, but their arrangement
+changes the functions they can represent.
+\end{framedexample}
+
+Increasing width or depth can increase capacity, depending on the
+architecture and activations. By
+\hyperref[prop:composition-linear-maps]{Proposition~\ref*{prop:composition-linear-maps}},
+adding only linear layers still gives a linear map.
+
+Greater capacity does not automatically improve predictions on new
+data: a flexible network may also fit accidental details of its
+training examples.
 
 \end{document}
