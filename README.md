@@ -154,6 +154,11 @@ Compiled from Flavia Celani's handwritten notes up to 16 October, in the order t
 - [ ] Subsequences, common subsequences and the longest common subsequence.
 - [ ] Edit distance, its relation to the LCS, and its recursive formula (start of dynamic programming).
 
+**19 October**
+
+- [ ] Memory: bytes, addresses and consecutive memory locations.
+- [ ] Python names refer to objects.
+
 **20 October**
 
 - [ ] Text mining: corpus, vocabulary and document count vectors; document length and L1/L2 normalization.

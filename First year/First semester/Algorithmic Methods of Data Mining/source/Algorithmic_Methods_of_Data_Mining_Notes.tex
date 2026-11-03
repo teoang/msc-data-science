@@ -888,8 +888,8 @@ The loop runs $n-1$ times with a constant amount of work per iteration,
 so the running time is $T(n)=O(n)$: this algorithm is linear.
 
 \begin{notebox}[Indexing and closed form]
-The slides use the convention $F_0=0$, $F_1=1$ (their iterative
-algorithm returns $n$ for $n\leq1$ and starts from $0$ and $1$). With
+A common convention is $F_0=0$, $F_1=1$: with it, the iterative
+algorithm returns $n$ for $n\leq1$ and starts from $0$ and $1$. With
 that convention $\mathrm{fib}(n)=F_{n+1}$, so the two sequences differ
 only by a shift. There is also a closed formula, which we do not prove:
 \[
@@ -1040,8 +1040,7 @@ distinct tours (each one can be travelled in two directions):
   A\,B\,D\,C\,A&:\ 2+6+2+5=15,\\
   A\,C\,B\,D\,A&:\ 5+3+6+4=18.
 \end{align*}
-The optimal tour costs $11$. In the lecture graph with eight cities,
-two tours cost $15$ and $21$.
+The optimal tour costs $11$.
 \end{framedexample}
 
 The brute-force approach tries all tours:
