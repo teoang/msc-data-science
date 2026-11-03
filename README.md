@@ -39,7 +39,7 @@
 <details>
 <summary><strong>Fundamentals of Statistical Learning · Topics in lecture order</strong></summary>
 
-Compiled from Flavia's handwritten notes up to 16 October, in the order the topics were covered. The lecture checklist above gives the date of each lecture.
+Compiled from Flavia Celani's handwritten notes up to 16 October, in the order the topics were covered. The lecture checklist above gives the date of each lecture.
 
 **Random variables (Topic 03)**
 
