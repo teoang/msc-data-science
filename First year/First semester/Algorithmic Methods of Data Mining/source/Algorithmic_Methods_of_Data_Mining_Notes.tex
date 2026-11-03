@@ -5289,6 +5289,297 @@ $O(c\log(k+1))$, for $1\leq k\leq c$. We still need to compute
 each candidate's complete score before comparing it with the heap
 root. If fewer than $k$ candidates are available, return all of them.
 
+\clearpage
+\lecturestart{2 November}
+
+\section{Finding a term in the inverted index}
+
+Let us go back to the inverted index of
+Definition~\ref{def:inverted-index}. Take three documents:
+\[
+  1:\ A\ B\ D,\qquad 2:\ B\ A\ B,\qquad 3:\ B.
+\]
+For each term, the index stores the documents that contain it:
+\[
+  A\to[1,2],\qquad B\to[1,2,3],\qquad D\to[1].
+\]
+To answer a query we start from a term, for example $B$, and we
+must reach its list $[1,2,3]$. What we need is a \emph{dictionary
+of terms}: a structure that, given a term, returns what is stored
+for it.
+
+What happens if the data are so many that the dictionary does not
+fit in memory? Then we would need parallel frameworks or external
+algorithms, which we will not discuss now.
+
+Here we ask a more basic
+question: what exactly is a dictionary, and how can we build one?
+
+\section{The dictionary ADT}
+
+As with lists and priority queues, we first say \emph{what} a
+dictionary does, and only then \emph{how} to implement it.
+
+\begin{frameddefn}{Dictionary (ADT)}\label{def:dictionary-adt}
+A \emph{dictionary} (or \emph{map}) $D$ stores pairs $(k,v)$, where
+the key $k$ belongs to a set $K$ of keys and the value $v$ to a set
+$V$ of values. Each key appears at most once. $D$ supports:
+\begin{enumerate}
+  \item $\operatorname{insert}(k,v)$: associate the value $v$ with
+    the key $k$;
+  \item $\operatorname{get}(k)$: return the value associated with $k$;
+  \item $\operatorname{remove}(k)$: remove $k$ and its value;
+  \item $\operatorname{exists}(k)$: return true if $k$ is in $D$,
+    false otherwise.
+\end{enumerate}
+\end{frameddefn}
+
+In Python, \verb|D["Maria"] = 7| inserts the key \verb|"Maria"|
+with value $7$; if \verb|"Maria"| is already in $D$, its value
+becomes $7$. To see whether \verb|"Maria"| is in $D$, we can compute
+$\operatorname{exists}(\texttt{"Maria"})$.
+
+The most direct implementation stores the pairs in a list,
+$[(k_1,v_1),(k_2,v_2),\ldots]$. To see whether a key exists, or to
+read its value, we must scan the keys one by one. Can we reach a
+key directly instead?
+
+\section{When the keys are positions}
+
+Suppose the keys are student IDs $0,1,\ldots,m-1$, and the value of
+each ID is the student's record. Then the dictionary can simply be
+an array (Definition~\ref{def:array}) with one slot per ID:
+\[
+  D[63]=(\texttt{"Maria"},\texttt{"De Paolis"},\ldots).
+\]
+The key \emph{is} the position, so every operation reaches its slot
+directly, in $\Theta(1)$ time.
+
+The problem appears when the keys are not numbers, but names or tax
+codes. Now the key is no longer $63$, but \verb|"Maria"|. (We
+assume the keys are unique, so there is only one Maria.) How can we
+still use an array?
+
+\section{Turning a key into a position}
+
+One idea is to convert the name into a number. Assign a number to
+each letter and add them up: this gives a function
+\[
+  f:\text{strings}\to\N,
+\]
+and we store each name at the position given by its number:
+\[
+  \operatorname{insert}(\textit{name},x):\quad A[f(\textit{name})]\gets x.
+\]
+
+\begin{framedexample}{}
+Number each letter by its position in the alphabet:
+$a=1$, $i=9$, $m=13$, $r=18$. Then
+\[
+  f(\texttt{"Maria"})=13+1+18+9+1=42,
+\]
+so Maria's record goes to $A[42]$.
+\end{framedexample}
+
+There are several problems with this idea.
+\begin{itemize}
+  \item \textbf{Different keys can get the same number.} Names made
+    of the same letters have the same sum: for example,
+    $f(\texttt{"Amira"})=1+13+9+18+1=42$, so Amira's record would
+    also go to $A[42]$, the slot already holding Maria. Different
+    letters can also add up to the same value: $3+1=4$ and $2+2=4$.
+  \item \textbf{How long must the array be?} Long names give large
+    numbers, so the array must reach the largest number a name can
+    produce. Although this is necessary, consider the case where we
+    store only $10$ names. Almost all of the array's slots stay
+    empty: we would allocate a huge array just for those $10$.
+\end{itemize}
+
+We would like a function that sends the keys into a \emph{small}
+range of positions, and that sends different keys to the same
+position as rarely as possible. This is what a hash function does.
+
+\section{Hash functions}
+
+\begin{frameddefn}{Hash function}\label{def:hash-function}
+A \emph{hash function} is a mapping from a domain to a range,
+\[
+  h:\{0,\ldots,2^m-1\}\to\{0,\ldots,2^n-1\},
+\]
+where typically $m\gg n$: the domain is much larger than the range.
+\end{frameddefn}
+
+For example, with $m=4$ the domain contains the $16$ bit strings
+from $0000$ (that is, $0$) to $1111$ (that is, $15$).
+
+\begin{center}
+\begin{tikzpicture}[font=\small,>=stealth]
+  \draw[thick,fill=PlotBlue!8] (0,0) ellipse (1.1cm and 1.7cm);
+  \draw[thick,fill=PlotGreen!10] (4,0) ellipse (0.6cm and 0.9cm);
+  \node at (0,2) {domain};
+  \node at (4,1.2) {range};
+  \foreach \y/\t in {1.1/0.45,0.6/0.45,0.1/0.0,-0.4/0.0,-0.9/-0.45,-1.3/-0.45}{
+    \fill (0,\y) circle (1.5pt);
+    \draw[->,black!60] (0.1,\y) -- (3.85,\t);
+  }
+  \foreach \t in {0.45,0.0,-0.45}{\fill (4,\t) circle (1.8pt);}
+  \node at (2,1.35) {$h$};
+\end{tikzpicture}
+\end{center}
+
+Another example is a hash function from $\{0,\ldots,9999\}$ to
+$\{0,\ldots,99\}$:
+\[
+  h(x)=x \bmod 100,
+\]
+which keeps the last two digits: $3783\to83$. Remember that, in
+binary, taking a
+number modulo $2^k$ keeps its last $k$ bits.
+
+Since the domain is much larger than the range, many keys must
+share the same position.
+
+\begin{frameddefn}{Collision}\label{def:collision}
+A \emph{collision} occurs when two different keys $x\neq y$ have
+the same hash value, $h(x)=h(y)$.
+\end{frameddefn}
+
+Collisions cannot be avoided, but a good hash function has a small
+number of them.
+
+\begin{framedexample}{Counting IP addresses}
+We want to count how many times each IP address appears, for
+example with \verb|count["151.100.37.83"] += 1|. An IP address has
+$32$ bits, and we want to send it to a range of $8$ bits:
+\[
+  \{0,\ldots,2^{32}-1\}\to\{0,\ldots,2^{8}-1\}.
+\]
+If $h$ keeps only the last byte, then $151.100.37.83$ and
+$11.23.161.83$ both go to $83$: a collision. Every pair of
+addresses ending with the same number collides.
+\end{framedexample}
+
+\subsection{How rare should collisions be?}
+
+Write $M=2^m$ for the size of the domain and $N=2^n$ for the size of
+the range. On average, $M/N$ keys of the domain share each position,
+so collisions are certain. What we can ask is that no pair of keys
+is more unlucky than the others: for all $x\neq y$,
+\[
+  \Prob\bigl(h(x)=h(y)\bigr)=\frac{1}{2^n}=\frac{1}{N}.
+\]
+
+\begin{center}
+\begin{tikzpicture}[font=\small]
+  \draw[thick] (0,0) rectangle (0.7,4);
+  \node[left] at (0,3.8) {$0$};
+  \node[left] at (0,0.2) {$2^{32}-1$};
+  \draw[thick] (4,1.2) rectangle (4.7,2.8);
+  \node[right] at (4.7,2.6) {$0$};
+  \node[right] at (4.7,1.4) {$2^{8}-1$};
+  \foreach \y/\t/\c in {3.5/2.3/PlotBlue,3.1/1.7/PlotGreen,2.6/2.3/PlotRed,
+      2.1/1.7/PlotBlue,1.5/2.3/PlotGreen,1.0/1.7/PlotRed,0.5/2.3/PlotBlue}{
+    \fill[\c] (0.35,\y) circle (1.6pt);
+    \draw[\c,dashed] (0.45,\y) -- (4.25,\t);
+  }
+  \fill (4.35,2.3) circle (1.8pt);
+  \fill (4.35,1.7) circle (1.8pt);
+  \node[align=left,right] at (5.6,2) {several keys\\share each position};
+\end{tikzpicture}
+\end{center}
+
+But where does the probability come from? The keys are fixed. We
+could choose the position of each key at random, but a dictionary
+needs the opposite: \verb|count[h(x)] += 1| works only if $h(x)$
+returns the \emph{same} position every time we call it on the same
+$x$. A function that returns a new random value at each call cannot
+be used. The hash function must be deterministic.
+
+\section{Universal hash families}
+
+The way out is to use randomness only once, at the start: we
+\emph{choose at random a deterministic function} from a family of
+hash functions, and from then on we always use that function.
+
+\begin{frameddefn}{Universal hash family}\label{def:universal-hash-family}
+A \emph{universal hash family} is a set of hash functions from
+which we choose one at random, so that for every pair of keys
+$x\neq y$ the probability, over this choice, that $h(x)=h(y)$ is
+as small as the size of the range allows.
+\end{frameddefn}
+
+\begin{framedexample}{A hash family for IP addresses}
+An IP address $x$ is made of four bytes, $x=x_1.x_2.x_3.x_4$, and
+we want to send it to the range $0,\ldots,255$.
+\begin{enumerate}
+  \item Choose a prime number $p$ larger than $255$ but close to it,
+    for example $p=257$.
+  \item Choose $a_1,a_2,a_3,a_4\in\{0,\ldots,p-1\}$ uniformly at
+    random.
+  \item Set
+    \[
+      h_{a}(x_1,x_2,x_3,x_4)=\Bigl(\sum_{i=1}^{4}a_i x_i\Bigr)\bmod p.
+    \]
+\end{enumerate}
+Each choice of $a_1,\ldots,a_4$ gives one function of the family.
+Its values lie in $\{0,\ldots,p-1\}$, that is $257$ positions, just
+above the $256$ we wanted.
+\end{framedexample}
+
+\begin{framedprop}{Collision probability}\label{prop:universal-ip}
+For every pair of addresses $x=x_1.x_2.x_3.x_4$ and
+$y=y_1.y_2.y_3.y_4$ with $x\neq y$,
+\[
+  \Prob\bigl(h_a(x)=h_a(y)\bigr)=\frac{1}{p},
+\]
+where the probability is over the random choice of
+$a_1,\ldots,a_4$.
+\end{framedprop}
+
+\section{Hash tables}\label{sec:hash-tables}
+
+We can now implement the dictionary. Keep an array $A$ of $p$ slots
+and store the value of key $z$ in slot $A[h(z)]$. For example:
+\[
+  z_1\to135,\quad z_2\to60,\quad z_3\to23,\quad z_4\to80,\quad
+  z_5\to60,\quad z_6\to75,\quad z_7\to111.
+\]
+Here $z_2$ and $z_5$ collide. Collisions are rare, but they can
+happen.
+
+If there are no collisions, finding an element takes constant time:
+\[
+  \operatorname{get}(z):\quad \text{return } A[h(z)].
+\]
+But with a collision, two values would need to be stored in the same
+slot. How can we keep both?
+
+The simplest way is to store a linked list
+(Definition~\ref{def:singly-linked-list}) in each slot: slot $60$
+holds the pairs of all the keys that hash to $60$.
+
+\begin{center}
+\begin{tikzpicture}[font=\small,>=stealth,
+  cell/.style={draw,minimum width=0.9cm,minimum height=0.55cm},
+  pair/.style={draw,fill=PlotBlue!10,minimum width=1.3cm,minimum height=0.55cm}]
+  \foreach \i/\lab in {0/0,1/{\vdots},2/60,3/{\vdots},4/256}{
+    \node[cell] (c\i) at (0,-0.55*\i) {};
+    \node[left=0.15cm] at (c\i.west) {$\lab$};
+  }
+  \node[pair] (p1) at (2.2,-1.1) {$(z_2,v_2)$};
+  \node[pair] (p2) at (4.1,-1.1) {$(z_5,v_5)$};
+  \node (nil) at (5.6,-1.1) {$\varnothing$};
+  \fill (c2.center) circle (1.5pt);
+  \draw[->] (c2.center) -- (p1);
+  \draw[->] (p1) -- (p2);
+  \draw[->] (p2) -- (nil);
+\end{tikzpicture}
+\end{center}
+
+Now $\operatorname{get}(z)$ goes to slot $A[h(z)]$ and scans its
+list until it finds the key $z$. The cost depends on the length of
+that list, so the time stays constant when the lists are short.
+
 \endgroup
 
 \end{document}
