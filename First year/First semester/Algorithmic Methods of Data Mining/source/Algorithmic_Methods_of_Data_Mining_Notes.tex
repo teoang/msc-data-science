@@ -7,6 +7,12 @@
 \hypersetup{linktoc=all}
 \setcounter{secnumdepth}{3}
 
+% Wider section numbers in the contents, so "12.10" does not touch
+% its title.
+\makeatletter
+\renewcommand*\l@section{\@dottedtocline{1}{1.5em}{3em}}
+\makeatother
+
 \newcommand{\exerciseheading}[1]{%
   \par\Needspace{5\baselineskip}\noindent\textbf{#1}\par\nobreak}
 \newcommand{\solutionheading}[1]{%

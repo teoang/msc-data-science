@@ -180,6 +180,25 @@ Compiled from Flavia Celani's handwritten notes up to 16 October, in the order t
 41. Randomized QuickSort: pivot, partition and a worked execution.
 42. QuickSort cost: balanced partitions, the Θ(n²) worst case with extreme pivots, and the expected O(n log n) bound (stated without proof).
 
+**29 October**
+
+43. Back to top-k selection: sorting everything, or keeping k candidates in an array.
+44. Abstract data types and data structures: an interface and its implementations.
+45. The list ADT: arrays, singly and doubly linked lists, and their operation costs.
+46. The priority queue ADT.
+47. Binary heaps: the array representation, insertion with sift-up and extraction with sift-down; comparing priority queue implementations.
+48. HeapSort, first into a second array and then in place.
+49. Selecting the top k with a min-heap in O(n log k) time.
+
+**2 November**
+
+50. The dictionary of terms in the inverted index; the dictionary (map) ADT.
+51. Keys as array positions, and turning names into numbers: collisions and wasted space.
+52. Hash functions, collisions, and why collisions cannot be avoided.
+53. How rare collisions should be, and why the hash function must be deterministic.
+54. Universal hash families: a family for IP addresses and the proof of its 1/p collision probability.
+55. Hash tables with chaining.
+
 </details>
 
 ## About
