@@ -20,88 +20,151 @@
 - [02_histogram.R](First%20year/First%20semester/Fundamentals%20of%20Statistical%20Learning/R_exercises/02_histogram.R) — Generate values and compare their histogram with the uniform PDF.
 
 <details>
-<summary><strong>Fundamentals of Statistical Learning · Lecture checklist</strong></summary>
-
-- [ ] **24 September** — Crash course exercises.
-- [x] **25 September** — Random variables, PMF, PDF and CDF.
-- [ ] **30 September** — The quantile function; gallery of univariate distributions: Bernoulli, Binomial, Poisson and Uniform.
-- [ ] **1 October** — Quantile and probability transforms, exponential families; Simulation, Part I: why simulate, physical simulators, true and pseudorandom numbers, first definitions of random vectors and random samples, pseudorandom generators.
-- [ ] **2 October** — Pseudorandom generators and seeds in R, distances between densities, loss, risk and convergence (a first definition of learning), the LCG, generating discrete variables and the inverse-transform method in R.
-- [x] **7 October** — Random vectors, joint/marginal/conditional distributions, independence, copulas and IID samples; likelihood and empirical CDF.
-- [ ] **8 October** — Transformations of continuous random variables, the example Y = X² and its simulation in R (Topic 06, Part II, slides 4–8).
-- [ ] **9 October** — Recap of Y = X², computing a quantile function numerically, and density estimation: empirical CDF, histograms and kernel density estimation.
-- [ ] **14 October** — Continuous random vectors, the exponential distribution (waiting times, memorylessness, the printer example), conditional densities, the exam-style exercise, and the setup of the mixed random vector with the Beta distribution.
-- [ ] **15 October** — Mixed random vector: joint model, Beta-Binomial marginal, posterior and conjugacy; stopping time of a stream of uniforms and the geometric distribution.
-- [ ] **16 October** — Mixing trick, Normal, Student's t, Laplace and Gamma distributions, scale mixtures and finite mixtures.
-
-</details>
-
-<details>
 <summary><strong>Fundamentals of Statistical Learning · Topics in lecture order</strong></summary>
 
-Compiled from Flavia Celani's handwritten notes up to 16 October, in the order the topics were covered. The lecture checklist above gives the date of each lecture.
+Compiled from Flavia Celani's handwritten notes, Gianmaria Romano's lecture log, and the course labs and classworks. A ticked topic is already in the Notes.
 
-**Random variables (Topic 03)**
+**23 September**
 
-1. Random variables as maps from the sample space: five coin flips and the dart example.
-2. Discrete and continuous variables: PMF and PDF, support, and why P(X = x) = 0 for a continuous variable.
-3. The CDF: definition and properties; the PDF as the derivative of the CDF.
-4. Discrete example: PMF, step-function CDF, and recovering the PMF from the jumps.
-5. Relations between PMF, PDF and CDF.
-6. Continuous example (darts): CDF, PDF, indicator functions and interval probabilities.
-7. The quantile function: invertible case, general definition, Pareto example (percentiles and median), discrete example (median, 90th percentile, third quartile), and solving F(x) = p numerically.
-8. The sample space moves into the background; "famous" distributions.
+- [ ] Course presentation.
+- [x] Recap of basic probability: sample spaces and events, probability and its basic properties, inclusion–exclusion and probability bounds.
+- [x] Conditional probability, independence and Bayes' theorem.
 
-**Gallery of univariate distributions (Topic 04)**
+**24 September**
 
-9. Modelling a psychic's 25 card guesses: Bernoulli model, IID assumptions, and the number of successes as a Binomial.
-10. Bernoulli and Binomial distributions; log-odds and the link to logistic regression.
-11. Poisson distribution and the Poisson approximation to the Binomial.
-12. Uniform distribution; quantile transform and probability transform.
-13. Single-parameter exponential families, with Binomial and Normal examples.
+- [ ] Introduction to R.
+- [x] Crash course exercises.
 
-**Simulation, Part I (Topic 06)**
+**25 September**
 
-14. Why simulate: typical behaviour, variability and rare events; population model and sampling scheme; generative models.
-15. Physical simulators; truly random and pseudorandom numbers.
-16. First definitions of random vectors and IID random samples.
-17. Pseudorandom number generators and seeds in R.
-18. Distances between densities (L1, L2, L∞, KL divergence, Wasserstein, Hellinger); when a generator works: worst-case and average loss, a first definition of learning, convergence rates.
-19. Checking generated samples: uniformity and independence of consecutive pairs.
-20. Linear congruential generator: definition, period, distribution and independence of the samples (k-dimensional equidistribution).
-21. Generating discrete random variables; the inverse-transform (quantile) method with continuous and Bernoulli examples in R; its limits (Normal and Box–Muller, dimension p > 1).
+- [x] Random variables as maps from the sample space: five coin flips and the dart example.
+- [x] Discrete and continuous variables: PMF and PDF, support, and why P(X = x) = 0 for a continuous variable.
+- [x] The CDF: definition and properties; the PDF as the derivative of the CDF.
+- [x] Discrete example: PMF, step-function CDF, and recovering the PMF from the jumps.
+- [x] Relations between PMF, PDF and CDF.
+- [x] Continuous example (darts): CDF, PDF, indicator functions and interval probabilities.
 
-**Random vectors**
+**30 September**
 
-22. Describing a random vector: individual variables and their dependence; the exam and attendance contingency table.
-23. Fully discrete vectors: joint, marginal and conditional PMFs.
-24. Independence and distances from independence.
-25. Sklar's theorem and copulas; the joint CDF and its basic properties (marginals as limits, independence through the CDF).
-26. IID samples from a population model, the data-generating process, the likelihood, maximum likelihood and the empirical CDF.
+- [x] The quantile function: invertible case, general definition, Pareto example (percentiles and median), discrete example (median, 90th percentile, third quartile), and solving F(x) = p numerically.
+- [ ] The sample space moves into the background; "famous" distributions.
+- [ ] Modelling a psychic's 25 card guesses: Bernoulli model, IID assumptions, and the number of successes as a Binomial.
+- [x] Bernoulli and Binomial distributions.
+- [ ] Log-odds and the link to logistic regression.
+- [ ] Poisson distribution and the Poisson approximation to the Binomial.
+- [x] Uniform distribution.
 
-**Simulation, Part II (Topic 06)**
+**1 October**
 
-27. Transformations of random variables: the three-step method, the monotone case, and Y = X² with X ~ Unif(−1, 1).
-28. Computing a quantile function numerically.
-29. Density estimation: empirical CDF, histograms in one and several dimensions, kernel density estimation; maximum likelihood over densities needs a penalty.
+- [x] The quantile transform.
+- [ ] The probability transform.
+- [ ] Single-parameter exponential families, with Binomial and Normal examples.
+- [ ] Why simulate: typical behaviour, variability and rare events.
+- [x] Population model and sampling scheme; simulation as a generative model.
+- [x] Physical simulators; truly random and pseudorandom numbers.
+- [x] First definitions of random vectors and IID random samples.
+- [x] Pseudorandom number generators.
 
-**Random vectors, Part II**
+**2 October**
 
-30. Fully continuous vectors: joint PDF, normalizing a kernel, probabilities as volumes, and moving between the joint CDF and the joint PDF.
-31. Two independent exponential variables: marginals, joint PDF and independence.
-32. Exponential distribution: waiting times, memorylessness and the printer example.
-33. Conditional densities and marginalization for PDFs.
-34. Exam-style exercise: normalizing a kernel, CDF, quantile, conditioning on an event, and the transformation Y = √X.
-35. Mixed random vector: a Binomial count with a Uniform or Beta success probability; the Beta distribution, the Beta-Binomial marginal, the posterior and conjugacy (a first Bayesian analysis).
-36. Stopping time of a stream of uniforms: T given X is Geometric, the marginal of T, and the geometric distribution with its memorylessness.
+- [x] Seeds in R.
+- [x] Distances between densities: L1, L2 and L∞.
+- [ ] KL divergence, Wasserstein and Hellinger distances.
+- [x] When a generator works: worst-case and average loss, a first definition of learning, convergence rates.
+- [x] Checking generated samples: uniformity and independence of consecutive pairs.
+- [x] Linear congruential generator: definition, period, distribution and independence of the samples.
+- [ ] k-dimensional equidistribution of the LCG.
+- [x] Generating discrete random variables; the inverse-transform (quantile) method with continuous and Bernoulli examples in R.
+- [ ] Limits of the inverse-transform method: the Normal and Box–Muller, dimension p > 1.
+
+**7 October**
+
+- [x] Describing a random vector: individual variables and their dependence; the exam and attendance contingency table.
+- [x] Fully discrete vectors: joint, marginal and conditional PMFs.
+- [x] Independence and distances from independence.
+- [x] Sklar's theorem and copulas; the joint CDF and its basic properties (marginals as limits, independence through the CDF).
+- [x] IID samples from a population model, the data-generating process, the likelihood, maximum likelihood and the empirical CDF.
+
+**8 October**
+
+- [x] Transformations of random variables: the three-step method, the monotone case, and Y = X² with X ~ Unif(−1, 1).
+- [x] Checking the transformation by simulation in R.
+
+**9 October**
+
+- [ ] Computing a quantile function numerically in R with `uniroot`.
+- [ ] Density estimation: the empirical CDF in R, histograms in one and several dimensions, kernel density estimation.
+
+**14 October**
+
+- [x] Refresher on IID samples and the data-generating process: maximum likelihood over CDFs gives the empirical CDF, while maximum likelihood over densities needs a penalty.
+- [x] Fully continuous vectors: joint PDF, normalizing a kernel, probabilities as volumes, and moving between the joint CDF and the joint PDF.
+- [x] Two independent exponential variables: marginals, joint PDF and independence.
+- [x] Exponential distribution: waiting times, memorylessness and the printer example.
+- [x] Conditional densities and marginalization for PDFs.
+- [x] Exam-style exercise: normalizing a kernel, CDF, quantile, conditioning on an event, and the transformation Y = √X.
+- [x] Mixed random vector: a Binomial count with a Uniform or Beta success probability; the Beta distribution.
+
+**15 October**
+
+- [x] Mixed random vector: joint model, Beta-Binomial marginal, posterior and conjugacy (a first Bayesian analysis).
+- [ ] Stopping time of a stream of uniforms: T given X is Geometric, the marginal of T, and the geometric distribution with its memorylessness.
 
 **16 October**
 
-37. The mixing "trick": latent variables and the marginals of joint models (Beta-Binomial, Geometric with a Uniform parameter).
-38. Normal distribution: standardization, probabilities, quantiles and light tails.
-39. Heavier tails: Student's t and Laplace distributions; the Gamma distribution and its special cases (Exponential, Erlang, χ²).
-40. Scale mixtures of Gaussians: the Student's t with a Gamma latent variable and the Laplace with an exponential one.
-41. Finite mixtures: Bernoulli mixtures through the law of total probability and mixtures of Gaussians.
+- [ ] The mixing "trick": latent variables and the marginals of joint models (Beta-Binomial, Geometric with a Uniform parameter).
+- [ ] Normal distribution: standardization, probabilities, quantiles and light tails.
+- [ ] Heavier tails: Student's t and Laplace distributions.
+- [x] The Gamma distribution, with the exponential as a special case.
+- [ ] Erlang and χ² as further special cases of the Gamma.
+- [ ] Scale mixtures of Gaussians: the Student's t with a Gamma latent variable and the Laplace with an exponential one.
+- [ ] Finite mixtures: Bernoulli mixtures through the law of total probability and mixtures of Gaussians.
+
+**21 October**
+
+- [ ] Recap of the mixing trick: the Student's t as a scale mixture of Gaussians.
+- [ ] Heart-rate data in R: summaries, histogram, empirical CDF and tail probabilities; what a good population model should capture.
+- [ ] A Gaussian mixture model for the heart-rate data: the likelihood of the sample and maximum likelihood; why known component labels would make fitting easy.
+- [ ] Parametric and nonparametric maximum likelihood; when maximum likelihood alone fails (choosing K, learning a PDF) and penalties, constraints or priors help; why finite mixtures are tricky (choice of K, ambiguous soft clustering, unbounded likelihood).
+- [ ] Many-to-one transformations of an IID sample: the sum and the empirical average; sampling distributions.
+- [ ] Transformations of continuous random vectors: the three-step method for Z = r(X, Y), the Jacobian matrix and the change-of-variables formula.
+- [ ] The Student's t as Z / √(W/ν): adding an auxiliary variable and marginalizing it out.
+- [ ] The Box–Muller transform: polar coordinates, the quantile transform for the radius, and sampling Normals in R.
+
+**22 October**
+
+- [ ] Classwork 00: checking our LCG formally in R; the power-law and lognormal models for bursty email activity.
+
+**23 October**
+
+- [ ] Why graphical models: the chain rule, conditional probability tables with O(J^D) parameters, conditional independence and the first-order Markov assumption.
+- [ ] Graphical models and DAGs: graph terminology, Bayesian networks and topological ordering.
+- [ ] The Markov condition and the graph-induced factorization; the set M(G) of distributions that are Markov to G.
+- [ ] Examples: Markov chains of first and second order, hidden Markov models and latent variables, linear dynamical systems.
+- [ ] Examples: medical diagnosis (the alarm network), Quick Medical Reference and latent Dirichlet allocation.
+- [ ] Latent variables for dimensionality reduction: probabilistic PCA.
+
+**28 October**
+
+- [ ] Probabilistic PCA: population model, sampling scheme and fitting by maximum likelihood; mixtures for nonlinear structure.
+- [ ] Bayesian modelling as a DAG: IID data are conditionally independent given θ; plate notation.
+- [ ] d-separation: chain, common cause and collider (explaining away, Berkson's paradox); the "am I out of fuel?" example.
+- [ ] The Bayes-ball algorithm, the general statement of d-separation and the Markov blanket; a worked example.
+- [ ] Ancestral (forward) sampling.
+- [ ] Exam exercise: the factorization encoded by a DAG, forward sampling in R and the marginal of one node.
+- [ ] Forward sampling for mixing-trick models in R: Beta-Binomial and Student's t.
+
+**29 October**
+
+- [ ] Did we simulate well? Comparing a simulated Student's t (ν = 1.5) with its theoretical density, CDF and quantiles; the Q-Q plot.
+- [ ] The random sample and the observed data; the CDF of the maximum of an IID sample, with the example of five bus waiting times.
+- [ ] From a tail probability to a "surprise": the p-value and what "small" means.
+- [ ] The lab example: why a maximum of about 7797 is not necessarily surprising, and the calculation in R.
+
+**30 October**
+
+- [ ] Causal inference: association and causation, confounders, and conditioning by intervention.
+- [ ] The expected value of a random variable and the law of the lazy statistician.
 
 </details>
 
