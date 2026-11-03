@@ -110,94 +110,94 @@ Compiled from Flavia Celani's handwritten notes up to 16 October, in the order t
 
 **24 September**
 
-1. Course organization: homeworks, hackathon and written exam.
-2. Definition of data mining; descriptive and predictive tasks.
-3. Structured, unstructured and semi-structured data; data cleaning.
+- [ ] Course organization: homeworks, hackathon and written exam.
+- [ ] Definition of data mining; descriptive and predictive tasks.
+- [ ] Structured, unstructured and semi-structured data; data cleaning.
 
 **28 September**
 
-4. Types of data: tables, transactions, documents, networks, genomic sequences, climate and behavioural data.
-5. Attributes (binary, categorical, numeric) and sparsity; rows as points or vectors; document, transaction, ordered and graph data.
-6. Max-Find: pseudocode, correctness by induction, counting steps (3n + 2 and 4n + 2).
+- [ ] Types of data: tables, transactions, documents, networks, genomic sequences, climate and behavioural data.
+- [ ] Attributes (binary, categorical, numeric) and sparsity; rows as points or vectors; document, transaction, ordered and graph data.
+- [ ] Max-Find: pseudocode, correctness by induction, counting steps (3n + 2 and 4n + 2).
 
 **29 September**
 
-7. Asymptotic notation (O, Ω, Θ), dominant terms and growth rates; the base of the logarithm.
-8. Lower bounds and optimal algorithms: Max-Find is optimal.
-9. Prefix sums: the quadratic algorithm and the linear one.
-10. Matrix multiplication: the open gap between n² and n³.
-11. Recursion: recursive Fibonacci, its exponential running time, and the linear iterative algorithm.
+- [ ] Asymptotic notation (O, Ω, Θ), dominant terms and growth rates; the base of the logarithm.
+- [ ] Lower bounds and optimal algorithms: Max-Find is optimal.
+- [ ] Prefix sums: the quadratic algorithm and the linear one.
+- [ ] Matrix multiplication: the open gap between n² and n³.
+- [ ] Recursion: recursive Fibonacci, its exponential running time, and the linear iterative algorithm.
 
 **1 October**
 
-12. Binary search: algorithm, examples and the Θ(log n) recurrence.
-13. Traveling salesman problem and brute force.
-14. Decision problems, the classes P and NP, and the P = NP question.
-15. NP-completeness and reductions (Max-Find and sorting).
+- [ ] Binary search: algorithm, examples and the Θ(log n) recurrence.
+- [ ] Traveling salesman problem and brute force.
+- [ ] Decision problems, the classes P and NP, and the P = NP question.
+- [ ] NP-completeness and reductions (Max-Find and sorting).
 
 **5 October**
 
-16. NP-completeness recap; SAT and how to prove that a problem is NP-complete.
-17. Knapsack, Set cover, Subset sum and Max clique.
-18. NP-hard problems.
-19. Approximation algorithms and guarantees from a lower bound.
+- [ ] NP-completeness recap; SAT and how to prove that a problem is NP-complete.
+- [ ] Knapsack, Set cover, Subset sum and Max clique.
+- [ ] NP-hard problems.
+- [ ] Approximation algorithms and guarantees from a lower bound.
 
 **8 October**
 
-20. Approximability (set cover, max clique); heuristics, greedy knapsack, fractional knapsack and meta-heuristics.
-21. Distance functions; Euclidean, Lp, Manhattan, L∞ and Hamming distances.
-22. Distances between sets: intersections, binary vectors, Jaccard similarity and distance.
+- [ ] Approximability (set cover, max clique); heuristics, greedy knapsack, fractional knapsack and meta-heuristics.
+- [ ] Distance functions; Euclidean, Lp, Manhattan, L∞ and Hamming distances.
+- [ ] Distances between sets: intersections, binary vectors, Jaccard similarity and distance.
 
 **12 October**
 
-23. Distances between strings: first attempts and their problems.
-24. Subsequences, common subsequences and the longest common subsequence.
-25. Edit distance, its relation to the LCS, and its recursive formula (start of dynamic programming).
+- [ ] Distances between strings: first attempts and their problems.
+- [ ] Subsequences, common subsequences and the longest common subsequence.
+- [ ] Edit distance, its relation to the LCS, and its recursive formula (start of dynamic programming).
 
 **20 October**
 
-26. Text mining: corpus, vocabulary and document count vectors; document length and L1/L2 normalization.
-27. Cosine similarity: geometric interpretation and step-by-step computation from coordinates.
-28. Stopwords, document frequency, IDF and TF-IDF weights, with worked examples.
-29. Query vectors, cosine scores and top-k retrieval; direct-search cost O(Nm + N log N).
-30. Offline corpus preparation and online query processing.
-31. Boolean AND search; inverted indexes and sorted posting lists.
-32. Posting-list intersections with pointers, algorithm and query-cost analysis.
+- [ ] Text mining: corpus, vocabulary and document count vectors; document length and L1/L2 normalization.
+- [ ] Cosine similarity: geometric interpretation and step-by-step computation from coordinates.
+- [ ] Stopwords, document frequency, IDF and TF-IDF weights, with worked examples.
+- [ ] Query vectors, cosine scores and top-k retrieval; direct-search cost O(Nm + N log N).
+- [ ] Offline corpus preparation and online query processing.
+- [ ] Boolean AND search; inverted indexes and sorted posting lists.
+- [ ] Posting-list intersections with pointers, algorithm and query-cost analysis.
 
 **22 October**
 
-33. Terms stored as integer identifiers.
-34. Boolean queries with OR and AND NOT: the same pointer merge with different rules, a worked query, and the cost O(|L| + |M|).
-35. Faster ranked search: approximate answers by searching inside one cluster.
-36. Ranked retrieval with an inverted index: (document, TF) postings, scoring only documents that share a query term, precomputed document norms, and the top-K algorithm with a worked example.
+- [ ] Terms stored as integer identifiers.
+- [ ] Boolean queries with OR and AND NOT: the same pointer merge with different rules, a worked query, and the cost O(|L| + |M|).
+- [ ] Faster ranked search: approximate answers by searching inside one cluster.
+- [ ] Ranked retrieval with an inverted index: (document, TF) postings, scoring only documents that share a query term, precomputed document norms, and the top-K algorithm with a worked example.
 
 **26 October**
 
-37. The sorting problem; Merge: combining two sorted arrays in linear time.
-38. MergeSort: split, sort the halves and merge, with a worked 13-element example.
-39. MergeSort running time: expanding the recurrence 2T(n/2) + cn to Θ(n log n).
-40. Randomized algorithms; expected value with one and two dice.
-41. Randomized QuickSort: pivot, partition and a worked execution.
-42. QuickSort cost: balanced partitions, the Θ(n²) worst case with extreme pivots, and the expected O(n log n) bound (stated without proof).
+- [ ] The sorting problem; Merge: combining two sorted arrays in linear time.
+- [ ] MergeSort: split, sort the halves and merge, with a worked 13-element example.
+- [ ] MergeSort running time: expanding the recurrence 2T(n/2) + cn to Θ(n log n).
+- [ ] Randomized algorithms; expected value with one and two dice.
+- [ ] Randomized QuickSort: pivot, partition and a worked execution.
+- [ ] QuickSort cost: balanced partitions, the Θ(n²) worst case with extreme pivots, and the expected O(n log n) bound (stated without proof).
 
 **29 October**
 
-43. Back to top-k selection: sorting everything, or keeping k candidates in an array.
-44. Abstract data types and data structures: an interface and its implementations.
-45. The list ADT: arrays, singly and doubly linked lists, and their operation costs.
-46. The priority queue ADT.
-47. Binary heaps: the array representation, insertion with sift-up and extraction with sift-down; comparing priority queue implementations.
-48. HeapSort, first into a second array and then in place.
-49. Selecting the top k with a min-heap in O(n log k) time.
+- [ ] Back to top-k selection: sorting everything, or keeping k candidates in an array.
+- [ ] Abstract data types and data structures: an interface and its implementations.
+- [ ] The list ADT: arrays, singly and doubly linked lists, and their operation costs.
+- [ ] The priority queue ADT.
+- [ ] Binary heaps: the array representation, insertion with sift-up and extraction with sift-down; comparing priority queue implementations.
+- [ ] HeapSort, first into a second array and then in place.
+- [ ] Selecting the top k with a min-heap in O(n log k) time.
 
 **2 November**
 
-50. The dictionary of terms in the inverted index; the dictionary (map) ADT.
-51. Keys as array positions, and turning names into numbers: collisions and wasted space.
-52. Hash functions, collisions, and why collisions cannot be avoided.
-53. How rare collisions should be, and why the hash function must be deterministic.
-54. Universal hash families: a family for IP addresses and the proof of its 1/p collision probability.
-55. Hash tables with chaining.
+- [ ] The dictionary of terms in the inverted index; the dictionary (map) ADT.
+- [ ] Keys as array positions, and turning names into numbers: collisions and wasted space.
+- [ ] Hash functions, collisions, and why collisions cannot be avoided.
+- [ ] How rare collisions should be, and why the hash function must be deterministic.
+- [ ] Universal hash families: a family for IP addresses and the proof of its 1/p collision probability.
+- [ ] Hash tables with chaining.
 
 </details>
 
