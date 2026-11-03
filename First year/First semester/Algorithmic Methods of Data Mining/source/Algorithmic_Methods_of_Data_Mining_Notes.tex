@@ -5463,7 +5463,27 @@ addresses ending with the same number collides.
 
 Write $M=2^m$ for the size of the domain and $N=2^n$ for the size of
 the range. On average, $M/N$ keys of the domain share each position,
-so collisions are certain. What we can ask is that no pair of keys
+so collisions are certain.
+
+\begin{framedexample}{}
+Take $m=4$ and $n=2$: the $M=16$ keys $0,\ldots,15$ go to the $N=4$
+positions $0,1,2,3$. With $h(x)=x\bmod 4$:
+\begin{center}
+\begin{tabular}{cl}
+\hline
+Position & Keys \\
+\hline
+$0$ & $0,4,8,12$ \\
+$1$ & $1,5,9,13$ \\
+$2$ & $2,6,10,14$ \\
+$3$ & $3,7,11,15$ \\
+\hline
+\end{tabular}
+\end{center}
+Each position receives $4=16/4=M/N$ keys.
+\end{framedexample}
+
+What we can ask is that no pair of keys
 is more unlucky than the others: for all $x\neq y$,
 \[
   \Prob\bigl(h(x)=h(y)\bigr)=\frac{1}{2^n}=\frac{1}{N}.
@@ -5488,12 +5508,25 @@ is more unlucky than the others: for all $x\neq y$,
 \end{tikzpicture}
 \end{center}
 
-But where does the probability come from? The keys are fixed. We
-could choose the position of each key at random, but a dictionary
-needs the opposite: \verb|count[h(x)] += 1| works only if $h(x)$
-returns the \emph{same} position every time we call it on the same
-$x$. A function that returns a new random value at each call cannot
-be used. The hash function must be deterministic.
+But where does the probability come from? A probability needs
+something random, but here nothing is:
+\begin{itemize}
+  \item the keys $x$ and $y$ are fixed;
+  \item $h$ is a fixed function.
+\end{itemize}
+Then $h(x)=h(y)$ is either always true or always false.
+
+We could let $h$ choose a random position every time we call it.
+Then two keys would share a position with probability $1/N$. But the
+dictionary would stop working. Suppose
+$\operatorname{insert}(\texttt{"Maria"},x)$ draws position $42$ and
+stores Maria's record in $A[42]$. Later,
+$\operatorname{get}(\texttt{"Maria"})$ draws again, say position
+$17$, and looks in $A[17]$: Maria is not there. To find what
+$\operatorname{insert}$ stored, $\operatorname{get}$ must look in the
+same position, so $h(x)$ must return the \emph{same} value every
+time we call it on the same $x$. The hash function must be
+deterministic.
 
 \section{Universal hash families}
 
@@ -5508,7 +5541,10 @@ $x\neq y$ the probability, over this choice, that $h(x)=h(y)$ is
 as small as the size of the range allows.
 \end{frameddefn}
 
-\begin{framedexample}{A hash family for IP addresses}
+\begin{framedexample}{One universal family for IP addresses}
+There are many ways to build a universal hash family. Here, let us
+try to construct one.
+
 An IP address $x$ is made of four bytes, $x=x_1.x_2.x_3.x_4$, and
 we want to send it to the range $0,\ldots,255$.
 \begin{enumerate}
@@ -5535,6 +5571,53 @@ $y=y_1.y_2.y_3.y_4$ with $x\neq y$,
 where the probability is over the random choice of
 $a_1,\ldots,a_4$.
 \end{framedprop}
+
+\begin{proof}
+Since $x\neq y$, the two addresses differ in at least one byte; say
+$x_1\neq y_1$ (the argument is the same for any other byte). The two
+addresses collide when
+\[
+  \sum_{i=1}^{4}a_ix_i\equiv\sum_{i=1}^{4}a_iy_i \pmod p,
+  \quad\text{that is}\quad
+  a_1(x_1-y_1)\equiv-\sum_{i=2}^{4}a_i(x_i-y_i) \pmod p.
+\]
+Imagine that $a_2,a_3,a_4$ have already been drawn. Then the right-hand
+side is a fixed number, and only $a_1$ is still random. Write
+\[
+  d=x_1-y_1,\qquad c=-\sum_{i=2}^{4}a_i(x_i-y_i),
+\]
+so that the equation becomes $a_1d\equiv c\pmod p$, with
+$a_1\in\{0,\ldots,p-1\}$. How many values of $a_1$ satisfy it?
+
+\emph{Step 1: $p$ does not divide $d$.} Each byte lies in
+$\{0,\ldots,255\}$, so $-255\leq d\leq255$, and $d\neq0$ because
+$x_1\neq y_1$. The only multiple of $p=257$ in this range is $0$, so
+$p\nmid d$.
+
+\emph{Step 2: different values of $a_1$ give different remainders.}
+Take $a,b\in\{0,\ldots,p-1\}$ with $ad\equiv bd\pmod p$. Then
+$(a-b)\,d\equiv0\pmod p$, that is, $p$ divides the product
+$(a-b)\,d$. A prime that divides a product divides one of its factors,
+and by Step~1 it does not divide $d$, so $p\mid(a-b)$. But
+$-(p-1)\leq a-b\leq p-1$, and the only multiple of $p$ in this range
+is $0$. Hence $a=b$.
+
+\emph{Step 3: exactly one value of $a_1$ works.} By Step~2, the $p$
+values $a_1=0,\ldots,p-1$ give $p$ different remainders $a_1d\bmod p$.
+There are only $p$ possible remainders, $0,\ldots,p-1$, so each of
+them is reached exactly once. In particular, exactly one value of
+$a_1$ gives the remainder of $c$.
+
+\emph{Step 4: the probability.} $a_1$ is drawn uniformly from $p$
+values, independently of $a_2,a_3,a_4$, and only one of them makes the
+two addresses collide. So, once $a_2,a_3,a_4$ are fixed, the collision
+has probability $1/p$. This holds whatever values $a_2,a_3,a_4$ took:
+$c$ changes, but by Step~3 there is always exactly one right value of
+$a_1$. Averaging over all choices of $a_2,a_3,a_4$ therefore gives
+\[
+  \Prob\bigl(h_a(x)=h_a(y)\bigr)=\frac1p.\qedhere
+\]
+\end{proof}
 
 \section{Hash tables}\label{sec:hash-tables}
 
