@@ -14,13 +14,8 @@
 | Fundamentals of Data Science | [📖 Open PDF](First%20year/First%20semester/Fundamentals%20of%20Data%20Science/Fundamentals_of_Data_Science_Notes.pdf) | 🟡 In progress |
 | Algorithmic Methods of Data Mining | [📖 Open PDF](First%20year/First%20semester/Algorithmic%20Methods%20of%20Data%20Mining/Algorithmic_Methods_of_Data_Mining_Notes.pdf) | 🟡 In progress |
 
-### Fundamentals of Statistical Learning · R examples
-
-- [01_lcg.R](First%20year/First%20semester/Fundamentals%20of%20Statistical%20Learning/R_exercises/01_lcg.R) — Define the generator, with step-by-step comments and a numerical example.
-- [02_histogram.R](First%20year/First%20semester/Fundamentals%20of%20Statistical%20Learning/R_exercises/02_histogram.R) — Generate values and compare their histogram with the uniform PDF.
-
 <details>
-<summary><strong>Fundamentals of Statistical Learning · Topics in lecture order</strong></summary>
+<summary><strong>📊 Fundamentals of Statistical Learning · Topics in lecture order</strong></summary>
 
 Compiled from Flavia Celani's handwritten notes, Gianmaria Romano's lecture log, and the course labs and classworks. A ticked topic is already in the Notes.
 
@@ -169,7 +164,7 @@ Compiled from Flavia Celani's handwritten notes, Gianmaria Romano's lecture log,
 </details>
 
 <details>
-<summary><strong>Algorithmic Methods of Data Mining · Topics in lecture order</strong></summary>
+<summary><strong>⛏️ Algorithmic Methods of Data Mining · Topics in lecture order</strong></summary>
 
 **24 September**
 
