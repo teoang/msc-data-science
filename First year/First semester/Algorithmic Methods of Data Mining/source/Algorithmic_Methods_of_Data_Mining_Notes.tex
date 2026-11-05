@@ -6092,11 +6092,18 @@ leaves are the points, and each horizontal line is a merge, drawn in
 the colour of the cluster it creates. Cutting the tree at a given level
 gives the clusters at that level.
 \begin{center}
-\begin{tikzpicture}[x=0.7cm,y=0.42cm,font=\small,
+\begin{tikzpicture}[x=0.7cm,y=0.62cm,font=\small,
   br/.style={line width=1.4pt,line cap=round}]
   \foreach \i/\c in {1/ClA,2/ClA,3/ClB,4/ClB,5/ClC,6/ClC,7/ClD,8/ClD,
       9/gray,10/gray}
     \node[below,text=\c!80!black] at (\i-1,0) {$\i$};
+  % One dotted cut per step, just above that step's merge: the branches
+  % it crosses are the clusters of the panel with the same step.
+  \foreach \s in {0,...,9}{
+    \pgfmathtruncatemacro{\c}{10-\s}
+    \draw[gray!60,densely dotted] (-0.5,\s+0.5) -- (9.6,\s+0.5);
+    \node[right,font=\scriptsize,gray!80!black] at (9.6,\s+0.5)
+      {Step \s: \c\ cluster\ifnum\c>1 s\fi};}
   % merge(xa,ya,colour a, xb,yb,colour b, level, colour of the new cluster)
   \def\merge#1#2#3#4#5#6#7#8{%
     \draw[br,#3!85!black] (#1,#2) -- (#1,#7);
@@ -6111,17 +6118,13 @@ gives the clusters at that level.
   \merge{4.5}{1}{ClC}{7.25}{5}{ClD}{7}{ClC}
   \merge{5.875}{7}{ClC}{9}{0}{gray}{8}{ClC}
   \merge{1.5}{6}{ClA}{7.4375}{8}{ClC}{9}{black}
-  \foreach \l in {0,...,9}{
-    \pgfmathtruncatemacro{\c}{10-\l}
-    \node[right,font=\scriptsize,gray] at (10,\l) {$\c$};}
-  \node[right,font=\scriptsize,gray] at (10,10) {clusters};
-  \draw[dashed,gray] (-0.5,4.5) -- (9.8,4.5);
 \end{tikzpicture}
 \end{center}
-The column on the right counts the clusters left after each step. The
-dashed line cuts the tree just after Step~4: the branches it crosses
-are the $6$ clusters $\{1,2\}$, $\{3,4\}$, $\{5,6\}$, $\{7,8\}$, $\{9\}$
-and $\{10\}$, in the same colours as in the panels.
+Each dotted line cuts the tree just after one step, and the branches
+it crosses are the clusters of the panel with the same step. For
+example, the line of Step~4 crosses the $6$ clusters $\{1,2\}$,
+$\{3,4\}$, $\{5,6\}$, $\{7,8\}$, $\{9\}$ and $\{10\}$, in the same
+colours as in the panels.
 \end{framedexample}}
 
 \subsubsection{How much does it cost?}
@@ -6137,32 +6140,166 @@ Can we avoid rescanning everything at every step? We can use a
 min-heap (Definition~\ref{def:binary-min-heap}) for each cluster,
 holding the distances from that cluster to all the others. The top of
 each heap is then the closest cluster, and the closest pair overall is
-the smallest of the tops. How much does this cost?
+the smallest of the tops.
+
+\begin{framedexample}{The heaps at Step~4}\label{ex:cluster-heaps}
+Let us go back to Step~4 of Example~\ref{ex:bottom-up}: there are $6$
+clusters, and the distance between two clusters is the distance between
+their means. Each cluster keeps a min-heap of its distances to the
+other $5$ clusters. For example, the heap of $\{9\}$ is
+\begin{center}
+\begin{tikzpicture}[font=\small,
+  hn/.style={draw,rounded corners,fill=#1!20,minimum width=1.5cm,
+    align=center,inner sep=2pt}]
+  \node[hn=ClD,very thick] (r) at (0,0) {$\{7,8\}$\\ $0.94$};
+  \node[hn=gray] (a) at (-2.2,-1.5) {$\{10\}$\\ $1.51$};
+  \node[hn=ClB] (b) at (2.2,-1.5) {$\{3,4\}$\\ $2.31$};
+  \node[hn=ClA] (c) at (-3.3,-3) {$\{1,2\}$\\ $2.68$};
+  \node[hn=ClC] (d) at (-1.1,-3) {$\{5,6\}$\\ $1.77$};
+  \draw (r) -- (a) (r) -- (b) (a) -- (c) (a) -- (d);
+  \node[right=0.3cm of r,text=PlotGreen!60!black,font=\footnotesize]
+    {top: the closest cluster to $\{9\}$};
+\end{tikzpicture}
+\end{center}
+Every parent is smaller than its children, so the top is the closest
+cluster, $\{7,8\}$, at distance $0.94$. The tops of all six heaps are:
+\begin{center}
+\renewcommand{\arraystretch}{1.15}
+\begin{tabular}{lcc}
+  heap of & top & distance\\\hline
+  $\{1,2\}$ & $\{3,4\}$ & $1.08$\\
+  $\{3,4\}$ & $\{1,2\}$ & $1.08$\\
+  $\{5,6\}$ & $\{7,8\}$ & $1.17$\\
+  $\{7,8\}$ & $\{9\}$ & $\mathbf{0.94}$\\
+  $\{9\}$ & $\{7,8\}$ & $\mathbf{0.94}$\\
+  $\{10\}$ & $\{9\}$ & $1.51$
+\end{tabular}
+\end{center}
+The smallest top is $0.94$, so the closest pair is $\{7,8\}$ and
+$\{9\}$: exactly the merge of Step~4. We read only $6$ tops ($O(n)$)
+instead of all the $O(n^2)$ distances between the clusters.
+\end{framedexample}
+
+How much does this cost?
 
 \begin{itemize}
-  \item \textbf{Building the heaps.} We compute the $n^2$ distances
-    and insert each point's $n_i\leq n$ distances into its heap, one
-    insertion at a time:
-    \[
-      n^2+\sum_{i=1}^{n}n_i\log n_i=\Theta(n^2\log n).
-    \]
-  \item \textbf{One merge.} Take for example the step that goes from
-    $n=10$ clusters to $n-1=9$. Two clusters disappear, so we remove
-    their $2(n-2)$ distances to the other clusters; one new cluster
-    appears, so we insert its $n-2$ distances to the other clusters.
-    Each heap holds fewer than $n$ distances, so each operation
-    costs $O(\log n)$, and the step costs
-    \[
-      \leq 3(n-2)\log n=O(n\log n).
-    \]
+  \item \textbf{Building the heaps (once).} Let the points be
+    $\vec x^{(1)},\ldots,\vec x^{(n)}$.
+    \begin{itemize}
+      \item \emph{Computing the distances.} At the start every point
+        is a cluster, so we need the distances between all the pairs,
+        about $n^2$ of them: this costs $\Theta(n^2)$.
+      \item \emph{Filling the heaps.} Each point $\vec x^{(i)}$ has a
+        heap with its $n-1$ distances to the other points, inserted one
+        at a time. An insertion into a heap with fewer than $n$
+        elements costs $O(\log n)$. There are $n$ heaps with $n-1$
+        insertions each, so in total
+        \[
+          \underbrace{n^2}_{\text{distances}}
+          +\underbrace{n\,(n-1)\log n}_{\text{insertions}}
+          =O(n^2\log n).
+        \]
+    \end{itemize}
+  \item \textbf{One step.} Suppose there are $m\leq n$ clusters
+    before the merge.
+    \begin{itemize}
+      \item \emph{Finding the closest pair.} We read the top of each
+        of the $m$ heaps and take the smallest, as in
+        Example~\ref{ex:cluster-heaps}: this costs $O(m)=O(n)$.
+      \item \emph{Updating the heaps.} Two clusters disappear and one
+        new cluster appears. In each heap of the other $m-2$ clusters
+        we remove the $2$ distances to the clusters that disappear
+        and insert the distance to the new one; then we fill the heap
+        of the new cluster with its $m-2$ distances. That is
+        \[
+          \underbrace{2(m-2)}_{\text{removals}}
+          +\underbrace{(m-2)}_{\text{insertions}}
+          +\underbrace{(m-2)}_{\text{new heap}}
+          =4(m-2)
+        \]
+        operations. Each heap holds fewer than $n$ distances, so each
+        operation costs $O(\log n)$, provided we know where each
+        distance sits in its heap (for example, by keeping an index of
+        the positions). The step therefore costs
+        \[
+          O(n)+4(m-2)\log n=O(n\log n).
+        \]
+    \end{itemize}
 \end{itemize}
 
-So for the $n$ levels the cost is
+% This example is long: let it break across pages.
+{\tcbset{examplebox/.append style={breakable}}
+\begin{framedexample}{Updating the heaps after Step~4}
+Let us take the heaps of Example~\ref{ex:cluster-heaps} again: at
+Step~4 there are $m=6$ clusters, and $\{7,8\}$ and $\{9\}$ merge into
+$\{7,8,9\}$.
+\begin{center}
+\begin{tikzpicture}[x=0.85cm,y=0.85cm,>=stealth]
+  \def\hullw{11pt}
+  \tenpanel{(0,0)}{%
+    \one{10}
+    \hull{ClC}{(t5) -- (t6)} \hullhi{ClD}{(t7) -- (t8)}
+    \hull{ClB}{(t3) -- (t4)} \hull{ClA}{(t1) -- (t2)} \onehi{9}}
+    {1/ClA,2/ClA,3/ClB,4/ClB,5/ClC,6/ClC,7/ClD,8/ClD,
+     9/white,10/white}
+    {\meanmark{0.3,1.55} \meanmark{0.2,0.47} \meanmark{1.98,1.65}
+     \meanmark{2.8,0.83}}
+    {\textbf{Step 4:} 6 clusters.\\ Closest: $\{7,8\}$ and $\{9\}$.}
+  \tenpanel{(6.65,0)}{%
+    \one{10}
+    \hull{ClC}{(t5) -- (t6)} \hull{ClD}{(t7) -- (t8) -- (t9) -- cycle}
+    \hullhi{ClB}{(t3) -- (t4)} \hullhi{ClA}{(t1) -- (t2)}}
+    {1/ClA,2/ClA,3/ClB,4/ClB,5/ClC,6/ClC,7/ClD,8/ClD,
+     9/ClD,10/white}
+    {\meanmark{0.3,1.55} \meanmark{0.2,0.47} \meanmark{1.98,1.65}
+     \meanmark{2.68,0.53}}
+    {\textbf{Step 5:} 5 clusters.\\ Closest: $\{1,2\}$ and $\{3,4\}$.}
+  \draw[->,thick,gray] (4.85,0.3) -- (5.65,0.3);
+\end{tikzpicture}
+\end{center}
+How many operations does the update take? The other
+clusters are $\{1,2\}$, $\{3,4\}$, $\{5,6\}$ and $\{10\}$. In each of
+their heaps we remove the distances to $\{7,8\}$ and $\{9\}$ and insert
+the distance to $\{7,8,9\}$; then the heap of $\{7,8,9\}$ gets its $4$
+distances:
+\[
+  8+4+4=16=4(m-2).
+\]
+Let us follow the heap of $\{10\}$, with the positions in level order:
+\begin{center}
+\renewcommand{\arraystretch}{1.15}
+\begin{tabular}{lccccc}
+  position & $1$ & $2$ & $3$ & $4$ & $5$\\\hline
+  cluster & $\{9\}$ & $\{7,8\}$ & $\{3,4\}$ & $\{1,2\}$ & $\{5,6\}$\\
+  distance & $1.51$ & $1.57$ & $3.82$ & $4.07$ & $2.74$
+\end{tabular}
+\end{center}
+\begin{enumerate}
+  \item \emph{Remove $\{7,8\}$.} The index says it is in position $2$.
+    We move the last element, $\{5,6\}$ at $2.74$, there and shorten
+    the array: $[1.51,\ 2.74,\ 3.82,\ 4.07]$. Its child, $4.07$, is
+    larger, so it stays.
+  \item \emph{Remove $\{9\}$.} The index says position $1$. We move
+    the last element, $4.07$, to the top: $[4.07,\ 2.74,\ 3.82]$. It
+    moves down, swapping with its smaller child:
+    $[2.74,\ 4.07,\ 3.82]$.
+  \item \emph{Insert $\{7,8,9\}$ at $1.49$.} It goes at the end,
+    $[2.74,\ 4.07,\ 3.82,\ 1.49]$, and moves up, swapping first with
+    $4.07$ and then with $2.74$: $[1.49,\ 2.74,\ 3.82,\ 4.07]$.
+\end{enumerate}
+The top is now $\{7,8,9\}$ at $1.49$, the closest cluster to $\{10\}$
+after Step~4. Each operation made at most one swap per level of the
+heap. Without the index we would have to scan the array to find
+$\{7,8\}$ and $\{9\}$, which costs $O(n)$ per removal.
+\end{framedexample}}
+
+There are $n-1$ steps, each costing $O(n\log n)$, so all the steps
+together cost $O(n^2\log n)$, as much as building the heaps. The total
+cost is therefore
 \[
   O(n^2\log n).
 \]
-This is better than $O(n^3)$, but it is still a lot: with a million
-points, $n^2$ alone is $10^{12}$.
+This is better than $O(n^3)$, but it is still a lot.
 
 \section{Partitional clustering}
 
