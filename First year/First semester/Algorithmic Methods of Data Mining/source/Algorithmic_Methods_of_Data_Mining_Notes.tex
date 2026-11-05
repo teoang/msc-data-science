@@ -5934,7 +5934,7 @@ takes a single colour.
 % #3 colour of each point (i/colour), #4 extra marks, #5 caption.
 \newcommand{\tenpanel}[5]{%
   \begin{scope}[shift={#1}]
-    \draw[gray!50,rounded corners] (-0.55,-2.35) rectangle (4.4,2.2);
+    \draw[gray!50,rounded corners] (-0.8,-2.35) rectangle (4.65,2.5);
     \foreach \i/\x/\y in {1/0/1.75,2/0.6/1.35,3/-0.1/0.62,4/0.5/0.32,
         5/1.75/1.65,6/2.2/1.65,7/2.75/1.1,8/2.85/0.55,9/2.45/-0.05,
         10/3.95/-0.25}
@@ -5945,12 +5945,12 @@ takes a single colour.
         label={[font=\scriptsize,label distance=2pt]\csname tenpos\i\endcsname:$\i$}]
         at (t\i) {};
     #4
-    \node[text width=4.1cm,align=center,font=\footnotesize]
+    \node[text width=4.4cm,align=center,font=\footnotesize]
       at (1.92,-1.5) {#5};
   \end{scope}}
-\expandafter\def\csname tenpos1\endcsname{above}
+\expandafter\def\csname tenpos1\endcsname{left}
 \expandafter\def\csname tenpos2\endcsname{right}
-\expandafter\def\csname tenpos3\endcsname{left}
+\expandafter\def\csname tenpos3\endcsname{below}
 \expandafter\def\csname tenpos4\endcsname{below}
 \expandafter\def\csname tenpos5\endcsname{above}
 \expandafter\def\csname tenpos6\endcsname{above}
@@ -5967,8 +5967,17 @@ takes a single colour.
 {\tcbset{examplebox/.append style={breakable}}
 \begin{framedexample}{Bottom-up clustering of ten points}
 \label{ex:bottom-up}
-Take the $n=10$ points below. We draw them as for the five points
-above; a point that is still a cluster on its own is grey.
+Take the $n=10$ points below.
+\begin{center}
+\begin{tikzpicture}[x=1.1cm,y=1.1cm]
+  \foreach \i/\x/\y/\a in {1/0/1.75/above,2/0.6/1.35/right,3/-0.1/0.62/left,
+      4/0.5/0.32/below,5/1.75/1.65/above,6/2.2/1.65/above,7/2.75/1.1/right,
+      8/2.85/0.55/right,9/2.45/-0.05/left,10/3.95/-0.25/right}
+    \node[circle,fill=black,inner sep=1.6pt,
+      label={[font=\small,label distance=1pt]\a:$\i$}] at (\x,\y) {};
+\end{tikzpicture}
+\end{center}
+A point that is still a cluster on its own is grey.
 \begin{center}
 \begin{tikzpicture}[x=0.85cm,y=0.85cm]
   \def\hullw{11pt}
@@ -5978,33 +5987,34 @@ above; a point that is still a cluster on its own is grey.
     {1/white,2/white,3/white,4/white,5/white,6/white,7/white,8/white,
      9/white,10/white}{}
     {\textbf{Step 0:} 10 clusters.\\ Closest: $\{5\}$ and $\{6\}$.}
-  \tenpanel{(5.3,0)}{%
+  \tenpanel{(5.75,0)}{%
     \foreach \i in {1,2,3,4,9,10} {\one{\i}}
     \hull{ClC}{(t5) -- (t6)} \onehi{7} \onehi{8}}
     {1/white,2/white,3/white,4/white,5/ClC,6/ClC,7/white,8/white,
      9/white,10/white}{}
     {\textbf{Step 1:} 9 clusters.\\ Closest: $\{7\}$ and $\{8\}$.}
-  \tenpanel{(10.6,0)}{%
+  \tenpanel{(11.5,0)}{%
     \foreach \i in {1,2,9,10} {\one{\i}}
     \hull{ClC}{(t5) -- (t6)} \hull{ClD}{(t7) -- (t8)}
     \onehi{3} \onehi{4}}
     {1/white,2/white,3/white,4/white,5/ClC,6/ClC,7/ClD,8/ClD,
      9/white,10/white}{}
     {\textbf{Step 2:} 8 clusters.\\ Closest: $\{3\}$ and $\{4\}$.}
-  \tenpanel{(2.65,-4.95)}{%
+  \tenpanel{(2.875,-5.2)}{%
     \foreach \i in {9,10} {\one{\i}}
     \hull{ClC}{(t5) -- (t6)} \hull{ClD}{(t7) -- (t8)}
     \hull{ClB}{(t3) -- (t4)} \onehi{1} \onehi{2}}
     {1/white,2/white,3/ClB,4/ClB,5/ClC,6/ClC,7/ClD,8/ClD,
      9/white,10/white}{}
     {\textbf{Step 3:} 7 clusters.\\ Closest: $\{1\}$ and $\{2\}$.}
-  \tenpanel{(7.95,-4.95)}{%
-    \foreach \i in {9,10} {\one{\i}}
-    \hull{ClC}{(t5) -- (t6)} \hull{ClD}{(t7) -- (t8)}
+  \tenpanel{(8.625,-5.2)}{%
+    \one{10} \onehi{9}
+    \hull{ClC}{(t5) -- (t6)} \hullhi{ClD}{(t7) -- (t8)}
     \hull{ClB}{(t3) -- (t4)} \hull{ClA}{(t1) -- (t2)}}
     {1/ClA,2/ClA,3/ClB,4/ClB,5/ClC,6/ClC,7/ClD,8/ClD,
      9/white,10/white}{}
-    {\textbf{Step 4:} 6 clusters.\\ Now what?}
+    {\textbf{Step 4:} 6 clusters.\\ Now what? Now the closest\\
+     are $\{7,8\}$ and $\{9\}$!}
 \end{tikzpicture}
 \end{center}
 After these four steps we have reached $6$ clusters:
@@ -6012,20 +6022,18 @@ After these four steps we have reached $6$ clusters:
   \{1,2\},\ \{3,4\},\ \{5,6\},\ \{7,8\},\ \{9\},\ \{10\}.
 \]
 
-Now what? At the first steps each cluster was a single point, so ``the
-two closest clusters'' simply meant the two closest points. Now the
-clusters contain several points: how do we measure the distance
-between two clusters? There are various approaches. For example, we
-can take the distance between the \emph{means} of the two clusters,
-where the mean of a cluster $C$ is
+Now what? So far the closest pair was always two single points. Now the
+candidates also include clusters with several points, such as
+$\{7,8\}$ and $\{9\}$. To compare them, we must decide how to measure the
+distance between two clusters.
+
+There are various approaches. For example, we can take the distance
+between the \emph{means} of the two clusters, where the mean of a cluster $C$ is
 \[
   \frac{1}{\abs{C}}\sum_{\vec x\in C}\vec x .
 \]
 In the panels below, the mean of each cluster with more than one point
-is marked with $\times$. With this distance, the next steps merge $9$
-with $\{7,8\}$, then $\{1,2\}$ with $\{3,4\}$, then $\{5,6\}$ with
-$\{7,8,9\}$, then $10$ with $\{5,6,7,8,9\}$, and finally the two
-clusters left.
+is marked with $\times$.
 \begin{center}
 \begin{tikzpicture}[x=0.85cm,y=0.85cm]
   \def\hullw{11pt}
@@ -6038,7 +6046,7 @@ clusters left.
     {\meanmark{0.3,1.55} \meanmark{0.2,0.47} \meanmark{1.98,1.65}
      \meanmark{2.8,0.83}}
     {\textbf{Step 4:} 6 clusters.\\ Closest: $\{7,8\}$ and $\{9\}$.}
-  \tenpanel{(5.3,0)}{%
+  \tenpanel{(5.75,0)}{%
     \one{10}
     \hull{ClC}{(t5) -- (t6)} \hull{ClD}{(t7) -- (t8) -- (t9) -- cycle}
     \hullhi{ClB}{(t3) -- (t4)} \hullhi{ClA}{(t1) -- (t2)}}
@@ -6047,7 +6055,7 @@ clusters left.
     {\meanmark{0.3,1.55} \meanmark{0.2,0.47} \meanmark{1.98,1.65}
      \meanmark{2.68,0.53}}
     {\textbf{Step 5:} 5 clusters.\\ Closest: $\{1,2\}$ and $\{3,4\}$.}
-  \tenpanel{(10.6,0)}{%
+  \tenpanel{(11.5,0)}{%
     \one{10}
     \hullhi{ClC}{(t5) -- (t6)} \hullhi{ClD}{(t7) -- (t8) -- (t9) -- cycle}
     \hull{ClA}{(t1) -- (t2) -- (t4) -- (t3) -- cycle}}
@@ -6055,7 +6063,7 @@ clusters left.
      9/ClD,10/white}
     {\meanmark{0.25,1.01} \meanmark{1.98,1.65} \meanmark{2.68,0.53}}
     {\textbf{Step 6:} 4 clusters.\\ Closest: $\{5,6\}$ and $\{7,8,9\}$.}
-  \tenpanel{(0,-4.95)}{%
+  \tenpanel{(0,-5.2)}{%
     \onehi{10}
     \hullhi{ClC}{(t5) -- (t6) -- (t7) -- (t8) -- (t9) -- cycle}
     \hull{ClA}{(t1) -- (t2) -- (t4) -- (t3) -- cycle}}
@@ -6063,14 +6071,14 @@ clusters left.
      9/ClC,10/white}
     {\meanmark{0.25,1.01} \meanmark{2.4,0.98}}
     {\textbf{Step 7:} 3 clusters.\\ Closest: $\{5,\ldots,9\}$ and $\{10\}$.}
-  \tenpanel{(5.3,-4.95)}{%
+  \tenpanel{(5.75,-5.2)}{%
     \hullhi{ClC}{(t5) -- (t6) -- (t7) -- (t8) -- (t10) -- (t9) -- cycle}
     \hullhi{ClA}{(t1) -- (t2) -- (t4) -- (t3) -- cycle}}
     {1/ClA,2/ClA,3/ClA,4/ClA,5/ClC,6/ClC,7/ClC,8/ClC,
      9/ClC,10/ClC}
     {\meanmark{0.25,1.01} \meanmark{2.66,0.78}}
     {\textbf{Step 8:} 2 clusters.\\ Closest: the last two.}
-  \tenpanel{(10.6,-4.95)}{%
+  \tenpanel{(11.5,-5.2)}{%
     \hull{ClA}{(t1) -- (t5) -- (t6) -- (t7) -- (t8) -- (t10) -- (t9)
       -- (t4) -- (t3) -- cycle}}
     {1/ClA,2/ClA,3/ClA,4/ClA,5/ClA,6/ClA,7/ClA,8/ClA,
