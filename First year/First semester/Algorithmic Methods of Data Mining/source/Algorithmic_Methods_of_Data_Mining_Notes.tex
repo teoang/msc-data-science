@@ -6608,6 +6608,9 @@ So, on a line, choosing a $k$-partition means choosing where to cut:
 among the $n-1$ gaps between consecutive points, we pick $k-1$. Which
 gaps should we pick? In the picture the cuts fall where the points are
 far apart, and the long empty stretches seem to separate the groups.
+
+\subsubsection{First idea}
+
 This suggests a first idea: cut at the $k-1$ largest distances between
 consecutive points. Does it work?
 
@@ -6622,8 +6625,8 @@ under each point we write what it adds to the cost, $d^2$, where $d$ is its
 distance from that mean.
 
 % A cut of 0,1,2,3,4,8,13 on a line: #1 the clusters' regions and points,
-% #2 the means, #3 what each point adds, #4 the cut, #5 the cost.
-\newcommand{\linecut}[5]{%
+% #2 the means, #3 what each point adds, #4 the cut.
+\newcommand{\linecut}[4]{%
 \begin{center}
 \begin{tikzpicture}[x=0.8cm,
   rep/.style={diamond,fill=##1,draw=black,thick,inner sep=2.2pt}]
@@ -6634,7 +6637,6 @@ distance from that mean.
   #2
   #3
   #4
-  \node[anchor=west,font=\small] at (14,0) {#5};
 \end{tikzpicture}
 \end{center}}
 % \addedcost{colour}{x/value,...}: what each point adds to the cost, under it.
@@ -6660,10 +6662,8 @@ mean $3$, and $\{13\}$:
   {\meanat{ClA}{3} \meanat{ClC}{13}}
   {\addedcost{ClA}{0/3^2,1/2^2,2/1^2,3/0^2,4/1^2,8/5^2} \addedcost{ClC}{13/0^2}}
   {\cutat{10.5}{cut}}
-  {cost $40$}
-The point $8$ alone adds $5^2=25$ to the cost:
 \[
-  (3^2+2^2+1^2+0^2+1^2+5^2)+0=40.
+  \cul{ClA}{(3^2+2^2+1^2+0^2+1^2+5^2)}+\cul{ClC}{0}=40.
 \]
 
 Cutting instead at the gap between $4$ and $8$ gives $\{0,1,2,3,4\}$,
@@ -6675,10 +6675,11 @@ with mean $2$, and $\{8,13\}$, with mean $10.5$:
   {\meanat{ClA}{2} \meanat{ClC}{10.5}}
   {\addedcost{ClA}{0/2^2,1/1^2,2/0^2,3/1^2,4/2^2} \addedcost{ClC}{8/2.5^2,13/2.5^2}}
   {\cutat{6}{cut}}
-  {cost $22.5$}
 \[
-  (2^2+1^2+0^2+1^2+2^2)+(2.5^2+2.5^2)=10+12.5=22.5<40.
+  \cul{ClA}{(2^2+1^2+0^2+1^2+2^2)}+\cul{ClC}{(2.5^2+2.5^2)}
+  =\cul{ClA}{10}+\cul{ClC}{12.5}=22.5<40.
 \]
+
 The largest gap is not the right place to cut.
 
 For any other case, the problem is NP-complete
