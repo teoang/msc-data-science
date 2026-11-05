@@ -3,7 +3,7 @@
 \usepackage{needspace}
 \usepackage{multicol}
 \usepackage{pgfplots}
-\usetikzlibrary{decorations.pathreplacing}
+\usetikzlibrary{decorations.pathreplacing,shapes.geometric}
 \pgfplotsset{compat=1.18}
 \hypersetup{linktoc=all}
 \setcounter{secnumdepth}{3}
@@ -5692,6 +5692,27 @@ that list, so the time stays constant when the lists are short.
   examplebox/.append style={unbreakable},
   algorithmbox/.append style={unbreakable}}
 
+% Shared by the clustering figures of this chapter.
+% Okabe--Ito colours, safe for colour-vision deficiencies.
+\definecolor{ClA}{HTML}{0072B2}
+\definecolor{ClB}{HTML}{D55E00}
+\definecolor{ClC}{HTML}{E69F00}
+\definecolor{ClD}{HTML}{CC79A7}
+\definecolor{ClE}{HTML}{009E73}
+\definecolor{ClF}{HTML}{56B4E9}
+% \hull{colour}{path}: a soft region around the points of a cluster;
+% \hullhi{colour}{path}: the same region outlined in black;
+% clpt=colour: a point coloured by its cluster.
+% \hullw is the thickness of the regions; a figure may redefine it.
+\newcommand{\hullw}{16pt}
+\newcommand{\hull}[2]{%
+  \draw[#1!25,fill=#1!25,line width=\hullw,line join=round,line cap=round] #2;}
+\newcommand{\hullhi}[2]{%
+  \draw[black,fill=black,line width={\hullw+3pt},line join=round,
+    line cap=round] #2;
+  \hull{#1}{#2}}
+\tikzset{clpt/.style={circle,fill=#1,draw=black,inner sep=1.8pt}}
+
 \section{Grouping similar things}
 
 When we introduced distances (Definition~\ref{def:distance}), one of the motivating tasks was to
@@ -5709,7 +5730,7 @@ the distance is the Euclidean, or $L_2$, distance
 \]
 
 In our setting the clusters do not overlap: every point belongs to
-exactly one cluster. This is a choice, not a rule; in other settings a
+exactly one cluster. This is a choice: in other settings a
 point may belong to several clusters.
 
 There are two main families of clustering methods:
@@ -5721,34 +5742,121 @@ There are two main families of clustering methods:
     \emph{$k$-clustering}.
 \end{enumerate}
 
-\begin{framedexample}{A $k$-clustering with $k=3$}
-The points below are split into three clusters.
+% The two families side by side, on the same points.
+\begingroup
+% In half-width boxes the title tab, attached 12.5mm from the left
+% corner, would stick out on the right: centre it instead.
+\tcbset{examplebox/.append style={equal height group=clfamilies,
+  attach boxed title to top center={yshift=-0.5mm}}}
+\noindent
+\begin{minipage}[t]{0.485\textwidth}
+\begin{framedexample}{Hierarchical}
+Clusters inside clusters: at every level, groups merge into bigger
+ones, up to a single group.
 \begin{center}
-\begin{tikzpicture}[p/.style={circle,fill=black,inner sep=1.2pt}]
-  \draw[thick] (0,0) ellipse (0.9cm and 0.75cm);
-  \draw[thick] (2.4,0) ellipse (0.7cm and 0.8cm);
-  \draw[thick] (4.2,0) ellipse (0.55cm and 0.6cm);
-  \foreach \x/\y in {-0.4/0.3,0.1/0.4,0.4/-0.1,-0.3/-0.3,0.2/-0.4}
-    \node[p] at (\x,\y) {};
-  \foreach \x/\y in {2.2/0.4,2.6/0.2,2.3/-0.1,2.5/-0.4,2.2/-0.35}
-    \node[p] at (\x,\y) {};
-  \foreach \x/\y in {4.05/0.1,4.35/-0.05}
-    \node[p] at (\x,\y) {};
+\begin{tikzpicture}[x=0.78cm,y=0.78cm]
+  \draw[gray,dashed,thick] (2.55,0.2) ellipse (3.55 and 1.35);
+  \draw[gray,thick] (4.05,0.2) ellipse (1.85 and 0.95);
+  \hull{ClA}{(-0.25,-0.1) -- (0,0.45) -- (0.55,0.65) -- (0.85,0.1)
+    -- (0.35,-0.35) -- cycle}
+  \hull{ClC}{(2.75,-0.15) -- (2.7,0.55) -- (3.2,0.75) -- (3.55,0.25)
+    -- (3.25,-0.3) -- cycle}
+  \hull{ClE}{(4.9,0.25) -- (5.35,0)}
+  \foreach \p in {(-0.25,-0.1),(0,0.45),(0.55,0.65),(0.85,0.1),(0.35,-0.35)}
+    \node[clpt=ClA] at \p {};
+  \foreach \p in {(2.75,-0.15),(2.7,0.55),(3.2,0.75),(3.55,0.25),(3.25,-0.3)}
+    \node[clpt=ClC] at \p {};
+  \foreach \p in {(4.9,0.25),(5.35,0)}
+    \node[clpt=ClE] at \p {};
 \end{tikzpicture}
 \end{center}
 \end{framedexample}
+\end{minipage}\hfill
+\begin{minipage}[t]{0.485\textwidth}
+\begin{framedexample}{Partitional}
+The same points split directly into exactly $k=3$ clusters, with no
+levels.
+\begin{center}
+\begin{tikzpicture}[x=0.78cm,y=0.78cm]
+  \path (2.55,0.2) ellipse (3.55 and 1.35);
+  \hull{ClA}{(-0.25,-0.1) -- (0,0.45) -- (0.55,0.65) -- (0.85,0.1)
+    -- (0.35,-0.35) -- cycle}
+  \hull{ClC}{(2.75,-0.15) -- (2.7,0.55) -- (3.2,0.75) -- (3.55,0.25)
+    -- (3.25,-0.3) -- cycle}
+  \hull{ClE}{(4.9,0.25) -- (5.35,0)}
+  \foreach \p in {(-0.25,-0.1),(0,0.45),(0.55,0.65),(0.85,0.1),(0.35,-0.35)}
+    \node[clpt=ClA] at \p {};
+  \foreach \p in {(2.75,-0.15),(2.7,0.55),(3.2,0.75),(3.55,0.25),(3.25,-0.3)}
+    \node[clpt=ClC] at \p {};
+  \foreach \p in {(4.9,0.25),(5.35,0)}
+    \node[clpt=ClE] at \p {};
+  \node[text=ClA!80!black] at (0.3,-0.95) {$C_1$};
+  \node[text=ClC!80!black] at (3.1,-0.95) {$C_2$};
+  \node[text=ClE!80!black] at (5.1,-0.95) {$C_3$};
+\end{tikzpicture}
+\end{center}
+\end{framedexample}
+\end{minipage}
+\endgroup
+
 
 We start with hierarchical clustering.
 
 \section{Hierarchical clustering}
 
 Hierarchical clustering can be done in two ways:
+% One stage of a hierarchical clustering of four points, shifted by #1:
+% #2 = 4 (singletons), 2 (two pairs) or 1 (one cluster).
+\newcommand{\hcstage}[2]{%
+  \begin{scope}[xshift=#1cm]
+    \coordinate (h1) at (0,0.45);  \coordinate (h2) at (0.6,0);
+    \coordinate (h3) at (2.1,0.38); \coordinate (h4) at (2.7,0);
+    \ifnum#2=4
+      \hull{ClA}{(h1) circle (0.01)} \hull{ClB}{(h2) circle (0.01)}
+      \hull{ClC}{(h3) circle (0.01)} \hull{ClD}{(h4) circle (0.01)}
+      \foreach \h/\c in {h1/ClA,h2/ClB,h3/ClC,h4/ClD}
+        \node[clpt=\c] at (\h) {};
+    \fi
+    \ifnum#2=2
+      \hull{ClA}{(h1) -- (h2)} \hull{ClC}{(h3) -- (h4)}
+      \foreach \h/\c in {h1/ClA,h2/ClA,h3/ClC,h4/ClC}
+        \node[clpt=\c] at (\h) {};
+    \fi
+    \ifnum#2=1
+      \hull{ClA}{(h1) -- (h3) -- (h4) -- (h2) -- cycle}
+      \foreach \h in {h1,h2,h3,h4} \node[clpt=ClA] at (\h) {};
+    \fi
+    \node[font=\scriptsize,gray] at (1.35,-0.8)
+      {$#2$ cluster\ifnum#2>1 s\fi};
+  \end{scope}}
 \begin{enumerate}
   \item \emph{bottom-up}: start from many small clusters and merge
     them;
+    \begin{center}
+    \begin{tikzpicture}[>=stealth]
+      \hcstage{0}{4}
+      \draw[->,thick,gray] (3.3,0.2) -- node[above,font=\scriptsize]{merge} (4.3,0.2);
+      \hcstage{4.9}{2}
+      \draw[->,thick,gray] (8.2,0.2) -- node[above,font=\scriptsize]{merge} (9.2,0.2);
+      \hcstage{9.8}{1}
+    \end{tikzpicture}
+    \end{center}
   \item \emph{top-down}: start from one big cluster and split it.
+    \begin{center}
+    \begin{tikzpicture}[>=stealth]
+      \hcstage{0}{1}
+      \draw[->,thick,gray] (3.3,0.2) -- node[above,font=\scriptsize]{split} (4.3,0.2);
+      \hcstage{4.9}{2}
+      \draw[->,thick,gray] (8.2,0.2) -- node[above,font=\scriptsize]{split} (9.2,0.2);
+      \hcstage{9.8}{4}
+    \end{tikzpicture}
+    \end{center}
 \end{enumerate}
-We follow the bottom-up way. We have $n$ points. Initially, every
+Let's see both.
+
+\subsection{The bottom-up way}
+
+Let's start with the bottom-up way. We have $n$ points. Initially, every
 point is its own cluster, so we have $n$ clusters:
 \[
   \{1\},\ \{2\},\ \ldots,\ \{n\}.
@@ -5757,78 +5865,258 @@ Then we choose the two closest points and merge them into one cluster,
 which leaves $n-1$ clusters. And we continue: at every step we merge
 the two closest clusters, until only one cluster is left.
 
+\Needspace{22\baselineskip}
+The figure below follows the procedure on five points $A,\ldots,E$.
+Each cluster has its own colour, and the two clusters outlined in black
+are the closest ones: they merge at the next step, and the new cluster
+takes a single colour.
+
+% \pts{colour of A}{B}{C}{D}{E}: the five points with their labels.
+\newcommand{\pts}[5]{%
+  \foreach \p/\c/\pos in {A/#1/above left,B/#2/above right,C/#3/above right,
+      D/#4/below right,E/#5/right}
+    \node[clpt=\c,
+      label={[font=\scriptsize,label distance=6pt]\pos:$\p$}] at (\p) {};}
+\begin{center}
+\begin{tikzpicture}[font=\small,>=stealth,
+  stepcap/.style={text width=3.7cm,align=center,font=\footnotesize}]
+  % The same five points in every panel; (\x,\y) shifts the panel.
+  \foreach \s/\x/\y in {0/0/0,1/5.1/0,2/10.2/0,3/2.55/-4.9,4/7.65/-4.9}{
+    \begin{scope}[shift={(\x,\y)}]
+      \draw[gray!50,rounded corners] (-0.85,-2.3) rectangle (3.5,2.2);
+      \coordinate (A\s) at (0,1.35);  \coordinate (B\s) at (0.7,0.85);
+      \coordinate (C\s) at (2.3,1.5); \coordinate (D\s) at (2.7,0.6);
+      \coordinate (E\s) at (1.3,-0.45);
+    \end{scope}}
+  % Step 0: five clusters; A and B are the closest.
+  \foreach \p in {A,B,C,D,E} \coordinate (\p) at (\p0);
+  \hullhi{ClA}{(A) circle (0.01)} \hullhi{ClB}{(B) circle (0.01)}
+  \hull{ClC}{(C) circle (0.01)} \hull{ClD}{(D) circle (0.01)}
+  \hull{ClE}{(E) circle (0.01)}
+  \pts{ClA}{ClB}{ClC}{ClD}{ClE}
+  \node[stepcap] at (1.35,-1.5) {\textbf{Step 0:} 5 clusters.\\
+    Closest: $\{A\}$ and $\{B\}$.};
+  % Step 1: A and B merged; C and D are the closest.
+  \foreach \p in {A,B,C,D,E} \coordinate (\p) at (\p1);
+  \hull{ClA}{(A) -- (B)}
+  \hullhi{ClC}{(C) circle (0.01)} \hullhi{ClD}{(D) circle (0.01)}
+  \hull{ClE}{(E) circle (0.01)}
+  \pts{ClA}{ClA}{ClC}{ClD}{ClE}
+  \node[stepcap] at (6.45,-1.5) {\textbf{Step 1:} 4 clusters.\\
+    Closest: $\{C\}$ and $\{D\}$.};
+  % Step 2: C and D merged; {A,B} and {E} are the closest.
+  \foreach \p in {A,B,C,D,E} \coordinate (\p) at (\p2);
+  \hullhi{ClA}{(A) -- (B)} \hull{ClC}{(C) -- (D)}
+  \hullhi{ClE}{(E) circle (0.01)}
+  \pts{ClA}{ClA}{ClC}{ClC}{ClE}
+  \node[stepcap] at (11.55,-1.5) {\textbf{Step 2:} 3 clusters.\\
+    Closest: $\{A,B\}$ and $\{E\}$.};
+  % Step 3: E joined {A,B}; the last two clusters are the closest.
+  \foreach \p in {A,B,C,D,E} \coordinate (\p) at (\p3);
+  \hullhi{ClA}{(A) -- (B) -- (E) -- cycle} \hullhi{ClC}{(C) -- (D)}
+  \pts{ClA}{ClA}{ClC}{ClC}{ClA}
+  \node[stepcap] at (3.9,-6.4) {\textbf{Step 3:} 2 clusters.\\
+    Closest: $\{A,B,E\}$ and $\{C,D\}$.};
+  % Step 4: one cluster; the procedure stops.
+  \foreach \p in {A,B,C,D,E} \coordinate (\p) at (\p4);
+  \hull{ClA}{(A) -- (C) -- (D) -- (E) -- cycle}
+  \pts{ClA}{ClA}{ClA}{ClA}{ClA}
+  \node[stepcap] at (9.0,-6.4) {\textbf{Step 4:} 1 cluster.\\
+    Stop.};
+  % Arrows between consecutive steps in the same row.
+  \draw[->,thick,gray] (3.6,0) -- (4.15,0);
+  \draw[->,thick,gray] (8.7,0) -- (9.25,0);
+  \draw[->,thick,gray] (6.15,-4.9) -- (6.7,-4.9);
+\end{tikzpicture}
+\end{center}
+
+% One panel of Example~\ref{ex:bottom-up}: #1 shift, #2 regions,
+% #3 colour of each point (i/colour), #4 extra marks, #5 caption.
+\newcommand{\tenpanel}[5]{%
+  \begin{scope}[shift={#1}]
+    \draw[gray!50,rounded corners] (-0.55,-2.35) rectangle (4.4,2.2);
+    \foreach \i/\x/\y in {1/0/1.75,2/0.6/1.35,3/-0.1/0.62,4/0.5/0.32,
+        5/1.75/1.65,6/2.2/1.65,7/2.75/1.1,8/2.85/0.55,9/2.45/-0.05,
+        10/3.95/-0.25}
+      \coordinate (t\i) at (\x,\y);
+    #2
+    \foreach \i/\c in {#3}
+      \node[clpt=\c,inner sep=1.5pt,
+        label={[font=\scriptsize,label distance=2pt]\csname tenpos\i\endcsname:$\i$}]
+        at (t\i) {};
+    #4
+    \node[text width=4.1cm,align=center,font=\footnotesize]
+      at (1.92,-1.5) {#5};
+  \end{scope}}
+\expandafter\def\csname tenpos1\endcsname{above}
+\expandafter\def\csname tenpos2\endcsname{right}
+\expandafter\def\csname tenpos3\endcsname{left}
+\expandafter\def\csname tenpos4\endcsname{below}
+\expandafter\def\csname tenpos5\endcsname{above}
+\expandafter\def\csname tenpos6\endcsname{above}
+\expandafter\def\csname tenpos7\endcsname{right}
+\expandafter\def\csname tenpos8\endcsname{right}
+\expandafter\def\csname tenpos9\endcsname{left}
+\expandafter\def\csname tenpos10\endcsname{right}
+% A singleton cluster: a grey region.
+\newcommand{\one}[1]{\hull{gray}{(t#1) circle (0.01)}}
+\newcommand{\onehi}[1]{\hullhi{gray}{(t#1) circle (0.01)}}
+\newcommand{\meanmark}[1]{\node[font=\small] at (#1) {$\times$};}
+
+% This example is long: let it break across pages.
+{\tcbset{examplebox/.append style={breakable}}
 \begin{framedexample}{Bottom-up clustering of ten points}
 \label{ex:bottom-up}
-Take the $n=10$ points below. The closest pair is $5$ and $6$, so the
-first step merges them and leaves $9$ clusters. The next steps merge
-$7$ and $8$, then $3$ and $4$, then $1$ and $2$. After these four
-steps we have reached $6$ clusters:
+Take the $n=10$ points below. We draw them as for the five points
+above; a point that is still a cluster on its own is grey.
+\begin{center}
+\begin{tikzpicture}[x=0.85cm,y=0.85cm]
+  \def\hullw{11pt}
+  \tenpanel{(0,0)}{%
+    \foreach \i in {1,2,3,4,7,8,9,10} {\one{\i}}
+    \onehi{5} \onehi{6}}
+    {1/white,2/white,3/white,4/white,5/white,6/white,7/white,8/white,
+     9/white,10/white}{}
+    {\textbf{Step 0:} 10 clusters.\\ Closest: $\{5\}$ and $\{6\}$.}
+  \tenpanel{(5.3,0)}{%
+    \foreach \i in {1,2,3,4,9,10} {\one{\i}}
+    \hull{ClC}{(t5) -- (t6)} \onehi{7} \onehi{8}}
+    {1/white,2/white,3/white,4/white,5/ClC,6/ClC,7/white,8/white,
+     9/white,10/white}{}
+    {\textbf{Step 1:} 9 clusters.\\ Closest: $\{7\}$ and $\{8\}$.}
+  \tenpanel{(10.6,0)}{%
+    \foreach \i in {1,2,9,10} {\one{\i}}
+    \hull{ClC}{(t5) -- (t6)} \hull{ClD}{(t7) -- (t8)}
+    \onehi{3} \onehi{4}}
+    {1/white,2/white,3/white,4/white,5/ClC,6/ClC,7/ClD,8/ClD,
+     9/white,10/white}{}
+    {\textbf{Step 2:} 8 clusters.\\ Closest: $\{3\}$ and $\{4\}$.}
+  \tenpanel{(2.65,-4.95)}{%
+    \foreach \i in {9,10} {\one{\i}}
+    \hull{ClC}{(t5) -- (t6)} \hull{ClD}{(t7) -- (t8)}
+    \hull{ClB}{(t3) -- (t4)} \onehi{1} \onehi{2}}
+    {1/white,2/white,3/ClB,4/ClB,5/ClC,6/ClC,7/ClD,8/ClD,
+     9/white,10/white}{}
+    {\textbf{Step 3:} 7 clusters.\\ Closest: $\{1\}$ and $\{2\}$.}
+  \tenpanel{(7.95,-4.95)}{%
+    \foreach \i in {9,10} {\one{\i}}
+    \hull{ClC}{(t5) -- (t6)} \hull{ClD}{(t7) -- (t8)}
+    \hull{ClB}{(t3) -- (t4)} \hull{ClA}{(t1) -- (t2)}}
+    {1/ClA,2/ClA,3/ClB,4/ClB,5/ClC,6/ClC,7/ClD,8/ClD,
+     9/white,10/white}{}
+    {\textbf{Step 4:} 6 clusters.\\ Now what?}
+\end{tikzpicture}
+\end{center}
+After these four steps we have reached $6$ clusters:
 \[
   \{1,2\},\ \{3,4\},\ \{5,6\},\ \{7,8\},\ \{9\},\ \{10\}.
 \]
-\begin{center}
-\begin{tikzpicture}[scale=0.9,
-  p/.style={circle,fill=black,inner sep=1.2pt},
-  lab/.style={font=\scriptsize}]
-  \foreach \i/\x/\y/\a in {1/0/3/above,2/0.8/2.4/right,3/-0.2/1/above,
-      4/0.7/0.6/right,5/3/2.6/above,6/3.4/2.6/above,7/4.3/1.6/right,
-      8/4.4/1.0/right,9/4.0/0.1/right,10/5.6/-0.6/right}
-    \node[p,label={[lab]\a:$\i$}] (q\i) at (\x,\y) {};
-  \draw[PlotBlue] (0.4,2.7) ellipse (0.75cm and 0.6cm);
-  \draw[PlotBlue] (0.25,0.8) ellipse (0.75cm and 0.5cm);
-  \draw[PlotBlue] (3.2,2.7) ellipse (0.5cm and 0.4cm);
-  \draw[PlotBlue] (4.4,1.3) ellipse (0.55cm and 0.65cm);
-  \foreach \x/\y in {0.4/2.7,0.25/0.8,3.2/2.6,4.35/1.3}
-    \node[PlotRed,font=\scriptsize] at (\x,\y) {$\times$};
-\end{tikzpicture}
-\end{center}
-\end{framedexample}
 
 Now what? At the first steps each cluster was a single point, so ``the
 two closest clusters'' simply meant the two closest points. Now the
 clusters contain several points: how do we measure the distance
 between two clusters? There are various approaches. For example, we
 can take the distance between the \emph{means} of the two clusters,
-the points marked with $\times$ in the figure: the mean of a cluster
-$C$ is
+where the mean of a cluster $C$ is
 \[
   \frac{1}{\abs{C}}\sum_{\vec x\in C}\vec x .
 \]
-
-With this distance, the next steps merge $9$ with $\{7,8\}$, then
-$\{1,2\}$ with $\{3,4\}$, then $\{5,6\}$ with $\{7,8,9\}$, then $10$
-with $\{5,6,7,8,9\}$, and finally the two clusters left. We can draw
-the whole history as a tree, a \emph{dendrogram}: the leaves are the
-points, and each horizontal line is a merge. Cutting the tree at a
-given level gives the clusters at that level.
-
+In the panels below, the mean of each cluster with more than one point
+is marked with $\times$. With this distance, the next steps merge $9$
+with $\{7,8\}$, then $\{1,2\}$ with $\{3,4\}$, then $\{5,6\}$ with
+$\{7,8,9\}$, then $10$ with $\{5,6,7,8,9\}$, and finally the two
+clusters left.
 \begin{center}
-\begin{tikzpicture}[x=0.7cm,y=0.42cm,font=\small]
-  \foreach \i in {1,...,10}
-    \node[below] at (\i-1,0) {$\i$};
-  % merge(xa,ya,xb,yb,level)
-  \def\merge#1#2#3#4#5{\draw (#1,#2) -- (#1,#5) -- (#3,#5) -- (#3,#4);}
-  \merge{4}{0}{5}{0}{1}
-  \merge{6}{0}{7}{0}{2}
-  \merge{2}{0}{3}{0}{3}
-  \merge{0}{0}{1}{0}{4}
-  \merge{6.5}{2}{8}{0}{5}
-  \merge{0.5}{4}{2.5}{3}{6}
-  \merge{4.5}{1}{7.25}{5}{7}
-  \merge{5.875}{7}{9}{0}{8}
-  \merge{1.5}{6}{7.4375}{8}{9}
+\begin{tikzpicture}[x=0.85cm,y=0.85cm]
+  \def\hullw{11pt}
+  \tenpanel{(0,0)}{%
+    \one{10}
+    \hull{ClC}{(t5) -- (t6)} \hullhi{ClD}{(t7) -- (t8)}
+    \hull{ClB}{(t3) -- (t4)} \hull{ClA}{(t1) -- (t2)} \onehi{9}}
+    {1/ClA,2/ClA,3/ClB,4/ClB,5/ClC,6/ClC,7/ClD,8/ClD,
+     9/white,10/white}
+    {\meanmark{0.3,1.55} \meanmark{0.2,0.47} \meanmark{1.98,1.65}
+     \meanmark{2.8,0.83}}
+    {\textbf{Step 4:} 6 clusters.\\ Closest: $\{7,8\}$ and $\{9\}$.}
+  \tenpanel{(5.3,0)}{%
+    \one{10}
+    \hull{ClC}{(t5) -- (t6)} \hull{ClD}{(t7) -- (t8) -- (t9) -- cycle}
+    \hullhi{ClB}{(t3) -- (t4)} \hullhi{ClA}{(t1) -- (t2)}}
+    {1/ClA,2/ClA,3/ClB,4/ClB,5/ClC,6/ClC,7/ClD,8/ClD,
+     9/ClD,10/white}
+    {\meanmark{0.3,1.55} \meanmark{0.2,0.47} \meanmark{1.98,1.65}
+     \meanmark{2.68,0.53}}
+    {\textbf{Step 5:} 5 clusters.\\ Closest: $\{1,2\}$ and $\{3,4\}$.}
+  \tenpanel{(10.6,0)}{%
+    \one{10}
+    \hullhi{ClC}{(t5) -- (t6)} \hullhi{ClD}{(t7) -- (t8) -- (t9) -- cycle}
+    \hull{ClA}{(t1) -- (t2) -- (t4) -- (t3) -- cycle}}
+    {1/ClA,2/ClA,3/ClA,4/ClA,5/ClC,6/ClC,7/ClD,8/ClD,
+     9/ClD,10/white}
+    {\meanmark{0.25,1.01} \meanmark{1.98,1.65} \meanmark{2.68,0.53}}
+    {\textbf{Step 6:} 4 clusters.\\ Closest: $\{5,6\}$ and $\{7,8,9\}$.}
+  \tenpanel{(0,-4.95)}{%
+    \onehi{10}
+    \hullhi{ClC}{(t5) -- (t6) -- (t7) -- (t8) -- (t9) -- cycle}
+    \hull{ClA}{(t1) -- (t2) -- (t4) -- (t3) -- cycle}}
+    {1/ClA,2/ClA,3/ClA,4/ClA,5/ClC,6/ClC,7/ClC,8/ClC,
+     9/ClC,10/white}
+    {\meanmark{0.25,1.01} \meanmark{2.4,0.98}}
+    {\textbf{Step 7:} 3 clusters.\\ Closest: $\{5,\ldots,9\}$ and $\{10\}$.}
+  \tenpanel{(5.3,-4.95)}{%
+    \hullhi{ClC}{(t5) -- (t6) -- (t7) -- (t8) -- (t10) -- (t9) -- cycle}
+    \hullhi{ClA}{(t1) -- (t2) -- (t4) -- (t3) -- cycle}}
+    {1/ClA,2/ClA,3/ClA,4/ClA,5/ClC,6/ClC,7/ClC,8/ClC,
+     9/ClC,10/ClC}
+    {\meanmark{0.25,1.01} \meanmark{2.66,0.78}}
+    {\textbf{Step 8:} 2 clusters.\\ Closest: the last two.}
+  \tenpanel{(10.6,-4.95)}{%
+    \hull{ClA}{(t1) -- (t5) -- (t6) -- (t7) -- (t8) -- (t10) -- (t9)
+      -- (t4) -- (t3) -- cycle}}
+    {1/ClA,2/ClA,3/ClA,4/ClA,5/ClA,6/ClA,7/ClA,8/ClA,
+     9/ClA,10/ClA}{}
+    {\textbf{Step 9:} 1 cluster.\\ Stop.}
+\end{tikzpicture}
+\end{center}
+
+We can draw the whole history as a tree, a \emph{dendrogram}: the
+leaves are the points, and each horizontal line is a merge, drawn in
+the colour of the cluster it creates. Cutting the tree at a given level
+gives the clusters at that level.
+\begin{center}
+\begin{tikzpicture}[x=0.7cm,y=0.42cm,font=\small,
+  br/.style={line width=1.4pt,line cap=round}]
+  \foreach \i/\c in {1/ClA,2/ClA,3/ClB,4/ClB,5/ClC,6/ClC,7/ClD,8/ClD,
+      9/gray,10/gray}
+    \node[below,text=\c!80!black] at (\i-1,0) {$\i$};
+  % merge(xa,ya,colour a, xb,yb,colour b, level, colour of the new cluster)
+  \def\merge#1#2#3#4#5#6#7#8{%
+    \draw[br,#3!85!black] (#1,#2) -- (#1,#7);
+    \draw[br,#6!85!black] (#4,#5) -- (#4,#7);
+    \draw[br,#8!85!black] (#1,#7) -- (#4,#7);}
+  \merge{4}{0}{gray}{5}{0}{gray}{1}{ClC}
+  \merge{6}{0}{gray}{7}{0}{gray}{2}{ClD}
+  \merge{2}{0}{gray}{3}{0}{gray}{3}{ClB}
+  \merge{0}{0}{gray}{1}{0}{gray}{4}{ClA}
+  \merge{6.5}{2}{ClD}{8}{0}{gray}{5}{ClD}
+  \merge{0.5}{4}{ClA}{2.5}{3}{ClB}{6}{ClA}
+  \merge{4.5}{1}{ClC}{7.25}{5}{ClD}{7}{ClC}
+  \merge{5.875}{7}{ClC}{9}{0}{gray}{8}{ClC}
+  \merge{1.5}{6}{ClA}{7.4375}{8}{ClC}{9}{black}
   \foreach \l in {0,...,9}{
     \pgfmathtruncatemacro{\c}{10-\l}
     \node[right,font=\scriptsize,gray] at (10,\l) {$\c$};}
   \node[right,font=\scriptsize,gray] at (10,10) {clusters};
-  \draw[dashed,PlotRed] (-0.5,4.5) -- (9.8,4.5);
+  \draw[dashed,gray] (-0.5,4.5) -- (9.8,4.5);
 \end{tikzpicture}
 \end{center}
 The column on the right counts the clusters left after each step. The
-dashed line cuts the tree just after the fourth step, at the $6$
-clusters of Example~\ref{ex:bottom-up}.
+dashed line cuts the tree just after Step~4: the branches it crosses
+are the $6$ clusters $\{1,2\}$, $\{3,4\}$, $\{5,6\}$, $\{7,8\}$, $\{9\}$
+and $\{10\}$, in the same colours as in the panels.
+\end{framedexample}}
 
-\subsection{How much does it cost?}
+\subsubsection{How much does it cost?}
 
 Just for the first step we already have to pay $\Theta(n^2)$: we must
 compute the distance between every pair of points to find the closest
@@ -5893,21 +6181,23 @@ So every point of $U$ lies in exactly one of the sets $C_i$.
 
 \begin{framedexample}{A $4$-partition}
 \begin{center}
-\begin{tikzpicture}[p/.style={circle,fill=black,inner sep=1.2pt}]
-  \draw[thick] (0,1.2) ellipse (0.8cm and 0.65cm);
-  \node at (0.95,1.85) {$C_1$};
-  \foreach \x/\y in {-0.35/1.35,0.2/1.55,0.3/1.0,-0.2/0.9}
-    \node[p] at (\x,\y) {};
-  \draw[thick] (1.7,0.2) ellipse (0.5cm and 0.4cm);
-  \node at (2.45,0.2) {$C_2$};
-  \foreach \x/\y in {1.5/0.2,1.9/0.2} \node[p] at (\x,\y) {};
-  \draw[thick] (2.9,1.5) ellipse (0.35cm and 0.3cm);
-  \node at (3.55,1.65) {$C_3$};
-  \node[p] at (2.9,1.5) {};
-  \draw[thick] (1.0,-1.3) ellipse (1.1cm and 0.7cm);
-  \node at (2.4,-1.3) {$C_4$};
-  \foreach \x/\y in {0.4/-1.1,0.9/-1.0,1.4/-1.1,0.7/-1.5,1.2/-1.6,1.6/-1.4}
-    \node[p] at (\x,\y) {};
+\begin{tikzpicture}
+  \hull{ClA}{(-0.35,1.35) -- (0.2,1.55) -- (0.3,1.0) -- (-0.2,0.9) -- cycle}
+  \hull{ClC}{(1.5,0.2) -- (1.9,0.2)}
+  \hull{ClE}{(2.9,1.5) circle (0.01)}
+  \hull{ClD}{(0.4,-1.1) -- (0.9,-1.0) -- (1.4,-1.1) -- (1.6,-1.4)
+    -- (1.2,-1.6) -- (0.7,-1.5) -- cycle}
+  \foreach \p in {(-0.35,1.35),(0.2,1.55),(0.3,1.0),(-0.2,0.9)}
+    \node[clpt=ClA] at \p {};
+  \foreach \p in {(1.5,0.2),(1.9,0.2)} \node[clpt=ClC] at \p {};
+  \node[clpt=ClE] at (2.9,1.5) {};
+  \foreach \p in {(0.4,-1.1),(0.9,-1.0),(1.4,-1.1),(1.6,-1.4),(1.2,-1.6),
+      (0.7,-1.5)}
+    \node[clpt=ClD] at \p {};
+  \node[text=ClA!80!black] at (-1.1,1.85) {$C_1$};
+  \node[text=ClC!80!black] at (2.5,0.2) {$C_2$};
+  \node[text=ClE!80!black] at (3.5,1.5) {$C_3$};
+  \node[text=ClD!80!black] at (2.25,-1.3) {$C_4$};
 \end{tikzpicture}
 \end{center}
 \end{framedexample}
@@ -5934,27 +6224,31 @@ of its own cluster, and we want the total payment to be as small as
 possible.
 
 \begin{framedexample}{Paying the distance to the representative}
-Each segment joins a point to the representative of its cluster; the
-cost is the sum of the squared lengths of all the segments.
+Each segment joins a point to the representative of its cluster, the
+diamond of the same colour; the cost is the sum of the squared lengths
+of all the segments.
 \begin{center}
-\begin{tikzpicture}[p/.style={circle,fill=black,inner sep=1.2pt},
-  r/.style={circle,fill=PlotRed,inner sep=1.8pt}]
-  \draw[thick] (0,1.2) ellipse (0.8cm and 0.9cm);
-  \node at (-1.0,1.9) {$C_1$};
-  \node[r,label={[PlotRed,font=\small]right:$\vec c_1$}] (c1) at (0,1.2) {};
-  \foreach \x/\y in {-0.4/1.6,0.4/1.75,-0.3/0.6,0.35/0.7}
-    {\node[p] (a) at (\x,\y) {}; \draw (a) -- (c1);}
-  \draw[thick] (2.7,-0.6) ellipse (1.4cm and 0.8cm);
-  \node at (4.4,-0.6) {$C_2$};
-  \node[r,label={[PlotRed,font=\small]above:$\vec c_2$}] (c2) at (3.2,-0.4) {};
-  \foreach \x/\y in {1.6/-0.4,2.3/-0.35,1.8/-0.9,2.6/-1.0,3.3/-0.9}
-    {\node[p] (a) at (\x,\y) {}; \draw (a) -- (c2);}
-  \draw[thick] (3.0,1.6) ellipse (0.55cm and 0.5cm);
-  \node at (3.9,1.9) {$C_3$};
-  \node[r] (c3) at (3.0,1.6) {};
-  \node[PlotRed,font=\small] at (2.9,2.35) {$\vec c_3$};
-  \foreach \x/\y in {2.7/1.8,3.25/1.85,3.1/1.3}
-    {\node[p] (a) at (\x,\y) {}; \draw (a) -- (c3);}
+\begin{tikzpicture}[
+  rep/.style={diamond,fill=#1,draw=black,thick,inner sep=2.4pt},
+  replab/.style={text=#1!80!black,font=\small}]
+  % #1 colour, #2 hull path, #3 representative, #4 points.
+  \hull{ClA}{(-0.4,1.6) -- (0.4,1.75) -- (0.35,0.7) -- (-0.3,0.6) -- cycle}
+  \hull{ClC}{(1.6,-0.4) -- (2.3,-0.35) -- (3.3,-0.9) -- (2.6,-1.0)
+    -- (1.8,-0.9) -- cycle}
+  \hull{ClE}{(2.7,1.8) -- (3.25,1.85) -- (3.1,1.3) -- cycle}
+  \foreach \c/\r/\pts in {ClA/{(0,1.2)}/{(-0.4,1.6),(0.4,1.75),(-0.3,0.6),(0.35,0.7)},
+      ClC/{(2.3,-0.65)}/{(1.6,-0.4),(2.3,-0.35),(1.8,-0.9),(2.6,-1.0),(3.3,-0.9)},
+      ClE/{(3.0,1.6)}/{(2.7,1.8),(3.25,1.85),(3.1,1.3)}}{
+    \foreach \p in \pts {
+      \draw[\c!80!black,thick] \p -- \r;
+      \node[clpt=\c] at \p {};}
+    \node[rep=\c] at \r {};}
+  \node[replab=ClA] at (-1.0,1.9) {$C_1$};
+  \node[replab=ClA] at (0.55,1.25) {$\vec c_1$};
+  \node[replab=ClC] at (3.95,-0.6) {$C_2$};
+  \node[replab=ClC] at (2.3,-0.05) {$\vec c_2$};
+  \node[replab=ClE] at (3.0,2.45) {$C_3$};
+  \node[replab=ClE] at (3.75,1.55) {$\vec c_3$};
 \end{tikzpicture}
 \end{center}
 \end{framedexample}
@@ -6037,12 +6331,15 @@ of consecutive points. With $k=4$, for example, we must cut the line in
 three places.
 
 \begin{center}
-\begin{tikzpicture}[p/.style={circle,draw,fill=white,inner sep=1.4pt}]
-  \draw (-0.3,0) -- (10.3,0);
-  \foreach \x in {0,0.6,1.1,2.6,3.1,3.7,5.3,5.8,6.4,8.2,8.8,9.5,10}
-    \node[p] at (\x,0) {};
-  \foreach \x in {1.85,4.5,7.3}
-    \draw[PlotRed,thick] (\x,-0.35) -- (\x,0.35);
+\begin{tikzpicture}
+  \draw[gray] (-0.3,0) -- (10.3,0);
+  \hull{ClA}{(0,0) -- (1.1,0)} \hull{ClC}{(2.6,0) -- (3.7,0)}
+  \hull{ClE}{(5.3,0) -- (6.4,0)} \hull{ClD}{(8.2,0) -- (10,0)}
+  \foreach \x/\c in {0/ClA,0.6/ClA,1.1/ClA,2.6/ClC,3.1/ClC,3.7/ClC,
+      5.3/ClE,5.8/ClE,6.4/ClE,8.2/ClD,8.8/ClD,9.5/ClD,10/ClD}
+    \node[clpt=\c] at (\x,0) {};
+  \foreach \x in {1.85,4.55,7.3}
+    \draw[thick] (\x,-0.45) -- (\x,0.45);
 \end{tikzpicture}
 \end{center}
 
