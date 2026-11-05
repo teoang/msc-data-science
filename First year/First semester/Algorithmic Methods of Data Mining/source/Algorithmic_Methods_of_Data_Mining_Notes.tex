@@ -6129,7 +6129,7 @@ colours as in the panels.
 
 \subsubsection{How much does it cost?}
 
-Just for the first step we already have to pay $\Theta(n^2)$: we must
+Just the first step already takes $\Theta(n^2)$ time: we must
 compute the distance between every pair of points to find the closest
 one. If we repeat this at every step, rescanning all the distances
 between the current clusters, each of the $n-1$ steps costs $O(n^2)$,
@@ -6472,7 +6472,7 @@ cost of this partitioning?
     at (6,1) {};
 \end{tikzpicture}
 \end{center}
-Each point pays the squared length of its segment:
+Each point adds to the cost the squared length of its segment:
 \[
 \begin{aligned}
   C_1:&\quad \norm{(0,0)-(1,1)}_2^2+\norm{(2,0)-(1,1)}_2^2
@@ -6483,7 +6483,7 @@ Each point pays the squared length of its segment:
 so the cost is $8+2=10$.
 
 If we moved $\vec c_2$ to $(5,1)$, the
-points of $C_2$ would pay $0+4=4$ and the cost would grow to $12$:
+points of $C_2$ would add $0+4=4$ and the cost would grow to $12$:
 the cost depends both on the partition and on the representatives.
 \end{framedexample}
 
@@ -6618,11 +6618,11 @@ Not always! Take $k=2$ and the points
 The largest gap is the one between $8$ and $13$, of length $5$; the
 next one is between $4$ and $8$, of length $4$. Let us compare the two
 cuts. In the pictures, the diamond marks the mean of each cluster, and
-under each point we write what it pays, $d^2$, where $d$ is its
+under each point we write what it adds to the cost, $d^2$, where $d$ is its
 distance from that mean.
 
 % A cut of 0,1,2,3,4,8,13 on a line: #1 the clusters' regions and points,
-% #2 the means, #3 the payments, #4 the cut, #5 the cost.
+% #2 the means, #3 what each point adds, #4 the cut, #5 the cost.
 \newcommand{\linecut}[5]{%
 \begin{center}
 \begin{tikzpicture}[x=0.8cm,
@@ -6637,8 +6637,8 @@ distance from that mean.
   \node[anchor=west,font=\small] at (14,0) {#5};
 \end{tikzpicture}
 \end{center}}
-% \payments{colour}{x/payment,...}: what each point pays, under it.
-\newcommand{\payments}[2]{%
+% \addedcost{colour}{x/value,...}: what each point adds to the cost, under it.
+\newcommand{\addedcost}[2]{%
   \foreach \x/\v in {#2}
     \node[font=\footnotesize,text=#1!80!black] at (\x,-0.5) {$\v$};}
 % \meanat{colour}{x}: the mean of a cluster, above the line.
@@ -6646,7 +6646,7 @@ distance from that mean.
   \draw[densely dotted,#1!80!black] (#2,0.05) -- (#2,0.28)
     (#2,0.6) -- (#2,0.95);
   \node[diamond,fill=#1,draw=black,thick,inner sep=2.2pt] at (#2,1.05) {};}
-% \cutat{x}{label}: the cut, with the length of the gap it cuts.
+% \cutat{x}{label}: the cut, with a label above it.
 \newcommand{\cutat}[2]{%
   \draw[very thick] (#1,-0.4) -- (#1,0.4);
   \node[font=\footnotesize,anchor=south] at (#1,0.45) {#2};}
@@ -6658,10 +6658,10 @@ mean $3$, and $\{13\}$:
   \foreach \x in {0,1,2,3,4,8} \node[clpt=ClA] at (\x,0) {};
   \node[clpt=ClC] at (13,0) {};}
   {\meanat{ClA}{3} \meanat{ClC}{13}}
-  {\payments{ClA}{0/3^2,1/2^2,2/1^2,3/0^2,4/1^2,8/5^2} \payments{ClC}{13/0^2}}
-  {\cutat{10.5}{gap $5$}}
+  {\addedcost{ClA}{0/3^2,1/2^2,2/1^2,3/0^2,4/1^2,8/5^2} \addedcost{ClC}{13/0^2}}
+  {\cutat{10.5}{cut}}
   {cost $40$}
-The point $8$ alone pays $25$:
+The point $8$ alone adds $5^2=25$ to the cost:
 \[
   (3^2+2^2+1^2+0^2+1^2+5^2)+0=40.
 \]
@@ -6673,8 +6673,8 @@ with mean $2$, and $\{8,13\}$, with mean $10.5$:
   \foreach \x in {0,1,2,3,4} \node[clpt=ClA] at (\x,0) {};
   \foreach \x in {8,13} \node[clpt=ClC] at (\x,0) {};}
   {\meanat{ClA}{2} \meanat{ClC}{10.5}}
-  {\payments{ClA}{0/2^2,1/1^2,2/0^2,3/1^2,4/2^2} \payments{ClC}{8/2.5^2,13/2.5^2}}
-  {\cutat{6}{gap $4$}}
+  {\addedcost{ClA}{0/2^2,1/1^2,2/0^2,3/1^2,4/2^2} \addedcost{ClC}{8/2.5^2,13/2.5^2}}
+  {\cutat{6}{cut}}
   {cost $22.5$}
 \[
   (2^2+1^2+0^2+1^2+2^2)+(2.5^2+2.5^2)=10+12.5=22.5<40.
