@@ -6324,7 +6324,27 @@ such that
 
 So every point of $U$ lies in exactly one of the sets $C_i$.
 
+% A 4-partition next to four sets that are not one.
+\begingroup
+% In half-width boxes the title tab, attached 12.5mm from the left
+% corner, would stick out on the right: centre it instead.
+% The titles are long, so the tab's side flares are also made narrower.
+\tcbset{examplebox/.append style={equal height group=kpartition,
+  attach boxed title to top center={yshift=-0.5mm},
+  boxed title style={frame code={%
+    \path[fill=tcbcolframe,draw=tcbcolframe]
+      (frame.north west) -- (frame.north east)
+      .. controls ([xshift=1.5mm]frame.north east) and
+                  ([xshift=2.8mm]frame.south east) ..
+                  ([xshift=4.2mm]frame.south east)
+      -- ([xshift=-4.2mm]frame.south west)
+      .. controls ([xshift=-2.8mm]frame.south west) and
+                  ([xshift=-1.5mm]frame.north west) .. (frame.north west)
+      -- cycle;}}}}
+\noindent
+\begin{minipage}[t]{0.485\textwidth}
 \begin{framedexample}{A $4$-partition}
+Every point lies in exactly one of the four sets.
 \begin{center}
 \begin{tikzpicture}
   \hull{ClA}{(-0.35,1.35) -- (0.2,1.55) -- (0.3,1.0) -- (-0.2,0.9) -- cycle}
@@ -6346,10 +6366,41 @@ So every point of $U$ lies in exactly one of the sets $C_i$.
 \end{tikzpicture}
 \end{center}
 \end{framedexample}
+\end{minipage}\hfill
+\begin{minipage}[t]{0.485\textwidth}
+\begin{framedexample}{Not a $4$-partition}
+The point $a$ lies in both $C_1$ and $C_2$, so condition~2 fails; the
+point on the top right lies in no set, so condition~3 fails.
+\begin{center}
+\begin{tikzpicture}
+  \begin{scope}[opacity=0.8]
+    \hull{ClA}{(-0.35,1.35) -- (0.2,1.55) -- (0.3,1.0) -- (-0.2,0.9) -- cycle}
+    \hull{ClC}{(0.3,1.0) -- (1.5,0.2) -- (1.9,0.2)}
+  \end{scope}
+  \hull{ClD}{(0.4,-1.1) -- (0.9,-1.0) -- (1.4,-1.1) -- (1.6,-1.4)
+    -- (1.2,-1.6) -- (0.7,-1.5) -- cycle}
+  \foreach \p in {(-0.35,1.35),(0.2,1.55),(-0.2,0.9)}
+    \node[clpt=ClA] at \p {};
+  \foreach \p in {(1.5,0.2),(1.9,0.2)} \node[clpt=ClC] at \p {};
+  \foreach \p in {(0.4,-1.1),(0.9,-1.0),(1.4,-1.1),(1.6,-1.4),(1.2,-1.6),
+      (0.7,-1.5)}
+    \node[clpt=ClD] at \p {};
+  % a: in two sets; the point on the top right: in no set.
+  \node[circle,fill=ClA,draw=ClC!80!black,line width=1.4pt,inner sep=1.8pt,
+    label={[text=PlotRed,font=\small]right:$a$}] at (0.3,1.0) {};
+  \node[clpt=white] at (2.9,1.5) {};
+  \node[text=ClA!80!black] at (-1.1,1.85) {$C_1$};
+  \node[text=ClC!80!black] at (2.5,0.2) {$C_2$};
+  \node[text=ClD!80!black] at (2.25,-1.3) {$C_3$};
+\end{tikzpicture}
+\end{center}
+\end{framedexample}
+\end{minipage}
+\endgroup
 
-There are a bunch of ways to choose a good $k$-partition; we will see
-one. The idea is to define an \emph{objective function}, a number that
-measures how good a partition is, and then minimize it.
+There are many ways to choose a good $k$-partition; we will see one.
+We define an \emph{objective function}, which gives every partition a
+cost, and we look for the partition with the smallest cost.
 
 \begin{framedproblem}{$k$-means}\label{prob:k-means}
 \textbf{Input:} a set $U=\{\vec x^{(1)},\ldots,\vec x^{(n)}\}\subseteq\R^d$
@@ -6364,11 +6415,7 @@ minimized:
 \]
 \end{framedproblem}
 
-In words, every point pays the squared distance to the representative
-of its own cluster, and we want the total payment to be as small as
-possible.
-
-\begin{framedexample}{Paying the distance to the representative}
+\begin{framedexample}{The cost of a partitioning}\label{ex:partition-cost}
 Each segment joins a point to the representative of its cluster, the
 diamond of the same colour; the cost is the sum of the squared lengths
 of all the segments.
@@ -6398,6 +6445,48 @@ of all the segments.
 \end{center}
 \end{framedexample}
 
+\begin{framedexample}{Computing the cost}\label{ex:kmeans-cost}
+Let us put numbers into the picture of Example~\ref{ex:partition-cost}.
+Take
+$k=2$ and five points of $\R^2$, split into
+\[
+  C_1=\{(0,0),\,(2,0),\,(1,3)\},\qquad C_2=\{(5,1),\,(7,1)\},
+\]
+with representatives $\vec c_1=(1,1)$ and $\vec c_2=(6,1)$. What is the
+cost of this partitioning?
+\begin{center}
+\begin{tikzpicture}[x=0.75cm,y=0.75cm,
+  rep/.style={diamond,fill=#1,draw=black,thick,inner sep=2.4pt}]
+  \draw[gray!30] (-0.5,-0.5) grid (7.5,3.5);
+  \hull{ClA}{(0,0) -- (2,0) -- (1,3) -- cycle}
+  \hull{ClC}{(5,1) -- (7,1)}
+  \foreach \p/\a in {(0,0)/below left,(2,0)/below right,(1,3)/above}{
+    \draw[ClA!80!black,thick] \p -- (1,1);
+    \node[clpt=ClA,label={[font=\scriptsize]\a:$\p$}] at \p {};}
+  \foreach \p/\a in {(5,1)/below,(7,1)/below}{
+    \draw[ClC!80!black,thick] \p -- (6,1);
+    \node[clpt=ClC,label={[font=\scriptsize]\a:$\p$}] at \p {};}
+  \node[rep=ClA,label={[text=ClA!80!black,font=\small]right:$\vec c_1$}]
+    at (1,1) {};
+  \node[rep=ClC,label={[text=ClC!80!black,font=\small]above:$\vec c_2$}]
+    at (6,1) {};
+\end{tikzpicture}
+\end{center}
+Each point pays the squared length of its segment:
+\[
+\begin{aligned}
+  C_1:&\quad \norm{(0,0)-(1,1)}_2^2+\norm{(2,0)-(1,1)}_2^2
+        +\norm{(1,3)-(1,1)}_2^2=2+2+4=8,\\
+  C_2:&\quad \norm{(5,1)-(6,1)}_2^2+\norm{(7,1)-(6,1)}_2^2=1+1=2,
+\end{aligned}
+\]
+so the cost is $8+2=10$.
+
+If we moved $\vec c_2$ to $(5,1)$, the
+points of $C_2$ would pay $0+4=4$ and the cost would grow to $12$:
+the cost depends both on the partition and on the representatives.
+\end{framedexample}
+
 \subsection{How hard is it?}
 
 Can we just try all the partitions? If we have $2$ clusters, every
@@ -6407,29 +6496,58 @@ Trying them all takes exponential time, and in general the problem is
 NP-hard (Definition~\ref{def:np-hard}). Some special cases, however,
 can be solved in polynomial time.
 
-\begin{framedexample}{$k=n$}
-Every point is in its own cluster, and the representative is the point
-itself. Every distance is $0$, so the cost is $0$: this is the
-optimum.
-\end{framedexample}
+\textbf{The case $k=n$.} Every point is in its own cluster, and the
+representative is the point itself. Every distance is $0$, so the cost
+is $0$: this is the optimum.
+\begin{center}
+\begin{tikzpicture}[
+  rep/.style={diamond,fill=#1,draw=black,thick,inner sep=2.4pt}]
+  % n = k = 5: each point is a cluster and its own representative.
+  \foreach \x/\y/\c/\j in {0/0.6/ClA/1,1.4/1.1/ClB/2,2.6/0.2/ClC/3,
+      4.0/0.9/ClD/4,5.3/0.3/ClE/5}{
+    \hull{\c}{(\x,\y) circle (0.01)}
+    \node[rep=\c,label={[text=\c!80!black,font=\small]below:$\vec c_{\j}$}]
+      at (\x,\y) {};}
+\end{tikzpicture}
+\end{center}
 
-\begin{framedexample}{$k=1$}\label{ex:k-means-one}
-Now all the points are in a single cluster $C_1=U$, so the partition
-is fixed: only the representative is left to choose. We must find the
-$\vec c$ that minimizes
+\textbf{The case $k=1$.} Now all the points are in a single cluster
+$C_1=U$, so the partition is fixed: only the representative is left to
+choose. Which $\vec c$ minimizes the cost?
+\begin{center}
+\begin{tikzpicture}[
+  rep/.style={diamond,fill=#1,draw=black,thick,inner sep=2.4pt}]
+  % The same five points as for k = n, now in one cluster.
+  \hull{ClA}{(0,0.6) -- (1.4,1.1) -- (4.0,0.9) -- (5.3,0.3) -- (2.6,0.2)
+    -- cycle}
+  \foreach \p in {(0,0.6),(1.4,1.1),(2.6,0.2),(4.0,0.9),(5.3,0.3)}{
+    \draw[ClA!80!black,thick] \p -- (2.66,0.62);
+    \node[clpt=ClA] at \p {};}
+  \node[rep=ClA,label={[text=ClA!80!black,font=\small]above:$\vec c$}]
+    at (2.66,0.62) {};
+\end{tikzpicture}
+\end{center}
+
+\begin{framedprop}{The best representative of one cluster}
+\label{prop:k-means-one}
+For $k=1$, the cost
 \[
-  \sum_{i=1}^{n}\norm{\vec x^{(i)}-\vec c}_2^2 .
+  \sum_{i=1}^{n}\norm{\vec x^{(i)}-\vec c}_2^2
 \]
-Take $d=2$, so $\vec x^{(i)}=(x^{(i)}_1,x^{(i)}_2)$ and
-$\vec c=(c_1,c_2)$. The square cancels the square root of the
-Euclidean distance:
+is minimized by the mean of the points,
+\[
+  \vec c=\frac1n\sum_{i=1}^{n}\vec x^{(i)} .
+\]
+\end{framedprop}
+
+\begin{proof}[Proof (case $d=2$)]
+Take $\vec x^{(i)}=(x^{(i)}_1,x^{(i)}_2)$ and $\vec c=(c_1,c_2)$. Then the
+cost is
 \[
   \sum_{i=1}^{n}\Bigl(\sqrt{(x^{(i)}_1-c_1)^2+(x^{(i)}_2-c_2)^2}\Bigr)^2
   =\sum_{i=1}^{n}\Bigl[(x^{(i)}_1-c_1)^2+(x^{(i)}_2-c_2)^2\Bigr]
   =f(c_1,c_2).
 \]
-\end{framedexample}
-
 How do we compute the minimum of $f$? At the minimum, the partial
 derivatives are zero. Differentiating with respect to $c_1$,
 \[
@@ -6448,16 +6566,14 @@ so
 \]
 This is indeed a minimum: as a function of $c_1$, $f$ is a parabola
 opening upwards, since its second derivative is $2n>0$. The same
-computation for $c_2$, and for every other coordinate when $d>2$,
-gives
-\[
-  \vec c=\frac1n\sum_{i=1}^{n}\vec x^{(i)}:
-\]
-the best representative is the mean of the points.
+computation for $c_2$ gives $c_2=\frac1n\sum_{i=1}^{n}x^{(i)}_2$, so
+$\vec c$ is the mean of the points. For $d>2$ we repeat it for every
+coordinate.
+\end{proof}
 
 Let us go back to the general case. Whatever the partition, the cost of
 each cluster $C_j$ only depends on the points of $C_j$ and on
-$\vec c_j$, so we can apply Example~\ref{ex:k-means-one} to each
+$\vec c_j$, so we can apply Proposition~\ref{prop:k-means-one} to each
 cluster on its own: the best representative of $C_j$ is its mean. The
 problem then becomes: find a $k$-partition that minimizes
 \[
