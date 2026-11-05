@@ -262,6 +262,15 @@ Compiled from Flavia Celani's handwritten notes, Gianmaria Romano's lecture log,
 - [ ] Universal hash families: a family for IP addresses and the proof of its 1/p collision probability.
 - [ ] Hash tables with chaining.
 
+**5 November**
+
+- [ ] Clustering: grouping similar points with the L2 distance; hierarchical and partitional (k-) clustering.
+- [ ] Bottom-up hierarchical clustering: merging the closest clusters, the distance between cluster means, and the dendrogram of a ten-point example.
+- [ ] Cost of hierarchical clustering: O(n³) by rescanning, O(n² log n) with one heap per cluster.
+- [ ] k-partitions and the k-means problem: representatives and the cost of the partitioning.
+- [ ] Hardness of k-means: k^n partitions, the easy cases k = n and k = 1 (the mean is the best representative), and points on a line.
+- [ ] Why cutting at the largest gaps fails on a line; NP-completeness and the need for approximation algorithms.
+
 </details>
 
 ## About

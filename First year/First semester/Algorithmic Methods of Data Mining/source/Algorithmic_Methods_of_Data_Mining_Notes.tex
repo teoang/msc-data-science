@@ -1,6 +1,7 @@
 \documentclass[a4paper,12pt,oneside]{report}
 \usepackage[english]{../../../../latex-setup/learningnotes}
 \usepackage{needspace}
+\usepackage{multicol}
 \usepackage{pgfplots}
 \usetikzlibrary{decorations.pathreplacing}
 \pgfplotsset{compat=1.18}
@@ -54,7 +55,14 @@
     before skip=6pt,after skip=6pt]
   \small\textbf{#1}
   \end{tcolorbox}}
-\newcommand{\lecturestart}[1]{\lecturebanner{Start of lecture #1}}
+% Each banner is a link target and an entry of the lecture list on the
+% first page (\lecturelist), so new lectures appear there automatically.
+\makeatletter
+\newcommand{\lecturestart}[1]{\lecturebanner{%
+  \phantomsection\addcontentsline{lec}{lecture}{#1}Start of lecture #1}}
+\newcommand{\l@lecture}[2]{\par\noindent#1\dotfill#2\par}
+\newcommand{\lecturelist}{\@starttoc{lec}}
+\makeatother
 
 \notestitle{ADM}
 \notessubtitle{Algorithmic Methods of Data Mining}
@@ -66,8 +74,8 @@
 \makenotestitle
 
 \thispagestyle{empty}
-\begin{tcolorbox}[
-  examplebox,unbreakable,title={Acknowledgements},
+\tcbset{frontbox/.style={
+  examplebox,unbreakable,
   colframe=blue!35!black,coltitle=white,
   arc=5mm,outer arc=5mm,left=3mm,right=3mm,top=3mm,bottom=3mm,
   boxed title style={
@@ -76,10 +84,20 @@
     frame code={
       \path[fill=tcbcolframe,draw=tcbcolframe,rounded corners=3mm]
         (frame.south west) rectangle (frame.north east);
-    }}]
+    }}}}
+\begin{tcolorbox}[frontbox,title={Acknowledgements}]
 Thanks to \href{https://github.com/flaviac18-hub}{Flavia Celani} for sharing
 her handwritten notes for Algorithmic Methods of Data Mining,
 which made this document possible.
+\end{tcolorbox}
+
+\vspace{1.5cm}
+
+\begin{tcolorbox}[frontbox,title={Are you looking only for a lesson?}]
+Click a date to jump to the start of that lecture.
+\begin{multicols}{2}
+\lecturelist
+\end{multicols}
 \end{tcolorbox}
 \clearpage
 
@@ -5661,6 +5679,397 @@ holds the pairs of all the keys that hash to $60$.
 Now $\operatorname{get}(z)$ goes to slot $A[h(z)]$ and scans its
 list until it finds the key $z$. The cost depends on the length of
 that list, so the time stays constant when the lists are short.
+
+\endgroup
+
+\chapter{Clustering}\label{ch:clustering}
+
+\lecturestart{5 November}
+
+% Keep each new definition and worked drawing together on one page.
+\begingroup
+\tcbset{definitionbox/.append style={unbreakable},
+  examplebox/.append style={unbreakable},
+  algorithmbox/.append style={unbreakable}}
+
+\section{Grouping similar things}
+
+When we introduced distances (Definition~\ref{def:distance}), one of the motivating tasks was to
+find groups of similar documents. We now study this task directly.
+In \emph{clustering} we try to group similar ``things'' together: each
+group is a \emph{cluster}.
+
+To say that two things are similar we need a distance, or a
+similarity (Definition~\ref{def:similarity}). To keep
+things simple, in this chapter the objects are points of $\R^d$ and
+the distance is the Euclidean, or $L_2$, distance
+(Definition~\ref{def:euclidean}):
+\[
+  \norm{\vec x-\vec y}_2=\sqrt{\sum_{j=1}^{d}(x_j-y_j)^2}.
+\]
+
+In our setting the clusters do not overlap: every point belongs to
+exactly one cluster. This is a choice, not a rule; in other settings a
+point may belong to several clusters.
+
+There are two main families of clustering methods:
+\begin{enumerate}
+  \item \emph{hierarchical clustering}, which builds clusters at each
+    level, from the finest to the coarsest;
+  \item \emph{partitional} (or \emph{flat}) clustering, which directly
+    splits the points into a fixed number $k$ of clusters: this is
+    \emph{$k$-clustering}.
+\end{enumerate}
+
+\begin{framedexample}{A $k$-clustering with $k=3$}
+The points below are split into three clusters.
+\begin{center}
+\begin{tikzpicture}[p/.style={circle,fill=black,inner sep=1.2pt}]
+  \draw[thick] (0,0) ellipse (0.9cm and 0.75cm);
+  \draw[thick] (2.4,0) ellipse (0.7cm and 0.8cm);
+  \draw[thick] (4.2,0) ellipse (0.55cm and 0.6cm);
+  \foreach \x/\y in {-0.4/0.3,0.1/0.4,0.4/-0.1,-0.3/-0.3,0.2/-0.4}
+    \node[p] at (\x,\y) {};
+  \foreach \x/\y in {2.2/0.4,2.6/0.2,2.3/-0.1,2.5/-0.4,2.2/-0.35}
+    \node[p] at (\x,\y) {};
+  \foreach \x/\y in {4.05/0.1,4.35/-0.05}
+    \node[p] at (\x,\y) {};
+\end{tikzpicture}
+\end{center}
+\end{framedexample}
+
+We start with hierarchical clustering.
+
+\section{Hierarchical clustering}
+
+Hierarchical clustering can be done in two ways:
+\begin{enumerate}
+  \item \emph{bottom-up}: start from many small clusters and merge
+    them;
+  \item \emph{top-down}: start from one big cluster and split it.
+\end{enumerate}
+We follow the bottom-up way. We have $n$ points. Initially, every
+point is its own cluster, so we have $n$ clusters:
+\[
+  \{1\},\ \{2\},\ \ldots,\ \{n\}.
+\]
+Then we choose the two closest points and merge them into one cluster,
+which leaves $n-1$ clusters. And we continue: at every step we merge
+the two closest clusters, until only one cluster is left.
+
+\begin{framedexample}{Bottom-up clustering of ten points}
+\label{ex:bottom-up}
+Take the $n=10$ points below. The closest pair is $5$ and $6$, so the
+first step merges them and leaves $9$ clusters. The next steps merge
+$7$ and $8$, then $3$ and $4$, then $1$ and $2$. After these four
+steps we have reached $6$ clusters:
+\[
+  \{1,2\},\ \{3,4\},\ \{5,6\},\ \{7,8\},\ \{9\},\ \{10\}.
+\]
+\begin{center}
+\begin{tikzpicture}[scale=0.9,
+  p/.style={circle,fill=black,inner sep=1.2pt},
+  lab/.style={font=\scriptsize}]
+  \foreach \i/\x/\y/\a in {1/0/3/above,2/0.8/2.4/right,3/-0.2/1/above,
+      4/0.7/0.6/right,5/3/2.6/above,6/3.4/2.6/above,7/4.3/1.6/right,
+      8/4.4/1.0/right,9/4.0/0.1/right,10/5.6/-0.6/right}
+    \node[p,label={[lab]\a:$\i$}] (q\i) at (\x,\y) {};
+  \draw[PlotBlue] (0.4,2.7) ellipse (0.75cm and 0.6cm);
+  \draw[PlotBlue] (0.25,0.8) ellipse (0.75cm and 0.5cm);
+  \draw[PlotBlue] (3.2,2.7) ellipse (0.5cm and 0.4cm);
+  \draw[PlotBlue] (4.4,1.3) ellipse (0.55cm and 0.65cm);
+  \foreach \x/\y in {0.4/2.7,0.25/0.8,3.2/2.6,4.35/1.3}
+    \node[PlotRed,font=\scriptsize] at (\x,\y) {$\times$};
+\end{tikzpicture}
+\end{center}
+\end{framedexample}
+
+Now what? At the first steps each cluster was a single point, so ``the
+two closest clusters'' simply meant the two closest points. Now the
+clusters contain several points: how do we measure the distance
+between two clusters? There are various approaches. For example, we
+can take the distance between the \emph{means} of the two clusters,
+the points marked with $\times$ in the figure: the mean of a cluster
+$C$ is
+\[
+  \frac{1}{\abs{C}}\sum_{\vec x\in C}\vec x .
+\]
+
+With this distance, the next steps merge $9$ with $\{7,8\}$, then
+$\{1,2\}$ with $\{3,4\}$, then $\{5,6\}$ with $\{7,8,9\}$, then $10$
+with $\{5,6,7,8,9\}$, and finally the two clusters left. We can draw
+the whole history as a tree, a \emph{dendrogram}: the leaves are the
+points, and each horizontal line is a merge. Cutting the tree at a
+given level gives the clusters at that level.
+
+\begin{center}
+\begin{tikzpicture}[x=0.7cm,y=0.42cm,font=\small]
+  \foreach \i in {1,...,10}
+    \node[below] at (\i-1,0) {$\i$};
+  % merge(xa,ya,xb,yb,level)
+  \def\merge#1#2#3#4#5{\draw (#1,#2) -- (#1,#5) -- (#3,#5) -- (#3,#4);}
+  \merge{4}{0}{5}{0}{1}
+  \merge{6}{0}{7}{0}{2}
+  \merge{2}{0}{3}{0}{3}
+  \merge{0}{0}{1}{0}{4}
+  \merge{6.5}{2}{8}{0}{5}
+  \merge{0.5}{4}{2.5}{3}{6}
+  \merge{4.5}{1}{7.25}{5}{7}
+  \merge{5.875}{7}{9}{0}{8}
+  \merge{1.5}{6}{7.4375}{8}{9}
+  \foreach \l in {0,...,9}{
+    \pgfmathtruncatemacro{\c}{10-\l}
+    \node[right,font=\scriptsize,gray] at (10,\l) {$\c$};}
+  \node[right,font=\scriptsize,gray] at (10,10) {clusters};
+  \draw[dashed,PlotRed] (-0.5,4.5) -- (9.8,4.5);
+\end{tikzpicture}
+\end{center}
+The column on the right counts the clusters left after each step. The
+dashed line cuts the tree just after the fourth step, at the $6$
+clusters of Example~\ref{ex:bottom-up}.
+
+\subsection{How much does it cost?}
+
+Just for the first step we already have to pay $\Theta(n^2)$: we must
+compute the distance between every pair of points to find the closest
+one. If we repeat this at every step, rescanning all the distances
+between the current clusters, each of the $n-1$ steps costs $O(n^2)$,
+and the whole algorithm costs $O(n^3)$. This is the worst-case
+scenario.
+
+Can we avoid rescanning everything at every step? We can use a
+min-heap (Definition~\ref{def:binary-min-heap}) for each cluster,
+holding the distances from that cluster to all the others. The top of
+each heap is then the closest cluster, and the closest pair overall is
+the smallest of the tops. How much does this cost?
+
+\begin{itemize}
+  \item \textbf{Building the heaps.} We compute the $n^2$ distances
+    and insert each point's $n_i\leq n$ distances into its heap, one
+    insertion at a time:
+    \[
+      n^2+\sum_{i=1}^{n}n_i\log n_i=\Theta(n^2\log n).
+    \]
+  \item \textbf{One merge.} Take for example the step that goes from
+    $n=10$ clusters to $n-1=9$. Two clusters disappear, so we remove
+    their $2(n-2)$ distances to the other clusters; one new cluster
+    appears, so we insert its $n-2$ distances to the other clusters.
+    Each heap holds fewer than $n$ distances, so each operation
+    costs $O(\log n)$, and the step costs
+    \[
+      \leq 3(n-2)\log n=O(n\log n).
+    \]
+\end{itemize}
+
+So for the $n$ levels the cost is
+\[
+  O(n^2\log n).
+\]
+This is better than $O(n^3)$, but it is still a lot: with a million
+points, $n^2$ alone is $10^{12}$.
+
+\section{Partitional clustering}
+
+In hierarchical clustering we obtain clusters at every level, from $n$
+down to $1$. Often, however, we already know how many clusters we
+want. In partitional clustering the input is a set of $n$ points
+\[
+  U=\{\vec x^{(1)},\ldots,\vec x^{(n)}\}
+\]
+and a number $k\in\N^{+}$, and we want to split $U$ into $k$
+clusters, that is, a $k$-partition of $U$.
+
+\begin{frameddefn}{$k$-partition}\label{def:k-partition}
+A \emph{$k$-partition} of $U$ is a family of sets $C_1,\ldots,C_k$
+such that
+\begin{enumerate}
+  \item $C_i\subseteq U$ for every $i$;
+  \item $C_i\cap C_j=\varnothing$ for all $i\neq j$;
+  \item $\bigcup_{i=1}^{k}C_i=U$.
+\end{enumerate}
+\end{frameddefn}
+
+So every point of $U$ lies in exactly one of the sets $C_i$.
+
+\begin{framedexample}{A $4$-partition}
+\begin{center}
+\begin{tikzpicture}[p/.style={circle,fill=black,inner sep=1.2pt}]
+  \draw[thick] (0,1.2) ellipse (0.8cm and 0.65cm);
+  \node at (0.95,1.85) {$C_1$};
+  \foreach \x/\y in {-0.35/1.35,0.2/1.55,0.3/1.0,-0.2/0.9}
+    \node[p] at (\x,\y) {};
+  \draw[thick] (1.7,0.2) ellipse (0.5cm and 0.4cm);
+  \node at (2.45,0.2) {$C_2$};
+  \foreach \x/\y in {1.5/0.2,1.9/0.2} \node[p] at (\x,\y) {};
+  \draw[thick] (2.9,1.5) ellipse (0.35cm and 0.3cm);
+  \node at (3.55,1.65) {$C_3$};
+  \node[p] at (2.9,1.5) {};
+  \draw[thick] (1.0,-1.3) ellipse (1.1cm and 0.7cm);
+  \node at (2.4,-1.3) {$C_4$};
+  \foreach \x/\y in {0.4/-1.1,0.9/-1.0,1.4/-1.1,0.7/-1.5,1.2/-1.6,1.6/-1.4}
+    \node[p] at (\x,\y) {};
+\end{tikzpicture}
+\end{center}
+\end{framedexample}
+
+There are a bunch of ways to choose a good $k$-partition; we will see
+one. The idea is to define an \emph{objective function}, a number that
+measures how good a partition is, and then minimize it.
+
+\begin{framedproblem}{$k$-means}\label{prob:k-means}
+\textbf{Input:} a set $U=\{\vec x^{(1)},\ldots,\vec x^{(n)}\}\subseteq\R^d$
+and a number $k\in\N^{+}$.\\
+\textbf{Output:} a $k$-partition $(C_1,\ldots,C_k)$ of $U$ and a
+\emph{representative} $\vec c_j\in\R^d$ for each $C_j$ such that the
+following objective function, the \emph{cost of the partitioning}, is
+minimized:
+\[
+  \sum_{j=1}^{k}\ \sum_{\vec x^{(i)}\in C_j}
+  \norm{\vec x^{(i)}-\vec c_j}_2^2 .
+\]
+\end{framedproblem}
+
+In words, every point pays the squared distance to the representative
+of its own cluster, and we want the total payment to be as small as
+possible.
+
+\begin{framedexample}{Paying the distance to the representative}
+Each segment joins a point to the representative of its cluster; the
+cost is the sum of the squared lengths of all the segments.
+\begin{center}
+\begin{tikzpicture}[p/.style={circle,fill=black,inner sep=1.2pt},
+  r/.style={circle,fill=PlotRed,inner sep=1.8pt}]
+  \draw[thick] (0,1.2) ellipse (0.8cm and 0.9cm);
+  \node at (-1.0,1.9) {$C_1$};
+  \node[r,label={[PlotRed,font=\small]right:$\vec c_1$}] (c1) at (0,1.2) {};
+  \foreach \x/\y in {-0.4/1.6,0.4/1.75,-0.3/0.6,0.35/0.7}
+    {\node[p] (a) at (\x,\y) {}; \draw (a) -- (c1);}
+  \draw[thick] (2.7,-0.6) ellipse (1.4cm and 0.8cm);
+  \node at (4.4,-0.6) {$C_2$};
+  \node[r,label={[PlotRed,font=\small]above:$\vec c_2$}] (c2) at (3.2,-0.4) {};
+  \foreach \x/\y in {1.6/-0.4,2.3/-0.35,1.8/-0.9,2.6/-1.0,3.3/-0.9}
+    {\node[p] (a) at (\x,\y) {}; \draw (a) -- (c2);}
+  \draw[thick] (3.0,1.6) ellipse (0.55cm and 0.5cm);
+  \node at (3.9,1.9) {$C_3$};
+  \node[r] (c3) at (3.0,1.6) {};
+  \node[PlotRed,font=\small] at (2.9,2.35) {$\vec c_3$};
+  \foreach \x/\y in {2.7/1.8,3.25/1.85,3.1/1.3}
+    {\node[p] (a) at (\x,\y) {}; \draw (a) -- (c3);}
+\end{tikzpicture}
+\end{center}
+\end{framedexample}
+
+\subsection{How hard is it?}
+
+Can we just try all the partitions? If we have $2$ clusters, every
+point goes either to the first or to the second, so the number of
+possible partitions is $2^n$. If we have $k$ clusters, it is $k^n$.
+Trying them all takes exponential time, and in general the problem is
+NP-hard (Definition~\ref{def:np-hard}). Some special cases, however,
+can be solved in polynomial time.
+
+\begin{framedexample}{$k=n$}
+Every point is in its own cluster, and the representative is the point
+itself. Every distance is $0$, so the cost is $0$: this is the
+optimum.
+\end{framedexample}
+
+\begin{framedexample}{$k=1$}\label{ex:k-means-one}
+Now all the points are in a single cluster $C_1=U$, so the partition
+is fixed: only the representative is left to choose. We must find the
+$\vec c$ that minimizes
+\[
+  \sum_{i=1}^{n}\norm{\vec x^{(i)}-\vec c}_2^2 .
+\]
+Take $d=2$, so $\vec x^{(i)}=(x^{(i)}_1,x^{(i)}_2)$ and
+$\vec c=(c_1,c_2)$. The square cancels the square root of the
+Euclidean distance:
+\[
+  \sum_{i=1}^{n}\Bigl(\sqrt{(x^{(i)}_1-c_1)^2+(x^{(i)}_2-c_2)^2}\Bigr)^2
+  =\sum_{i=1}^{n}\Bigl[(x^{(i)}_1-c_1)^2+(x^{(i)}_2-c_2)^2\Bigr]
+  =f(c_1,c_2).
+\]
+\end{framedexample}
+
+How do we compute the minimum of $f$? At the minimum, the partial
+derivatives are zero. Differentiating with respect to $c_1$,
+\[
+  \frac{\partial f}{\partial c_1}
+  =\sum_{i=1}^{n}2\bigl(x^{(i)}_1-c_1\bigr)(-1),
+\]
+so
+\[
+\begin{aligned}
+  \frac{\partial f}{\partial c_1}=0
+  &\iff\sum_{i=1}^{n}\bigl(x^{(i)}_1-c_1\bigr)=0
+  \iff\sum_{i=1}^{n}x^{(i)}_1-\sum_{i=1}^{n}c_1=0\\
+  &\iff\sum_{i=1}^{n}x^{(i)}_1=n\,c_1
+  \iff c_1=\frac1n\sum_{i=1}^{n}x^{(i)}_1 .
+\end{aligned}
+\]
+This is indeed a minimum: as a function of $c_1$, $f$ is a parabola
+opening upwards, since its second derivative is $2n>0$. The same
+computation for $c_2$, and for every other coordinate when $d>2$,
+gives
+\[
+  \vec c=\frac1n\sum_{i=1}^{n}\vec x^{(i)}:
+\]
+the best representative is the mean of the points.
+
+Let us go back to the general case. Whatever the partition, the cost of
+each cluster $C_j$ only depends on the points of $C_j$ and on
+$\vec c_j$, so we can apply Example~\ref{ex:k-means-one} to each
+cluster on its own: the best representative of $C_j$ is its mean. The
+problem then becomes: find a $k$-partition that minimizes
+\[
+  \sum_{j=1}^{k}\ \sum_{\vec x^{(i)}\in C_j}
+  \norm{\vec x^{(i)}-\vec c_j}_2^2,
+  \qquad\text{where}\quad
+  \vec c_j=\frac{1}{\abs{C_j}}\sum_{\vec x\in C_j}\vec x .
+\]
+The only choice left is the partition.
+
+\subsection{Points on a line}
+
+For any $k$ and $d=1$ the problem is easy: it can be solved in
+polynomial time. The points now lie on a line, and a cluster is a run
+of consecutive points. With $k=4$, for example, we must cut the line in
+three places.
+
+\begin{center}
+\begin{tikzpicture}[p/.style={circle,draw,fill=white,inner sep=1.4pt}]
+  \draw (-0.3,0) -- (10.3,0);
+  \foreach \x in {0,0.6,1.1,2.6,3.1,3.7,5.3,5.8,6.4,8.2,8.8,9.5,10}
+    \node[p] at (\x,0) {};
+  \foreach \x in {1.85,4.5,7.3}
+    \draw[PlotRed,thick] (\x,-0.35) -- (\x,0.35);
+\end{tikzpicture}
+\end{center}
+
+A first idea is to cut at the $k-1$ largest distances between
+consecutive points. This is wrong! Take $k=2$ and the points
+\[
+  0,\ 1,\ 2,\ 3,\ 4,\ 8,\ 13 .
+\]
+The largest gap is the one between $8$ and $13$, of length $5$.
+Cutting there gives the clusters $\{0,1,2,3,4,8\}$, with mean $3$, and
+$\{13\}$, with cost
+\[
+  (3^2+2^2+1^2+0^2+1^2+5^2)+0=40.
+\]
+Cutting instead at the gap between $4$ and $8$, of length $4$, gives
+$\{0,1,2,3,4\}$, with mean $2$, and $\{8,13\}$, with mean $10.5$, with
+cost
+\[
+  (2^2+1^2+0^2+1^2+2^2)+(2.5^2+2.5^2)=10+12.5=22.5<40.
+\]
+The largest gap is not the right place to cut: the point $8$ is far
+from the other points of its cluster and costs a lot.
+
+For any other case, the problem is NP-complete
+(Definition~\ref{def:np-complete}). What do we do when we have an
+NP-complete problem? We look for an approximation algorithm
+(Definition~\ref{def:approximation}).
 
 \endgroup
 
