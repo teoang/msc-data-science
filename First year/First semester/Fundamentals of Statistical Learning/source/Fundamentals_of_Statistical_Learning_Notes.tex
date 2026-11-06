@@ -2040,12 +2040,13 @@ logarithm of a ratio is the difference of the logarithms, so
 F(q,\theta)
 =\mathbb{E}_q\big[\log p_\theta(\text{obs},\text{hid})\big]
 -\mathbb{E}_q\big[\log q(\text{hid})\big]
-=\underbrace{\mathbb{E}_q\big[\log p_\theta(\text{obs},\text{hid})\big]}_{\text{complete log-likelihood}}
+=\underbrace{\mathbb{E}_q\big[\log p_\theta(\text{obs},\text{hid})\big]}_{\text{expected complete log-likelihood}}
 +\underbrace{H(q)}_{\text{entropy of }q},
 \]
 where $H(q)=-\mathbb{E}_q\big[\log q(\text{hid})\big]$ is called the
-\textbf{entropy} of $q$. The first term is the log-likelihood we would have
-if we also observed the hidden variable, averaged over $q$. The entropy
+\textbf{entropy} of $q$. In the first term, $\log p_\theta(\text{obs},\text{hid})$ is the
+\textbf{complete log-likelihood}, the one we would have if we also observed
+the hidden variable, and we average it over $q$. The entropy
 depends only on $q$, and in the M-step $q=q^{(t)}$ is fixed, so
 \[
 \theta^{(t)}=\arg\max_{\theta}F\big(q^{(t)},\theta\big)
