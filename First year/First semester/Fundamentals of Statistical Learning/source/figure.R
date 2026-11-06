@@ -450,3 +450,27 @@ legend("topleft", bty = "n", cex = .8, lwd = c(2.2, 2.2, 1.6),
                              q == p[theta[old]](hid ~ "|" ~ obs)),
                   expression(F(q, theta) ~ "with the" ~ q ~ "of Example 18")))
 dev.off()
+
+# Coordinate ascent on F(q, theta): a step in q, then a step in theta, and so on.
+pdf("assets/em-coordinate-ascent.pdf", width = 4.2, height = 3,
+    family = "Helvetica", useDingbats = FALSE)
+par(mar = c(2.2, 2.2, .6, .6), mgp = c(1, .45, 0), las = 1, cex = .78)
+a <- 1; b <- 1; cc <- .8; x0 <- 6; y0 <- 6
+Fxy <- function(x, y) -(a * (x - x0)^2 + b * (y - y0)^2 + 2 * cc * (x - x0) * (y - y0))
+gx <- seq(0, 10, length.out = 200); gy <- seq(0, 10, length.out = 200)
+z <- outer(gx, gy, Fxy)
+contour(gx, gy, z, levels = -c(1, 4, 9, 16, 25, 36, 49), drawlabels = FALSE,
+        col = "grey70", xaxt = "n", yaxt = "n", xlab = "", ylab = "", xaxs = "i",
+        yaxs = "i")
+title(xlab = "q (a distribution)", ylab = expression(theta ~ "(a parameter)"),
+      line = .6)
+px <- 1.2; py <- 9; path_x <- px; path_y <- py
+for (k in 1:6) {
+  px <- x0 - cc * (py - y0) / a; path_x <- c(path_x, px); path_y <- c(path_y, py)
+  py <- y0 - cc * (px - x0) / b; path_x <- c(path_x, px); path_y <- c(path_y, py)
+}
+lines(path_x, path_y, col = orange, lwd = 1.8)
+points(path_x[1], path_y[1], pch = 19, col = ink, cex = .9)
+points(x0, y0, pch = 4, col = ink, cex = 1.1, lwd = 1.6)
+text(path_x[1], path_y[1], "start", pos = 4, cex = .85, col = ink)
+dev.off()

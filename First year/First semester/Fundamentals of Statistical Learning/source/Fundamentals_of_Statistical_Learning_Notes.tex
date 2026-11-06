@@ -1942,4 +1942,71 @@ $q=p_{\theta_{\text{old}}}(\text{hid}\mid\text{obs})$.
 
 How can we use this to climb $\log p_\theta(\text{obs})$?
 
+\subsection{The EM algorithm}\label{sec:em}
+
+The ELBO $F(q,\theta)$ depends on two things we can move: the distribution
+$q$ and the parameter $\theta$. The typical way to use it is the
+\textbf{EM algorithm}, one example of the wider family of MM algorithms.
+The idea is \textbf{coordinate ascent} over $F(q,\theta)$: we move one
+coordinate at a time, keeping the other fixed. First we optimise over $q$
+with $\theta$ fixed, then over $\theta$ with $q$ fixed, and we repeat.
+
+\begin{center}
+\includegraphics[width=.6\linewidth]{assets/em-coordinate-ascent.pdf}
+\end{center}
+
+In the plot each grey curve joins the points with the same value of $F$, and
+the cross marks its maximum. A horizontal step changes only $q$, a vertical
+step changes only $\theta$, and each step climbs as high as it can.
+
+\begin{framedalgo}{EM algorithm}\label{alg:em}
+Start from a parameter $\theta^{(0)}$. For $t=1,2,\ldots$ repeat:
+\begin{enumerate}
+\item \textbf{E-step.} Optimise over all distributions $q$, with $\theta$
+fixed:
+\[
+q^{(t)}=\arg\max_{q}F\big(q,\theta^{(t-1)}\big).
+\]
+\item \textbf{M-step.} Optimise over all parameters $\theta$, with $q$
+fixed:
+\[
+\theta^{(t)}=\arg\max_{\theta}F\big(q^{(t)},\theta\big).
+\]
+\end{enumerate}
+\end{framedalgo}
+
+Which $q$ does the E-step choose? Recall from
+Section~\ref{sec:information-gap} that
+\[
+F(q,\theta)=\log p_\theta(\text{obs})-\mathrm{KL}\big(q(\text{hid})\mid
+p_\theta(\text{hid}\mid\text{obs})\big).
+\]
+
+With $\theta=\theta^{(t-1)}$ fixed,
+the first term does not depend on $q$, so $F$ is largest when the
+\hyperref[def:kl]{KL} is $0$, that is, when
+\[
+q^{(t)}(\text{hid})=p_{\theta^{(t-1)}}(\text{hid}\mid\text{obs}),
+\]
+if we can compute it.
+
+Does EM really climb $\log p_\theta(\text{obs})$, the target we want to
+maximise? Let us follow one round. At the beginning we are at
+$\log p_{\theta^{(t-1)}}(\text{obs})$. Then:
+\[
+\log p_{\theta^{(t-1)}}(\text{obs})
+\underbrace{=}_{\text{E-step}}F\big(q^{(t)},\theta^{(t-1)}\big)
+\underbrace{\le}_{\text{M-step}}F\big(q^{(t)},\theta^{(t)}\big)
+\underbrace{\le}_{\text{Jensen}}\log p_{\theta^{(t)}}(\text{obs}).
+\]
+\begin{itemize}
+\item The E-step closes the gap, so $F$ equals the log-likelihood at
+$\theta^{(t-1)}$: the two curves touch, as in the last plot.
+\item The M-step chooses the $\theta$ with the largest $F$, so $F$ can only
+go up.
+\item By Jensen's inequality $F$ never rises above the log-likelihood.
+\end{itemize}
+So every round of EM increases, or at least does not decrease, the original
+objective $\log p_\theta(\text{obs})$.
+
 \end{document}
