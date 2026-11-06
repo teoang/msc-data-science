@@ -2019,6 +2019,18 @@ go up.
 So every round of EM increases, or at least does not decrease, the original
 objective $\log p_\theta(\text{obs})$.
 
+What does this look like round after round? In the sketch below we start
+from $\theta^{(0)}$ and run two rounds of EM. In each E-step a new orange
+curve touches the blue one at the current $\theta$; in each M-step we move to
+the top of the orange curve, and the blue curve is higher there.
+
+\begin{center}
+\includegraphics[width=\linewidth]{assets/em-steps.pdf}
+\end{center}
+
+The second step is shorter than the first: as EM approaches a maximum of
+$\log p_\theta(\text{obs})$, each round gains less.
+
 \paragraph{Remarks.} Both steps of Algorithm~\ref{alg:em} ask for a
 maximum. Do we always get it, and do we really need it?
 \begin{enumerate}

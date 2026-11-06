@@ -474,3 +474,41 @@ points(path_x[1], path_y[1], pch = 19, col = ink, cex = .9)
 points(x0, y0, pch = 4, col = ink, cex = 1.1, lwd = 1.6)
 text(path_x[1], path_y[1], "start", pos = 4, cex = .85, col = ink)
 dev.off()
+
+# EM step by step: each E-step builds a lower bound that touches log p at the
+# current theta, each M-step moves to the top of that bound.
+em_bound <- function(t, at) elbo_lp(t) - .06 * (t - at)^2
+em_argmax <- function(at) optimize(function(t) em_bound(t, at), c(0, 10),
+                                   maximum = TRUE)$maximum
+th <- c(.6); for (k in 1:2) th <- c(th, em_argmax(th[k]))
+pdf("assets/em-steps.pdf", width = 7, height = 4.6, family = "Helvetica",
+    useDingbats = FALSE)
+par(mfrow = c(2, 2), mar = c(2, 1, 1.6, .6), mgp = c(1.6, .4, 0), las = 1,
+    cex = .72)
+tt <- seq(0, 10, length.out = 600)
+em_panel <- function(title, at, show_move, labels) {
+  plot(tt, elbo_lp(tt), type = "n", xlab = "", ylab = "", xaxt = "n",
+       yaxt = "n", ylim = c(1.8, 4.8), yaxs = "i", main = title,
+       cex.main = 1, font.main = 1)
+  grid(col = grid_col)
+  lines(tt, elbo_lp(tt), col = blue, lwd = 2)
+  lines(tt, em_bound(tt, at), col = orange, lwd = 2, lty = 2)
+  ticks <- at; labs <- labels[1]
+  points(at, elbo_lp(at), pch = 21, col = ink, bg = orange, cex = 1.1)
+  if (show_move) {
+    nw <- em_argmax(at)
+    segments(nw, em_bound(nw, at), nw, elbo_lp(nw), col = ink, lty = 3)
+    points(nw, em_bound(nw, at), pch = 19, col = orange, cex = 1)
+    points(nw, elbo_lp(nw), pch = 19, col = blue, cex = 1.1)
+    arrows(at, 2.05, nw, 2.05, length = .07, col = ink)
+    ticks <- c(at, nw); labs <- labels
+    if (abs(nw - at) < 1) { ticks <- nw; labs <- labels[2] }
+  }
+  axis(1, at = ticks, labels = labs)
+}
+em_panel("E-step, t = 1", th[1], FALSE, expression(theta^(0)))
+em_panel("M-step, t = 1", th[1], TRUE, expression(theta^(0), theta^(1)))
+em_panel("E-step, t = 2", th[2], FALSE, expression(theta^(1)))
+em_panel("M-step, t = 2", th[2], TRUE, expression(theta^(1), theta^(2)))
+dev.off()
+cat("EM thetas", th, "lp", elbo_lp(th), "\n")
