@@ -1811,7 +1811,7 @@ moved inside the expected value, so we take the logarithm of each term
 instead of the logarithm of their sum.
 
 For a \hyperref[def:gmm]{GMM} the
-terms are $\log\big(\pi_j\,\mathcal{N}(o\mid\mu_j,\sigma_j^2)\big)$, which
+terms are $\log\big(\pi_j\,N(o\mid\mu_j,\sigma_j^2)\big)$, which
 split into simple pieces, as in the case with labels of
 Proposition~\ref{prop:mle-gmm-labels}.
 
@@ -1979,7 +1979,7 @@ fixed:
 \end{enumerate}
 \end{framedalgo}
 
-\esteptag\par\smallskip
+\Needspace{5\baselineskip}\esteptag\par\smallskip
 Which $q$ does the E-step choose? Recall from
 Section~\ref{sec:information-gap} that
 \[
@@ -1995,7 +1995,7 @@ q^{(t)}(\text{hid})=p_{\theta^{(t-1)}}(\text{hid}\mid\text{obs}),
 \]
 if we can compute it.
 
-\msteptag\par\smallskip
+\Needspace{5\baselineskip}\msteptag\par\smallskip
 The M-step, instead, depends on the model: for a
 \hyperref[def:gmm]{GMM} we will see it in the next lecture.
 
@@ -2066,5 +2066,79 @@ depends only on $q$, and in the M-step $q=q^{(t)}$ is fixed, so
 \]
 The M-step maximises the expected complete log-likelihood: it works as if we
 knew the hidden variable, weighting each of its values by $q^{(t)}$.
+
+\lecturestart{5 November}
+
+\subsection{EM for a Gaussian mixture}\label{sec:em-gmm}
+
+So far we have presented the EM algorithm without going into the details,
+in particular of the M-step.
+
+Let us now run it on a concrete model: the
+\hyperref[def:gmm]{GMM} without labels, the one of problem~\spadeproblem.
+We have the data $o_1,\ldots,o_n$, a number of groups $K$ that we keep fixed,
+and the likelihood
+\[
+L(\theta)=\prod_{i=1}^n\ \underbrace{\sum_{j=1}^K\pi_j\,
+N(o_i\mid\mu_j,\sigma_j^2)}_{p_\theta(o_i)},
+\qquad\theta=\{\pi_j,\mu_j,\sigma_j^2\}_{j=1}^K.
+\]
+What do the E-step and the M-step of Algorithm~\ref{alg:em} become here?
+
+\Needspace{5\baselineskip}\esteptag\par\smallskip
+As we saw in the \hyperref[sec:em]{EM algorithm}, the optimal choice is
+$q(\text{hid})=p_\theta(\text{hid}\mid\text{obs})$, if we can compute it.
+Let us see if we can. Each observation $o_i$ has its own hidden variable
+$\text{hid}_i$, the group it comes from, and by Bayes' theorem its posterior
+is
+\[
+p_\theta(\text{hid}_i=j\mid o_i)
+=\frac{p_\theta(o_i\mid\text{hid}_i=j)\,p_\theta(\text{hid}_i=j)}{p_\theta(o_i)}
+=\frac{\pi_j\,N(o_i\mid\mu_j,\sigma_j^2)}
+{\sum_{k=1}^K\pi_k\,N(o_i\mid\mu_k,\sigma_k^2)}.
+\]
+Once $\theta$ is fixed every piece is
+a number we can compute, and the denominator is a sum of only $K$ terms, so
+for a GMM we can.
+
+Notice that, since the denominator does not depend on $j$,
+\[
+p_\theta(\text{hid}_i=j\mid o_i)\propto p_\theta(o_i\mid\text{hid}_i=j)\,
+p_\theta(\text{hid}_i=j).
+\]
+
+\begin{frameddefn}{Responsibilities}\label{def:responsibility}
+The \textbf{responsibility} of group $j$ for the observation $o_i$ is the
+posterior probability of its hidden variable,
+\[
+r_j^{(i)}=p_\theta(\text{hid}_i=j\mid o_i),
+\qquad i=1,\ldots,n,\quad j=1,\ldots,K.
+\]
+\end{frameddefn}
+
+\begin{framedexamplepart}{ex:men-women}{6}{Heights of men and women}
+Let us take the heights of Example~\ref{ex:men-women} part~5 again. With the
+labels we found $\hat\theta_{\text{women}}\approx(160.5,\,7.1^2)$,
+$\hat\theta_{\text{men}}\approx(176.3,\,7.4^2)$ and weights
+$\hat\pi_1=\hat\pi_2=0.5$. Suppose these are the current parameters of EM.
+What responsibilities do the heights $147$, $167$ and $184$ get?
+
+Using Bayes' theorem as above:
+\begin{center}
+\begin{tabular}{ccc}
+\toprule
+height $o_i$ & $r_{\text{women}}^{(i)}$ & $r_{\text{men}}^{(i)}$\\
+\midrule
+$147$ & $0.998$ & $0.002$\\
+$167$ & $0.60$ & $0.40$\\
+$184$ & $0.007$ & $0.993$\\
+\bottomrule
+\end{tabular}
+\end{center}
+A very short or very tall person is almost surely in one group. A height of
+$167$~cm, between the two centres, is shared: $60\%$ women and $40\%$ men. Every
+observation gets a weight for every group, instead of a single label.
+\end{framedexamplepart}
+
 
 \end{document}
