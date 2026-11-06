@@ -2143,23 +2143,48 @@ observation gets a weight for every group, instead of a single label.
 \Needspace{5\baselineskip}\msteptag\par\smallskip
 Once we have the responsibilities, the M-step looks for the new parameters
 $\theta$. Recall that it maximises the
-\hyperref[def:complete-loglik]{expected complete log-likelihood}; let us call
-it $E(\theta)$:
+\hyperref[def:complete-loglik]{expected complete log-likelihood}:
 \[
-E(\theta)=\mathbb{E}_q\big[\log p_\theta(\text{obs},\text{hid})\big].
+\theta^{(t)}=\arg\max_{\theta}\,\mathbb{E}_{q^{(t)}}\big[\log p_\theta(\text{obs},\text{hid})\big].
 \]
+Let us call the function to maximise
+$E(\theta)=\mathbb{E}_{q^{(t)}}\big[\log p_\theta(\text{obs},\text{hid})\big]$.
 For a GMM it is the double sum
 \[
 E(\theta)=\sum_{i=1}^n\sum_{j=1}^K r_j^{(i)}\,
 \log\big(\pi_j\,N(o_i\mid\mu_j,\sigma_j^2)\big).
 \]
-Writing the logarithm of the Normal density explicitly,
+The logarithm of a product is the sum of the logarithms, so
+\[
+E(\theta)=\sum_{i=1}^n\sum_{j=1}^K r_j^{(i)}\,
+\Big[\log\pi_j+\log N(o_i\mid\mu_j,\sigma_j^2)\Big].
+\]
+Now we write the Normal density explicitly:
+\[
+E(\theta)=\sum_{i=1}^n\sum_{j=1}^K r_j^{(i)}\,
+\Big[\log\pi_j+\log\Big(\frac{1}{\sqrt{2\pi}\,\sigma_j}\,
+\exp\Big(-\frac{(o_i-\mu_j)^2}{2\sigma_j^2}\Big)\Big)\Big].
+\]
+The second logarithm is again the logarithm of a product, so it is the sum
+of the logarithms of its three factors:
+\[
+E(\theta)=\sum_{i=1}^n\sum_{j=1}^K r_j^{(i)}\,
+\Big[\log\pi_j+\log\frac{1}{\sqrt{2\pi}}+\log\frac{1}{\sigma_j}
++\log\exp\Big(-\frac{(o_i-\mu_j)^2}{2\sigma_j^2}\Big)\Big].
+\]
+Since $\log\frac1a=-\log a$, $\log\sqrt{a}=\tfrac12\log a$ and the logarithm
+cancels the exponential,
+\[
+E(\theta)=\sum_{i=1}^n\sum_{j=1}^K r_j^{(i)}\,
+\Big[\log\pi_j-\tfrac12\log(2\pi)-\log\sigma_j
+-\frac{(o_i-\mu_j)^2}{2\sigma_j^2}\Big].
+\]
+The term $-\tfrac12\log(2\pi)$ does not depend on $\theta$, so it does not
+change where the maximum is, and we can drop it:
 \[
 E(\theta)=\sum_{i=1}^n\sum_{j=1}^K r_j^{(i)}\Big[\log\pi_j-\log\sigma_j
--\frac{(o_i-\mu_j)^2}{2\sigma_j^2}\Big]+\text{const},
+-\frac{(o_i-\mu_j)^2}{2\sigma_j^2}\Big]+\text{const}.
 \]
-where the constant collects the terms $-\tfrac12\log(2\pi)$, which do not
-depend on $\theta$.
 
 At the start we could not maximise the likelihood with a closed form,
 because of the logarithm of a sum in problem~\spadeproblem. Now the
