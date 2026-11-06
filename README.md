@@ -278,7 +278,7 @@
 
 ## About
 
-These are my English notes for the MSc in Data Science at Sapienza, written to work through each course in my own words. They are a work in progress and may contain mistakes, so use them alongside the lectures and textbooks. 🐛 Found an error? [Open an issue](https://github.com/teoang/msc-data-science/issues).
+These are my English notes for the MSc in Data Science at Sapienza. They are a work in progress and may contain mistakes, so use them alongside the lectures and textbooks. 🐛 Found an error? [Open an issue](https://github.com/teoang/msc-data-science/issues).
 
 The LaTeX sources are included, but the shared style package is not: to compile them, supply your own.
 
