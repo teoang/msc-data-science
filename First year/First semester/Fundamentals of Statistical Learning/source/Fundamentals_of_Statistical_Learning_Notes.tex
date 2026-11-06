@@ -2057,7 +2057,7 @@ F(q,\theta)
 \]
 where $H(q)=-\mathbb{E}_q\big[\log q(\text{hid})\big]$ is called the
 \textbf{entropy} of $q$. In the first term, $\log p_\theta(\text{obs},\text{hid})$ is the
-\textbf{complete log-likelihood}, the one we would have if we also observed
+\phantomsection\label{def:complete-loglik}\textbf{complete log-likelihood}, the one we would have if we also observed
 the hidden variable, and we average it over $q$. The entropy
 depends only on $q$, and in the M-step $q=q^{(t)}$ is fixed, so
 \[
@@ -2140,5 +2140,77 @@ $167$~cm, between the two centres, is shared: $60\%$ women and $40\%$ men. Every
 observation gets a weight for every group, instead of a single label.
 \end{framedexamplepart}
 
+\Needspace{5\baselineskip}\msteptag\par\smallskip
+Once we have the responsibilities, the M-step looks for the new parameters
+$\theta$. Recall that it maximises the
+\hyperref[def:complete-loglik]{expected complete log-likelihood}; let us call
+it $E(\theta)$:
+\[
+E(\theta)=\mathbb{E}_q\big[\log p_\theta(\text{obs},\text{hid})\big].
+\]
+For a GMM it is the double sum
+\[
+E(\theta)=\sum_{i=1}^n\sum_{j=1}^K r_j^{(i)}\,
+\log\big(\pi_j\,N(o_i\mid\mu_j,\sigma_j^2)\big).
+\]
+Writing the logarithm of the Normal density explicitly,
+\[
+E(\theta)=\sum_{i=1}^n\sum_{j=1}^K r_j^{(i)}\Big[\log\pi_j-\log\sigma_j
+-\frac{(o_i-\mu_j)^2}{2\sigma_j^2}\Big]+\text{const},
+\]
+where the constant collects the terms $-\tfrac12\log(2\pi)$, which do not
+depend on $\theta$.
+
+At the start we could not maximise the likelihood with a closed form,
+because of the logarithm of a sum in problem~\spadeproblem. Now the
+logarithm is inside the sums, and each term is as simple as in the case
+with labels. So now we can.
+
+\paragraph{The means.} Only the terms of group $j$ contain $\mu_j$. Setting
+the derivative to zero,
+\[
+\frac{\partial E}{\partial\mu_j}=\sum_{i=1}^n r_j^{(i)}\,
+\frac{o_i-\mu_j}{\sigma_j^2}=0
+\quad\Longleftrightarrow\quad
+\hat\mu_j=\frac{\sum_{i=1}^n r_j^{(i)}\,o_i}{\sum_{i=1}^n r_j^{(i)}}.
+\]
+The new mean of group $j$ is a weighted average of the observations: each
+one counts as much as its responsibility for group $j$.
+
+\paragraph{The variances.} In the same way, setting to zero the derivative
+with respect to $\sigma_j$,
+\[
+\frac{\partial E}{\partial\sigma_j}=\sum_{i=1}^n r_j^{(i)}
+\Big[-\frac{1}{\sigma_j}+\frac{(o_i-\mu_j)^2}{\sigma_j^3}\Big]=0
+\quad\Longleftrightarrow\quad
+\hat\sigma_j^2=\frac{\sum_{i=1}^n r_j^{(i)}\,(o_i-\hat\mu_j)^2}
+{\sum_{i=1}^n r_j^{(i)}}.
+\]
+The new variance is a weighted average of the squared distances from the new
+mean.
+
+Compare these with \hyperref[prop:mle-gmm-labels]{maximum likelihood for a
+GMM with labels}. If each responsibility were $1$ for the true group and $0$
+for the others, $\sum_i r_j^{(i)}$ would be $n_j$, and $\hat\mu_j$ and
+$\hat\sigma_j^2$ would be the mean and the variance of the observations of
+group $j$ only. The M-step is maximum likelihood with labels, where the
+labels $0$ or $1$ are replaced by the responsibilities.
+
+\begin{framedexamplepart}{ex:men-women}{7}{Heights of men and women}
+Let us take the three heights of Example~\ref{ex:men-women} part~6 again:
+$147$, $167$ and $184$, with responsibilities $0.998$, $0.60$ and $0.007$
+for women and $0.002$, $0.40$ and $0.993$ for men. If these three were all
+our data, where would the M-step move the two centres?
+
+For women,
+\[
+\hat\mu_{\text{women}}
+=\frac{0.998\cdot147+0.60\cdot167+0.007\cdot184}{0.998+0.60+0.007}
+\approx\frac{248.2}{1.605}\approx154.6,
+\]
+and in the same way $\hat\mu_{\text{men}}\approx179.1$. The height $147$ pulls
+the women's centre almost with its full weight, $167$ pulls it with weight
+$0.60$, and $184$ hardly at all.
+\end{framedexamplepart}
 
 \end{document}
