@@ -6,14 +6,33 @@
 \setcounter{secnumdepth}{3}
 \setcounter{tocdepth}{3}
 
-% Yellow lecture banners, as in the ADM notes.
+% Yellow lecture banner with the same space above and below it. A heading
+% or a box right after the banner adds its own space, so that much is taken back.
+\newlength{\lecturebannerskip}
+\setlength{\lecturebannerskip}{7mm}
+\makeatletter
 \newcommand{\lecturebanner}[1]{%
+  \par\removelastskip
   \Needspace{6\baselineskip}%
+  \vspace{\lecturebannerskip}%
   \begin{tcolorbox}[colback=yellow!20,colframe=yellow!60!black,
     boxrule=0.4pt,arc=1mm,left=5pt,right=5pt,top=3pt,bottom=3pt,
-    before skip=6pt,after skip=6pt]
+    before skip=0pt,after skip=0pt]
   \small\textbf{#1}
-  \end{tcolorbox}}
+  \end{tcolorbox}%
+  \par\lb@after}
+\newcommand{\lb@after}{\@ifnextchar\par{\lb@gobblepar}{\lb@decide}}
+\def\lb@gobblepar\par{\lb@after}
+\newcommand{\lb@decide}{%
+  \@ifnextchar\section{\vspace{\dimexpr\lecturebannerskip-3.5ex\relax}}{%
+  \@ifnextchar\subsection{\vspace{\dimexpr\lecturebannerskip-2.75ex\relax}}{%
+  \@ifnextchar\subsubsection{\vspace{\dimexpr\lecturebannerskip-2.25ex\relax}}{%
+  \@ifnextchar\begin{\lb@beforebox}{%
+  \vspace{\lecturebannerskip}}}}}}
+% A framed box adds its own 7mm (kept by \addvspace) and a \parskip.
+\newcommand{\lb@beforebox}{%
+  \vspace{\dimexpr\lecturebannerskip-\parskip-7mm\relax}\vspace{7mm}}
+\makeatother
 % Each lecture start is a link target and an entry of the lecture list on
 % the first page (\lecturelist), so new lectures appear there automatically.
 \makeatletter
@@ -1797,7 +1816,8 @@ $F(q,\theta)\le\log p_\theta(\text{obs})$ for every $q$ and every $\theta$.
 \end{frameddefn}
 
 The ELBO is our \textbf{surrogate target}: instead of maximising
-$\log p_\theta(\text{obs})$, which is hard, we maximise $F(q,\theta)$, which is
+$\log p_\theta(\text{obs})$, which is hard, as problem~\spadeproblem{} shows for a
+\hyperref[def:gmm]{GMM}, we maximise $F(q,\theta)$, which is
 easier. In the plot below the curve $F(q,\theta)$ never rises above
 $\log p_\theta(\text{obs})$, so by pushing $F$ up we push up a lower bound of the
 curve we care about.
@@ -1808,5 +1828,79 @@ curve we care about.
 
 But does raising $F$ really raise $\log p_\theta(\text{obs})$ as well? That depends
 on how wide the gap between the two curves is.
+
+\lecturesecond{4 November}
+
+\subsection{The information gap}\label{sec:information-gap}
+
+How wide is the gap between the two curves? Let us give it a name and
+compute it.
+
+\begin{frameddefn}{Information gap}\label{def:information-gap}
+The \textbf{information gap} is the difference between the log-likelihood and
+the \hyperref[def:elbo]{ELBO},
+\[
+\log p_\theta(\text{obs})-F(q,\theta).
+\]
+\end{frameddefn}
+
+By Jensen's inequality it is never negative. To see what it is, we write
+$F$ as an integral and split the joint density with the multiplication
+rule, $p_\theta(\text{obs},\text{hid})=p_\theta(\text{hid}\mid\text{obs})\,
+p_\theta(\text{obs})$:
+\begin{align*}
+\log p_\theta(\text{obs})-F(q,\theta)
+&=\log p_\theta(\text{obs})-\int q(\text{hid})\,
+\log\frac{p_\theta(\text{obs},\text{hid})}{q(\text{hid})}\,\mathrm{d}\,\text{hid}\\
+&=\log p_\theta(\text{obs})-\int q(\text{hid})\,
+\log\frac{p_\theta(\text{hid}\mid\text{obs})\,p_\theta(\text{obs})}{q(\text{hid})}\,
+\mathrm{d}\,\text{hid}.
+\end{align*}
+The logarithm of a product is the sum of the logarithms, so the integral
+splits in two:
+\[
+=\log p_\theta(\text{obs})-\left[\int q(\text{hid})\,
+\log\frac{p_\theta(\text{hid}\mid\text{obs})}{q(\text{hid})}\,\mathrm{d}\,\text{hid}
++\int q(\text{hid})\,\log p_\theta(\text{obs})\,\mathrm{d}\,\text{hid}\right].
+\]
+In the second integral $\log p_\theta(\text{obs})$ does not depend on
+$\text{hid}$, so it comes out, and what is left integrates to $1$ because
+$q$ is a distribution:
+\[
+\int q(\text{hid})\,\log p_\theta(\text{obs})\,\mathrm{d}\,\text{hid}
+=\log p_\theta(\text{obs})\underbrace{\int q(\text{hid})\,\mathrm{d}\,\text{hid}}_{1}
+=\log p_\theta(\text{obs}).
+\]
+The two copies of $\log p_\theta(\text{obs})$ cancel, and turning the
+fraction upside down changes the sign of the logarithm:
+\[
+\log p_\theta(\text{obs})-F(q,\theta)
+=\int q(\text{hid})\,\log\frac{q(\text{hid})}{p_\theta(\text{hid}\mid\text{obs})}\,
+\mathrm{d}\,\text{hid}.
+\]
+This integral is a very specific way of measuring how far $q$ is from the
+distribution of the hidden variable given what we observe.
+
+\begin{frameddefn}{Kullback--Leibler divergence}\label{def:kl}
+The \textbf{Kullback--Leibler divergence} (KL) of $q$ from $p$ is
+\[
+\mathrm{KL}(q\mid p)=\int q(x)\,\log\frac{q(x)}{p(x)}\,\mathrm{d}x.
+\]
+It is not a distance, and $\mathrm{KL}(q\mid p)=0$ if and only if $q=p$.
+\end{frameddefn}
+
+So the information gap is
+\[
+\log p_\theta(\text{obs})-F(q,\theta)
+=\mathrm{KL}\big(q(\text{hid})\mid p_\theta(\text{hid}\mid\text{obs})\big),
+\]
+and it is zero exactly when
+\[
+q(\text{hid})=p_\theta(\text{hid}\mid\text{obs}).
+\]
+This answers our question: if we choose $q$ as the distribution of the
+hidden variable given what we observe, the two curves touch, and
+$F(q,\theta)=\log p_\theta(\text{obs})$ at that $\theta$. How can we use
+this to climb $\log p_\theta(\text{obs})$?
 
 \end{document}

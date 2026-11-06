@@ -47,14 +47,33 @@
 \newcommand{\pqpeekop}[1]{\cul{ListGet}{\operatorname{peek#1}()}}
 \newcommand{\pqextractop}[1]{\cul{ListRemove}{\operatorname{extract#1}()}}
 
-% Yellow lecture banner, as in the FSL notes before the chapter reorganization.
+% Yellow lecture banner with the same space above and below it. A heading
+% or a box right after the banner adds its own space, so that much is taken back.
+\newlength{\lecturebannerskip}
+\setlength{\lecturebannerskip}{7mm}
+\makeatletter
 \newcommand{\lecturebanner}[1]{%
+  \par\removelastskip
   \Needspace{6\baselineskip}%
+  \vspace{\lecturebannerskip}%
   \begin{tcolorbox}[colback=yellow!20,colframe=yellow!60!black,
     boxrule=0.4pt,arc=1mm,left=5pt,right=5pt,top=3pt,bottom=3pt,
-    before skip=6pt,after skip=6pt]
+    before skip=0pt,after skip=0pt]
   \small\textbf{#1}
-  \end{tcolorbox}}
+  \end{tcolorbox}%
+  \par\lb@after}
+\newcommand{\lb@after}{\@ifnextchar\par{\lb@gobblepar}{\lb@decide}}
+\def\lb@gobblepar\par{\lb@after}
+\newcommand{\lb@decide}{%
+  \@ifnextchar\section{\vspace{\dimexpr\lecturebannerskip-3.5ex\relax}}{%
+  \@ifnextchar\subsection{\vspace{\dimexpr\lecturebannerskip-2.75ex\relax}}{%
+  \@ifnextchar\subsubsection{\vspace{\dimexpr\lecturebannerskip-2.25ex\relax}}{%
+  \@ifnextchar\begin{\lb@beforebox}{%
+  \vspace{\lecturebannerskip}}}}}}
+% A framed box adds its own 7mm (kept by \addvspace) and a \parskip.
+\newcommand{\lb@beforebox}{%
+  \vspace{\dimexpr\lecturebannerskip-\parskip-7mm\relax}\vspace{7mm}}
+\makeatother
 % Each banner is a link target and an entry of the lecture list on the
 % first page (\lecturelist), so new lectures appear there automatically.
 \makeatletter
@@ -4335,13 +4354,13 @@ We do not prove the expected bound here.
 
 \chapter{Data structures}\label{ch:data-structures}
 
-\lecturestart{29 October}
-
 % Keep each new definition and worked drawing together on one page.
 \begingroup
 \tcbset{definitionbox/.append style={unbreakable},
   examplebox/.append style={unbreakable},
   algorithmbox/.append style={unbreakable}}
+
+\lecturestart{29 October}
 
 \section{Returning to the top-k problem}
 
@@ -5684,8 +5703,6 @@ that list, so the time stays constant when the lists are short.
 
 \chapter{Clustering}\label{ch:clustering}
 
-\lecturestart{5 November}
-
 % Keep each new definition and worked drawing together on one page.
 \begingroup
 \tcbset{definitionbox/.append style={unbreakable},
@@ -5712,6 +5729,8 @@ that list, so the time stays constant when the lists are short.
     line cap=round] #2;
   \hull{#1}{#2}}
 \tikzset{clpt/.style={circle,fill=#1,draw=black,inner sep=1.8pt}}
+
+\lecturestart{5 November}
 
 \section{Grouping similar things}
 
