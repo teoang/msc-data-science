@@ -164,6 +164,12 @@
 - [x] Jensen's inequality and the ELBO: a lower bound for the log-likelihood of a model with hidden variables.
 - [x] The information gap and the KL divergence; the EM algorithm as coordinate ascent, with its remarks and the M-step as expected complete log-likelihood.
 
+**5 November**
+
+- [x] EM for a Gaussian mixture: the E-step with Bayes' theorem and the responsibilities.
+- [x] The M-step: the expected complete log-likelihood of a GMM, centres and spreads as weighted averages, and the weights.
+- [ ] Constrained optimisation and Lagrange multipliers for the weights.
+
 </details>
 
 <details>

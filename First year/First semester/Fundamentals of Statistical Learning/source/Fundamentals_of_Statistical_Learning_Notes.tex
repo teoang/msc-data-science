@@ -2191,7 +2191,7 @@ because of the logarithm of a sum in problem~\spadeproblem. Now the
 logarithm is inside the sums, and each term is as simple as in the case
 with labels. So now we can.
 
-\paragraph{The means.} Only the terms of group $j$ contain $\mu_j$. Setting
+\paragraph{The centres.} Only the terms of group $j$ contain $\mu_j$. Setting
 the derivative to zero,
 \[
 \frac{\partial E}{\partial\mu_j}=\sum_{i=1}^n r_j^{(i)}\,
@@ -2199,10 +2199,10 @@ the derivative to zero,
 \quad\Longleftrightarrow\quad
 \hat\mu_j=\frac{\sum_{i=1}^n r_j^{(i)}\,o_i}{\sum_{i=1}^n r_j^{(i)}}.
 \]
-The new mean of group $j$ is a weighted average of the observations: each
+The new centre of group $j$ is a weighted average of the observations: each
 one counts as much as its responsibility for group $j$.
 
-\paragraph{The variances.} In the same way, setting to zero the derivative
+\paragraph{The spreads.} In the same way, setting to zero the derivative
 with respect to $\sigma_j$,
 \[
 \frac{\partial E}{\partial\sigma_j}=\sum_{i=1}^n r_j^{(i)}
@@ -2211,14 +2211,14 @@ with respect to $\sigma_j$,
 \hat\sigma_j^2=\frac{\sum_{i=1}^n r_j^{(i)}\,(o_i-\hat\mu_j)^2}
 {\sum_{i=1}^n r_j^{(i)}}.
 \]
-The new variance is a weighted average of the squared distances from the new
-mean.
+The new $\hat\sigma_j^2$ is a weighted average of the squared distances from
+the new centre.
 
 Compare these with \hyperref[prop:mle-gmm-labels]{maximum likelihood for a
 GMM with labels}. If each responsibility were $1$ for the true group and $0$
 for the others, $\sum_i r_j^{(i)}$ would be $n_j$, and $\hat\mu_j$ and
-$\hat\sigma_j^2$ would be the mean and the variance of the observations of
-group $j$ only. The M-step is maximum likelihood with labels, where the
+$\hat\sigma_j^2$ would be the centre and the spread computed from the
+observations of group $j$ only. The M-step is maximum likelihood with labels, where the
 labels $0$ or $1$ are replaced by the responsibilities.
 
 \begin{framedexamplepart}{ex:men-women}{7}{Heights of men and women}
@@ -2237,5 +2237,29 @@ and in the same way $\hat\mu_{\text{men}}\approx179.1$. The height $147$ pulls
 the women's centre almost with its full weight, $167$ pulls it with weight
 $0.60$, and $184$ hardly at all.
 \end{framedexamplepart}
+
+\paragraph{The weights.} The weights are different: they must be
+non-negative and add up to $1$, so they lie in the
+\hyperref[def:simplex]{simplex}. Maximising $E(\theta)$ over the weights is
+therefore an optimisation with a constraint, which is solved with Lagrange
+multipliers, a tool we will see later. The result is
+\[
+\hat\pi_j=\frac{\sum_{i=1}^n r_j^{(i)}}{n},
+\]
+the share of the observations that group $j$ is responsible for. With
+labels $0$ or $1$ it becomes $n_j/n$, as in the case with labels.
+
+\paragraph{Putting it together.} One round of EM for a GMM is:
+\begin{enumerate}
+\item \textbf{E-step:} with the current parameters, compute the
+responsibilities $r_j^{(i)}$ of every group for every observation;
+\item \textbf{M-step:} with these responsibilities, compute the new centres
+$\hat\mu_j$, spreads $\hat\sigma_j^2$ and weights $\hat\pi_j$.
+\end{enumerate}
+We repeat the two steps, and by the check of
+Section~\ref{sec:em} the log-likelihood never goes down. This is the
+tool that problem~\spadeproblem\ was waiting for: without labels there is
+still no single formula for $\hat\theta$, but we can now fit a GMM by
+climbing its likelihood one round at a time.
 
 \end{document}
