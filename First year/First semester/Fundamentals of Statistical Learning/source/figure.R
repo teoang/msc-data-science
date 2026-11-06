@@ -375,30 +375,6 @@ draw_group(hgt[grp == "woman"], "Women: 25 heights", orange)
 draw_group(hgt[grp == "man"], "Men: 25 heights", blue)
 dev.off()
 
-# Likelihood and log-likelihood of the 50 heights as functions of mu
-# (sigma fixed at its estimate): same point of maximum.
-set.seed(7)
-h50 <- round(rnorm(50, 172, 7))
-mhat <- mean(h50); shat <- sqrt(mean((h50 - mhat)^2))
-mus <- seq(160, 188, length.out = 400)
-ll <- sapply(mus, function(m) sum(dnorm(h50, m, shat, log = TRUE)))
-pdf("images/lik-loglik.pdf", width = 8, height = 2.4,
-    family = "Helvetica", useDingbats = FALSE)
-par(mfrow = c(1, 2), mar = c(2.6, 4.2, 1.6, .6),
-    mgp = c(1.6, .45, 0), las = 1, cex = .75)
-plot(mus, exp(ll), type = "n", xlab = expression(mu), ylab = "",
-     main = expression(L(mu)), cex.main = 1)
-grid(col = grid_col)
-lines(mus, exp(ll), col = blue, lwd = 1.8)
-abline(v = mhat, col = orange, lty = 2)
-plot(mus, ll, type = "n", xlab = expression(mu), ylab = "",
-     main = expression(l(mu) == log ~ L(mu)), cex.main = 1)
-grid(col = grid_col)
-lines(mus, ll, col = blue, lwd = 1.8)
-abline(v = mhat, col = orange, lty = 2)
-dev.off()
-cat("mhat", mhat, "shat", shat, "\n")
-
 # ELBO sketch: the log-likelihood and a lower bound F(q, theta) that never exceeds it.
 pdf("images/elbo-sketch.pdf", width = 5.2, height = 2.5,
     family = "Helvetica", useDingbats = FALSE)
