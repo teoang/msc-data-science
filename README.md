@@ -2,10 +2,6 @@
 
 *Lecture notes and worked exercises · Sapienza University of Rome*
 
-![Composition VIII (1923) by Wassily Kandinsky](assets/kandinsky-composition-viii.jpg)
-
-<sub>Wassily Kandinsky, <em>Composition VIII</em> (1923) · <a href="https://commons.wikimedia.org/wiki/File:Wassily_Kandinsky_Composition_VIII.jpg">Wikimedia Commons</a></sub>
-
 ---
 
 ## 📚 Course notes
