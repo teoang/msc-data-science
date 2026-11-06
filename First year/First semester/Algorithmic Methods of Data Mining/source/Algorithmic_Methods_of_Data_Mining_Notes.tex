@@ -622,7 +622,7 @@ matches a lower bound for the problem.
 \end{frameddefn}
 
 \begin{framedexample}{Max-Find is optimal}\label{ex:max-find-optimal}
-Max-Find (Algorithm~\ref{alg:max-find}) runs in $O(n)$, as we computed
+\hyperref[alg:max-find]{Max-Find} runs in $O(n)$, as we computed
 in Example~\ref{ex:max-find-steps}, and the problem requires
 $\Omega(n)$, so Max-Find is \emph{optimal}.
 \end{framedexample}
@@ -1353,8 +1353,8 @@ The decision versions of Knapsack, Set cover, Subset sum and Max clique
 are NP-complete.
 \end{framedprop}
 
-We do not prove this: each proof is a poly-time reduction from a known
-NP-complete problem (Proposition~\ref{prop:prove-npc}).
+We do not prove this: each proof follows Proposition~\ref{prop:prove-npc},
+with a poly-time reduction from a known NP-complete problem.
 
 \section{NP-hard problems}
 
@@ -1587,8 +1587,8 @@ are considering.
 
 \section{\texorpdfstring{$L_p$}{Lp} distances}
 
-We have defined what a distance function is
-(Definition~\ref{def:distance}). We now look at concrete distances,
+We have defined what a \hyperref[def:distance]{distance function} is.
+We now look at concrete distances,
 starting with objects described by vectors of numbers, that is,
 $U=\R^m$.
 
@@ -1787,8 +1787,8 @@ where $\abs{\cdot}$ is the cardinality (not the absolute value).
 \end{frameddefn}
 
 The Jaccard similarity is symmetric, lies between $0$ and $1$, and
-gives $J(P,P)=1$ for every nonempty $P$: it is a normalized similarity
-function (Definition~\ref{def:similarity}). For the baskets in
+gives $J(P,P)=1$ for every nonempty $P$: it is a normalized
+\hyperref[def:similarity]{similarity function}. For the baskets in
 Example~\ref{ex:baskets},
 \[
   J(P_1,P_2)=\frac{\abs{\{A\}}}{\abs{\{A,B,C,D,E,G,H\}}}=\frac17,
@@ -1819,8 +1819,8 @@ We turn the Jaccard similarity into a distance by taking
 except the intersection.}
 \end{center}
 
-One can prove that the Jaccard distance $d_J$ is a distance in the
-sense of Definition~\ref{def:distance}. For the baskets,
+One can prove that the Jaccard distance $d_J$ is a
+\hyperref[def:distance]{distance}. For the baskets,
 $d_J(P_1,P_2)=6/7$ and $d_J(P_1,P_3)=4/6=2/3$.
 
 \chapter{Distances between strings}
@@ -2101,8 +2101,8 @@ Written directly as a recursive algorithm, this formula has an
 exponential running time.
 
 \begin{notebox}[The same problem as Fibonacci]
-As with the recursive Fibonacci algorithm
-(Proposition~\ref{prop:fib-exponential}), the recursion solves the
+As with the
+\hyperref[prop:fib-exponential]{recursive Fibonacci algorithm}, the recursion solves the
 same subproblems again and again. There are only $(n+1)(m+1)$
 different subproblems $\ED(S^i,T^j)$, so storing each value once
 (dynamic programming) avoids the repeated work.
@@ -2380,8 +2380,8 @@ count vectors do not necessarily imply identical meanings.
 
 \section{Why document length can distort a comparison}
 
-Now that documents are points, we can compare them using the $L_2$
-distance already introduced in Definition~\ref{def:euclidean}.
+Now that documents are points, we can compare them using the
+\hyperref[def:euclidean]{$L_2$ distance} we already introduced.
 For a two-dimensional illustration, keep only the coordinates
 $(\texttt{three},\texttt{we})$ from Example~\ref{ex:document-counts}:
 \[
@@ -3404,7 +3404,7 @@ costs $O\bigl(\sum_{t\in Q}n_t\bigr)$, as for AND.
 
 \section{Faster ranked search}\label{sec:faster-ranked-search}
 
-We return to ranked search (Section~\ref{sec:vector-search}): given a
+We return to \hyperref[sec:vector-search]{ranked search}: given a
 query vector $\mathbf q$ and an integer $K$, return the $K$ documents
 with the largest cosine similarity to $\mathbf q$. Scanning every
 document costs $\Theta(Nm)$. Can we avoid looking at every document
@@ -5192,8 +5192,8 @@ Section~\ref{sec:vector-search}. To keep the $k$ \emph{largest}
 scores, we repeatedly need the \emph{smallest retained score}:
 it is the weakest candidate and the one a better entry replaces.
 
-We therefore use a \emph{min-heap} of at most $k$ entries
-(Definition~\ref{def:binary-min-heap}). Its array representation
+We therefore use a \hyperref[def:binary-min-heap]{\emph{min-heap}} of
+at most $k$ entries. Its array representation
 is the same as for a max-heap. Insertions sift up when a child
 is smaller than its parent; extraction sifts down using the smaller
 child. The operation bounds are unchanged.
@@ -5311,8 +5311,8 @@ root. If fewer than $k$ candidates are available, return all of them.
 
 \section{Finding a term in the inverted index}
 
-Let us go back to the inverted index of
-Definition~\ref{def:inverted-index}. Take three documents:
+Let us go back to the \hyperref[def:inverted-index]{inverted index}.
+Take three documents:
 \[
   1:\ A\ B\ D,\qquad 2:\ B\ A\ B,\qquad 3:\ B.
 \]
@@ -5365,7 +5365,7 @@ key directly instead?
 
 Suppose the keys are student IDs $0,1,\ldots,m-1$, and the value of
 each ID is the student's record. Then the dictionary can simply be
-an array (Definition~\ref{def:array}) with one slot per ID:
+an \hyperref[def:array]{array} with one slot per ID:
 \[
   D[63]=(\texttt{"Maria"},\texttt{"De Paolis"},\ldots).
 \]
@@ -5654,8 +5654,8 @@ If there are no collisions, finding an element takes constant time:
 But with a collision, two values would need to be stored in the same
 slot. How can we keep both?
 
-The simplest way is to store a linked list
-(Definition~\ref{def:singly-linked-list}) in each slot: slot $60$
+The simplest way is to store a
+\hyperref[def:singly-linked-list]{linked list} in each slot: slot $60$
 holds the pairs of all the keys that hash to $60$.
 
 \begin{center}
@@ -5715,16 +5715,16 @@ that list, so the time stays constant when the lists are short.
 
 \section{Grouping similar things}
 
-When we introduced distances (Definition~\ref{def:distance}), one of the motivating tasks was to
+When we introduced \hyperref[def:distance]{distances}, one of the motivating tasks was to
 find groups of similar documents. We now study this task directly.
 In \emph{clustering} we try to group similar ``things'' together: each
 group is a \emph{cluster}.
 
-To say that two things are similar we need a distance, or a
-similarity (Definition~\ref{def:similarity}). To keep
+To say that two things are similar we need a \hyperref[def:distance]{distance}, or a
+\hyperref[def:similarity]{similarity}. To keep
 things simple, in this chapter the objects are points of $\R^d$ and
-the distance is the Euclidean, or $L_2$, distance
-(Definition~\ref{def:euclidean}):
+the distance is the
+\hyperref[def:euclidean]{Euclidean, or $L_2$, distance}:
 \[
   \norm{\vec x-\vec y}_2=\sqrt{\sum_{j=1}^{d}(x_j-y_j)^2}.
 \]
@@ -6137,7 +6137,7 @@ and the whole algorithm costs $O(n^3)$. This is the worst-case
 scenario.
 
 Can we avoid rescanning everything at every step? We can use a
-min-heap (Definition~\ref{def:binary-min-heap}) for each cluster,
+\hyperref[def:binary-min-heap]{min-heap} for each cluster,
 holding the distances from that cluster to all the others. The top of
 each heap is then the closest cluster, and the closest pair overall is
 the smallest of the tops.
@@ -6493,7 +6493,7 @@ Can we just try all the partitions? If we have $2$ clusters, every
 point goes either to the first or to the second, so the number of
 possible partitions is $2^n$. If we have $k$ clusters, it is $k^n$.
 Trying them all takes exponential time, and in general the problem is
-NP-hard (Definition~\ref{def:np-hard}). Some special cases, however,
+\hyperref[def:np-hard]{NP-hard}. Some special cases, however,
 can be solved in polynomial time.
 
 \textbf{The case $k=n$.} Every point is in its own cluster, and the
@@ -6682,10 +6682,10 @@ with mean $2$, and $\{8,13\}$, with mean $10.5$:
 
 The largest gap is not the right place to cut.
 
-For any other case, the problem is NP-complete
-(Definition~\ref{def:np-complete}). What do we do when we have an
-NP-complete problem? We look for an approximation algorithm
-(Definition~\ref{def:approximation}).
+For any other case, the problem is
+\hyperref[def:np-complete]{NP-complete}. What do we do when we have an
+NP-complete problem? We look for an
+\hyperref[def:approximation]{approximation algorithm}.
 
 \endgroup
 
