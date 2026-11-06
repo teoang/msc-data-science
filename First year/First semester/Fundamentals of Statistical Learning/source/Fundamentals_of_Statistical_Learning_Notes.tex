@@ -1,6 +1,7 @@
 \documentclass[a4paper,12pt,oneside]{report}
-\usepackage[english]{../../../../../latex-setup/learningnotes}
+\usepackage[english]{../../../../latex-setup/learningnotes}
 \usepackage{needspace}
+\usepackage{multicol}
 \hypersetup{linktoc=all}
 \setcounter{secnumdepth}{3}
 \setcounter{tocdepth}{3}
@@ -13,7 +14,14 @@
     before skip=6pt,after skip=6pt]
   \small\textbf{#1}
   \end{tcolorbox}}
-\newcommand{\lecturestart}[1]{\lecturebanner{Start of lecture #1}}
+% Each lecture start is a link target and an entry of the lecture list on
+% the first page (\lecturelist), so new lectures appear there automatically.
+\makeatletter
+\newcommand{\lecturestart}[1]{\lecturebanner{%
+  \phantomsection\addcontentsline{lec}{lecture}{#1}Start of lecture #1}}
+\newcommand{\l@lecture}[2]{\par\noindent#1\dotfill#2\par}
+\newcommand{\lecturelist}{\@starttoc{lec}}
+\makeatother
 % An example that continues an earlier one: "Example 5 part 2: <same title>".
 % Arguments: label of the original example, part number, title.
 \makeatletter
@@ -57,6 +65,27 @@
 \begin{document}
 
 \makenotestitle
+
+\thispagestyle{empty}
+\tcbset{frontbox/.style={
+  examplebox,unbreakable,
+  colframe=blue!35!black,coltitle=white,
+  arc=5mm,outer arc=5mm,left=3mm,right=3mm,top=3mm,bottom=3mm,
+  boxed title style={
+    colback=blue!35!black,colframe=blue!35!black,
+    arc=3mm,outer arc=3mm,
+    frame code={
+      \path[fill=tcbcolframe,draw=tcbcolframe,rounded corners=3mm]
+        (frame.south west) rectangle (frame.north east);
+    }}}}
+\begin{tcolorbox}[frontbox,title={Looking for a specific lecture?}]
+Click a date to jump to the start of that lecture.
+\begin{multicols}{2}
+\lecturelist
+\end{multicols}
+\end{tcolorbox}
+\clearpage
+
 \notescontents
 
 \setcounter{chapter}{-1}

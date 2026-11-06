@@ -1,6 +1,7 @@
 \documentclass[a4paper,12pt,oneside]{report}
 \usepackage[english]{../../../../latex-setup/learningnotes}
 \usepackage{needspace}
+\usepackage{multicol}
 \usepackage{pgfplots}
 \pgfplotsset{compat=1.18}
 \hypersetup{linktoc=all}
@@ -27,18 +28,52 @@
 \newcommand{\fixedmark}{%
   \text{\tikz[baseline=-0.6ex]\fill[PlotRed] (0,0) circle (2.5pt);\ fixed}}
 
+% Yellow lecture banner, as in the ADM notes.
+\newcommand{\lecturebanner}[1]{%
+  \Needspace{6\baselineskip}%
+  \begin{tcolorbox}[colback=yellow!20,colframe=yellow!60!black,
+    boxrule=0.4pt,arc=1mm,left=5pt,right=5pt,top=3pt,bottom=3pt,
+    before skip=0pt,after skip=0pt]
+  \small\textbf{#1}
+  \end{tcolorbox}}
+% Each lecture start is a link target and an entry of the lecture list on
+% the first page (\lecturelist), so new lectures appear there automatically.
+\makeatletter
+\newcommand{\lecturestart}[1]{\lecturebanner{%
+  \phantomsection\addcontentsline{lec}{lecture}{#1}Start of lecture #1}}
+\newcommand{\l@lecture}[2]{\par\noindent#1\dotfill#2\par}
+\newcommand{\lecturelist}{\@starttoc{lec}}
+\makeatother
+
 \begin{document}
 
 \makenotestitle
+
+\thispagestyle{empty}
+\tcbset{frontbox/.style={
+  examplebox,unbreakable,
+  colframe=blue!35!black,coltitle=white,
+  arc=5mm,outer arc=5mm,left=3mm,right=3mm,top=3mm,bottom=3mm,
+  boxed title style={
+    colback=blue!35!black,colframe=blue!35!black,
+    arc=3mm,outer arc=3mm,
+    frame code={
+      \path[fill=tcbcolframe,draw=tcbcolframe,rounded corners=3mm]
+        (frame.south west) rectangle (frame.north east);
+    }}}}
+\begin{tcolorbox}[frontbox,title={Looking for a specific lecture?}]
+Click a date to jump to the start of that lecture.
+\begin{multicols}{2}
+\lecturelist
+\end{multicols}
+\end{tcolorbox}
+\clearpage
+
 \notescontents
 
 \chapter{Introduction}
 
-\begin{tcolorbox}[colback=yellow!20,colframe=yellow!60!black,
-  boxrule=0.4pt,arc=1mm,left=5pt,right=5pt,top=3pt,bottom=3pt,
-  before skip=0pt,after skip=0pt]
-\small\textbf{Start of lecture 00 (Spinelli)}
-\end{tcolorbox}
+\lecturestart{00 (Spinelli)}
 
 \section{What is Data Science?}
 
@@ -118,11 +153,7 @@ is setosa, versicolor, or virginica is a classification task.
 
 \chapter{Data Representation}
 
-\begin{tcolorbox}[colback=yellow!20,colframe=yellow!60!black,
-  boxrule=0.4pt,arc=1mm,left=5pt,right=5pt,top=3pt,bottom=3pt,
-  before skip=0pt,after skip=0pt]
-\small\textbf{Start of lecture 01 (Spinelli) --- 2 October 2026}
-\end{tcolorbox}
+\lecturestart{01 (Spinelli) --- 2 October 2026}
 
 \section{The Iris dataset}
 
@@ -2008,11 +2039,7 @@ the data.
 
 \chapter{Principal Component Analysis}\label{chap:pca}
 
-\begin{tcolorbox}[colback=yellow!20,colframe=yellow!60!black,
-  boxrule=0.4pt,arc=1mm,left=5pt,right=5pt,top=3pt,bottom=3pt,
-  before skip=0pt,after skip=0pt]
-\small\textbf{Start of lecture 02 (Spinelli)}
-\end{tcolorbox}
+\lecturestart{02 (Spinelli)}
 
 \section{Why learn directions from the data?}
 
@@ -2435,11 +2462,7 @@ reconstruction using one direction.
 
 \chapter{Optimization}\label{chap:optimization}
 
-\begin{tcolorbox}[colback=yellow!20,colframe=yellow!60!black,
-  boxrule=0.4pt,arc=1mm,left=5pt,right=5pt,top=3pt,bottom=3pt,
-  before skip=0pt,after skip=0pt]
-\small\textbf{Start of lecture 03 (Spinelli)}
-\end{tcolorbox}
+\lecturestart{03 (Spinelli)}
 
 \smallskip
 In the chapter on Data Representation, we chose weights to make a
@@ -3280,11 +3303,7 @@ Sections 1.4, 2.1.1--2.1.2, and 2.2.1.}}
 
 \chapter{Shallow Neural Networks}\label{chap:shallow-neural-networks}
 
-\begin{tcolorbox}[colback=yellow!20,colframe=yellow!60!black,
-  boxrule=0.4pt,arc=1mm,left=5pt,right=5pt,top=3pt,bottom=3pt,
-  before skip=0pt,after skip=0pt]
-\small\textbf{Start of lecture 05 (Spinelli) --- 2 November 2026}
-\end{tcolorbox}
+\lecturestart{05 (Spinelli) --- 2 November 2026}
 
 \section{Choosing features by hand}
 
@@ -4136,6 +4155,7 @@ the points where they switch are the same too. The weights $\phi_{jd}$
 only decide \emph{how much} and \emph{in which direction} each output
 bends at those points, not \emph{where}.
 
+\Needspace{16\baselineskip}
 \begin{intuitionbox}
 Why would we want to calculate more outputs $y$?
 
@@ -4156,41 +4176,164 @@ at sunrise or at sunset, and these hours are the same for both outputs.
 \end{intuitionbox}
 
 \clearpage
-\section{How much can a network represent?}
+\section{More inputs}
 
-Training can only choose among the functions that the network can
-represent. Capacity concerns how complex those functions can be.
+So far our network has had a single input $x$. In practice, however,
+we often want to predict $y$ from several quantities: for example, the
+price of a house from its size $x_1$ and its age $x_2$. What changes
+when the network has two inputs?
 
-\begin{frameddefn}{Model capacity, depth, and width}\label{def:network-capacity}
-\textbf{Model capacity} describes the range and complexity of functions
-a model can represent. For a feed-forward network, two architectural
-choices that affect capacity are:
-\begin{itemize}
-  \item \textbf{Depth}: the number of hidden layers.
-  \item \textbf{Width}: the number of neurons in a hidden layer.
-        Different hidden layers may have different widths.
-\end{itemize}
-A hidden layer is an intermediate layer between the input and output.
-Each of its neurons computes one value, so its width determines how
-many values it passes to the next layer.
+Each hidden neuron now combines both inputs before applying the
+activation:
+\[
+  h_k=a(\theta_{k0}+\theta_{k1}x_1+\theta_{k2}x_2),\qquad k=1,2,3,
+\]
+while the output is computed exactly as before:
+\[
+  y=\phi_0+\phi_1h_1+\phi_2h_2+\phi_3h_3.
+\]
+Each hidden neuron now has three parameters instead of two: a constant
+and one weight for each input.
+\begin{center}
+\begin{tikzpicture}[font=\small,
+    neuron/.style={circle,draw=NotesBlue,thick,minimum size=0.9cm,inner sep=0pt},
+    edge/.style={-{Stealth},black!70}]
+  \node[neuron] (x1) at (0,0.7) {$x_1$};
+  \node[neuron] (x2) at (0,-0.7) {$x_2$};
+  \foreach \k/\yy in {1/1.4,2/0,3/-1.4}{\node[neuron] (h\k) at (3,\yy) {$h_{\k}$};}
+  \node[neuron] (y) at (6,0) {$y$};
+  \foreach \k in {1,2,3}{
+    \draw[edge] (x1)--(h\k); \draw[edge] (x2)--(h\k); \draw[edge] (h\k)--(y);}
+\end{tikzpicture}
+\end{center}
+
+With two inputs we can no longer draw a curve: every function depends
+on a point $(x_1,x_2)$ of the plane. We therefore draw it as a map seen
+from above, with $x_1$ on the horizontal axis and $x_2$ on the vertical
+one. The colour shows the value, light for high values and dark for low
+ones, and the thin grey lines are \emph{level curves}: along each of
+them the function has the same value, like the contour lines of a map.
+
+We now follow the same four steps as in
+\hyperref[sec:example-shallow-network]{Section~\ref*{sec:example-shallow-network}}.
+
+\Needspace{14\baselineskip}
+\textbf{Step 1: compute three linear functions.} With two inputs,
+$\theta_{k0}+\theta_{k1}x_1+\theta_{k2}x_2$ is no longer a line but a
+tilted plane. Its level curves are therefore parallel straight lines,
+and each of the three planes is tilted in a different direction.
+\begin{center}
+  \includegraphics[width=0.85\linewidth,trim=108 272 125 0,clip]{assets/two-inputs-slide-30.pdf}
+\end{center}
+
+\Needspace{14\baselineskip}
+\textbf{Step 2: pass each plane through ReLU.} Where the plane is
+negative, the hidden unit is zero: the map becomes flat, with a uniform
+colour and no level curves. The cyan line is where the plane is exactly
+zero, that is, where the unit switches on or off. With one input this
+was a point, the joint; with two inputs it is a line.
+\begin{center}
+  \includegraphics[width=0.85\linewidth,trim=108 0 125 280,clip]{assets/two-inputs-slide-30.pdf}
+\end{center}
+
+\Needspace{14\baselineskip}
+\textbf{Step 3: weight the hidden units.} Multiplying $h_k$ by $\phi_k$
+keeps the flat part at zero and the cyan line where it was; only the
+slope and its direction change. Here $\phi_1<0$, so the colours of
+$\phi_1h_1$ are reversed: its active part now goes down instead of up.
+\begin{center}
+  \includegraphics[width=0.85\linewidth,trim=108 0 125 280,clip]{assets/two-inputs-slide-31.pdf}
+\end{center}
+
+\Needspace{18\baselineskip}
+\textbf{Step 4: add the weighted hidden units and the constant
+$\phi_0$.} The three cyan lines now cut the square into pieces. Inside
+each piece the activation pattern does not change, so $y$ is a sum of
+planes, that is, again a plane: its level curves are parallel straight
+lines. Crossing a cyan line switches one unit on or off, so the plane
+changes its tilt and the level curves change direction.
+\begin{center}
+  \includegraphics[width=0.32\linewidth,trim=330 0 350 280,clip]{assets/two-inputs-slide-32.pdf}
+\end{center}
+\begin{frameddefn}{Convex region}\label{def:convex-region}
+A region is \textbf{convex} if the segment joining any two of its
+points lies entirely inside it.
 \end{frameddefn}
 
-\begin{framedexample}{}
-Compare one hidden layer of $100$ neurons with five hidden layers
-of $20$ neurons each. The first network is wider: it produces $100$
-hidden values at once. The second is deeper: it performs five
-successive hidden transformations, each producing $20$ values.
-Both have $100$ hidden neurons in total, but their arrangement
-changes the functions they can represent.
-\end{framedexample}
+The pieces are \textbf{convex polygons}; here there are seven.
 
-Increasing width or depth can increase capacity, depending on the
-architecture and activations. By
-\hyperref[prop:composition-linear-maps]{Proposition~\ref*{prop:composition-linear-maps}},
-adding only linear layers still gives a linear map.
+The picture is the same as with one input, one dimension higher:
+\begin{center}
+\begin{tabular}{@{}lll@{}}
+\toprule
+ & One input & Two inputs\\
+\midrule
+Each hidden neuron computes & a line & a plane\\
+A unit switches on or off at & a point (joint) & a line\\
+The output is made of & segments & pieces of planes over convex polygons\\
+\bottomrule
+\end{tabular}
+\end{center}
 
-Greater capacity does not automatically improve predictions on new
-data: a flexible network may also fit accidental details of its
-training examples.
+Seen in three dimensions, with $y$ on the vertical axis, the output is
+a surface made of flat faces, one above each polygon. Training adjusts
+the parameters so that this surface passes close to the data points:
+\begin{center}
+  \includegraphics[width=0.55\linewidth,trim=430 79 20 144,clip]{assets/two-inputs-slide-33.pdf}
+\end{center}
+
+\clearpage
+\section{The general shallow network}
+
+We can now put the two extensions together. A shallow network can have
+any number of inputs, hidden units and outputs: say $D_i$ inputs, $D$
+hidden units and $D_o$ outputs. Each hidden unit combines all the
+inputs, and each output combines all the hidden units:
+\[
+  h_d=a\Bigl(\theta_{d0}+\sum_{i=1}^{D_i}\theta_{di}x_i\Bigr),
+  \quad d=1,\dots,D,
+  \qquad\qquad
+  y_j=\phi_{j0}+\sum_{d=1}^{D}\phi_{jd}h_d,
+  \quad j=1,\dots,D_o.
+\]
+Every network we have seen so far is a special case: the network of
+\hyperref[sec:example-shallow-network]{Section~\ref*{sec:example-shallow-network}}
+has $D_i=1$, $D=3$, $D_o=1$; the one with two outputs has $D_i=1$, $D=4$,
+$D_o=2$; the one with two inputs has $D_i=2$, $D=3$, $D_o=1$.
+
+For example, a network with three inputs, three hidden units and two
+outputs looks like this:
+\begin{center}
+\begin{tikzpicture}[font=\small,
+    neuron/.style={circle,draw=NotesBlue,thick,minimum size=0.9cm,inner sep=0pt},
+    edge/.style={-{Stealth},black!70}]
+  \foreach \i/\yy in {1/1.4,2/0,3/-1.4}{\node[neuron] (x\i) at (0,\yy) {$x_{\i}$};}
+  \foreach \k/\yy in {1/1.4,2/0,3/-1.4}{\node[neuron] (h\k) at (3,\yy) {$h_{\k}$};}
+  \node[neuron] (y1) at (6,0.7) {$y_1$};
+  \node[neuron] (y2) at (6,-0.7) {$y_2$};
+  \foreach \i in {1,2,3}{\foreach \k in {1,2,3}{\draw[edge] (x\i)--(h\k);}}
+  \foreach \k in {1,2,3}{\draw[edge] (h\k)--(y1); \draw[edge] (h\k)--(y2);}
+\end{tikzpicture}
+\end{center}
+
+\begin{framedexercise}{}\label{ex:count-parameters}
+How many parameters does this network have?
+\end{framedexercise}
+
+We count them piece by piece. Each hidden unit has one constant and
+one weight for each input, so $1+3=4$ parameters, and the three hidden
+units have $3\cdot4=12$. Each output has one constant and one weight for
+each hidden unit, so again $1+3=4$ parameters, and the two outputs have
+$2\cdot4=8$. In total the network has $12+8=20$ parameters.
+
+The same count works for any shallow network:
+\[
+  \underbrace{D\,(D_i+1)}_{\text{hidden units}}
+  +\underbrace{D_o\,(D+1)}_{\text{outputs}}
+\]
+parameters. For the network of
+\hyperref[sec:example-shallow-network]{Section~\ref*{sec:example-shallow-network}}
+this gives $3\cdot2+1\cdot4=10$, as in
+\hyperref[def:network-parameters]{Definition~\ref*{def:network-parameters}}.
 
 \end{document}
