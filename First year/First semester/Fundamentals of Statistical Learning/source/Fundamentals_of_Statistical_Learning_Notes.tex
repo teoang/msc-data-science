@@ -758,18 +758,14 @@ In Example~\ref{ex:men-women} the hidden variable had only two values, man
 and woman. What happens if the population is made of $K$ groups instead of
 two?
 
-To write the formulas more compactly, from now on we call the hidden
-variable $H$ instead of $\text{hid}$, and the observed one $O$ instead of
-$\text{obs}$.
-
 We make two assumptions:
 \begin{enumerate}
-\item The hidden variable $H$ has a finite support,
-$\operatorname{supp}(H)=\{1,\ldots,K\}$: each value is a group, or
+\item The hidden variable $\text{hid}$ has a finite support,
+$\operatorname{supp}(\text{hid})=\{1,\ldots,K\}$: each value is a group, or
 \textbf{sub-population}. The probability of each group is, again, a
 \textbf{weight},
 \[
-\pi_k=P(H=k),\qquad k=1,\ldots,K.
+\pi_k=P(\text{hid}=k),\qquad k=1,\ldots,K.
 \]
 The weights are probabilities, so they are non-negative and add up to $1$.
 Vectors like this have a name.
@@ -787,7 +783,7 @@ $(\pi_1,\ldots,\pi_K)\in\Delta^{K-1}$.
 \item Inside each group the observation has its own distribution, usually
 from a simple family:
 \[
-(O\mid H=k)\sim f_k(o).
+(\text{obs}\mid \text{hid}=k)\sim f_k(o).
 \]
 It may be discrete or continuous, univariate or multivariate.
 \end{enumerate}
@@ -795,17 +791,17 @@ It may be discrete or continuous, univariate or multivariate.
 We are still interested in computing the distribution of what we actually
 see. As in Section~\ref{sec:hidden}, we sum out the hidden variable:
 \[
-f_O(o)=\int_{\operatorname{supp}(H)}p(o,\,h)\,\mathrm{d}h .
+f_{\text{obs}}(o)=\int_{\operatorname{supp}(\text{hid})}p(o,\,h)\,\mathrm{d}h .
 \]
-Since $H$ takes only the values $1,\ldots,K$, the integral becomes a sum:
+Since $\text{hid}$ takes only the values $1,\ldots,K$, the integral becomes a sum:
 \[
-f_O(o)=\sum_{k=1}^K p(o,\,H=k).
+f_{\text{obs}}(o)=\sum_{k=1}^K p(o,\,\text{hid}=k).
 \]
 Each term splits, by the multiplication rule, into a conditional and a
 marginal:
 \[
-p(o,\,H=k)=\underbrace{p(o\mid H=k)}_{f_k(o)\text{ (assumption 2)}}\cdot
-\underbrace{P(H=k)}_{\pi_k\text{ (assumption 1)}}.
+p(o,\,\text{hid}=k)=\underbrace{p(o\mid \text{hid}=k)}_{f_k(o)\text{ (assumption 2)}}\cdot
+\underbrace{P(\text{hid}=k)}_{\pi_k\text{ (assumption 1)}}.
 \]
 Since we know both pieces on the right-hand side from the two assumptions, putting them together
 gives the following model.
@@ -814,7 +810,7 @@ gives the following model.
 A \textbf{finite mixture model} with $K$ \textbf{components} has density (or
 mass function)
 \[
-f_O(o)=\sum_{j=1}^K f_j(o)\,\pi_j,
+f_{\text{obs}}(o)=\sum_{j=1}^K f_j(o)\,\pi_j,
 \]
 where $f_1,\ldots,f_K$ are the distributions of the $K$ groups and
 $(\pi_1,\ldots,\pi_K)\in\Delta^{K-1}$ are their weights.
@@ -826,7 +822,7 @@ Let us take the heights of Example~\ref{ex:men-women} again, where
 p(\text{height})=p(\text{height}\mid\text{man})\,p(\text{man})
 +p(\text{height}\mid\text{woman})\,p(\text{woman}).
 \]
-Is it a finite mixture? Yes, with $K=2$ groups: the hidden variable $H$
+Is it a finite mixture? Yes, with $K=2$ groups: the hidden variable $\text{hid}$
 takes the values woman and man, with weights and distributions
 \[
 \pi_1=p(\text{woman}),\quad \pi_2=p(\text{man}),\qquad
@@ -846,7 +842,7 @@ f_j(o)=N(o\mid\mu_j,\sigma_j^2),\qquad j=1,\ldots,K.
 \begin{frameddefn}{Gaussian mixture model}\label{def:gmm}
 A \textbf{Gaussian mixture model} (GMM) with $K$ components has density
 \[
-f_O(o)=\sum_{j=1}^K\pi_j\,N(o\mid\mu_j,\sigma_j^2),
+f_{\text{obs}}(o)=\sum_{j=1}^K\pi_j\,N(o\mid\mu_j,\sigma_j^2),
 \]
 with parameters
 $\theta=\{\pi_j,\,\mu_j,\,\sigma_j^2\}_{j=1}^K$, where
@@ -881,8 +877,8 @@ $\theta=\{\pi_1,\pi_2,\mu_1,\mu_2,\sigma_1^2,\sigma_2^2\}$.
 \end{framedexamplepart}
 
 How do we learn the $\theta$ of a GMM from data? Let us follow the steps of
-Algorithm~\ref{alg:learning}, writing the data as $o_1,\ldots,o_n$ since they
-are observations of $O$:
+Algorithm~\ref{alg:learning}, writing the data as $o_1,\ldots,o_n$, the observed
+values of $\text{obs}$:
 \begin{enumerate}
 \item \textbf{Data:} IID observations $o_1,\ldots,o_n$;
 \item \textbf{Model:} the GMM of Definition~\ref{def:gmm}, with
@@ -901,7 +897,7 @@ L(\theta)=\prod_{i=1}^n\ \sum_{j=1}^K\pi_j\,N(o_i\mid\mu_j,\sigma_j^2);
 Steps 1, 2 and 3 work as before. Step 4 is where we get stuck. Why?
 
 To see why, consider first the case where we know the group of every
-observation: its hidden label $H_i$ takes an observed value $h_i$.
+observation: its hidden label $\text{hid}_i$ takes an observed value $h_i$.
 
 \begin{framedprop}{Maximum likelihood for a GMM with labels}\label{prop:mle-gmm-labels}
 Let $o_1,\ldots,o_n$ be IID data from a GMM with $K$ components, and suppose
@@ -1767,20 +1763,19 @@ q(\text{hid})\,\frac{p_\theta(\text{obs},\text{hid})}{q(\text{hid})}\,
 The integral now has the form of the
 \hyperref[thm:lazy]{law of the lazy statistician}: it is the expected value of
 $p_\theta(\text{obs},\text{hid})/q(\text{hid})$ when the hidden variable has
-distribution $q$. Writing $O$ for the observed variable and $H$ for the
-hidden one,
+distribution $q$:
 \[
-\log p_\theta(O)=\log\,\mathbb{E}_q\!\left[\frac{p_\theta(O,H)}{q(H)}\right],
+\log p_\theta(\text{obs})=\log\,\mathbb{E}_q\!\left[\frac{p_\theta(\text{obs},\text{hid})}{q(\text{hid})}\right],
 \]
-where $\mathbb{E}_q$ means that $H\sim q$. We now have the logarithm of an
+where $\mathbb{E}_q$ means that $\text{hid}\sim q$. We now have the logarithm of an
 expected value, and $\log$ is concave: this is exactly the situation of
 \hyperref[thm:jensen]{Jensen's inequality}.
 
 Since $\log$ is concave, Jensen's inequality says that the logarithm of the
 mean is at least the mean of the logarithm:
 \[
-\log p_\theta(O)=\log\,\mathbb{E}_q\!\left[\frac{p_\theta(O,H)}{q(H)}\right]
-\;\ge\;\mathbb{E}_q\!\left[\log\frac{p_\theta(O,H)}{q(H)}\right]
+\log p_\theta(\text{obs})=\log\,\mathbb{E}_q\!\left[\frac{p_\theta(\text{obs},\text{hid})}{q(\text{hid})}\right]
+\;\ge\;\mathbb{E}_q\!\left[\log\frac{p_\theta(\text{obs},\text{hid})}{q(\text{hid})}\right]
 =:F(q,\theta).
 \]
 What have we gained? On the left we still have the logarithm of a sum, the
@@ -1792,27 +1787,27 @@ split into simple pieces, as in the case with labels of
 Proposition~\ref{prop:mle-gmm-labels}.
 
 \begin{frameddefn}{ELBO}\label{def:elbo}
-Let $O$ be the observed variable, $H$ the hidden one, and $q$ any
-distribution of $H$. The \textbf{evidence lower bound} (ELBO) is
+Let $\text{obs}$ be the observed variable, $\text{hid}$ the hidden one, and $q$ any
+distribution of $\text{hid}$. The \textbf{evidence lower bound} (ELBO) is
 \[
-F(q,\theta)=\mathbb{E}_q\!\left[\log\frac{p_\theta(O,H)}{q(H)}\right].
+F(q,\theta)=\mathbb{E}_q\!\left[\log\frac{p_\theta(\text{obs},\text{hid})}{q(\text{hid})}\right].
 \]
-\emph{Evidence} refers to $\log p_\theta(O)$, the log-likelihood of what we
+\emph{Evidence} refers to $\log p_\theta(\text{obs})$, the log-likelihood of what we
 observe, and \emph{lower bound} to the fact that
-$F(q,\theta)\le\log p_\theta(O)$ for every $q$ and every $\theta$.
+$F(q,\theta)\le\log p_\theta(\text{obs})$ for every $q$ and every $\theta$.
 \end{frameddefn}
 
 The ELBO is our \textbf{surrogate target}: instead of maximising
-$\log p_\theta(O)$, which is hard, we maximise $F(q,\theta)$, which is
+$\log p_\theta(\text{obs})$, which is hard, we maximise $F(q,\theta)$, which is
 easier. In the plot below the curve $F(q,\theta)$ never rises above
-$\log p_\theta(O)$, so by pushing $F$ up we push up a lower bound of the
+$\log p_\theta(\text{obs})$, so by pushing $F$ up we push up a lower bound of the
 curve we care about.
 
 \begin{center}
 \includegraphics[width=.72\linewidth]{assets/elbo-sketch.pdf}
 \end{center}
 
-But does raising $F$ really raise $\log p_\theta(O)$ as well? That depends
+But does raising $F$ really raise $\log p_\theta(\text{obs})$ as well? That depends
 on how wide the gap between the two curves is.
 
 \end{document}

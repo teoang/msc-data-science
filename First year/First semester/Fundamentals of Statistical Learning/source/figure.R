@@ -389,5 +389,5 @@ lines(tt, lp, col = blue, lwd = 2.2)
 lines(tt, fq, col = orange, lwd = 2.2, lty = 2)
 legend("topleft", bty = "n", cex = .85, lwd = 2.2, lty = c(1, 2),
        col = c(blue, orange),
-       legend = c(expression(log ~ p[theta](O)), expression(F(q, theta))))
+       legend = c(expression(log ~ p[theta](obs)), expression(F(q, theta))))
 dev.off()
