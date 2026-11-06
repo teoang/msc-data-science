@@ -10,8 +10,10 @@ references/
 /First year/First semester/Algorithmic Methods of Data Mining/adm-homework1/
 /First year/First semester/Fundamentals of Data Science/challenge/
 
-# Notes for AI agents remain local.
+# Notes and configuration for AI agents remain local.
 AGENTS.md
+/.codex/
+/.claude/
 
 # Local backups.
 older/
