@@ -217,8 +217,8 @@
 
 **19 October**
 
-- [x] Memory: bytes, addresses and consecutive memory locations.
-- [x] Python names refer to objects.
+- [ ] Memory: bytes, addresses and consecutive memory locations.
+- [ ] Python names refer to objects.
 
 **20 October**
 
