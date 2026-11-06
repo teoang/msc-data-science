@@ -20,7 +20,7 @@ draw_rod <- function(x, p, xlim, main) {
   text(m, -.11, bquote(E(X) == .(m)), pos = 4, cex = .8, col = orange, offset = .9)
 }
 
-pdf("images/rod-discrete.pdf", width = 8, height = 2.1,
+pdf("assets/rod-discrete.pdf", width = 8, height = 2.1,
     family = "Helvetica", useDingbats = FALSE)
 par(mfrow = c(1, 2), mar = c(1.6, .8, 1.6, .8), cex = .85)
 draw_rod(1:5, c(.10, .15, .25, .30, .20), c(.5, 5.5), "Five weights")
@@ -29,7 +29,7 @@ dev.off()
 
 # A continuous rod: the density is the mass per unit length.
 # Gamma(2, 1): peak (mode) at 1, centre of mass (mean) at 2.
-pdf("images/rod-continuous.pdf", width = 4.6, height = 2.2,
+pdf("assets/rod-continuous.pdf", width = 4.6, height = 2.2,
     family = "Helvetica", useDingbats = FALSE)
 par(mar = c(2.6, 3.4, .6, .6), mgp = c(1.6, .45, 0), las = 1, cex = .8)
 xx <- seq(0, 9, length.out = 601)
@@ -47,7 +47,7 @@ text(2, -.03, "E(X) = 2", pos = 4, cex = .85, col = orange)
 dev.off()
 
 # Cauchy against the standard Normal: same bell shape, very different tails.
-pdf("images/cauchy-normal.pdf", width = 8, height = 2.1,
+pdf("assets/cauchy-normal.pdf", width = 8, height = 2.1,
     family = "Helvetica", useDingbats = FALSE)
 par(mfrow = c(1, 2), mar = c(2.6, 4.6, 1.6, .6),
     mgp = c(1.65, .45, 0), las = 1, cex = .78)
@@ -87,8 +87,8 @@ draw_far <- function(x, p, file, main) {
        cex = .8, col = orange, offset = .9)
   dev.off()
 }
-draw_far(1:5, c(.10, .15, .25, .30, .20), "images/far-before.pdf", "Before")
-draw_far(c(1:5, 50), c(.05, .15, .25, .30, .20, .05), "images/far-after.pdf",
+draw_far(1:5, c(.10, .15, .25, .30, .20), "assets/far-before.pdf", "Before")
+draw_far(c(1:5, 50), c(.05, .15, .25, .30, .20, .05), "assets/far-after.pdf",
          "After moving 0.05 to x = 50")
 
 # The lottery rod resting on a support at c: level if balanced, tilted if not.
@@ -110,12 +110,12 @@ draw_tilt <- function(c, angle, file, main) {
   text(c, -.6, paste("c =", c), pos = 1, cex = .8, col = orange)
   dev.off()
 }
-draw_tilt(1, 0, "images/rod-balanced.pdf", "Support at c = 1")
-draw_tilt(.5, .12, "images/rod-tilted.pdf", "Support at c = 0.5")
+draw_tilt(1, 0, "assets/rod-balanced.pdf", "Support at c = 1")
+draw_tilt(.5, .12, "assets/rod-tilted.pdf", "Support at c = 0.5")
 
 # The tangent on (-pi/2, pi/2) and its inverse, the arctangent:
 # vertical asymptotes at +-pi/2 become horizontal ones.
-pdf("images/tan-arctan.pdf", width = 8, height = 2.4,
+pdf("assets/tan-arctan.pdf", width = 8, height = 2.4,
     family = "Helvetica", useDingbats = FALSE)
 par(mfrow = c(1, 2), mar = c(2.6, 3.4, 1.6, .8),
     mgp = c(1.6, .45, 0), las = 1, cex = .78)
@@ -138,7 +138,7 @@ lines(xx, atan(xx), col = blue, lwd = 1.8)
 dev.off()
 
 # Integrand of the expected value, x f(x): Cauchy against the standard Normal.
-pdf("images/cauchy-integrand.pdf", width = 4.6, height = 2.4,
+pdf("assets/cauchy-integrand.pdf", width = 4.6, height = 2.4,
     family = "Helvetica", useDingbats = FALSE)
 par(mar = c(2.6, 3.6, .6, .6), mgp = c(1.6, .45, 0), las = 1, cex = .8)
 xx <- seq(-10, 10, length.out = 801)
@@ -154,7 +154,7 @@ legend("topleft", bty = "n", cex = .85, legend = c("Cauchy", "Normal"),
 dev.off()
 
 # A convex function: the chord between two points lies above the graph.
-pdf("images/convex-chord.pdf", width = 4.8, height = 2.9,
+pdf("assets/convex-chord.pdf", width = 4.8, height = 2.9,
     family = "Helvetica", useDingbats = FALSE)
 par(mar = c(2.2, 7, .6, .6), mgp = c(1.4, .45, 0), las = 1, cex = .8)
 r <- function(x) .25 * (x - 1.5)^2 + .5
@@ -184,7 +184,7 @@ dev.off()
 # The standard Normal: density and CDF.
 purple <- "#7A5195"
 green <- "#2E8B3E"
-pdf("images/normal-pdf-cdf.pdf", width = 8, height = 2.3,
+pdf("assets/normal-pdf-cdf.pdf", width = 8, height = 2.3,
     family = "Helvetica", useDingbats = FALSE)
 par(mfrow = c(1, 2), mar = c(2.6, 3.2, 1.6, .6),
     mgp = c(1.65, .45, 0), las = 1, cex = .78)
@@ -205,7 +205,7 @@ text(0, .5, expression(F[X](0) == 0.5), pos = 4, cex = .85, col = ink)
 dev.off()
 
 # Four Normals: the mean moves the bell, the variance stretches it.
-pdf("images/normal-family.pdf", width = 8, height = 2.5,
+pdf("assets/normal-family.pdf", width = 8, height = 2.5,
     family = "Helvetica", useDingbats = FALSE)
 par(mfrow = c(1, 2), mar = c(2.6, 3.2, 1.6, .6),
     mgp = c(1.65, .45, 0), las = 1, cex = .78)
@@ -243,7 +243,7 @@ draw_area <- function(a, b, label, main) {
   lines(xx, dnorm(xx), col = blue, lwd = 1.8)
   text(mean(c(max(a, -3.5), min(b, 3.5))), .12, label, cex = .9, col = ink)
 }
-pdf("images/normal-quantiles.pdf", width = 8, height = 2,
+pdf("assets/normal-quantiles.pdf", width = 8, height = 2,
     family = "Helvetica", useDingbats = FALSE)
 par(mfrow = c(1, 3), mar = c(2.2, .6, 1.6, .6), mgp = c(1.4, .45, 0), cex = .78)
 draw_area(-Inf, 1.96, "97.5%", expression(P(Z <= 1.96)))
@@ -253,7 +253,7 @@ draw_area(-1.96, 1.96, "95%", expression(P(-1.96 <= Z ~ "" <= 1.96)))
 dev.off()
 
 # Light tails: the log-density of the standard Normal is a parabola.
-pdf("images/normal-log-density.pdf", width = 4.6, height = 2.3,
+pdf("assets/normal-log-density.pdf", width = 4.6, height = 2.3,
     family = "Helvetica", useDingbats = FALSE)
 par(mar = c(2.6, 3.4, .6, .6), mgp = c(1.65, .45, 0), las = 1, cex = .78)
 xx <- seq(-5, 5, length.out = 601)
@@ -279,7 +279,7 @@ draw_std <- function(mu, s, x0, main, xlab, lab) {
   text(x0, dnorm(x0, mu, s), lab, pos = 4, cex = .85, col = orange)
   segments(mu, 0, mu, dnorm(mu, mu, s), col = ink, lty = 3)
 }
-pdf("images/normal-standardization.pdf", width = 8, height = 2.3,
+pdf("assets/normal-standardization.pdf", width = 8, height = 2.3,
     family = "Helvetica", useDingbats = FALSE)
 par(mfrow = c(1, 2), mar = c(2.6, 3.4, 1.6, .6),
     mgp = c(1.65, .45, 0), las = 1, cex = .78)
@@ -301,7 +301,7 @@ draw_heights <- function(main, mu = NULL, s = NULL, col = blue) {
     lines(xx, dnorm(xx, mu, s), col = col, lwd = 2)
   }
 }
-pdf("images/heights-candidates.pdf", width = 8, height = 2.3,
+pdf("assets/heights-candidates.pdf", width = 8, height = 2.3,
     family = "Helvetica", useDingbats = FALSE)
 par(mfrow = c(1, 3), mar = c(2.6, 2.6, 1.6, .4),
     mgp = c(1.5, .45, 0), las = 1, cex = .72)
@@ -312,7 +312,7 @@ dev.off()
 cat("heights summary:", range(heights), mean(heights), "\n")
 
 # A mixture of two Normals: women and men, each weighted 0.5.
-pdf("images/heights-mixture.pdf", width = 5.2, height = 2.5,
+pdf("assets/heights-mixture.pdf", width = 5.2, height = 2.5,
     family = "Helvetica", useDingbats = FALSE)
 par(mar = c(2.6, 3.2, .6, .6), mgp = c(1.6, .45, 0), las = 1, cex = .78)
 xx <- seq(140, 205, length.out = 600)
@@ -331,7 +331,7 @@ legend("topright", bty = "n", cex = .85, lwd = c(1.6, 1.6, 2.2),
 dev.off()
 
 # A Gaussian mixture with K = 3: three weighted bells and their sum.
-pdf("images/gmm-three.pdf", width = 5.2, height = 2.5,
+pdf("assets/gmm-three.pdf", width = 5.2, height = 2.5,
     family = "Helvetica", useDingbats = FALSE)
 par(mar = c(2.6, 3.2, .6, .6), mgp = c(1.6, .45, 0), las = 1, cex = .78)
 xx <- seq(-6, 10, length.out = 800)
@@ -367,7 +367,7 @@ draw_group <- function(x, main, col) {
   xx <- seq(140, 200, length.out = 400)
   lines(xx, dnorm(xx, m, s), col = col, lwd = 2)
 }
-pdf("images/heights-split.pdf", width = 8, height = 2.4,
+pdf("assets/heights-split.pdf", width = 8, height = 2.4,
     family = "Helvetica", useDingbats = FALSE)
 par(mfrow = c(1, 2), mar = c(2.6, 2.8, 1.6, .6),
     mgp = c(1.5, .45, 0), las = 1, cex = .75)
@@ -376,7 +376,7 @@ draw_group(hgt[grp == "man"], "Men: 25 heights", blue)
 dev.off()
 
 # ELBO sketch: the log-likelihood and a lower bound F(q, theta) that never exceeds it.
-pdf("images/elbo-sketch.pdf", width = 5.2, height = 2.5,
+pdf("assets/elbo-sketch.pdf", width = 5.2, height = 2.5,
     family = "Helvetica", useDingbats = FALSE)
 par(mar = c(2.6, 1.2, .6, .6), mgp = c(1.6, .45, 0), las = 1, cex = .78)
 tt <- seq(0, 10, length.out = 600)
