@@ -2019,4 +2019,39 @@ go up.
 So every round of EM increases, or at least does not decrease, the original
 objective $\log p_\theta(\text{obs})$.
 
+\paragraph{Remarks.} Both steps of Algorithm~\ref{alg:em} ask for a
+maximum. Do we always get it, and do we really need it?
+\begin{enumerate}
+\item \textbf{E-step.} Optimising over \emph{all} distributions $q$ is
+sometimes not feasible: sometimes $p_\theta(\text{hid}\mid\text{obs})$ is not
+available. What do we do then? We optimise over a smaller class of
+distributions instead of the whole class. This is the idea of
+\textbf{variational methods}.
+\item \textbf{M-step.} Here we are fine even without the exact maximum. In
+the chain above the M-step is only used through
+$F\big(q^{(t)},\theta^{(t-1)}\big)\le F\big(q^{(t)},\theta^{(t)}\big)$, so
+any $\theta^{(t)}$ that does not lower $F$ still makes
+$\log p_\theta(\text{obs})$ climb.
+\end{enumerate}
+
+\paragraph{What does the M-step maximise?} Let us split the ELBO in two. The
+logarithm of a ratio is the difference of the logarithms, so
+\[
+F(q,\theta)
+=\mathbb{E}_q\big[\log p_\theta(\text{obs},\text{hid})\big]
+-\mathbb{E}_q\big[\log q(\text{hid})\big]
+=\underbrace{\mathbb{E}_q\big[\log p_\theta(\text{obs},\text{hid})\big]}_{\text{complete log-likelihood}}
++\underbrace{H(q)}_{\text{entropy of }q},
+\]
+where $H(q)=-\mathbb{E}_q\big[\log q(\text{hid})\big]$ is called the
+\textbf{entropy} of $q$. The first term is the log-likelihood we would have
+if we also observed the hidden variable, averaged over $q$. The entropy
+depends only on $q$, and in the M-step $q=q^{(t)}$ is fixed, so
+\[
+\theta^{(t)}=\arg\max_{\theta}F\big(q^{(t)},\theta\big)
+=\arg\max_{\theta}\,\mathbb{E}_{q^{(t)}}\big[\log p_\theta(\text{obs},\text{hid})\big].
+\]
+The M-step maximises the expected complete log-likelihood: it works as if we
+knew the hidden variable, weighting each of its values by $q^{(t)}$.
+
 \end{document}

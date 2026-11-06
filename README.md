@@ -162,7 +162,7 @@
 **4 November**
 
 - [x] Jensen's inequality and the ELBO: a lower bound for the log-likelihood of a model with hidden variables.
-- [ ] The information gap and the KL divergence; the EM algorithm as coordinate ascent.
+- [x] The information gap and the KL divergence; the EM algorithm as coordinate ascent, with its remarks and the M-step as expected complete log-likelihood.
 
 </details>
 
