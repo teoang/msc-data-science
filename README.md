@@ -1,10 +1,10 @@
-![Composition VIII (1923) by Wassily Kandinsky](assets/kandinsky-composition-viii.jpg)
-
-<sub>Wassily Kandinsky, <em>Composition VIII</em> (1923) · <a href="https://commons.wikimedia.org/wiki/File:Wassily_Kandinsky_Composition_VIII.jpg">Wikimedia Commons</a></sub>
-
 # 🎓 MSc Data Science Notes
 
 *Lecture notes and worked exercises · Sapienza University of Rome*
+
+![Composition VIII (1923) by Wassily Kandinsky](assets/kandinsky-composition-viii.jpg)
+
+<sub>Wassily Kandinsky, <em>Composition VIII</em> (1923) · <a href="https://commons.wikimedia.org/wiki/File:Wassily_Kandinsky_Composition_VIII.jpg">Wikimedia Commons</a></sub>
 
 ---
 
@@ -282,21 +282,10 @@
 
 ## About
 
-I write these notes in English to organize what I learn and work through the material in my own words. They are works in progress and may contain mistakes or omissions; use them alongside the lectures and recommended textbooks.
+These are my English notes for the MSc in Data Science at Sapienza, written to work through each course in my own words. They are a work in progress and may contain mistakes, so use them alongside the lectures and textbooks. 🐛 Found an error? [Open an issue](https://github.com/teoang/msc-data-science/issues).
 
-The LaTeX sources are available, but the custom style package remains excluded from
-the public repository. To compile a downloaded copy, supply the shared package and
-its logo at these paths, or replace the package and its custom environments with
-your own definitions.
-
-🐛 Found an error? [Open an issue](https://github.com/teoang/msc-data-science/issues).
+The LaTeX sources are included, but the shared style package is not: to compile them, supply your own.
 
 ## License
 
-The notes, LaTeX sources and scripts in this repository are released under the [Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License](https://creativecommons.org/licenses/by-nc-sa/4.0/) (CC BY-NC-SA 4.0). You may share and adapt them as long as you:
-
-- **credit** the author and indicate any changes;
-- do **not** use them for commercial purposes;
-- release any adapted version under the **same license**.
-
-The Sapienza logo and any figures taken from other sources remain the property of their respective owners and are not covered by this license. The full license text is in [LICENSE](LICENSE).
+Released under [CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/): you may share and adapt the notes with credit, for non-commercial use, under the same license. The Sapienza logo and figures from other sources belong to their owners. Full text in [LICENSE](LICENSE).
