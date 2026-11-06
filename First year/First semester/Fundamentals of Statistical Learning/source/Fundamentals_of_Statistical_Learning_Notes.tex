@@ -1757,22 +1757,19 @@ the hidden variable, and multiply and divide by it inside the integral, which
 changes nothing since $q/q=1$:
 \[
 \log p_\theta(\text{obs})=\log\int_{\operatorname{supp}(\text{hid})}
-q(\text{hid})\,\frac{p_\theta(\text{obs},\text{hid})}{q(\text{hid})}\,
+\underbrace{q(\text{hid})}_{\text{density}}\,
+\underbrace{\frac{p_\theta(\text{obs},\text{hid})}{q(\text{hid})}}_{r(\text{hid})}\,
 \mathrm{d}\,\text{hid}.
 \]
-The integral now has the form of the
-\hyperref[thm:lazy]{law of the lazy statistician}: it is the expected value of
-$p_\theta(\text{obs},\text{hid})/q(\text{hid})$ when the hidden variable has
-distribution $q$:
+By the \hyperref[thm:lazy]{law of the lazy statistician}:
 \[
-\log p_\theta(\text{obs})=\log\,\mathbb{E}_q\!\left[\frac{p_\theta(\text{obs},\text{hid})}{q(\text{hid})}\right],
-\]
-where $\mathbb{E}_q$ means that $\text{hid}\sim q$. We now have the logarithm of an
+\log p_\theta(\text{obs})=\log\,\mathbb{E}_q\big(r(\text{hid})\big)
+=\log\,\mathbb{E}_q\!\left[\frac{p_\theta(\text{obs},\text{hid})}{q(\text{hid})}\right].
+\] We now have the logarithm of an
 expected value, and $\log$ is concave: this is exactly the situation of
 \hyperref[thm:jensen]{Jensen's inequality}.
 
-Since $\log$ is concave, Jensen's inequality says that the logarithm of the
-mean is at least the mean of the logarithm:
+By Jensen's inequality:
 \[
 \log p_\theta(\text{obs})=\log\,\mathbb{E}_q\!\left[\frac{p_\theta(\text{obs},\text{hid})}{q(\text{hid})}\right]
 \;\ge\;\mathbb{E}_q\!\left[\log\frac{p_\theta(\text{obs},\text{hid})}{q(\text{hid})}\right]
@@ -1781,7 +1778,9 @@ mean is at least the mean of the logarithm:
 What have we gained? On the left we still have the logarithm of a sum, the
 one that blocked us in problem~\spadeproblem. On the right the logarithm has
 moved inside the expected value, so we take the logarithm of each term
-instead of the logarithm of their sum. For a \hyperref[def:gmm]{GMM} the
+instead of the logarithm of their sum.
+
+For a \hyperref[def:gmm]{GMM} the
 terms are $\log\big(\pi_j\,\mathcal{N}(o\mid\mu_j,\sigma_j^2)\big)$, which
 split into simple pieces, as in the case with labels of
 Proposition~\ref{prop:mle-gmm-labels}.
