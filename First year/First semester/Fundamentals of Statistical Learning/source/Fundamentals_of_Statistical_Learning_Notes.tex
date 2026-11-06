@@ -61,6 +61,10 @@
   boxsep=0pt,fontupper=\footnotesize\sffamily\bfseries}
 \newcommand{\withlabels}{\casetagbox[TagBlue]{With labels}}
 \newcommand{\withoutlabels}{\casetagbox[TagRed]{Without labels}}
+% Tags for the two steps of the EM algorithm.
+\definecolor{TagOrange}{HTML}{B2562C}
+\newcommand{\esteptag}{\casetagbox[TagBlue]{E-step}}
+\newcommand{\msteptag}{\casetagbox[TagOrange]{M-step}}
 
 % "Important" box for open problems we come back to later.
 \definecolor{ImportantFrame}{HTML}{8A5A00}
@@ -1975,6 +1979,7 @@ fixed:
 \end{enumerate}
 \end{framedalgo}
 
+\esteptag\par\smallskip
 Which $q$ does the E-step choose? Recall from
 Section~\ref{sec:information-gap} that
 \[
@@ -1990,8 +1995,13 @@ q^{(t)}(\text{hid})=p_{\theta^{(t-1)}}(\text{hid}\mid\text{obs}),
 \]
 if we can compute it.
 
-Does EM really climb $\log p_\theta(\text{obs})$, the target we want to
-maximise? Let us follow one round. At the beginning we are at
+\msteptag\par\smallskip
+The M-step, instead, depends on the model: for a
+\hyperref[def:gmm]{GMM} we will see it in the next lecture.
+
+\vspace{\baselineskip}
+Whatever form the M-step takes, does one round of EM really climb $\log p_\theta(\text{obs})$, the
+target we want to maximise? Let us follow one round. At the beginning we are at
 $\log p_{\theta^{(t-1)}}(\text{obs})$. Then:
 \[
 \log p_{\theta^{(t-1)}}(\text{obs})
