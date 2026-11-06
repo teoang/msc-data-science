@@ -378,16 +378,75 @@ dev.off()
 # ELBO sketch: the log-likelihood and a lower bound F(q, theta) that never exceeds it.
 pdf("assets/elbo-sketch.pdf", width = 5.2, height = 2.5,
     family = "Helvetica", useDingbats = FALSE)
-par(mar = c(2.6, 1.2, .6, .6), mgp = c(1.6, .45, 0), las = 1, cex = .78)
+par(mar = c(1.6, 1.2, .6, .6), mgp = c(1.6, .45, 0), las = 1, cex = .78)
 tt <- seq(0, 10, length.out = 600)
 lp <- 3 + 1.2 * exp(-(tt - 4)^2 / 6) + .8 * exp(-(tt - 7.5)^2 / 1.5)
 fq <- 2.2 + 1.3 * exp(-(tt - 5)^2 / 5)
-plot(tt, lp, type = "n", xlab = expression(theta), ylab = "", xaxt = "n",
+plot(tt, lp, type = "n", xlab = "", ylab = "", xaxt = "n",
      yaxt = "n", ylim = c(1.8, 4.8), yaxs = "i")
+title(xlab = expression(theta), line = .5)
 grid(col = grid_col)
 lines(tt, lp, col = blue, lwd = 2.2)
 lines(tt, fq, col = orange, lwd = 2.2, lty = 2)
 legend("topleft", bty = "n", cex = .85, lwd = 2.2, lty = c(1, 2),
        col = c(blue, orange),
        legend = c(expression(log ~ p[theta](obs)), expression(F(q, theta))))
+dev.off()
+
+# ELBO before and after a change of theta: F goes up, log p_theta(obs) goes down.
+elbo_lp <- function(t) 3 + 1.2 * exp(-(t - 4)^2 / 6) + .8 * exp(-(t - 7.5)^2 / 1.5)
+elbo_fq <- function(t) 2.2 + 1.3 * exp(-(t - 5)^2 / 5)
+elbo_panel <- function(file, t_now, t_old = NULL, label) {
+  pdf(file, width = 3.6, height = 2.6, family = "Helvetica", useDingbats = FALSE)
+  par(mar = c(2.6, 1.2, 1.4, .6), mgp = c(1.6, .45, 0), las = 1, cex = .78)
+  tt <- seq(0, 10, length.out = 600)
+  plot(tt, elbo_lp(tt), type = "n", xlab = "", ylab = "", xaxt = "n",
+       yaxt = "n", ylim = c(1.8, 4.8), yaxs = "i", main = label,
+       cex.main = 1, font.main = 1)
+  axis(1, at = c(t_old, t_now),
+       labels = if (is.null(t_old)) expression(theta[old])
+                else expression(theta[old], theta[new]))
+  grid(col = grid_col)
+  lines(tt, elbo_lp(tt), col = blue, lwd = 2.2)
+  lines(tt, elbo_fq(tt), col = orange, lwd = 2.2, lty = 2)
+  if (!is.null(t_old)) {
+    points(c(t_old, t_old), c(elbo_lp(t_old), elbo_fq(t_old)),
+           pch = 21, col = "grey55", bg = "white", cex = 1.1)
+    segments(t_old, elbo_fq(t_old), t_old, elbo_lp(t_old), col = "grey65",
+             lty = 3)
+  }
+  segments(t_now, elbo_fq(t_now), t_now, elbo_lp(t_now), col = ink, lty = 3)
+  points(t_now, elbo_lp(t_now), pch = 19, col = blue, cex = 1.1)
+  points(t_now, elbo_fq(t_now), pch = 19, col = orange, cex = 1.1)
+  legend("topleft", bty = "n", cex = .8, lwd = 2.2, lty = c(1, 2),
+         col = c(blue, orange),
+         legend = c(expression(log ~ p[theta](obs)), expression(F(q, theta))))
+  dev.off()
+}
+elbo_panel("assets/elbo-before.pdf", t_now = 7.5, label = "Before")
+elbo_panel("assets/elbo-after.pdf", t_now = 6, t_old = 7.5, label = "After")
+cat("before lp", elbo_lp(7.5), "F", elbo_fq(7.5), "after lp", elbo_lp(6), "F", elbo_fq(6), "\n")
+
+# ELBO with q equal to the posterior at theta_old: it touches log p_theta(obs) there.
+pdf("assets/elbo-touch.pdf", width = 5.2, height = 2.8,
+    family = "Helvetica", useDingbats = FALSE)
+par(mar = c(1.8, 1.2, .6, .6), mgp = c(1.6, .45, 0), las = 1, cex = .78)
+t0 <- 7.5
+elbo_touch <- function(t) elbo_lp(t) - .12 * (t - t0)^2
+tt <- seq(0, 10, length.out = 600)
+plot(tt, elbo_lp(tt), type = "n", xlab = "", ylab = "", xaxt = "n",
+     yaxt = "n", ylim = c(1.8, 4.8), yaxs = "i")
+axis(1, at = t0, labels = expression(theta[old]))
+grid(col = grid_col)
+lines(tt, elbo_fq(tt), col = "grey70", lwd = 1.6, lty = 2)
+lines(tt, elbo_lp(tt), col = blue, lwd = 2.2)
+lines(tt, elbo_touch(tt), col = orange, lwd = 2.2, lty = 2)
+segments(t0, 1.8, t0, elbo_lp(t0), col = ink, lty = 3)
+points(t0, elbo_lp(t0), pch = 21, col = ink, bg = orange, cex = 1.2)
+legend("topleft", bty = "n", cex = .8, lwd = c(2.2, 2.2, 1.6),
+       lty = c(1, 2, 2), col = c(blue, orange, "grey70"),
+       legend = c(expression(log ~ p[theta](obs)),
+                  expression(F(q, theta) ~ "with" ~
+                             q == p[theta[old]](hid ~ "|" ~ obs)),
+                  expression(F(q, theta) ~ "with the" ~ q ~ "of Example 18")))
 dev.off()

@@ -36,9 +36,14 @@
 % Each lecture start is a link target and an entry of the lecture list on
 % the first page (\lecturelist), so new lectures appear there automatically.
 \makeatletter
-\newcommand{\lecturestart}[1]{\lecturebanner{%
-  \phantomsection\addcontentsline{lec}{lecture}{#1}Start of lecture #1}}
+% A lecture in two parts uses \lecturestart[parts]{date}: its entry then
+% lists "First part", and \lecturesecond{date} adds "Second part".
+\newcommand{\lecturestart}[2][]{\lecturebanner{%
+  \phantomsection\addcontentsline{lec}{lecture}{#2}%
+  \ifx\relax#1\relax\else\addcontentsline{lec}{lecturepart}{First part}\fi
+  Start of lecture #2}}
 \newcommand{\l@lecture}[2]{\par\noindent#1\dotfill#2\par}
+\newcommand{\l@lecturepart}[2]{\par\nobreak\noindent\hspace*{1.5em}#1\dotfill#2\par}
 \newcommand{\lecturelist}{\@starttoc{lec}}
 \makeatother
 % An example that continues an earlier one: "Example 5 part 2: <same title>".
@@ -74,7 +79,9 @@
   before upper={\tcbset{notesbox/.append style={opacityback=0.22,
     opacityframe=0.22,opacitytext=0.22,opacitybacktitle=0.22,
     opacitytitle=0.22}}}}
-\newcommand{\lecturesecond}[1]{\lecturebanner{Start of the second part of lecture #1}}
+\newcommand{\lecturesecond}[1]{\lecturebanner{%
+  \phantomsection\addcontentsline{lec}{lecturepart}{Second part}%
+  Start of the second part of lecture #1}}
 
 \notestitle{FSL}
 \notessubtitle{Fundamentals of statistical learning, rebuilt from scratch}
@@ -1699,7 +1706,7 @@ is increasing. The arithmetic mean is always at least the geometric mean:
 for $1$ and $4$, $2.5\ge\sqrt{4}=2$.
 \end{framedexample}
 
-\lecturestart{4 November}
+\lecturestart[parts]{4 November}
 
 Jensen's inequality also gives back Proposition~\ref{prop:linear}. What
 happens if $r$ is both convex and concave? Then the segment between two
@@ -1826,8 +1833,31 @@ curve we care about.
 \includegraphics[width=.72\linewidth]{assets/elbo-sketch.pdf}
 \end{center}
 
-But does raising $F$ really raise $\log p_\theta(\text{obs})$ as well? That depends
-on how wide the gap between the two curves is.
+But does raising $F$ really raise $\log p_\theta(\text{obs})$ as well? Not
+necessarily, as the next example shows.
+
+% Keep the text and both plots of this example on one page.
+\begingroup
+\tcbset{examplebox/.append style={unbreakable}}
+\begin{framedexample}{Raising $F$ while $\log p_\theta(\text{obs})$ goes down}\label{ex:elbo-before-after}
+Keep $q$ fixed and take the two curves of the plot above. We start from
+$\theta_{\text{old}}$, where $\log p_\theta(\text{obs})$ is close to its
+highest point and $F(q,\theta)$ lies far below it. Then we move to
+$\theta_{\text{new}}$, chosen so that $F$ goes up. In the plot on the
+right the hollow points mark where we were: the orange point has risen, but
+the blue one has gone down. Raising $F$ has lowered the log-likelihood.
+
+\begin{center}
+\includegraphics[width=.49\linewidth]{assets/elbo-before.pdf}\hfill
+\includegraphics[width=.49\linewidth]{assets/elbo-after.pdf}
+\end{center}
+\end{framedexample}
+\endgroup
+
+Whether raising $F$ raises $\log p_\theta(\text{obs})$ depends on how wide
+the gap between the two curves is: at $\theta_{\text{old}}$ the gap was so
+wide that $F$ could rise a lot without telling us anything about
+$\log p_\theta(\text{obs})$.
 
 \lecturesecond{4 November}
 
@@ -1900,7 +1930,16 @@ q(\text{hid})=p_\theta(\text{hid}\mid\text{obs}).
 \]
 This answers our question: if we choose $q$ as the distribution of the
 hidden variable given what we observe, the two curves touch, and
-$F(q,\theta)=\log p_\theta(\text{obs})$ at that $\theta$. How can we use
-this to climb $\log p_\theta(\text{obs})$?
+$F(q,\theta)=\log p_\theta(\text{obs})$ at that $\theta$.
+
+In the plot below we take $\theta_{\text{old}}$ of
+Example~\ref{ex:elbo-before-after} again and choose
+$q=p_{\theta_{\text{old}}}(\text{hid}\mid\text{obs})$.
+
+\begin{center}
+\includegraphics[width=.72\linewidth]{assets/elbo-touch.pdf}
+\end{center}
+
+How can we use this to climb $\log p_\theta(\text{obs})$?
 
 \end{document}
