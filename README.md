@@ -170,6 +170,15 @@
 - [x] The M-step: the expected complete log-likelihood of a GMM, centres and spreads as weighted averages, and the weights.
 - [ ] Constrained optimisation and Lagrange multipliers for the weights.
 
+**6 November**
+
+- [x] Prediction under perfect information: loss and risk functions; the square loss gives the expected value (MSE), the abs loss the median (MAE).
+- [x] Variance, standard deviation and the median absolute deviation; shift and scale; existence and degeneracy of the variance.
+- [x] The variance from the moments, higher moments and the existence of lower moments.
+- [x] Expected value of a random vector: linear combinations and products of independent variables.
+- [x] The covariance matrix and the variance of a linear combination; independent variables have zero covariance.
+- [x] Conditioning: conditional expectation and variance, the law of total expectation and the law of total probability.
+
 </details>
 
 <details>

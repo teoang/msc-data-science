@@ -2747,4 +2747,272 @@ out all the other coordinates leaves the marginal density of $X_j$:
 \]
 \end{proof}
 
+\subsection{Products of independent variables}\label{sec:product}
+
+A weighted sum is not the only way to turn $p$ numbers into one. What
+happens to the expected value of a product,
+\[
+Y=r(X_1,\ldots,X_p)=\prod_{j=1}^pX_j\,?
+\]
+
+\begin{framedprop}{Expected value of a product}\label{prop:product}
+Let $\underline{X}=(X_1,\ldots,X_p)^{\mathsf T}$ have independent
+components with $\mu_j=\mathbb{E}(X_j)$, and let $Y=\prod_{j=1}^pX_j$. Then
+\[
+\mathbb{E}(Y)=\prod_{j=1}^p\mu_j .
+\]
+\end{framedprop}
+
+\begin{proof}[Proof (continuous case)]
+By the \hyperref[sec:lazy]{law of the lazy statistician},
+\[
+\mathbb{E}(Y)=\int_{\mathbb{R}^p}\prod_{j=1}^px_j\,f_{\underline{X}}(x_1,\ldots,x_p)\,\mathrm{d}x_1\cdots\mathrm{d}x_p .
+\]
+The components are independent, so the joint density is the product of the
+marginal densities:
+\[
+f_{\underline{X}}(x_1,\ldots,x_p)=\prod_{j=1}^pf_{X_j}(x_j).
+\]
+The integrand is now a product of $p$ factors, each depending on one
+coordinate only, so the $p$-fold integral splits into $p$ single integrals:
+\[
+\mathbb{E}(Y)=\prod_{j=1}^p\underbrace{\int_{\mathbb{R}}x_j\,f_{X_j}(x_j)\,\mathrm{d}x_j}_{\mathbb{E}(X_j)=\mu_j}
+=\prod_{j=1}^p\mu_j .
+\]
+\end{proof}
+
+\subsection{Variance of a linear combination}\label{sec:var-linear}
+
+Let us take the linear combination $Y=\underline{\alpha}^{\mathsf T}\underline{X}$
+of Proposition~\ref{prop:linear-vector} again. There we found
+$\mathbb{E}(Y)=\underline{\alpha}^{\mathsf T}\underline{\mu}$. How spread out is $Y$?
+
+By the \hyperref[prop:var-moments]{variance from the moments},
+\[
+\mathrm{Var}(Y)=\mathbb{E}\big((\underline{\alpha}^{\mathsf T}\underline{X})^2\big)
+-\big(\underbrace{\mathbb{E}(\underline{\alpha}^{\mathsf T}\underline{X})}_{\underline{\alpha}^{\mathsf T}\underline{\mu}}\big)^2 .
+\]
+Both terms are squares of numbers. A number is equal to its transpose, so
+$\underline{\alpha}^{\mathsf T}\underline{X}=\underline{X}^{\mathsf T}\underline{\alpha}$,
+and
+\[
+(\underline{\alpha}^{\mathsf T}\underline{X})^2
+=\underbrace{\underline{\alpha}^{\mathsf T}}_{1\times p}\,
+\underbrace{\underline{X}\,\underline{X}^{\mathsf T}}_{p\times p}\,
+\underbrace{\underline{\alpha}}_{p\times1},
+\qquad
+(\underline{\alpha}^{\mathsf T}\underline{\mu})^2
+=\underbrace{\underline{\alpha}^{\mathsf T}}_{1\times p}\,
+\underbrace{\underline{\mu}\,\underline{\mu}^{\mathsf T}}_{p\times p}\,
+\underbrace{\underline{\alpha}}_{p\times1}.
+\]
+The matrix $\underline{X}\,\underline{X}^{\mathsf T}$ is random, with entries
+$X_iX_j$. Its expected value is taken entry by entry, and by
+\hyperref[prop:linear-vector]{linearity} the constant $\underline{\alpha}$
+comes out of it:
+\[
+\mathbb{E}\big(\underline{\alpha}^{\mathsf T}\,\underline{X}\,\underline{X}^{\mathsf T}\,\underline{\alpha}\big)
+=\underline{\alpha}^{\mathsf T}\,\mathbb{E}\big(\underline{X}\,\underline{X}^{\mathsf T}\big)\,\underline{\alpha}.
+\]
+So the two terms of the variance are
+\[
+\mathrm{Var}(Y)=\underbrace{\underline{\alpha}^{\mathsf T}\,\mathbb{E}\big(\underline{X}\,\underline{X}^{\mathsf T}\big)\,\underline{\alpha}}_{\mathbb{E}\left((\underline{\alpha}^{\mathsf T}\underline{X})^2\right)}
+-\underbrace{\underline{\alpha}^{\mathsf T}\,\underline{\mu}\,\underline{\mu}^{\mathsf T}\,\underline{\alpha}}_{(\underline{\alpha}^{\mathsf T}\underline{\mu})^2}.
+\]
+Both have $\underline{\alpha}^{\mathsf T}$ on the left and $\underline{\alpha}$
+on the right, so we collect them:
+\[
+\mathrm{Var}(Y)=\underline{\alpha}^{\mathsf T}\Big[\mathbb{E}\big(\underline{X}\,\underline{X}^{\mathsf T}\big)-\underline{\mu}\,\underline{\mu}^{\mathsf T}\Big]\underline{\alpha}.
+\]
+The $p\times p$ matrix in brackets does not depend on $\underline{\alpha}$:
+it belongs to $\underline{X}$ alone, and it gets a name.
+
+\begin{frameddefn}{Covariance matrix}\label{def:covariance}
+The \textbf{covariance matrix} of $\underline{X}$, with
+$\underline{\mu}=\mathbb{E}(\underline{X})$, is the $p\times p$ matrix
+\[
+\mathrm{Cov}(\underline{X})=\mathbb{E}\big(\underline{X}\,\underline{X}^{\mathsf T}\big)-\underline{\mu}\,\underline{\mu}^{\mathsf T},
+\]
+where
+\[
+\underline{X}\,\underline{X}^{\mathsf T}=\begin{pmatrix}X_1X_1&X_1X_2&\cdots&X_1X_p\\X_2X_1&X_2X_2&\cdots&X_2X_p\\\vdots&\vdots&\ddots&\vdots\\X_pX_1&X_pX_2&\cdots&X_pX_p\end{pmatrix},
+\qquad
+\underline{\mu}\,\underline{\mu}^{\mathsf T}=\begin{pmatrix}\mu_1\mu_1&\mu_1\mu_2&\cdots&\mu_1\mu_p\\\mu_2\mu_1&\mu_2\mu_2&\cdots&\mu_2\mu_p\\\vdots&\vdots&\ddots&\vdots\\\mu_p\mu_1&\mu_p\mu_2&\cdots&\mu_p\mu_p\end{pmatrix}.
+\]
+Its entry $(i,j)$ is the \textbf{covariance} of $X_i$ and $X_j$,
+\[
+\mathrm{Cov}(X_i,X_j)=\mathbb{E}(X_iX_j)-\mathbb{E}(X_i)\,\mathbb{E}(X_j)
+=\mathbb{E}\big((X_i-\mu_i)(X_j-\mu_j)\big),
+\]
+where $\mathbb{E}(X_iX_j)$ is the \textbf{cross-moment} of $X_i$ and $X_j$.
+\end{frameddefn}
+
+Two facts can be read off the definition.
+\begin{enumerate}
+\item The matrix is symmetric, because $X_iX_j=X_jX_i$.
+\item On the diagonal, $i=j$ gives
+\[
+\mathrm{Cov}(X_j,X_j)=\mathbb{E}(X_j^2)-\mathbb{E}(X_j)^2=\mathrm{Var}(X_j).
+\]
+\end{enumerate}
+
+\begin{framedprop}{Variance of a linear combination}\label{prop:var-linear}
+Let $\underline{X}$ be a random vector, let $\underline{\alpha}\in\mathbb{R}^p$
+be a vector of constants, and let $Y=\underline{\alpha}^{\mathsf T}\underline{X}$.
+Then
+\[
+\mathrm{Var}(Y)=\underline{\alpha}^{\mathsf T}\,\mathrm{Cov}(\underline{X})\,\underline{\alpha}
+=\sum_{j=1}^p\alpha_j^2\,\mathrm{Var}(X_j)+2\sum_{i<j}\alpha_i\alpha_j\,\mathrm{Cov}(X_i,X_j).
+\]
+\end{framedprop}
+
+\begin{proof}
+The first equality is the computation above. For the second, write the
+product as a double sum over the entries of the matrix:
+\[
+\underline{\alpha}^{\mathsf T}\,\mathrm{Cov}(\underline{X})\,\underline{\alpha}
+=\sum_{i=1}^p\sum_{j=1}^p\alpha_i\alpha_j\,\mathrm{Cov}(X_i,X_j).
+\]
+The terms with $i=j$ are on the diagonal and give
+$\alpha_j^2\,\mathrm{Var}(X_j)$. The matrix is symmetric, so each term with
+$i<j$ appears a second time as $j<i$, hence the factor $2$.
+\end{proof}
+
+When does the covariance vanish? Take $p=2$ in the
+\hyperref[prop:product]{expected value of a product}: if $X_i$ and $X_j$
+are independent, then $\mathbb{E}(X_iX_j)=\mathbb{E}(X_i)\,\mathbb{E}(X_j)$,
+so
+\[
+\mathrm{Cov}(X_i,X_j)=0 .
+\]
+
+\begin{notebox}[The converse is false]
+A zero covariance does not imply independence. Let $X$ take the values
+$-1,0,1$ with probability $\tfrac13$ each, and $Y=X^2$. Then $Y$ is a
+function of $X$, so they are far from independent, yet
+\[
+\mathrm{Cov}(X,Y)=\underbrace{\mathbb{E}(X^3)}_{0}-\underbrace{\mathbb{E}(X)}_{0}\,\mathbb{E}(X^2)=0 .
+\]
+\end{notebox}
+
+So with independent components every covariance is zero, and only the
+diagonal of Proposition~\ref{prop:var-linear} survives.
+
+\begin{framedcor}{Variance of a sum of independent variables}\label{cor:var-independent}
+If the components of $\underline{X}$ are independent, then
+\[
+\mathrm{Var}\Big(\sum_{j=1}^p\alpha_jX_j\Big)=\sum_{j=1}^p\alpha_j^2\,\mathrm{Var}(X_j).
+\]
+In particular, with all $\alpha_j=1$, the variance of a sum is the sum of
+the variances.
+\end{framedcor}
+
+\section{Conditioning}\label{sec:conditioning}
+
+Take two variables, $p=2$:
+\[
+\begin{pmatrix}X\\ Y\end{pmatrix}\sim F_{X,Y}.
+\]
+Suppose we observe $X=x$. What do we now expect from $Y$? Knowing $x$
+changes the distribution of $Y$: it becomes the conditional distribution
+$F_{Y|X}(y\,|\,x)$, with density
+\[
+f_{Y|X}(y\,|\,x)=\frac{f_{X,Y}(x,y)}{f_X(x)} .
+\]
+Like any distribution, it has a centre and a spread.
+
+\begin{frameddefn}{Conditional expectation and variance given $X=x$}\label{def:conditional-x}
+The \textbf{conditional expectation} and the \textbf{conditional variance}
+of $Y$ given $X=x$ are
+\begin{gather*}
+\mathbb{E}(Y\,|\,X=x)=\int_{\mathbb{R}}y\,\mathrm{d}F_{Y|X}(y\,|\,x),\\
+\mathrm{Var}(Y\,|\,X=x)=\int_{\mathbb{R}}\big(y-\mathbb{E}(Y\,|\,X=x)\big)^2\,\mathrm{d}F_{Y|X}(y\,|\,x).
+\end{gather*}
+Both are numbers, which depend on $x$. Swapping the roles of $X$ and $Y$
+gives $\mathbb{E}(X\,|\,Y=y)$ and $\mathrm{Var}(X\,|\,Y=y)$.
+\end{frameddefn}
+
+Before we observe $X$, we do not know $x$. The number
+$\mathbb{E}(Y\,|\,X=x)$ then becomes a function of the random variable $X$.
+
+\begin{frameddefn}{Conditional expectation}\label{def:conditional}
+Let $r(x)=\mathbb{E}(Y\,|\,X=x)$. The \textbf{conditional expectation} of
+$Y$ given $X$ is the random variable
+\[
+\mathbb{E}(Y\,|\,X)=r(X).
+\]
+\end{frameddefn}
+
+So $\mathbb{E}(Y\,|\,X=x)$ is a number, while $\mathbb{E}(Y\,|\,X)$ is a
+random variable with its own distribution. Since it is a random variable,
+we can take its expected value. What do we get?
+
+\begin{framedthm}{Law of total expectation}\label{thm:total-expectation}
+For random variables $X$ and $Y$,
+\[
+\mathbb{E}_Y(Y)=\mathbb{E}_X\big(\mathbb{E}_{Y|X}(Y\,|\,X)\big).
+\]
+\end{framedthm}
+
+\begin{proof}[Proof (continuous case)]
+$\mathbb{E}(Y\,|\,X)=r(X)$ is a function of $X$, so by the
+\hyperref[sec:lazy]{law of the lazy statistician}
+\[
+\mathbb{E}_X\big(\mathbb{E}(Y\,|\,X)\big)=\int_{\mathbb{R}}r(x)\,f_X(x)\,\mathrm{d}x
+=\int_{\mathbb{R}}\Big(\int_{\mathbb{R}}y\,f_{Y|X}(y\,|\,x)\,\mathrm{d}y\Big)f_X(x)\,\mathrm{d}x .
+\]
+Bring $f_X(x)$ inside and use the conditional density:
+\[
+\underbrace{f_{Y|X}(y\,|\,x)\,f_X(x)}_{f_{X,Y}(x,y)}
+\quad\Longrightarrow\quad
+\mathbb{E}_X\big(\mathbb{E}(Y\,|\,X)\big)=\int_{\mathbb{R}}\int_{\mathbb{R}}y\,f_{X,Y}(x,y)\,\mathrm{d}y\,\mathrm{d}x .
+\]
+Swap the order of integration. The factor $y$ does not depend on $x$, so it
+comes out of the inner integral, which leaves the marginal density of $Y$:
+\[
+\mathbb{E}_X\big(\mathbb{E}(Y\,|\,X)\big)
+=\int_{\mathbb{R}}y\underbrace{\Big(\int_{\mathbb{R}}f_{X,Y}(x,y)\,\mathrm{d}x\Big)}_{f_Y(y)}\mathrm{d}y
+=\int_{\mathbb{R}}y\,f_Y(y)\,\mathrm{d}y=\mathbb{E}_Y(Y).
+\]
+\end{proof}
+
+The law tells a story in two steps, the same as for the
+\hyperref[marginal]{hidden variables}: first $X$ is drawn from its
+distribution, then $Y$ is drawn given that value of $X$. To get the overall
+average of $Y$, we average the conditional averages
+$\mathbb{E}(Y\,|\,X=x)$, each weighted by how likely its $x$ is.
+
+A first consequence is a familiar rule for events.
+
+\begin{framedcor}{Law of total probability}\label{cor:total-probability}
+For any events $A$ and $B$,
+\[
+P(B)=P(B\,|\,A)\,P(A)+P(B\,|\,A^c)\,P(A^c).
+\]
+\end{framedcor}
+
+\begin{proof}
+Take the indicators of the two events,
+\[
+X=\mathbb{I}_A\sim\mathrm{Bern}\big(P(A)\big),\qquad
+Y=\mathbb{I}_B\sim\mathrm{Bern}\big(P(B)\big),
+\]
+so that $X=1$ if $A$ occurs and $X=0$ otherwise. Since
+\hyperref[cor:prob-expected]{probabilities are expected values},
+$\mathbb{E}(Y)=P(B)$. Given $X=1$, the event $A$ has occurred, so $Y=1$
+with probability $P(B\,|\,A)$; given $X=0$, with probability
+$P(B\,|\,A^c)$:
+\[
+\mathbb{E}(Y\,|\,X=1)=P(B\,|\,A),\qquad
+\mathbb{E}(Y\,|\,X=0)=P(B\,|\,A^c).
+\]
+So $\mathbb{E}(Y\,|\,X)$ takes the value $P(B\,|\,A)$ with probability
+$P(A)$ and the value $P(B\,|\,A^c)$ with probability $P(A^c)$. The
+\hyperref[thm:total-expectation]{law of total expectation} gives
+\[
+P(B)=\mathbb{E}(Y)=\mathbb{E}\big(\mathbb{E}(Y\,|\,X)\big)
+=P(B\,|\,A)\,P(A)+P(B\,|\,A^c)\,P(A^c).
+\]
+\end{proof}
+
 \end{document}
