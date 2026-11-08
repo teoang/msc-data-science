@@ -545,3 +545,37 @@ segments(0, 1.1, 1, 1.1, col = orange, lwd = 3.5)
 text(.5, 1.1, "medians: [0, 1]", pos = 3, offset = 1.6, cex = .8,
      col = orange)
 dev.off()
+
+# Shift and scale: alpha moves the density, beta stretches it.
+var_panel <- function(file, xlim, m2, s2, label2, main, where = "topright") {
+  pdf(file, width = 3.2, height = 2.4, family = "Helvetica", useDingbats = FALSE)
+  par(mar = c(2.6, 2.2, 1.4, .4), mgp = c(1.6, .45, 0), las = 1, cex = .8)
+  xx <- seq(xlim[1], xlim[2], length.out = 600)
+  plot(NA, xlim = xlim, ylim = c(-.07, .43), xlab = "", ylab = "",
+       yaxt = "n", main = main, cex.main = 1, font.main = 1)
+  grid(col = grid_col)
+  lines(xx, dnorm(xx), col = blue, lwd = 2.2)
+  lines(xx, dnorm(xx, m2, s2), col = orange, lwd = 2.2, lty = 2)
+  # one standard deviation on each side of the centre
+  segments(-1, -.035, 1, -.035, col = blue, lwd = 3)
+  segments(m2 - s2, -.065, m2 + s2, -.065, col = orange, lwd = 3)
+  legend(where, c("X", label2), col = c(blue, orange), lwd = 2,
+         lty = c(1, 2), bty = "n", cex = .85)
+  dev.off()
+}
+var_panel("assets/var-shift.pdf", c(-3.5, 6.5), 3, 1, "X + 3",
+          "(1)", "topleft")
+var_panel("assets/var-scale.pdf", c(-6, 6), 0, 2, "2X",
+          "(2)")
+
+# A degenerate distribution: all the probability sits on E(X).
+pdf("assets/degenerate.pdf", width = 4.2, height = 2.4,
+    family = "Helvetica", useDingbats = FALSE)
+par(mar = c(2.6, 3.6, .6, .6), mgp = c(1.6, .45, 0), las = 1, cex = .8)
+plot(NA, xlim = c(0, 4), ylim = c(0, 1.12), xlab = "x", ylab = "")
+grid(col = grid_col)
+mtext("P(X = x)", side = 2, line = 2.4, las = 0, cex = .8)
+segments(2, 0, 2, 1, col = orange, lwd = 6, lend = 1)
+text(2, 1, "P(X = 2) = 1", pos = 4, offset = .7, cex = .8, col = orange)
+text(2, .86, "E(X) = 2", pos = 4, offset = .7, cex = .8, col = ink)
+dev.off()

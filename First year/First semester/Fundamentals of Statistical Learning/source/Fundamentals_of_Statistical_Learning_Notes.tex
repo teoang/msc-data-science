@@ -1515,7 +1515,7 @@ The law is everywhere, and it starts paying off at once. A first surprise:
 probabilities themselves are expected values. Taking as $r$ the indicator function
 $\mathbb{I}_A$ of an event $A$ gives the following result.
 
-\begin{framedcor}{Probabilities are expected values}
+\begin{framedcor}{Probabilities are expected values}\label{cor:prob-expected}
 For any event $A$,
 \[
 \mathbb{E}\big(\mathbb{I}_A(X)\big)=\int_{\mathbb{R}} \mathbb{I}_A(x)\,f_X(x)\,\mathrm{d}x
@@ -2523,6 +2523,7 @@ The \textbf{median absolute deviation} of $X$ is
 
 Like the median, it is barely moved by extreme values.
 
+\vspace{\baselineskip}
 How does the variance react if we shift and rescale $X$? Recall from
 Proposition~\ref{prop:linear} that
 \[
@@ -2534,6 +2535,92 @@ $(\alpha+\beta X)-(\alpha+\beta\mu)=\beta(X-\mu)$, so
 \mathrm{Var}(\alpha+\beta X)=\mathbb{E}\big(\beta^2(X-\mu)^2\big)=\beta^2\,\mathrm{Var}(X).
 \]
 The shift $\alpha$ disappears: moving all values by the same amount does
-not change how spread out they are. The scale $\beta$ comes out squared.
+not change how spread out they are (plot 1). The scale $\beta$ comes out squared (plot 2).
+\begin{center}
+\includegraphics[width=.48\linewidth]{assets/var-shift.pdf}\hfill
+\includegraphics[width=.48\linewidth]{assets/var-scale.pdf}
+\end{center}
+
+\subsection{Existence and degeneracy}\label{sec:var-degeneracy}
+
+We now have the variance and know how it reacts to a shift and a scale.
+Two basic questions are still open. When is the variance a finite number?
+And what does a variance of zero tell us about $X$?
+
+\begin{framedprop}{Existence of the variance}\label{prop:var-exists}
+For every random variable $X$, $\mathrm{Var}(X)\ge0$. If $X$ is bounded,
+then $\mathrm{Var}(X)$ exists and is finite.
+\end{framedprop}
+
+The first part holds because
+\[
+\mathrm{Var}(X)=\mathbb{E}\big(\underbrace{(X-\mu)^2}_{\ge0}\big)\ge0 .
+\]
+
+For the second, let $|X|\le M$. Then
+$|\mu|\le M$ as well, so by the triangle inequality every gap is at most $2M$:
+\[
+|X-\mu|\le|X|+|\mu|\le 2M .
+\]
+Hence
+\[
+\mathrm{Var}(X)=\mathbb{E}\big((X-\mu)^2\big)\le(2M)^2<\infty .
+\]
+
+What if the variance is zero? On average, the squared gap from $\mu$ is
+zero, so $X$ seems never to move away from $\mu$. The next proposition
+makes this precise. ``Almost surely'' means ``with probability $1$''.
+
+\begin{framedprop}{Degeneracy}\label{prop:var-zero}
+Let $X$ have variance $\sigma^2$. Then
+\[
+\sigma^2=0
+\quad\Longleftrightarrow\quad
+X=\mathbb{E}(X)\ \text{almost surely}.
+\]
+\end{framedprop}
+
+\begin{proof}
+($\Leftarrow$) Assume $X=\mu$ almost surely, that is, $P(X=\mu)=1$. Then
+the squared gap is $0$ with probability $1$, so
+\[
+\sigma^2=\mathbb{E}\big(\underbrace{(X-\mu)^2}_{0\text{ a.s.}}\big)=0 .
+\]
+
+($\Rightarrow$) Assume $\sigma^2=0$ and fix a threshold $a>0$. We keep
+only the values of $X$ at least $a$ away from $\mu$, by multiplying by the
+indicator of that event. This can only make the expected value smaller:
+\[
+0=\sigma^2=\mathbb{E}\big((X-\mu)^2\big)
+\ge\mathbb{E}\big((X-\mu)^2\,\mathbb{I}_{\{|X-\mu|\ge a\}}\big).
+\]
+Where the indicator is $1$, the gap is at least $a$, so its square is at
+least $a^2$:
+\[
+\mathbb{E}\big((X-\mu)^2\,\mathbb{I}_{\{|X-\mu|\ge a\}}\big)
+\ge a^2\,\underbrace{\mathbb{E}\big(\mathbb{I}_{\{|X-\mu|\ge a\}}\big)}_{P(|X-\mu|\ge a)}.
+\]
+The underbrace holds because \hyperref[cor:prob-expected]{probabilities are
+expected values}. So $0\ge a^2\,P(|X-\mu|\ge a)$, and since $a^2>0$,
+\[
+P(|X-\mu|\ge a)=0\qquad\text{for every }a>0 .
+\]
+Finally, we let the threshold shrink to $0$. The event $\{|X-\mu|>0\}$ is
+the union of the events $\{|X-\mu|\ge a\}$, which grow as $a$ decreases, so
+\[
+P(X=\mu)=1-P(|X-\mu|>0)
+=1-\lim_{a\downarrow0}\underbrace{P(|X-\mu|\ge a)}_{0}
+=1-0=1 .
+\]
+\end{proof}
+
+So a random variable with zero variance is not really random: all its
+probability sits on the single value $\mathbb{E}(X)$. Such a distribution
+is called \textbf{degenerate}.
+\begin{center}
+\includegraphics[width=.6\linewidth]{assets/degenerate.pdf}
+\end{center}
+Here $X$ takes the value $2$ with probability $1$. Every gap from
+$\mathbb{E}(X)=2$ is $0$, so $\mathrm{Var}(X)=0$.
 
 \end{document}
