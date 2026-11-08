@@ -512,3 +512,36 @@ em_panel("E-step, t = 2", th[2], FALSE, expression(theta^(1)))
 em_panel("M-step, t = 2", th[2], TRUE, expression(theta^(1), theta^(2)))
 dev.off()
 cat("EM thetas", th, "lp", elbo_lp(th), "\n")
+
+# Risk of the share of the stock example as a function of the guess d.
+share_x <- c(-2, 0, 1, 3); share_p <- c(.1, .4, .3, .2)
+share_mse <- function(d) sapply(d, function(t) sum((share_x - t)^2 * share_p))
+share_mae <- function(d) sapply(d, function(t) sum(abs(share_x - t) * share_p))
+dd <- seq(-2.5, 3.5, length.out = 601)
+
+pdf("assets/share-mse.pdf", width = 4.8, height = 2.6,
+    family = "Helvetica", useDingbats = FALSE)
+par(mar = c(2.6, 3.6, .6, .6), mgp = c(1.6, .45, 0), las = 1, cex = .8)
+plot(dd, share_mse(dd), type = "n", xlab = "guess d", ylab = "", ylim = c(1, 12.3))
+grid(col = grid_col)
+mtext(expression(E(X - d)^2), side = 2, line = 2.4, las = 0, cex = .8)
+lines(dd, share_mse(dd), col = blue, lwd = 2.2)
+points(c(0, 1), share_mse(c(0, 1)), pch = 19, col = ink, cex = .8)
+text(c(0, 1), share_mse(c(0, 1)), c("d = 0", "d = 1"), pos = 1, offset = .6,
+     cex = .8, col = ink)
+points(.7, share_mse(.7), pch = 19, col = orange, cex = 1.1)
+text(.7, share_mse(.7), "E(X) = 0.7", pos = 3, offset = 1.6, cex = .8,
+     col = orange)
+dev.off()
+
+pdf("assets/share-mae.pdf", width = 4.8, height = 2.6,
+    family = "Helvetica", useDingbats = FALSE)
+par(mar = c(2.6, 3.6, .6, .6), mgp = c(1.6, .45, 0), las = 1, cex = .8)
+plot(dd, share_mae(dd), type = "n", xlab = "guess d", ylab = "")
+grid(col = grid_col)
+mtext("E|X - d|", side = 2, line = 2.4, las = 0, cex = .8)
+lines(dd, share_mae(dd), col = blue, lwd = 2.2)
+segments(0, 1.1, 1, 1.1, col = orange, lwd = 3.5)
+text(.5, 1.1, "medians: [0, 1]", pos = 3, offset = 1.6, cex = .8,
+     col = orange)
+dev.off()

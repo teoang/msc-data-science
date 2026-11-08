@@ -1072,7 +1072,7 @@ and receive a whole density curve, we have all the information but no
 answer. Can we describe $X$ with a few numbers instead of a whole function,
 accepting that we lose some information?
 
-\subsection{Median and quantiles}
+\subsection{Median and quantiles}\label{sec:median}
 
 The simplest \emph{summaries} pick a few points of the distribution and
 give up describing the entire curve. We have already met them with the
@@ -1137,7 +1137,7 @@ so a ticket costing more than 1\,\texteuro{} loses money in the long run.
 Using the expected value to decide whether a deal pays off is exactly what
 the next example does.
 
-\begin{framedexample}{A fair price for a stock}
+\begin{framedexample}{A fair price for a stock}\label{ex:stock}
 You have 18\,\texteuro{} and consider buying a share that costs 18\,\texteuro{} and
 holding it for one year. After one year the share is worth
 \[
@@ -1402,7 +1402,7 @@ the bulk of the distribution. When a model gives non-negligible probability
 to values very far from the centre, as the distribution of the next section
 does, other summaries such as the median can describe it better.
 
-\section{Property 2: it may not exist}
+\section{Property 2: it may not exist}\label{sec:may-not-exist}
 
 The condition ``and $\mathbb{E}(X)$ exists'' in
 Proposition~\ref{prop:symmetric} is not a formality. To see why, take a distribution that looks perfectly
@@ -1453,7 +1453,7 @@ so the condition fails and $\mathbb{E}(X)$ is not defined.
 Yet the Cauchy clearly has a centre: it is symmetric around $0$ and peaks
 there. If the expected value cannot describe it, what about the median?
 
-\section{Property 3: the law of the lazy statistician}
+\section{Property 3: the law of the lazy statistician}\label{sec:lazy}
 
 Often we are not interested in $X$ itself but in a transformation of it:
 its square $X^2$, its exponential $e^X$, a gain that depends on $X$.
@@ -1730,31 +1730,6 @@ Together they give
 \]
 which is Proposition~\ref{prop:linear} again.
 
-The last example compares the expected value with the median. For
-well-behaved random variables the two cannot be too far apart, and Jensen's
-inequality tells us how far.
-
-\begin{framedexample}{Expected value and median}
-Let $\mu=\mathbb{E}(X)$, assuming it exists, and let $m$ be the median of
-$X$. With the convex function $r(x)=|x|$,
-\begin{align*}
-|\mu-m|&=\big|\mathbb{E}(X)-m\big|=\big|\mathbb{E}(X-m)\big|
-&&\text{linear functions}\\
-&\le\mathbb{E}\,|X-m|&&\text{Jensen, $|x|$ convex}\\
-&\le\mathbb{E}\,|X-\mu|&&\text{(}\heartsuit\text{)}\\
-&=\mathbb{E}\sqrt{(X-\mu)^2}\\
-&\le\sqrt{\mathbb{E}(X-\mu)^2}&&\text{Jensen, $\sqrt{x}$ concave.}
-\end{align*}
-Step $(\heartsuit)$ uses a property of the median that we will prove in
-Property~5: among all constants $c$, the median minimises
-$\mathbb{E}\,|X-c|$. The last quantity,
-$\sigma=\sqrt{\mathbb{E}(X-\mu)^2}$, is the \textbf{standard deviation},
-which we will meet again with the variance. Hence
-\[
-|\mu-m|\le\sigma :
-\]
-the expected value and the median are at most one standard deviation apart.
-\end{framedexample}
 
 \subsection{Jensen and the ELBO}
 
@@ -2261,5 +2236,304 @@ Section~\ref{sec:em} the log-likelihood never goes down. This is the
 tool that problem~\spadeproblem\ was waiting for: without labels there is
 still no single formula for $\hat\theta$, but we can now fit a GMM by
 climbing its likelihood one round at a time.
+
+\lecturestart{6 November}
+
+\section{Property 5: variational characterisations}\label{sec:variational}
+
+So far we have seen the expected value as the centre of mass of $X$. Now we
+look at it from a different angle: as the answer to a prediction problem.
+
+Let us take the share of Example~\ref{ex:stock} again. Its price change
+over one year, $X$, has distribution
+\begin{center}
+\begin{tabular}{@{}lcccc@{}}
+\toprule
+$x$ (\texteuro) & $-2$ & $0$ & $1$ & $3$\\
+$P(X=x)$ & $0.1$ & $0.4$ & $0.3$ & $0.2$\\
+\bottomrule
+\end{tabular}
+\end{center}
+We must predict $X$ today, with a single number $d$.
+
+We know the distribution perfectly, but not the value: this year $X$ may be
+$-2$, $0$, $1$ or $3$, and we do not know which. This is \textbf{prediction under perfect information}.
+Which $d$ should we choose?
+
+First we must say how good or bad a guess is.
+
+\begin{frameddefn}{Loss function}\label{def:loss}
+A \textbf{loss function} $L(X,d)$ measures how bad the guess $d$ is when
+the value turns out to be $X$. The most used are
+\[
+\underbrace{(X-d)^2}_{\text{square loss}},\qquad
+\underbrace{|X-d|}_{\text{abs loss}},\qquad
+\underbrace{\mathbb{I}(X\neq d)}_{\text{0-1 loss}}.
+\]
+\end{frameddefn}
+
+The square loss punishes large errors much more than small ones, the abs
+loss punishes them in proportion to their size, and the 0-1 loss only
+checks whether the guess is exactly right, which makes sense when $X$ takes
+a few values, such as categories.
+
+There is a small problem. The loss depends on $X$, so it is a
+transformation of a random variable, and therefore a random variable
+itself, with its own distribution, possibly very complex. We cannot
+minimise a random variable.
+
+\begin{framedexamplepart}{ex:stock}{2}{A fair price for a stock}
+Let us take the share of Example~\ref{ex:stock} again, with the square loss,
+and compare the guesses $d=1$ and $d=0$. Which one gives the smaller loss?
+\begin{center}
+\begin{tabular}{@{}lcccc@{}}
+\toprule
+$x$ (\texteuro) & $-2$ & $0$ & $1$ & $3$\\
+$P(X=x)$ & $0.1$ & $0.4$ & $0.3$ & $0.2$\\
+\midrule
+loss with $d=1$, $(x-1)^2$ & $9$ & $1$ & $0$ & $4$\\
+loss with $d=0$, $x^2$ & $4$ & $0$ & $1$ & $9$\\
+\bottomrule
+\end{tabular}
+\end{center}
+Neither guess always wins: if $X$ is $-2$ or $0$, $d=0$ is better; if $X$
+is $1$ or $3$, $d=1$ is better. The answer depends on the value of $X$,
+which we do not know yet.
+\end{framedexamplepart}
+
+The usual solution is to squeeze it into a
+single number, and the classic choice to do it is its expected value.
+
+\begin{frameddefn}{Risk function}\label{def:risk}
+The \textbf{risk function} is the expected loss,
+\[
+R(d)=\mathbb{E}\,L(X,d)=\int_{\mathbb{R}}L(x,d)\,\mathrm{d}F_X(x),
+\]
+where the integral comes from the
+\hyperref[sec:lazy]{law of the lazy statistician}. The best guess
+minimises the risk:
+\[
+d^*=\operatorname*{arg\,min}_{d}\ \mathbb{E}\,L(X,d).
+\]
+\end{frameddefn}
+
+The best guess depends on the loss we pick. What is $d^*$ for the square
+loss?
+
+\subsection{Square loss: the expected value}\label{sec:mse}
+
+With the square loss, the risk has its own name.
+
+\begin{frameddefn}{Mean squared error}\label{def:mse}
+The risk of the square loss,
+\[
+R(d)=\mathbb{E}\,L(X,d)=\mathbb{E}(X-d)^2,
+\]
+is called the \textbf{mean squared error} (MSE) of the guess $d$.
+\end{frameddefn}
+
+Which $d$ makes the MSE smallest? The answer is the expected value.
+
+\begin{framedprop}{Variational characterisation of $\mathbb{E}(X)$}\label{prop:mse}
+Let $X$ be a random variable with $\mathbb{E}(X^2)<\infty$, and let
+$\mu=\mathbb{E}(X)$. Then, for every number $d$,
+\[
+\mathbb{E}(X-\mu)^2\le\mathbb{E}(X-d)^2,
+\]
+with equality if and only if $d=\mu$. So $d^*=\mu$.
+\end{framedprop}
+
+\begin{proof}
+Expand the square:
+\[
+\mathbb{E}(X-d)^2=\mathbb{E}\big(X^2-2dX+d^2\big).
+\]
+By the \hyperref[sec:lazy]{law of the lazy statistician}, this expected
+value is an integral:
+\[
+\mathbb{E}(X-d)^2=\int_{\mathbb{R}}\big(x^2-2dx+d^2\big)\,\mathrm{d}F_X(x).
+\]
+The integral of a sum is the sum of the integrals, so
+\[
+\mathbb{E}(X-d)^2
+=\underbrace{\int_{\mathbb{R}}x^2\,\mathrm{d}F_X(x)}_{\mathbb{E}(X^2)}
+-2d\underbrace{\int_{\mathbb{R}}x\,\mathrm{d}F_X(x)}_{\mathbb{E}(X)=\mu}
++d^2\underbrace{\int_{\mathbb{R}}\mathrm{d}F_X(x)}_{1}
+=\mathbb{E}(X^2)-2d\mu+d^2 .
+\]
+As a function of $d$, this is a parabola that opens upwards. Its
+derivative is $-2\mu+2d$, which is zero only at $d=\mu$, so the minimum is
+at $d=\mu$ and nowhere else.
+\end{proof}
+
+\begin{framedexamplepart}{ex:stock}{3}{A fair price for a stock}
+Let us take the share of Example~\ref{ex:stock} again. In part~2, with the square loss,
+we compared $d=0$ and $d=1$, and neither always won. Which $d$ wins on
+average?
+
+The share has $\mu=0.7$ and $\mathbb{E}(X^2)=2.5$, so
+\[
+\mathbb{E}(X-d)^2=2.5-1.4\,d+d^2 .
+\]
+\begin{center}
+\includegraphics[width=.8\linewidth]{assets/share-mse.pdf}
+\end{center}
+Both guesses sit above the bottom of the parabola, which is at
+$d=\mathbb{E}(X)=0.7$.
+\end{framedexamplepart}
+
+Why does this matter for \hyperref[alg:learning]{learning}? In practice we do not know $F_X$, so we
+cannot compute $\mu$. But the analysis under perfect information gives us a
+\emph{target}: with the square loss, the best possible prediction is
+$\mathbb{E}(X)$, and a good learning algorithm should try to get as close
+as possible to it.
+
+\subsection{Abs loss: the median}\label{sec:mae}
+
+The square loss leads to the expected value. What happens if we change the
+loss? Let us take the abs loss, which punishes errors in proportion to
+their size.
+
+\begin{frameddefn}{Mean absolute error}\label{def:mae}
+The risk of the abs loss,
+\[
+R(d)=\mathbb{E}\,L(X,d)=\mathbb{E}\,|X-d|,
+\]
+is called the \textbf{mean absolute error} (MAE) of the guess $d$.
+\end{frameddefn}
+
+Which $d$ makes the MAE smallest? This time the answer is the
+\hyperref[sec:median]{median}.
+
+\begin{framedprop}{Variational characterisation of the median}\label{prop:mae}
+Let $X$ be a random variable with $\mathbb{E}\,|X|<\infty$, and let $m$ be a
+median of $X$. Then, for every number $d$,
+\[
+\mathbb{E}\,|X-m|\le\mathbb{E}\,|X-d|,
+\]
+with equality if and only if $d$ is also a median of $X$. So $d^*=m$.
+\end{framedprop}
+
+Why ``a'' median? A discrete variable can have more than one: every point
+with probability at least $1/2$ on each side is a median, and all of them
+give the same MAE.
+
+Why the median? Think of it as the \emph{deepest} point of the
+distribution: half of the mass lies on its left and half on its right.
+If we move $d$ a little to the right of $m$, we get closer to the values on
+the right but farther from those on the left, and the left now holds more
+than half of the mass: the MAE goes up. The same happens moving to the
+left.
+
+\begin{framedexamplepart}{ex:stock}{4}{A fair price for a stock}
+Let us take the share of Example~\ref{ex:stock} again. With the abs loss, which $d$ wins
+on average?
+
+$X\le0$ with probability $0.5$ and $X\ge1$ with probability $0.5$, so every
+$d$ between $0$ and $1$ is a median.
+\begin{center}
+\includegraphics[width=.8\linewidth]{assets/share-mae.pdf}
+\end{center}
+The MAE is made of straight pieces, and it is flat between $0$ and $1$.
+\end{framedexamplepart}
+
+Each loss has its own best guess: the expected value for the square loss,
+the median for the abs loss.
+
+
+\section{Variance and standard deviation}\label{sec:variance}
+
+Once we pick a representative of $X$, its expected value, we also want to
+know how far, on average, the values of $X$ are from it. Two variables can
+share the same expected value and be very different: in
+Example~\ref{ex:stock}, the bank pays $0.90$\,\texteuro{} for sure, while
+the share has an expected gain of $0.70$\,\texteuro{} but may lose
+$2$\,\texteuro. How do we measure this spread?
+
+\begin{frameddefn}{Variance}\label{def:variance}
+Let $X\sim F_X$ have expected value $\mu=\mathbb{E}(X)<\infty$. The
+\textbf{variance} of $X$ is the expected squared gap between $X$ and
+$\mu$,
+\[
+\mathrm{Var}(X)=\mathbb{E}\big((X-\mu)^2\big)=\int_{\mathbb{R}}(x-\mu)^2\,\mathrm{d}F_X(x).
+\]
+\end{frameddefn}
+
+The variance squares the gaps, so it is measured in squared units. To come back to the units of $X$, we
+take its square root.
+
+\begin{frameddefn}{Standard deviation}\label{def:sd}
+The \textbf{standard deviation} of $X$ is
+\[
+\mathrm{sd}(X)=\sigma=\sqrt{\mathrm{Var}(X)}.
+\]
+\end{frameddefn}
+
+We have already met the variance. In Proposition~\ref{prop:mse},
+\[
+\underbrace{\mathbb{E}(X-\mu)^2}_{\mathrm{Var}(X)}\le\mathbb{E}(X-d)^2
+\]
+for every $d$: the variance is the MSE of the best guess $d=\mu$. So the variance is itself a risk: the expected loss we cannot avoid
+even when we guess $\mathbb{E}(X)$.
+
+\begin{notebox}[Two remarks on the definition]
+\begin{itemize}
+\item Like the expected value, the variance depends only on the
+distribution $F_X$.
+\item The variance needs $\mu$. If the expected value does not exist, as
+for the \hyperref[sec:may-not-exist]{Cauchy distribution}, the variance
+does not exist either.
+\end{itemize}
+\end{notebox}
+
+With $\sigma$ defined, we can answer a question left open by
+Proposition~\ref{prop:mae}: the expected value and the median are the best
+guesses for two different losses, so how far apart can they be? For
+well-behaved random variables not too far, and
+\hyperref[thm:jensen]{Jensen's inequality} tells us how far.
+
+\begin{framedexample}{Expected value and median}\label{ex:mean-median}
+Let $\mu=\mathbb{E}(X)$, assuming it exists, and let $m$ be a median of
+$X$. With the convex function $r(x)=|x|$,
+\begin{align*}
+|\mu-m|&=\big|\mathbb{E}(X)-m\big|=\big|\mathbb{E}(X-m)\big|
+&&\text{linear functions}\\
+&\le\mathbb{E}\,|X-m|&&\text{Jensen, $|x|$ convex}\\
+&\le\mathbb{E}\,|X-\mu|&&\text{Proposition~\ref{prop:mae}}\\
+&=\mathbb{E}\sqrt{(X-\mu)^2}\\
+&\le\sqrt{\mathbb{E}(X-\mu)^2}&&\text{Jensen, $\sqrt{x}$ concave.}
+\end{align*}
+The last quantity is the standard deviation $\sigma$. Hence
+\[
+|\mu-m|\le\sigma :
+\]
+the expected value and the median are at most one standard deviation apart.
+\end{framedexample}
+
+The variance has a robust counterpart. The variance measures the gap from
+the expected value with the square loss. What if we change the
+representative to the median and the gap to the abs loss?
+
+\begin{frameddefn}{Median absolute deviation}\label{def:mad}
+The \textbf{median absolute deviation} of $X$ is
+\[
+\mathrm{MAD}(X)=\mathrm{Median}\,\big|X-\mathrm{Median}(X)\big|.
+\]
+\end{frameddefn}
+
+Like the median, it is barely moved by extreme values.
+
+How does the variance react if we shift and rescale $X$? Recall from
+Proposition~\ref{prop:linear} that
+\[
+\mathbb{E}(\alpha+\beta X)=\alpha+\beta\,\mathbb{E}(X).
+\]
+For the variance, the gap from the expected value is
+$(\alpha+\beta X)-(\alpha+\beta\mu)=\beta(X-\mu)$, so
+\[
+\mathrm{Var}(\alpha+\beta X)=\mathbb{E}\big(\beta^2(X-\mu)^2\big)=\beta^2\,\mathrm{Var}(X).
+\]
+The shift $\alpha$ disappears: moving all values by the same amount does
+not change how spread out they are. The scale $\beta$ comes out squared.
 
 \end{document}
