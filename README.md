@@ -295,6 +295,14 @@
 - [x] Accuracy and running time: how an exponent 1/ε can make a tighter approximation computationally expensive.
 - [x] Lloyd's (k-means) algorithm: initialization by choosing k distinct input points at random as the starting centres.
 - [x] Lloyd's assignment step: assigning points to the nearest fixed centre, with a tie rule and a worked example.
+- [x] Lloyd's mean update: moving each centre to the mean of its fixed cluster.
+- [x] Repeating assignment and mean updates: iterations and a worked convergence example.
+- [x] Lloyd's stopping rules: unchanged centres, a tolerance on squared displacement, or a tolerance on the cost change; complete pseudocode in an algorithm box.
+- [x] Lloyd's running time: O(Inkd), O(Ink) for fixed dimension, and exponentially many iterations in the worst case.
+- [x] Local and global minima: a rectangular example, dependence on initialization, and keeping the best of several runs.
+- [x] Sensitivity to outliers and the risk of overlooking small groups with uniform initialization.
+- [x] Distance to a set of centres; k-means++ initialization by sampling in proportion to squared distance, with pseudocode and a worked example.
+- [x] The O(log k) approximation guarantee of k-means++ in expectation, preserved by Lloyd's updates.
 
 </details>
 

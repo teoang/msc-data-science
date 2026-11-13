@@ -17,6 +17,14 @@
 
 % Computational problems are stated in definition-coloured boxes.
 \newtcolorbox{framedproblem}[1]{definitionbox,title={Problem:\enspace #1}}
+% Continue an example without advancing its counter; keep a separate link
+% target and include the part number in references to each continuation.
+\makeatletter
+\newtcolorbox{framedexamplepart}[3]{examplebox,
+  before upper app={\phantomsection
+    \protected@edef\@currentlabel{\getrefnumber{#1} part #2}},
+  title={\ln@boxtitle{\ln@example}{\ref*{#1} part #2}{#3}}}
+\makeatother
 \newcommand{\ED}{\operatorname{ED}}
 \newcommand{\LCS}{\operatorname{LCS}}
 \newcommand{\OPT}{\mathrm{OPT}}
@@ -6787,11 +6795,11 @@ yet, so we cannot compute their means. The
 \hyperref[prop:k-means-one]{mean is the best representative} once the
 points of a cluster are fixed; here we are choosing where to start.
 
-\begin{framedexample}{Choosing two initial centres}
+\begin{framedexample}{Lloyd's algorithm on five points}
 \label{ex:lloyd-initialization}
 Take the five points $U=\{1,2,5,8,9\}$ on a line, and let $k=2$.
-One possible random choice is $2$ and $8$, giving initial centres
-$c_1=2$ and $c_2=8$.
+One possible random choice is $8$ and $9$, giving initial centres
+$c_1=8$ and $c_2=9$.
 \begin{center}
 \begin{tikzpicture}[x=0.9cm,
   rep/.style={diamond,fill=#1,draw=black,thick,inner sep=2.4pt}]
@@ -6799,8 +6807,8 @@ $c_1=2$ and $c_2=8$.
   \foreach \x in {1,2,5,8,9}{
     \node[clpt=gray!40] at (\x,0) {};
     \node[font=\small,below=5pt] at (\x,0) {$\x$};}
-  \node[rep=ClA,label={[text=ClA!80!black]above=5pt:$c_1$}] at (2,0) {};
-  \node[rep=ClC,label={[text=ClC!80!black]above=5pt:$c_2$}] at (8,0) {};
+  \node[rep=ClA,label={[text=ClA!80!black]above=5pt:$c_1$}] at (8,0) {};
+  \node[rep=ClC,label={[text=ClC!80!black]above=5pt:$c_2$}] at (9,0) {};
 \end{tikzpicture}
 \end{center}
 The diamonds mark the two selected centres. At this stage we have
@@ -6822,26 +6830,121 @@ possible while the centres are fixed. If two or more centres are
 equally close, we need a rule to choose just one; we will use the
 centre with the smallest index.
 
-\begin{framedexample}{Forming the first two clusters}
+\begin{framedexamplepart}{ex:lloyd-initialization}{2}{Lloyd's algorithm on five points}
+\label{ex:lloyd-first-clusters}
 Let us take Example~\ref{ex:lloyd-initialization} again:
-$U=\{1,2,5,8,9\}$, with initial centres $c_1=2$ and $c_2=8$.
+$U=\{1,2,5,8,9\}$, with initial centres $c_1=8$ and $c_2=9$.
 Which points go into each cluster? We compare the squared distances
 to the two centres:
 \[
 \begin{array}{c|cc|c}
-  x & (x-2)^2 & (x-8)^2 & \text{cluster}\\
+  x & (x-8)^2 & (x-9)^2 & \text{cluster}\\
   \hline
-  1 & 1  & 49 & C_1\\
-  2 & 0  & 36 & C_1\\
-  5 & 9  & 9  & C_1\\
-  8 & 36 & 0  & C_2\\
-  9 & 49 & 1  & C_2
+  1 & 49 & 64 & C_1\\
+  2 & 36 & 49 & C_1\\
+  5 & 9  & 16 & C_1\\
+  8 & 0  & 1  & C_1\\
+  9 & 1  & 0  & C_2
 \end{array}
 \]
-The point $5$ is equally far from both centres, so our tie rule
-assigns it to $C_1$. We obtain
+We obtain
+\[
+  C_1=\{1,2,5,8\},\qquad C_2=\{9\}.
+\]
+\begin{center}
+\begin{tikzpicture}[x=0.9cm,
+  rep/.style={diamond,fill=#1,draw=black,thick,inner sep=2.4pt}]
+  \draw[gray] (0.4,0) -- (9.6,0);
+  \hull{ClA}{(1,0) -- (8,0)}
+  \hull{ClC}{(9,0) circle (0.01)}
+  \foreach \x in {1,2,5,8} \node[clpt=ClA] at (\x,0) {};
+  \node[clpt=ClC] at (9,0) {};
+  \foreach \x in {1,2,5,8,9}
+    \node[font=\small,below=5pt] at (\x,0) {$\x$};
+  \node[rep=ClA,label={[text=ClA!80!black]above=5pt:$c_1$}] at (8,0) {};
+  \node[rep=ClC,label={[text=ClC!80!black]above=5pt:$c_2$}] at (9,0) {};
+\end{tikzpicture}
+\end{center}
+\end{framedexamplepart}
+
+\subsubsection{Updating the centres}
+\label{sec:lloyd-update}
+
+We now know which points belong to each cluster. Are the starting
+centres still the best representatives of those points? We can use
+the \hyperref[prop:k-means-one]{mean as the best representative}:
+keep the clusters fixed and move each centre to the mean of its
+cluster. For every non-empty $C_j$, the update is
+\[
+  \vec c_j\gets\frac{1}{\abs{C_j}}\sum_{\vec x\in C_j}\vec x.
+\]
+During this step the points stay in their clusters; only the centres
+move. Since the mean minimizes the sum of squared distances within a
+cluster, this update cannot increase the cost.
+
+\begin{framedexamplepart}{ex:lloyd-initialization}{3}{Lloyd's algorithm on five points}
+\label{ex:lloyd-updated-centres}
+Let us take Example~\ref{ex:lloyd-first-clusters} again:
+$U=\{1,2,5,8,9\}$, with clusters $C_1=\{1,2,5,8\}$ and
+$C_2=\{9\}$, and centres $c_1=8$ and $c_2=9$.
+Where should we move the two centres?
+\[
+  c_1\gets\frac{1+2+5+8}{4}=4,\qquad
+  c_2\gets\frac91=9.
+\]
+\begin{center}
+\begin{tikzpicture}[x=0.9cm,
+  rep/.style={diamond,fill=#1,draw=black,thick,inner sep=2.4pt}]
+  \draw[gray] (0.4,0) -- (9.6,0);
+  \hull{ClA}{(1,0) -- (8,0)}
+  \hull{ClC}{(9,0) circle (0.01)}
+  \foreach \x in {1,2,5,8} \node[clpt=ClA] at (\x,0) {};
+  \node[clpt=ClC] at (9,0) {};
+  \foreach \x in {1,2,5,8,9}
+    \node[font=\small,below=5pt] at (\x,0) {$\x$};
+  \node[rep=ClA,label={[text=ClA!80!black]above=5pt:$c_1=4$}]
+    at (4,0) {};
+  \node[rep=ClC,label={[text=ClC!80!black]above=5pt:$c_2=9$}]
+    at (9,0) {};
+\end{tikzpicture}
+\end{center}
+\end{framedexamplepart}
+
+\subsubsection{Repeating the two steps}
+\label{sec:lloyd-repeat}
+
+Moving the centres may change which one is closest to a point. So we
+repeat the \hyperref[sec:lloyd-assignment]{assignment step} using the
+new centres, then repeat the
+\hyperref[sec:lloyd-update]{mean update} using the new clusters.
+One assignment followed by one mean update is called an
+\emph{iteration}.
+
+The two steps take turns fixing one part of the solution and improving
+the other: assignment fixes the centres and chooses the clusters;
+the mean update fixes the clusters and chooses the centres. Neither
+step increases the cost.
+
+\begin{framedexamplepart}{ex:lloyd-initialization}{4}{Lloyd's algorithm on five points}
+\label{ex:lloyd-second-iteration}
+Let us take Example~\ref{ex:lloyd-updated-centres} again:
+$U=\{1,2,5,8,9\}$, with clusters $C_1=\{1,2,5,8\}$ and
+$C_2=\{9\}$, and updated centres $c_1=4$ and $c_2=9$.
+Does another assignment change the clusters?
+
+The points $1$, $2$ and $5$ are still closer to $c_1$, and $9$ stays
+with $c_2$. But for $8$, the distances are now
+\[
+  \abs{8-4}=4>1=\abs{8-9}.
+\]
+So $8$ moves from $C_1$ to $C_2$, giving
 \[
   C_1=\{1,2,5\},\qquad C_2=\{8,9\}.
+\]
+We then update the centres using these new clusters:
+\[
+  c_1\gets\frac{1+2+5}{3}=\frac83,\qquad
+  c_2\gets\frac{8+9}{2}=\frac{17}{2}=8.5.
 \]
 \begin{center}
 \begin{tikzpicture}[x=0.9cm,
@@ -6853,13 +6956,506 @@ assigns it to $C_1$. We obtain
   \foreach \x in {8,9} \node[clpt=ClC] at (\x,0) {};
   \foreach \x in {1,2,5,8,9}
     \node[font=\small,below=5pt] at (\x,0) {$\x$};
-  \node[rep=ClA,label={[text=ClA!80!black]above=5pt:$c_1$}] at (2,0) {};
+  \node[rep=ClA,label={[text=ClA!80!black]above=5pt:$c_1=\frac83$}]
+    at ({8/3},0) {};
+  \node[rep=ClC,label={[text=ClC!80!black]above=5pt:$c_2=8.5$}]
+    at (8.5,0) {};
+\end{tikzpicture}
+\end{center}
+\end{framedexamplepart}
+
+\subsubsection{When do we stop?}
+\label{sec:lloyd-stopping}
+
+\begin{framedexamplepart}{ex:lloyd-initialization}{5}{Lloyd's algorithm on five points}
+\label{ex:lloyd-convergence}
+Let us take the result of Example~\ref{ex:lloyd-second-iteration}
+again: $U=\{1,2,5,8,9\}$, with clusters $C_1=\{1,2,5\}$ and
+$C_2=\{8,9\}$, and centres $c_1=8/3$ and $c_2=8.5$.
+What happens in a third iteration?
+
+The points $1$ and $2$ stay in $C_1$, and $8$ and $9$ stay in $C_2$.
+The point $5$ stays in $C_1$ too, since
+\[
+  \abs{5-\frac83}=\frac73
+  <\frac72=\abs{5-\frac{17}{2}}.
+\]
+The clusters are unchanged, so their means remain $8/3$ and $8.5$.
+\end{framedexamplepart}
+
+Once a full iteration leaves all centres unchanged, the algorithm has
+converged and we can stop.
+
+\Needspace{12\baselineskip}
+In practice we can also stop when the changes are small enough.
+Let $\vec c_j^{\mathrm{old}}$ and $\vec c_j^{\mathrm{new}}$ be the
+positions of centre $j$ before and after one iteration. We measure the
+largest squared displacement,
+\[
+  \Delta=\max_{1\leq j\leq k}
+  \norm{\vec c_j^{\mathrm{new}}-\vec c_j^{\mathrm{old}}}_2^2.
+\]
+Choose a tolerance $\delta\geq0$ and stop when $\Delta\leq\delta$.
+With $\delta=0$ we require the centres to stay exactly in place; a
+small positive $\delta$ allows us to stop when they move very little.
+
+Another option is to measure the change in the cost. Let
+$\varphi_{\mathrm{old}}$ and $\varphi_{\mathrm{new}}$ be the costs
+before and after an iteration. For a chosen tolerance $\eta\geq0$,
+we can stop when
+\[
+  \abs{\varphi_{\mathrm{old}}-\varphi_{\mathrm{new}}}\leq\eta.
+\]
+This asks whether another iteration has made a substantial improvement
+in the objective function.
+
+We can now put the steps together. In the pseudocode, $\argmin$
+returns the index of a centre with the smallest squared distance;
+ties are resolved by choosing the smallest index. We write the basic
+version assuming that every cluster formed is non-empty, so its mean
+is defined.
+
+\Needspace{30\baselineskip}
+\begin{framedalgo}{Lloyd's algorithm ($k$-means)}\label{alg:lloyd}
+\begin{algorithmic}[1]
+  \Function{Lloyd}{$U,k,\delta$}
+    \State Choose $k$ distinct points of $U$ at random as
+      $\vec c_1,\ldots,\vec c_k$
+    \Repeat
+      \For{$j=1$ \textbf{to} $k$}
+        \State $\vec c_j^{\mathrm{old}}\gets\vec c_j$;
+          $C_j\gets\varnothing$
+      \EndFor
+      \ForAll{$\vec x\in U$}
+        \State $j\gets\argmin_{1\leq\ell\leq k}
+          \norm{\vec x-\vec c_\ell}_2^2$
+        \State $C_j\gets C_j\cup\{\vec x\}$
+      \EndFor
+      \For{$j=1$ \textbf{to} $k$}
+        \State $\vec c_j\gets\dfrac{1}{\abs{C_j}}
+          \displaystyle\sum_{\vec x\in C_j}\vec x$
+      \EndFor
+    \Until{$\max_{1\leq j\leq k}
+      \norm{\vec c_j-\vec c_j^{\mathrm{old}}}_2^2\leq\delta$}
+    \State \Return $(C_1,\ldots,C_k)$ and
+      $(\vec c_1,\ldots,\vec c_k)$
+  \EndFunction
+\end{algorithmic}
+\end{framedalgo}
+
+\subsubsection{How much time does Lloyd's algorithm take?}
+\label{sec:lloyd-running-time}
+
+We have a stopping rule, but how many iterations will we need before
+we reach it? Exact convergence can require exponentially many
+iterations in the worst case, even for points in the plane. In
+practice the method often stops much sooner; this is one reason for
+using a tolerance on the changes.\footnote{For the exponential
+worst case, see \href{https://cseweb.ucsd.edu/~avattani/papers/kmeans-journal.pdf}{Vattani (2011)}.}
+
+Let $I$ be the number of iterations performed. We can count the work
+in one iteration of Algorithm~\ref{alg:lloyd}:
+\begin{itemize}
+  \item \textbf{Assignment.} For each of the $n$ points, compare its
+    distance to all $k$ centres. A squared Euclidean distance in
+    $\R^d$ takes $O(d)$ operations, so this step takes $O(nkd)$.
+  \item \textbf{Mean update.} Add each point to the coordinate sums of
+    its cluster, then divide by the cluster size. Across all clusters
+    this takes $O(nd+kd)$ operations.
+\end{itemize}
+The assignment step dominates, so the total running time is
+\[
+  O(Inkd),\qquad\text{or }O(Ink)\text{ when }d\text{ is fixed}.
+\]
+Even if each iteration is fast, the total running time can be large
+if many iterations are needed.
+
+\Needspace{12\baselineskip}
+\subsubsection{Does convergence give the best partition?}
+\label{sec:lloyd-local-minima}
+
+At each iteration, the cost decreases or stays the same. Lloyd's
+algorithm stops changing the result when its updates leave both the
+clusters and the centres unchanged. But a different partition may
+still have a lower cost: the algorithm has stopped improving its
+current solution without finding the best possible one. To understand
+how this can happen, we distinguish two notions.
+
+\begin{frameddefn}{Local minimum}
+\label{def:kmeans-local-minimum}
+A \emph{local minimum} of the cost cannot be improved by sufficiently
+small changes to the centre positions.
+\end{frameddefn}
+
+\begin{frameddefn}{Global minimum}
+\label{def:kmeans-global-minimum}
+A \emph{global minimum} has the smallest cost among all choices of
+the centre positions.
+\end{frameddefn}
+
+Lloyd's algorithm can settle at a poor
+\hyperref[def:kmeans-local-minimum]{local minimum}. The initial centres
+determine the first assignments, and those assignments determine the
+next means. A different start can therefore lead to a different final
+partition.
+
+% The rectangle examples use the same coordinate plane and scale.
+\newcommand{\rectangleaxes}{%
+  \draw[gray!20] (0,0) grid (4,2);
+  \draw[->,gray!80!black] (-0.25,0) -- (4.7,0)
+    node[right] {$x_1$};
+  \draw[->,gray!80!black] (0,-0.2) -- (0,2.7)
+    node[above] {$x_2$};
+  \foreach \x in {1,2,3,4}{
+    \draw[gray!80!black] (\x,0.06) -- (\x,-0.06);
+    \node[font=\small,below=3pt] at (\x,0) {$\x$};}
+  \foreach \y in {1,2}{
+    \draw[gray!80!black] (0.06,\y) -- (-0.06,\y);
+    \node[font=\small,left=3pt] at (0,\y) {$\y$};}}
+
+\begin{framedexample}{Lloyd's algorithm on a rectangle}
+\label{ex:lloyd-rectangle}
+Take $k=2$ and the four points
+\[
+  U=\{(1,1),(1,2),(4,1),(4,2)\}.
+\]
+Suppose the initial centres are the two points on the left,
+$\vec c_1=(1,1)$ and $\vec c_2=(1,2)$. Each point on the right is
+closer to the centre on its own row, so the first assignment gives
+\[
+  C_1=\{(1,1),(4,1)\},\qquad C_2=\{(1,2),(4,2)\}.
+\]
+\begin{center}
+\begin{tikzpicture}[x=1.1cm,y=1.1cm,>=stealth,
+  rep/.style={diamond,fill=#1,draw=black,thick,inner sep=2.4pt}]
+  \rectangleaxes
+  \hull{ClA}{(1,1) -- (4,1)}
+  \hull{ClC}{(1,2) -- (4,2)}
+  \foreach \x in {1,4}{
+    \draw[ClA!80!black,thick] (\x,1) -- (1,1);
+    \draw[ClC!80!black,thick] (\x,2) -- (1,2);
+    \node[clpt=ClA,label={[font=\small]below=5pt:$(\x,1)$}]
+      at (\x,1) {};
+    \node[clpt=ClC,label={[font=\small]above=5pt:$(\x,2)$}]
+      at (\x,2) {};}
+  \node[rep=ClA,label={[text=ClA!80!black]left=5pt:$\vec c_1$}]
+    at (1,1) {};
+  \node[rep=ClC,label={[text=ClC!80!black]left=5pt:$\vec c_2$}]
+    at (1,2) {};
+\end{tikzpicture}
+\end{center}
+The means are $\vec c_1=(2.5,1)$ and $\vec c_2=(2.5,2)$.
+\begin{center}
+\begin{tikzpicture}[x=1.1cm,y=1.1cm,>=stealth,
+  rep/.style={diamond,fill=#1,draw=black,thick,inner sep=2.4pt}]
+  \rectangleaxes
+  \hull{ClA}{(1,1) -- (4,1)}
+  \hull{ClC}{(1,2) -- (4,2)}
+  \foreach \x in {1,4}{
+    \draw[ClA!80!black,thick] (\x,1) -- (2.5,1);
+    \draw[ClC!80!black,thick] (\x,2) -- (2.5,2);
+    \node[clpt=ClA,label={[font=\small]below=5pt:$(\x,1)$}]
+      at (\x,1) {};
+    \node[clpt=ClC,label={[font=\small]above=5pt:$(\x,2)$}]
+      at (\x,2) {};}
+  \node[rep=ClA,label={[text=ClA!80!black]below=5pt:$\vec c_1$}]
+    at (2.5,1) {};
+  \node[rep=ClC,label={[text=ClC!80!black]above=5pt:$\vec c_2$}]
+    at (2.5,2) {};
+\end{tikzpicture}
+\end{center}
+Another assignment keeps the rows separate, and their means do not
+move. Lloyd has converged. Each of the four points is $1.5$ units
+from its centre, so the final cost is
+\[
+  4\cdot1.5^2=9.
+\]
+\end{framedexample}
+
+\subsubsection{Trying more than one initialization}
+\label{sec:lloyd-restarts}
+
+How can we reduce the chance of keeping a poor result? Run Lloyd's
+algorithm several times, each time with a new random initialization,
+and keep the final partition with the smallest cost. The cost lets us
+compare the runs even though we do not know the optimum.
+
+\begin{framedexamplepart}{ex:lloyd-rectangle}{2}{Lloyd's algorithm on a rectangle}
+\label{ex:lloyd-rectangle-better}
+Let us take Example~\ref{ex:lloyd-rectangle} again:
+$U=\{(1,1),(1,2),(4,1),(4,2)\}$, with $k=2$. Starting from the two
+left-hand points gave horizontal clusters and cost $9$. What if a new
+run starts from the two bottom points, $(1,1)$ and $(4,1)$?
+
+Now each point is closer to the centre on its own column. The clusters
+are $C_1=\{(1,1),(1,2)\}$ and $C_2=\{(4,1),(4,2)\}$, with means
+$\vec c_1=(1,1.5)$ and $\vec c_2=(4,1.5)$.
+\begin{center}
+\begin{tikzpicture}[x=1.1cm,y=1.1cm,>=stealth,
+  rep/.style={diamond,fill=#1,draw=black,thick,inner sep=2.4pt}]
+  \rectangleaxes
+  \hull{ClA}{(1,1) -- (1,2)}
+  \hull{ClC}{(4,1) -- (4,2)}
+  \foreach \y in {1,2}{
+    \draw[ClA!80!black,thick] (1,\y) -- (1,1.5);
+    \draw[ClC!80!black,thick] (4,\y) -- (4,1.5);
+    \node[clpt=ClA] at (1,\y) {};
+    \node[clpt=ClC] at (4,\y) {};}
+  \foreach \x in {1,4}{
+    \node[font=\small,below=5pt] at (\x,1) {$(\x,1)$};
+    \node[font=\small,above=5pt] at (\x,2) {$(\x,2)$};}
+  \node[rep=ClA,label={[text=ClA!80!black]right=5pt:$\vec c_1$}]
+    at (1,1.5) {};
+  \node[rep=ClC,label={[text=ClC!80!black]left=5pt:$\vec c_2$}]
+    at (4,1.5) {};
+\end{tikzpicture}
+\end{center}
+Each point is now $0.5$ units from its centre, giving cost
+\[
+  4\cdot0.5^2=1<9.
+\]
+This is the optimal partition for these four points. We keep this
+second run.
+\end{framedexamplepart}
+
+Trying several starts can help, but it gives no certainty that one
+of them will find a \hyperref[def:kmeans-global-minimum]{global minimum}.
+
+\subsubsection{Sensitivity to outliers}
+\label{sec:kmeans-outliers}
+
+The starting centres are not the only source of difficulty. An
+\emph{outlier} is a point far from most of the data. Such a point can
+have a large effect on the mean: its squared distance can contribute
+so much to the cost that moving a centre towards it outweighs moving
+that centre away from many nearby points.
+
+\begin{framedexample}{One distant point moves the mean}
+For $k=1$, the points $0,1,2$ have mean $1$. Add the point $100$.
+The \hyperref[prop:k-means-one]{best representative} becomes
+\[
+  \frac{0+1+2+100}{4}=25.75.
+\]
+\begin{center}
+\begin{tikzpicture}[x=0.105cm,y=1cm,>=stealth,
+  rep/.style={diamond,fill=ClA,draw=black,thick,inner sep=2.4pt}]
+  \node[anchor=west,font=\small] at (0,1.2) {Before adding $100$};
+  \draw[->,gray!80!black] (-5,0) -- (105,0) node[right] {$x$};
+  \hull{ClA}{(0,0) -- (2,0)}
+  \foreach \x in {0,1,2}
+    \node[clpt=ClA,inner sep=1pt] at (\x,0) {};
+  \node[font=\small,below=5pt] at (1,0) {$0,1,2$};
+  \draw[gray!60] (100,0.06) -- (100,-0.06);
+  \node[font=\small,text=gray,below=5pt] at (100,0) {$100$};
+  \draw[densely dotted,ClA!80!black] (1,0.08) -- (1,0.65);
+  \node[rep,label={[text=ClA!80!black]right=5pt:$c=1$}]
+    at (1,0.65) {};
+  \begin{scope}[yshift=-2.6cm]
+    \node[anchor=west,font=\small] at (0,1.2) {After adding $100$};
+    \draw[->,gray!80!black] (-5,0) -- (105,0) node[right] {$x$};
+    \hull{ClA}{(0,0) -- (100,0)}
+    \foreach \x in {0,1,2}
+      \node[clpt=ClA,inner sep=1pt] at (\x,0) {};
+    \node[clpt=ClA] at (100,0) {};
+    \node[font=\small,below=5pt] at (1,0) {$0,1,2$};
+    \node[font=\small,below=5pt] at (100,0) {$100$};
+    \draw[densely dotted,ClA!80!black] (25.75,0.08) -- (25.75,0.65);
+    \draw[->,ClA!80!black,thick] (1,0.65) -- (25.75,0.65);
+    \node[rep,label={[text=ClA!80!black]right=5pt:$c=25.75$}]
+      at (25.75,0.65) {};
+  \end{scope}
+\end{tikzpicture}
+\end{center}
+The centre has moved far from the three nearby points. This is still
+the best choice for the squared-distance objective: the example
+shows the sensitivity of that objective to an outlier.
+\end{framedexample}
+
+\Needspace{20\baselineskip}
+Uniform random initialization can also overlook a small group. If one
+group contains $10^7$ points and another contains $100$, a uniformly
+chosen point comes from the smaller group with probability
+\[
+  \frac{100}{10^7+100}\approx10^{-5}.
+\]
+Several initial centres can end up in the large group, even when the
+smaller group lies far away. Can we use the centres already chosen
+to guide the next choice?
+
+\begin{center}
+\begin{tikzpicture}[x=0.95cm,y=0.95cm,>=stealth,
+  rep/.style={diamond,fill=ClA,draw=black,thick,inner sep=2.4pt}]
+  \draw[gray!20] (0,0) grid (8,3);
+  \draw[->,gray!80!black] (-0.2,0) -- (8.6,0) node[right] {$x_1$};
+  \draw[->,gray!80!black] (0,-0.2) -- (0,3.5) node[above] {$x_2$};
+  \hull{ClA}{(1.1,1.2) -- (2.5,1.1) -- (3.2,1.7) -- (2.7,2.7)
+    -- (1.4,2.6) -- (0.9,1.9) -- cycle}
+  \hull{ClC}{(6.8,1.5) -- (7.4,1.4) -- (7.7,1.9) -- (7.2,2.3)
+    -- (6.7,2.1) -- cycle}
+  \foreach \p in {(1.1,1.5),(1.2,2.0),(1.4,2.4),(1.5,1.6),
+      (1.6,1.2),(1.7,2.1),(1.8,1.7),(1.9,2.5),(2.0,1.3),
+      (2.1,1.9),(2.2,2.3),(2.3,1.5),(2.4,2.6),(2.5,2.0),
+      (2.6,1.3),(2.7,2.1),(2.8,2.4),(2.9,1.7),(3.0,2.0)}
+    \node[clpt=ClA] at \p {};
+  \foreach \p in {(6.9,1.7),(7.0,2.1),(7.3,1.6),(7.5,1.9),
+      (7.3,2.2)}
+    \node[clpt=ClC] at \p {};
+  \node[rep,label={[text=ClA!80!black]below left=3pt:$\vec c_1$}]
+    at (1.5,1.6) {};
+  \node[rep,label={[text=ClA!80!black]above right=3pt:$\vec c_2$}]
+    at (2.7,2.1) {};
+  \node[font=\small,text=ClA!80!black] at (2.1,3.15) {$10^7$ points};
+  \node[font=\small,text=ClC!80!black] at (7.2,2.85) {$100$ points};
+  \node[font=\small,align=center] at (4.2,-0.65)
+    {One possible initialization: both centres are in the large group.};
+\end{tikzpicture}
+\end{center}
+
+\subsection{$k$-means++: choosing the starting centres}
+\label{sec:kmeanspp}
+
+We would like to give more attention to points that the current
+centres represent poorly. This is the idea of \emph{$k$-means++}:
+choose the first centre uniformly at random, then make each later
+choice depend on the distance to the centres already selected.
+Choosing the initial centres is also called \emph{seeding}.
+
+How far is a point from several centres? We only need its distance
+to the nearest one.
+
+\begin{frameddefn}{Distance to a set of centres}
+\label{def:distance-centres}
+Let $A\subseteq\R^d$ be a non-empty finite set of centres. The distance of a
+point $\vec x$ to $A$ is
+\[
+  d_A(\vec x)=\min_{\vec c\in A}\norm{\vec x-\vec c}_2.
+\]
+\end{frameddefn}
+
+A point close to any chosen centre has a small
+\hyperref[def:distance-centres]{distance to the set}. A point far from
+every chosen centre has a large one. If we assign each point to its
+nearest centre, its contribution to the
+\hyperref[prob:k-means]{cost} is $d_A(\vec x)^2$.
+
+\subsubsection{Sampling in proportion to the squared distance}
+\label{sec:kmeanspp-sampling}
+
+We use those contributions as weights: a point whose current cost
+is larger gets a larger chance of becoming the next centre. To turn
+the weights into probabilities, divide each one by their sum:
+\[
+  p(\vec x\mid A)=
+  \frac{d_A(\vec x)^2}{\displaystyle\sum_{\vec y\in U}d_A(\vec y)^2}.
+\]
+These probabilities add to $1$. After drawing a centre, add it to
+$A$ and recompute the distances before making the next choice. A
+centre already in $A$ has distance $0$, so it cannot be drawn again.
+With $1\leq k\leq n=\abs{U}$ distinct input points, we can continue
+until $A$ contains $k$ centres.
+
+\Needspace{25\baselineskip}
+\begin{framedalgo}{$k$-means++ initialization}\label{alg:kmeanspp}
+\begin{algorithmic}[1]
+  \Function{KMeansPlusPlusSeeds}{$U,k$}
+    \State Choose $\vec c\in U$ uniformly at random
+    \State $A\gets\{\vec c\}$
+    \While{$\abs{A}<k$}
+      \ForAll{$\vec x\in U$}
+        \State $w(\vec x)\gets d_A(\vec x)^2$
+      \EndFor
+      \State $W\gets\displaystyle\sum_{\vec x\in U}w(\vec x)$
+      \State Choose $\vec c\in U$ with probability $w(\vec c)/W$
+      \State $A\gets A\cup\{\vec c\}$
+    \EndWhile
+    \State \Return $A$
+  \EndFunction
+\end{algorithmic}
+\end{framedalgo}
+
+Use the returned centres to start the assignment and mean-update
+loop of \hyperref[alg:lloyd]{Lloyd's algorithm}. The change is in the
+initialization; the two update steps are the same.
+
+\begin{framedexample}{Choosing centres with $k$-means++}
+\label{ex:kmeanspp-first-choice}
+Take $U=\{0,5,7,8\}$ on a line and let $k=3$. Suppose that the first
+uniform draw gives $c_1=0$, so $A=\{0\}$. Which point is likely to
+be chosen next?
+\[
+\begin{array}{c|ccc}
+  x & d_A(x) & d_A(x)^2 & p(x\mid A)\\
+  \hline
+  0 & 0 & 0  & 0\\
+  5 & 5 & 25 & 25/138\\
+  7 & 7 & 49 & 49/138\\
+  8 & 8 & 64 & 64/138
+\end{array}
+\]
+The squared distances sum to $25+49+64=138$. The point $8$ has the
+largest probability, $64/138$, but $5$ and $7$ can also be selected.
+\end{framedexample}
+
+Once we have selected another centre, we must use its position in
+the next round. Keeping the old probabilities would ignore the new
+centre's contribution.
+
+\begin{framedexamplepart}{ex:kmeanspp-first-choice}{2}{Choosing centres with $k$-means++}
+\label{ex:kmeanspp-next-choice}
+Let us take Example~\ref{ex:kmeanspp-first-choice} again:
+$U=\{0,5,7,8\}$, with $k=3$ and first centre $0$. Suppose the next
+draw selects $8$, giving $A=\{0,8\}$. How do the probabilities change?
+
+Now $5$ is only $3$ units from the centre $8$, and $7$ is only $1$
+unit from it. Their new squared distances to $A$ are $9$ and $1$;
+the two selected centres have weight $0$. Thus
+\[
+  p(5\mid A)=\frac9{9+1}=\frac9{10},\qquad
+  p(7\mid A)=\frac1{9+1}=\frac1{10}.
+\]
+\begin{center}
+\begin{tikzpicture}[x=0.9cm,
+  rep/.style={diamond,fill=#1,draw=black,thick,inner sep=2.4pt}]
+  \draw[gray] (-0.6,0) -- (8.6,0);
+  \foreach \x in {0,5,7,8}{
+    \node[clpt=gray!40] at (\x,0) {};
+    \node[font=\small,below=5pt] at (\x,0) {$\x$};}
+  \node[rep=ClA,label={[text=ClA!80!black]above=5pt:$c_1$}] at (0,0) {};
   \node[rep=ClC,label={[text=ClC!80!black]above=5pt:$c_2$}] at (8,0) {};
 \end{tikzpicture}
 \end{center}
-The colours show the two clusters; the centres have stayed at $2$
-and $8$ throughout this assignment step.
-\end{framedexample}
+The point $5$ is now more likely than $7$ to become the third centre:
+$7$ is already well represented by the centre at $8$. If we draw $5$,
+the initial centres are $0,8,5$, and Lloyd's iterations can start.
+\end{framedexamplepart}
+
+\subsubsection{An approximation guarantee in expectation}
+\label{sec:kmeanspp-guarantee}
+
+Does this more careful initialization give a guarantee on the final
+cost? Let $\varphi$ be the cost after $k$-means++ initialization and
+Lloyd's updates, and let $\OPT$ be the minimum cost for the same
+input. The input is fixed; the
+\hyperref[def:expected-value]{expected value} averages over the random
+choices of the starting centres. We write $\ln$ for the natural
+logarithm.
+
+\begin{framedprop}{Expected cost of $k$-means++}
+\label{prop:kmeanspp-guarantee}
+The expected cost satisfies
+\[
+  \mathbb{E}[\varphi]\leq8(\ln k+2)\OPT.
+\]
+In particular, this is an $O(\log k)$ approximation in expectation
+for $k\geq2$.
+\end{framedprop}
+
+The bound already holds for the cost immediately after the seeding
+step. Lloyd's updates cannot increase that cost, so the same bound
+holds after the updates. An individual run may have a larger cost;
+the guarantee is on the expectation over the random choices.
+This result is due to
+\href{https://theory.stanford.edu/~sergei/papers/kMeansPP-soda.pdf}{Arthur and Vassilvitskii (2007)}.
 
 \endgroup
 
