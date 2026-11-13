@@ -289,6 +289,13 @@
 - [x] Hardness of k-means: k^n partitions, the easy cases k = n and k = 1 (the mean is the best representative), and points on a line.
 - [x] Why cutting at the largest gaps fails on a line; NP-completeness and the need for approximation algorithms.
 
+**9 November**
+
+- [x] Approximating the k-means cost: interpreting a (1 + ε) guarantee, with a 10% example.
+- [x] Accuracy and running time: how an exponent 1/ε can make a tighter approximation computationally expensive.
+- [x] Lloyd's (k-means) algorithm: initialization by choosing k distinct input points at random as the starting centres.
+- [x] Lloyd's assignment step: assigning points to the nearest fixed centre, with a tie rule and a worked example.
+
 </details>
 
 ## About

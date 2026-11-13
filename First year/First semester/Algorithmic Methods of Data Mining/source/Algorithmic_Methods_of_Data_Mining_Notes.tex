@@ -1476,7 +1476,7 @@ Different problems behave very differently:
 Some approximation algorithms are also very inefficient. This is why
 there is another approach: heuristics.
 
-\section{Heuristics}
+\section{Heuristics}\label{sec:heuristics}
 
 A \emph{heuristic} is a method that usually finds good solutions
 quickly, but without any guarantee on their quality.
@@ -6633,13 +6633,13 @@ far apart, and the long empty stretches seem to separate the groups.
 This suggests a first idea: cut at the $k-1$ largest distances between
 consecutive points. Does it work?
 
-Not always! Take $k=2$ and the points
+Not always! Let's see a counterexample. Take $k=2$ and the points
 \[
   0,\ 1,\ 2,\ 3,\ 4,\ 8,\ 13 .
 \]
-The largest gap is the one between $8$ and $13$, of length $5$; the
-next one is between $4$ and $8$, of length $4$. Let us compare the two
-cuts. In the pictures, the diamond marks the mean of each cluster, and
+The largest gap is the one between $8$ and $13$, of length $5$.
+
+In the picture, the diamond marks the mean of each cluster, and
 under each point we write what it adds to the cost, $d^2$, where $d$ is its
 distance from that mean.
 
@@ -6685,8 +6685,8 @@ mean $3$, and $\{13\}$:
   \cul{ClA}{(3^2+2^2+1^2+0^2+1^2+5^2)}+\cul{ClC}{0}=40.
 \]
 
-Cutting instead at the gap between $4$ and $8$ gives $\{0,1,2,3,4\}$,
-with mean $2$, and $\{8,13\}$, with mean $10.5$:
+If we cut between $4$ and $8$ instead, for example, we would get the
+clusters $\{0,1,2,3,4\}$, with mean $2$, and $\{8,13\}$, with mean $10.5$:
 \linecut{%
   \hull{ClA}{(0,0) -- (4,0)} \hull{ClC}{(8,0) -- (13,0)}
   \foreach \x in {0,1,2,3,4} \node[clpt=ClA] at (\x,0) {};
@@ -6699,12 +6699,167 @@ with mean $2$, and $\{8,13\}$, with mean $10.5$:
   =\cul{ClA}{10}+\cul{ClC}{12.5}=22.5<40.
 \]
 
-The largest gap is not the right place to cut.
+Thus, the largest gap is not the right place to cut: the second cut is
+better.
 
 For any other case, the problem is
 \hyperref[def:np-complete]{NP-complete}. What do we do when we have an
 NP-complete problem? We look for an
 \hyperref[def:approximation]{approximation algorithm}.
+
+\lecturestart{9 November}
+
+\subsection{Approximating the $k$-means cost}
+\label{sec:kmeans-approximation}
+
+We want to find a good partition without trying all the possibilities.
+For the \hyperref[prob:k-means]{$k$-means problem}, what would an
+\hyperref[def:approximation]{approximation guarantee} tell us?
+
+Let $\OPT$ be the smallest possible cost for our input, and let
+$\varphi$ be the cost of the partition returned by an algorithm. Since
+we are minimizing, a smaller cost is better. We can express the allowed
+relative error by a number $\varepsilon>0$: a
+$(1+\varepsilon)$-approximation guarantees
+\[
+  \OPT\leq\varphi\leq(1+\varepsilon)\OPT.
+\]
+The left inequality holds because no partition can cost less than the
+optimum; the right one is the guarantee we ask of the algorithm.
+
+\begin{framedexample}{At most $10\%$ above the optimum}
+Suppose that the minimum cost is $\OPT=3$. If we choose
+$\varepsilon=0.1$, the approximation factor is $1.1$, so the returned
+partition must have cost
+\[
+  3\leq\varphi\leq1.1\cdot3=3.3.
+\]
+The algorithm may find the optimum itself, or a partition whose cost
+is at most $0.3$ larger.
+\end{framedexample}
+
+The smaller $\varepsilon$ is, the closer the guaranteed cost is to the
+optimum. We can state this guarantee even when we do not know the
+value of $\OPT$ for the input we are solving.
+
+\subsection{Accuracy and running time}
+\label{sec:kmeans-accuracy-time}
+
+A smaller $\varepsilon$ gives us a cost closer to the optimum. But how
+much computation do we need to obtain that guarantee? We must consider
+the running time as well as the quality of the solution.
+
+For example, suppose that an approximation algorithm takes time
+proportional to $n^{1/\varepsilon}$, where $n$ is the number of input
+points. What happens when we ask for a smaller error?
+\[
+\begin{aligned}
+  \varepsilon=0.1 &\quad\Longrightarrow\quad
+    1+\varepsilon=1.1,\qquad n^{1/\varepsilon}=n^{10},\\
+  \varepsilon=0.01 &\quad\Longrightarrow\quad
+    1+\varepsilon=1.01,\qquad n^{1/\varepsilon}=n^{100}.
+\end{aligned}
+\]
+Allowing at most $10\%$ above the optimum gives an exponent of $10$;
+allowing at most $1\%$ gives an exponent of $100$. For each fixed
+$\varepsilon$, this running time is polynomial in $n$, but the exponent
+can be so large that the algorithm is impractical. A tighter
+approximation guarantee can therefore come at a substantial
+computational cost.
+
+\subsection{Lloyd's algorithm}
+\label{sec:lloyd}
+
+To look for a useful solution in practice, we turn to a
+\hyperref[sec:heuristics]{heuristic}: \emph{Lloyd's algorithm}, also
+called the \emph{$k$-means algorithm}. Its starting point is a choice
+of $k$ centres. Where do we put them?
+
+\subsubsection{Initialization}
+\label{sec:lloyd-initialization}
+
+We choose $k$ distinct input points at random and use their positions
+as the initial centres $\vec c_1,\ldots,\vec c_k$. This first choice is
+called \emph{initialization}.
+
+These centres are starting guesses. We have not formed the clusters
+yet, so we cannot compute their means. The
+\hyperref[prop:k-means-one]{mean is the best representative} once the
+points of a cluster are fixed; here we are choosing where to start.
+
+\begin{framedexample}{Choosing two initial centres}
+\label{ex:lloyd-initialization}
+Take the five points $U=\{1,2,5,8,9\}$ on a line, and let $k=2$.
+One possible random choice is $2$ and $8$, giving initial centres
+$c_1=2$ and $c_2=8$.
+\begin{center}
+\begin{tikzpicture}[x=0.9cm,
+  rep/.style={diamond,fill=#1,draw=black,thick,inner sep=2.4pt}]
+  \draw[gray] (0.4,0) -- (9.6,0);
+  \foreach \x in {1,2,5,8,9}{
+    \node[clpt=gray!40] at (\x,0) {};
+    \node[font=\small,below=5pt] at (\x,0) {$\x$};}
+  \node[rep=ClA,label={[text=ClA!80!black]above=5pt:$c_1$}] at (2,0) {};
+  \node[rep=ClC,label={[text=ClC!80!black]above=5pt:$c_2$}] at (8,0) {};
+\end{tikzpicture}
+\end{center}
+The diamonds mark the two selected centres. At this stage we have
+chosen their positions; we have not assigned the other points to
+clusters.
+\end{framedexample}
+
+\subsubsection{Assigning points to the nearest centre}
+\label{sec:lloyd-assignment}
+
+Now we have $k$ centres, but which points should each one represent?
+We keep the centres fixed and assign every input point to its nearest
+centre. The points assigned to $\vec c_j$ form the cluster $C_j$.
+
+Why the nearest centre? Each point contributes its squared distance
+from its assigned centre to the \hyperref[prob:k-means]{cost}.
+Choosing the nearest centre makes that contribution as small as
+possible while the centres are fixed. If two or more centres are
+equally close, we need a rule to choose just one; we will use the
+centre with the smallest index.
+
+\begin{framedexample}{Forming the first two clusters}
+Let us take Example~\ref{ex:lloyd-initialization} again:
+$U=\{1,2,5,8,9\}$, with initial centres $c_1=2$ and $c_2=8$.
+Which points go into each cluster? We compare the squared distances
+to the two centres:
+\[
+\begin{array}{c|cc|c}
+  x & (x-2)^2 & (x-8)^2 & \text{cluster}\\
+  \hline
+  1 & 1  & 49 & C_1\\
+  2 & 0  & 36 & C_1\\
+  5 & 9  & 9  & C_1\\
+  8 & 36 & 0  & C_2\\
+  9 & 49 & 1  & C_2
+\end{array}
+\]
+The point $5$ is equally far from both centres, so our tie rule
+assigns it to $C_1$. We obtain
+\[
+  C_1=\{1,2,5\},\qquad C_2=\{8,9\}.
+\]
+\begin{center}
+\begin{tikzpicture}[x=0.9cm,
+  rep/.style={diamond,fill=#1,draw=black,thick,inner sep=2.4pt}]
+  \draw[gray] (0.4,0) -- (9.6,0);
+  \hull{ClA}{(1,0) -- (5,0)}
+  \hull{ClC}{(8,0) -- (9,0)}
+  \foreach \x in {1,2,5} \node[clpt=ClA] at (\x,0) {};
+  \foreach \x in {8,9} \node[clpt=ClC] at (\x,0) {};
+  \foreach \x in {1,2,5,8,9}
+    \node[font=\small,below=5pt] at (\x,0) {$\x$};
+  \node[rep=ClA,label={[text=ClA!80!black]above=5pt:$c_1$}] at (2,0) {};
+  \node[rep=ClC,label={[text=ClC!80!black]above=5pt:$c_2$}] at (8,0) {};
+\end{tikzpicture}
+\end{center}
+The colours show the two clusters; the centres have stayed at $2$
+and $8$ throughout this assignment step.
+\end{framedexample}
 
 \endgroup
 
