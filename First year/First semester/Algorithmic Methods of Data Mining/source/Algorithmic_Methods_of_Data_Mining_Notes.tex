@@ -7279,8 +7279,14 @@ chosen point comes from the smaller group with probability
   \frac{100}{10^7+100}\approx10^{-5}.
 \]
 Several initial centres can end up in the large group, even when the
-smaller group lies far away. Can we use the centres already chosen
-to guide the next choice?
+smaller group lies far away.
+
+We want to give points far from the centres already chosen a better
+chance of getting a centre nearby.
+
+After choosing the first
+centre, can we choose the second by taking into account where the
+first one is? This leads to a variant called $k$-means++.
 
 \begin{center}
 \begin{tikzpicture}[x=0.95cm,y=0.95cm,>=stealth,
@@ -7314,9 +7320,7 @@ to guide the next choice?
 \subsection{$k$-means++: choosing the starting centres}
 \label{sec:kmeanspp}
 
-We would like to give more attention to points that the current
-centres represent poorly. This is the idea of \emph{$k$-means++}:
-choose the first centre uniformly at random, then make each later
+In $k$-means++, we choose the first centre uniformly at random, then make each later
 choice depend on the distance to the centres already selected.
 Choosing the initial centres is also called \emph{seeding}.
 
@@ -7337,6 +7341,38 @@ A point close to any chosen centre has a small
 every chosen centre has a large one. If we assign each point to its
 nearest centre, its contribution to the
 \hyperref[prob:k-means]{cost} is $d_A(\vec x)^2$.
+
+\begin{center}
+\begin{tikzpicture}[x=0.9cm,y=0.9cm,>=stealth,
+  rep/.style={diamond,fill=#1,draw=black,thick,inner sep=2.4pt}]
+  \draw[gray!20] (0,0) grid (6,4);
+  \draw[->,gray!80!black] (-0.2,0) -- (6.6,0) node[right] {$x_1$};
+  \draw[->,gray!80!black] (0,-0.2) -- (0,4.8) node[above] {$x_2$};
+  \node[font=\small] at (3.5,4.75) {$A=\{\vec c_1,\vec c_2\}$};
+  \draw[densely dotted,gray!75,thick] (2,1) -- (5,1)
+    node[midway,above=3pt,font=\small] {$3$};
+  \draw[densely dotted,gray!75,thick] (1,1) -- (5,4)
+    node[midway,above left=2pt,font=\small] {$5$};
+  \hull{ClA}{(1,1) -- (2,1)}
+  \hull{ClC}{(5,1) -- (5,4)}
+  \draw[ClA!80!black,thick] (1,1) -- (2,1)
+    node[midway,below=4pt,font=\small] {$1$};
+  \draw[ClC!80!black,thick] (5,1) -- (5,4)
+    node[midway,right=4pt,font=\small] {$3$};
+  \node[rep=ClA,label={[text=ClA!80!black]below left=4pt:$\vec c_1$}]
+    at (1,1) {};
+  \node[rep=ClC,label={[text=ClC!80!black]below right=4pt:$\vec c_2$}]
+    at (5,1) {};
+  \node[clpt=ClA,label={[text=ClA!80!black]below right=6pt:$\vec a$}]
+    at (2,1) {};
+  \node[clpt=ClC,label={[text=ClC!80!black]above=5pt:$\vec b$}]
+    at (5,4) {};
+  \node[font=\small,text=ClA!80!black,anchor=east] at (3.1,-0.65)
+    {$d_A(\vec a)=1,\quad d_A(\vec a)^2=1$};
+  \node[font=\small,text=ClC!80!black,anchor=west] at (3.7,-0.65)
+    {$d_A(\vec b)=3,\quad d_A(\vec b)^2=9$};
+\end{tikzpicture}
+\end{center}
 
 \subsubsection{Sampling in proportion to the squared distance}
 \label{sec:kmeanspp-sampling}
