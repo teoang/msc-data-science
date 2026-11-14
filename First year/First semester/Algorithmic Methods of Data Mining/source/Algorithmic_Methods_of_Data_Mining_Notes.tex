@@ -7464,26 +7464,22 @@ be chosen next?
   8 & 8 & 64 & 64/138
 \end{array}
 \]
-The squared distances sum to $25+49+64=138$. The point $8$ has the
-largest probability, $64/138$, but $5$ and $7$ can also be selected.
-\end{framedexample}
-
 Once we have selected another centre, we must use its position in
 the next round. Keeping the old probabilities would ignore the new
 centre's contribution.
 
-\begin{framedexamplepart}{ex:kmeanspp-first-choice}{2}{Choosing centres with $k$-means++}
-\label{ex:kmeanspp-next-choice}
-Let us take Example~\ref{ex:kmeanspp-first-choice} again:
-$U=\{0,5,7,8\}$, with $k=3$ and first centre $0$. Suppose the next
-draw selects $8$, giving $A=\{0,8\}$. How do the probabilities change?
+Suppose the next draw selects $8$, giving $A=\{0,8\}$.
+How do the probabilities change?
 
-Now $5$ is only $3$ units from the centre $8$, and $7$ is only $1$
-unit from it. Their new squared distances to $A$ are $9$ and $1$;
-the two selected centres have weight $0$. Thus
 \[
-  p(5\mid A)=\frac9{9+1}=\frac9{10},\qquad
-  p(7\mid A)=\frac1{9+1}=\frac1{10}.
+\begin{array}{c|ccc}
+  x & d_A(x) & d_A(x)^2 & p(x\mid A)\\
+  \hline
+  0 & 0 & 0 & 0\\
+  5 & 3 & 9 & 9/10\\
+  7 & 1 & 1 & 1/10\\
+  8 & 0 & 0 & 0
+\end{array}
 \]
 \begin{center}
 \begin{tikzpicture}[x=0.9cm,
@@ -7499,7 +7495,7 @@ the two selected centres have weight $0$. Thus
 The point $5$ is now more likely than $7$ to become the third centre:
 $7$ is already well represented by the centre at $8$. If we draw $5$,
 the initial centres are $0,8,5$, and Lloyd's iterations can start.
-\end{framedexamplepart}
+\end{framedexample}
 
 \Needspace{18\baselineskip}
 \subsubsection{An approximation guarantee in expectation}
