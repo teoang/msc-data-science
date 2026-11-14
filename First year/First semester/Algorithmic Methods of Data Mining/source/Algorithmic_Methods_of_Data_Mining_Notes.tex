@@ -7378,13 +7378,19 @@ nearest centre, its contribution to the
 \label{sec:kmeanspp-sampling}
 
 We use those contributions as weights: a point whose current cost
-is larger gets a larger chance of becoming the next centre. To turn
-the weights into probabilities, divide each one by their sum:
+is larger gets a larger chance of becoming the next centre.
+
+Let $p(\vec x\mid A)$ be the probability that $\vec x$ is chosen as
+the next centre, given the centres already in $A$:
 \[
   p(\vec x\mid A)=
   \frac{d_A(\vec x)^2}{\displaystyle\sum_{\vec y\in U}d_A(\vec y)^2}.
 \]
-These probabilities add to $1$. After drawing a centre, add it to
+We note that
+\[
+  \sum_{\vec x\in U}p(\vec x\mid A)=1.
+\]
+After drawing a centre, add it to
 $A$ and recompute the distances before making the next choice. A
 centre already in $A$ has distance $0$, so it cannot be drawn again.
 With $1\leq k\leq n=\abs{U}$ distinct input points, we can continue
@@ -7409,9 +7415,39 @@ until $A$ contains $k$ centres.
 \end{algorithmic}
 \end{framedalgo}
 
-Use the returned centres to start the assignment and mean-update
-loop of \hyperref[alg:lloyd]{Lloyd's algorithm}. The change is in the
-initialization; the two update steps are the same.
+\Needspace{30\baselineskip}
+$k$-means++ uses \textsc{KMeansPlusPlusSeeds} from
+Algorithm~\ref{alg:kmeanspp} to choose the initial centres, then
+continues with the steps of
+\hyperref[alg:lloyd]{Lloyd's $k$-means algorithm}.
+
+\begin{framedalgo}{$k$-means++ with Lloyd's updates}
+\label{alg:kmeanspp-lloyd}
+\begin{algorithmic}[1]
+  \Function{KMeansPlusPlus}{$U,k,\delta$}
+    \State $\{\vec c_1,\ldots,\vec c_k\}\gets$
+      \Call{KMeansPlusPlusSeeds}{$U,k$}
+    \Repeat
+      \For{$j=1$ \textbf{to} $k$}
+        \State $\vec c_j^{\mathrm{old}}\gets\vec c_j$;
+          $C_j\gets\varnothing$
+      \EndFor
+      \ForAll{$\vec x\in U$}
+        \State $j\gets\argmin_{1\leq\ell\leq k}
+          \norm{\vec x-\vec c_\ell}_2^2$
+        \State $C_j\gets C_j\cup\{\vec x\}$
+      \EndFor
+      \For{$j=1$ \textbf{to} $k$}
+        \State $\vec c_j\gets\dfrac{1}{\abs{C_j}}
+          \displaystyle\sum_{\vec x\in C_j}\vec x$
+      \EndFor
+    \Until{$\max_{1\leq j\leq k}
+      \norm{\vec c_j-\vec c_j^{\mathrm{old}}}_2^2\leq\delta$}
+    \State \Return $(C_1,\ldots,C_k)$ and
+      $(\vec c_1,\ldots,\vec c_k)$
+  \EndFunction
+\end{algorithmic}
+\end{framedalgo}
 
 \begin{framedexample}{Choosing centres with $k$-means++}
 \label{ex:kmeanspp-first-choice}
@@ -7465,6 +7501,7 @@ $7$ is already well represented by the centre at $8$. If we draw $5$,
 the initial centres are $0,8,5$, and Lloyd's iterations can start.
 \end{framedexamplepart}
 
+\Needspace{18\baselineskip}
 \subsubsection{An approximation guarantee in expectation}
 \label{sec:kmeanspp-guarantee}
 
