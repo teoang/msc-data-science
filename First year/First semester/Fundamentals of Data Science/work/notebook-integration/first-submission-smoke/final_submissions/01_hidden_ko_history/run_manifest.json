@@ -1,0 +1,34 @@
+{
+  "submission": "01_hidden_ko_history",
+  "git_commit": "484eeed4b4e3cb78ba57d5c3856468c63e66284f",
+  "source_manifest_sha256": "8c478096e463cdc855cbf9002e44c2fd3ce3cc659aa58b6703c7ae57062a0cef",
+  "inputs": {
+    "train.jsonl": "78f9e91c51b92adebe803bb09221347a55423dce080e433465edf527d2c20d0d",
+    "test.jsonl": "25bdbb2a2f43d6ca480228c142299d325d3ea41eebfab8c4e652447b82914d60",
+    "type_chart_gen2.csv": "66c8e6f8eaa54f07fdd586663324f5e0fbbaaa8e7f0b7e41d83729c28d837e10",
+    "sample_submission.csv": "9902229ada3a3f3fda090d9cd8de4622536f7bdd2f07fc764909a6cc18f23aac"
+  },
+  "runtime": {
+    "python": "3.12.14",
+    "platform": "macOS-15.8.2-arm64-arm-64bit",
+    "numpy": "2.1.3",
+    "pandas": "2.3.3",
+    "scikit-learn": "1.6.1",
+    "lightgbm": "4.6.0",
+    "xgboost": "3.4.1",
+    "catboost": "1.2.10",
+    "scipy": "1.18.1"
+  },
+  "output": {
+    "rows": 5000,
+    "p1_wins": 2541,
+    "file_sha256": "c1d12cc0eacb506a29c5c0f9ddad7abf419a9d8acccc8703334b2a1d5633f9f4",
+    "predictions_sha256": "b701d9bae48c0432095b7e42d1e8889c3dcd00a6f5ac3a40e83c687e18c98fbb"
+  },
+  "reference": {
+    "submission_ref": 57708941,
+    "predictions_match": true,
+    "expected_predictions_sha256": "b701d9bae48c0432095b7e42d1e8889c3dcd00a6f5ac3a40e83c687e18c98fbb"
+  },
+  "csv_path": "/Users/teoang/Projects/uni/msc-data-science/First year/First semester/Fundamentals of Data Science/work/notebook-integration/first-submission-smoke/final_submissions/01_hidden_ko_history/submission.csv"
+}

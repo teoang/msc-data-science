@@ -179,6 +179,12 @@
 - [x] The covariance matrix and the variance of a linear combination; independent variables have zero covariance.
 - [x] Conditioning: conditional expectation and variance, the law of total expectation and the law of total probability.
 
+**11 November**
+
+- [x] A familiar Binomial count as a sum of independent Bernoulli variables: the many-to-one transformation.
+- [x] Mean, variance and second moment of a Binomial count from the individual Bernoulli trials.
+- [x] Different success probabilities and dependent trials: linearity of expectation, covariance terms and the need for the joint distribution.
+
 </details>
 
 <details>
@@ -303,6 +309,15 @@
 - [x] Sensitivity to outliers and the risk of overlooking small groups with uniform initialization.
 - [x] Distance to a set of centres; k-means++ initialization by sampling in proportion to squared distance, with pseudocode and a worked example.
 - [x] The O(log k) approximation guarantee of k-means++ in expectation, preserved by Lloyd's updates.
+
+**10 November**
+
+- [x] One-dimensional Lloyd exercise on nine points: complete runs for k = 2 and k = 3, convergence, and the final centres 18 units apart for k = 2.
+- [x] Geometric limitations of k-means: different sizes, different densities, non-spherical shapes, and dependence on initialization.
+- [x] Random and farthest-first initialization, sensitivity to outliers, and the distance-exponent view of k-means++.
+- [x] Exact k-means on a line: consecutive blocks, dynamic programming, prefix-sum block costs, reconstruction, and O(kn²) time after sorting.
+- [x] Matrix rank, linear independence, data matrices, and matrix multiplication as a sum of outer products.
+- [x] Orthogonal projection onto a line and onto a subspace: reduced coordinates, projected data, and orthogonal residuals.
 
 </details>
 
