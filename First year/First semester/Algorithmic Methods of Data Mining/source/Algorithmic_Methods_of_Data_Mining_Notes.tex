@@ -7502,12 +7502,13 @@ the initial centres are $0,8,5$, and Lloyd's iterations can start.
 \label{sec:kmeanspp-guarantee}
 
 Does this more careful initialization give a guarantee on the final
-cost? Let $\varphi$ be the cost after $k$-means++ initialization and
+cost?
+
+Let $\varphi$ be the cost after $k$-means++ initialization and
 Lloyd's updates, and let $\OPT$ be the minimum cost for the same
 input. The input is fixed; the
 \hyperref[def:expected-value]{expected value} averages over the random
-choices of the starting centres. We write $\ln$ for the natural
-logarithm.
+choices of the starting centres.
 
 \begin{framedprop}{Expected cost of $k$-means++}
 \label{prop:kmeanspp-guarantee}
@@ -7521,8 +7522,7 @@ for $k\geq2$.
 
 The bound already holds for the cost immediately after the seeding
 step. Lloyd's updates cannot increase that cost, so the same bound
-holds after the updates. An individual run may have a larger cost;
-the guarantee is on the expectation over the random choices.
+holds after the updates.
 This result is due to
 \href{https://theory.stanford.edu/~sergei/papers/kMeansPP-soda.pdf}{Arthur and Vassilvitskii (2007)}.
 
