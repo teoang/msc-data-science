@@ -2614,6 +2614,7 @@ from their coordinates:
   =\frac{\sum_{j=1}^{m}u_jv_j}
     {\sqrt{\sum_{j=1}^{m}u_j^2}\sqrt{\sum_{j=1}^{m}v_j^2}}.
 \]
+\phantomsection\label{sec:dot-product}
 The numerator is the \emph{dot product}: multiply corresponding
 coordinates, then add the results. The denominator is the product of
 the two $L_2$ norms.
@@ -7525,6 +7526,790 @@ step. Lloyd's updates cannot increase that cost, so the same bound
 holds after the updates.
 This result is due to
 \href{https://theory.stanford.edu/~sergei/papers/kMeansPP-soda.pdf}{Arthur and Vassilvitskii (2007)}.
+
+\clearpage
+\lecturestart{10 November}
+
+\subsection{A one-dimensional $k$-means exercise}
+\label{sec:kmeans-nine-points}
+
+We have seen how \hyperref[alg:lloyd]{Lloyd's algorithm} alternates
+between assigning points and updating the centres. Let us now run
+it on a larger set of points on a line and follow the assignments
+and mean updates until they stop changing.
+
+\begingroup
+\tcbset{examplebox/.append style={breakable}}
+\begin{framedexample}{Lloyd's algorithm on nine points}
+\label{ex:lloyd-nine-points}
+Take
+\[
+  U=\{2,3,4,10,11,12,20,25,30\},
+  \qquad k=2,
+\]
+with initial centres $c_1=2$ and $c_2=4$. Which points go into each
+cluster?
+
+The point $3$ is equally far from both centres: its distance to
+each is $1$. Following our tie rule, we assign it to $C_1$.
+The point $2$ is closest to $c_1$, while every point from $4$
+onwards is closest to $c_2$. The first assignment therefore gives
+\[
+  C_1=\{2,3\},\qquad C_2=\{4,10,11,12,20,25,30\}.
+\]
+\begin{center}
+\begin{tikzpicture}[x=0.43cm,y=1cm,
+  rep/.style={diamond,fill=#1,draw=black,thick,inner sep=2.4pt}]
+  \renewcommand{\hullw}{8pt}
+  \draw[gray] (0,0) -- (31.5,0);
+  \hull{ClA}{(2,0)--(3,0)}
+  \hull{ClB}{(4,0)--(30,0)}
+  \foreach \x in {2,3}{
+    \node[clpt=ClA] at (\x,0) {};
+    \node[font=\small,below=6pt] at (\x,0) {$\x$};}
+  \foreach \x in {4,10,11,12,20,25,30}{
+    \node[clpt=ClB] at (\x,0) {};}
+  \foreach \x in {4,20,25,30}{
+    \node[font=\small,below=6pt] at (\x,0) {$\x$};}
+  \node[font=\small,below=6pt] at (11,0) {$10,11,12$};
+  \draw[ClA,densely dotted] (2,0) -- (2,0.75);
+  \draw[ClB,densely dotted] (4,0) -- (4,0.75);
+  \node[rep=ClA,label={[text=ClA!80!black]above left=2pt:$c_1=2$}]
+    at (2,0.75) {};
+  \node[rep=ClB,label={[text=ClB!80!black]above right=2pt:$c_2=4$}]
+    at (4,0.75) {};
+\end{tikzpicture}
+\end{center}
+
+The first mean update gives
+\[
+  c_1=\frac{2+3}{2}=\frac52,\qquad
+  c_2=\frac{4+10+11+12+20+25+30}{7}=16.
+\]
+Following the steps of the algorithm, we obtain:
+\begin{center}
+\begin{tabular}{c|l|cc}
+  Iteration & $C_1$ & $c_1$ & $c_2$\\
+  \hline
+  1 & $\{2,3\}$ & $5/2$ & $16$\\
+  2 & $\{2,3,4\}$ & $3$ & $18$\\
+  3 & $\{2,3,4,10\}$ & $19/4$ & $98/5$\\
+  4 & $\{2,3,4,10,11,12\}$ & $7$ & $25$
+\end{tabular}
+\end{center}
+\par\noindent\begin{minipage}{\linewidth}
+With centres $7$ and $25$, the boundary is $16$. The next assignment
+keeps $C_1=\{2,3,4,10,11,12\}$ and $C_2=\{20,25,30\}$, so the
+means stay at $7$ and $25$: the algorithm has converged.
+\begin{center}
+\begin{tikzpicture}[x=0.43cm,y=1cm,
+  rep/.style={diamond,fill=#1,draw=black,thick,inner sep=2.4pt}]
+  \renewcommand{\hullw}{8pt}
+  \draw[gray] (0,0)--(31.5,0);
+  \hull{ClA}{(2,0)--(12,0)}
+  \hull{ClB}{(20,0)--(30,0)}
+  \foreach \x in {2,3,4,10,11,12} \node[clpt=ClA] at (\x,0) {};
+  \foreach \x in {20,25,30} \node[clpt=ClB] at (\x,0) {};
+  \foreach \x in {2,3,4,20,25,30}
+    \node[font=\small,below=6pt] at (\x,0) {$\x$};
+  \node[font=\small,below=6pt] at (11,0) {$10,11,12$};
+  \draw[ClA,densely dotted] (7,0)--(7,0.65);
+  \draw[ClB,densely dotted] (25,0)--(25,0.65);
+  \node[rep=ClA,label=above:{$c_1=7$}] at (7,0.65) {};
+  \node[rep=ClB,label=above:{$c_2=25$}] at (25,0.65) {};
+\end{tikzpicture}
+\end{center}
+\end{minipage}
+\end{framedexample}
+\endgroup
+
+What changes if we ask for three clusters instead of two?
+
+\begingroup
+\tcbset{examplebox/.append style={breakable}}
+% The same scale, point labels and centre markers in every iteration.
+\newcommand{\ninethreeplot}[4]{%
+\begin{center}
+\begin{tikzpicture}[x=0.43cm,y=1cm,
+  rep/.style={diamond,fill=##1,draw=black,thick,inner sep=2.4pt}]
+  \path[use as bounding box] (-2,-0.65) rectangle (33,1.25);
+  \renewcommand{\hullw}{8pt}
+  \draw[gray] (0,0)--(31.5,0);
+  \ifnum#1=1
+    \hull{ClA}{(2,0) circle (0.01)}
+    \hull{ClB}{(3,0)--(12,0)}
+    \node[clpt=ClA] at (2,0) {};
+    \foreach \x in {3,4,10,11,12} \node[clpt=ClB] at (\x,0) {};
+  \else
+    \hull{ClA}{(2,0)--(4,0)}
+    \hull{ClB}{(10,0)--(12,0)}
+    \foreach \x in {2,3,4} \node[clpt=ClA] at (\x,0) {};
+    \foreach \x in {10,11,12} \node[clpt=ClB] at (\x,0) {};
+  \fi
+  \hull{ClC}{(20,0)--(30,0)}
+  \foreach \x in {20,25,30} \node[clpt=ClC] at (\x,0) {};
+  \foreach \x in {2,3,4,20,25,30}
+    \node[font=\small,below=6pt] at (\x,0) {$\x$};
+  \node[font=\small,below=6pt] at (11,0) {$10,11,12$};
+  \foreach \x/\col in {#2/ClA,#3/ClB,#4/ClC}
+    \draw[\col,densely dotted] (\x,0)--(\x,0.65);
+  \node[rep=ClA,label=above left:{$c_1=#2$}] at (#2,0.65) {};
+  \node[rep=ClB,label=above right:{$c_2=#3$}] at (#3,0.65) {};
+  \node[rep=ClC,label=above:{$c_3=#4$}] at (#4,0.65) {};
+\end{tikzpicture}
+\end{center}}
+
+\begin{framedexample}{The same nine points with three centres}
+\label{ex:lloyd-nine-three}
+Let us take Example~\ref{ex:lloyd-nine-points} again:
+$U=\{2,3,4,10,11,12,20,25,30\}$. This time let $k=3$ and start
+with centres $2,3,30$.
+
+The initial boundaries are $5/2$ and $33/2$, so the first
+assignment gives
+\[
+  C_1=\{2\},\quad C_2=\{3,4,10,11,12\},\quad C_3=\{20,25,30\}.
+\]
+\ninethreeplot{1}{2}{3}{30}
+
+The mean update keeps these clusters fixed and moves the centres
+to $2,8,25$:
+\ninethreeplot{1}{2}{8}{25}
+
+The boundaries are now $5$ and $33/2$, so the next assignment gives
+\[
+  C_1=\{2,3,4\},\quad C_2=\{10,11,12\},\quad C_3=\{20,25,30\}.
+\]
+\ninethreeplot{2}{2}{8}{25}
+
+The mean update keeps these clusters fixed and moves the centres
+to $3,11,25$:
+\ninethreeplot{2}{3}{11}{25}
+
+With boundaries $7$ and $18$, the next assignment is unchanged,
+so these are the final centres.
+\end{framedexample}
+\endgroup
+
+\subsection{When the geometry disagrees with the $k$-means cost}
+\label{sec:kmeans-geometric-limits}
+
+The algorithm always tries to reduce the sum of squared distances
+to the centres. Does reducing that sum always recover the groups
+we see in a picture? A single centre represents a compact group
+well, but groups can also differ in size, density or shape.
+
+\Needspace{18\baselineskip}
+\subsubsection{Different sizes}
+
+In the left-hand picture, we see three geometric groups: a large,
+broad group in the middle and two small groups at the sides. With
+$k=3$, we would expect one cluster for each group.
+
+But $k$-means minimizes the sum of squared distances to the centres.
+The central group contains many points, including some far from its
+centre. A point near an edge of this group can be closer to the
+centre of a small side group. Assigning it to that centre reduces
+its contribution to the cost.
+
+This is what happens in the right-hand picture: the side clusters
+also take some points from the central group, which is split across
+several clusters. Minimizing the $k$-means cost can therefore give
+groups different from those we recognize visually, especially when
+their sizes differ greatly.
+\begin{center}
+\input{assets/kmeans-sizes.tex}
+\end{center}
+
+\Needspace{18\baselineskip}
+\subsubsection{Different densities}
+
+Density describes how closely packed the points are: a dense group
+has points close together, while a low-density group has points
+spread farther apart.
+
+In the left-hand picture, we see three geometric groups: a broad,
+low-density group on the left and two small, dense groups on the
+right. With $k=3$, we would expect one cluster for each group.
+
+But $k$-means minimizes the sum of squared distances to the centres:
+\begin{itemize}
+  \item In the low-density group, many points are far from its
+    centre. \textbf{Using two centres can greatly reduce its cost.}
+  \item In the two dense groups, the points are already close
+    together. \textbf{Representing both groups with one centre can
+    increase their cost by less than this saving.}
+\end{itemize}
+
+If the saving in the broad group exceeds the increase in the two
+compact groups, the total cost decreases. This is what happens in
+the right-hand picture: the low-density group is split, while the
+two dense groups are merged. Minimizing the $k$-means cost can
+therefore give groups different from those we recognize visually,
+especially when their densities differ greatly.
+\begin{center}
+\input{assets/kmeans-densities.tex}
+\end{center}
+
+\Needspace{18\baselineskip}
+\subsubsection{Non-spherical shapes}
+
+Finally, consider two curved groups. A point can be close to the
+centre of the other curve even though it belongs to a different
+geometric group. Nearest-centre assignment can cut across the
+curves instead of following them. The partition below illustrates
+why a small $k$-means cost need not capture a non-spherical shape.
+\begin{center}
+\input{assets/kmeans-shapes.tex}
+\end{center}
+
+Changing the initialization can also change the result, as in
+Example~\ref{ex:lloyd-rectangle}. Repeated starts can help, but they
+do not remove these geometric limitations.
+
+\subsection{Choosing distant centres without chasing outliers}
+\label{sec:farthest-first}
+
+We now return to the choice of initial centres. We have already
+seen two strategies:
+\begin{itemize}
+  \item \textbf{Uniform random sampling:} it can choose several
+    centres in the same group and leave other groups without one.
+    This is the initialization used in our original
+    \hyperref[alg:lloyd]{Lloyd algorithm}.
+  \item \textbf{\hyperref[alg:kmeanspp]{$k$-means++}:} it gives more distant points a greater
+    chance of being chosen, without necessarily choosing the
+    farthest point.
+\end{itemize}
+
+Let us now consider another initialization method, called
+\emph{farthest-first traversal}.
+
+The aim is to understand why $k$-means++ uses a random choice
+guided by distances.
+
+In \emph{farthest-first traversal}, choose a first centre, then
+repeatedly choose the input point farthest from the centres already
+selected. Using our \hyperref[def:distance-centres]{distance to a
+set of centres}, each new choice is
+\[
+  \vec c\in\argmax_{\vec x\in U}d_A(\vec x),\qquad
+  A\gets A\cup\{\vec c\}.
+\]
+This avoids putting every initial centre in the same compact group.
+But an isolated outlier can be farther away than every useful
+candidate inside a group.
+
+\begingroup
+\tcbset{examplebox/.append style={breakable}}
+\newcommand{\ffoutlierplot}[1]{%
+\begin{center}
+\begin{tikzpicture}[x=1.15cm,y=1cm,
+  rep/.style={diamond,fill=##1,draw=black,thick,inner sep=2.4pt},
+  mass/.style={circle,fill=##1,draw=black,inner sep=4pt}]
+  \path[use as bounding box] (-1.2,-0.9) rectangle (11.2,1.2);
+  \draw[gray] (-.5,0)--(10.6,0);
+  \ifnum#1=1
+    \hull{ClA}{(0,0)--(4,0)}
+    \node[mass=ClA] at (0,0) {};
+    \node[mass=ClA] at (4,0) {};
+    \node[clpt=ClB] at (10,0) {};
+    \foreach \x/\col in {2/ClA,10/ClB}{
+      \draw[\col,densely dotted] (\x,0)--(\x,0.65);
+      \node[rep=\col,label=above:{centre $\x$}] at (\x,0.65) {};}
+  \else
+    \node[mass=ClA] at (0,0) {};
+    \node[mass=ClB] at (4,0) {};
+    \ifnum#1=0
+      \node[clpt=gray] at (10,0) {};
+    \else
+      \hull{ClB}{(4,0)--(10,0)}
+      \node[mass=ClB] at (4,0) {};
+      \node[clpt=ClB] at (10,0) {};
+      \foreach \x/\col in {0/ClA,4/ClB}{
+        \draw[\col,densely dotted] (\x,0)--(\x,0.65);
+        \node[rep=\col,label=above:{centre $\x$}] at (\x,0.65) {};}
+    \fi
+  \fi
+  \foreach \x in {0,4,10}
+    \node[font=\small,below=6pt] at (\x,0) {$\x$};
+  \foreach \x in {0,4}
+    \node[font=\small,below=22pt] at (\x,0) {10 points};
+  \node[font=\small,below=22pt] at (10,0) {1 point};
+\end{tikzpicture}
+\end{center}}
+
+\begin{framedexample}{Farthest-first can favour one outlier over a group}
+\label{ex:farthest-outlier}
+Take $k=2$ and a dataset with ten observations at $0$, ten at $4$
+and one isolated observation at $10$. Observations can coincide:
+each large circle below represents ten points at the same position.
+\ffoutlierplot{0}
+
+Whichever observation we choose first, farthest-first selects $10$
+as one of its two centres. If we start at $0$ or $4$, the farthest
+point is $10$; if we start at $10$, the farthest point is $0$.
+
+Lloyd then assigns the twenty points at $0$ and $4$ to one cluster
+and leaves $10$ alone. Their joint mean is $2$. With centres $2$
+and $10$, the boundary is $6$, so the assignments stay unchanged.
+The final cost is $20\cdot2^2=80$:
+\ffoutlierplot{1}
+
+Now put the centres at $0$ and $4$ instead. All twenty points in
+the two groups have cost zero; only the isolated point contributes,
+giving a cost of $(10-4)^2=36<80$:
+\ffoutlierplot{2}
+
+This already proves that the farthest-first plus Lloyd result is
+not optimal.
+\end{framedexample}
+\endgroup
+
+Uniform sampling has the opposite behaviour: many points in a
+large group give that group many chances of being selected, while
+a single outlier has only one chance among $n$ points. It can work
+well here, but can also miss groups or choose several centres in
+one group.
+
+We can move between uniform sampling and farthest-first by changing
+how strongly distance affects the next choice. After choosing the
+first centre uniformly, let $A$ contain the centres already chosen
+and let $R$ contain the input points not yet selected. We use an
+exponent $\alpha\geq0$ to control how much we favour distant points.
+
+Let $p_\alpha(\vec x\mid A)$ be the probability that
+$\vec x\in R$ is chosen as the next centre, given the centres
+already in $A$. For $\alpha>0$, we use $d_A(\vec x)^\alpha$ as
+its weight:
+\[
+  p_\alpha(\vec x\mid A)=
+  \frac{d_A(\vec x)^\alpha}
+       {\displaystyle\sum_{\vec y\in R}d_A(\vec y)^\alpha},
+  \qquad \sum_{\vec x\in R}p_\alpha(\vec x\mid A)=1.
+\]
+
+For $\alpha=0$, we give every remaining point weight $1$. Thus
+\[
+  p_0(\vec x\mid A)=\frac{1}{\abs{R}},\qquad \vec x\in R,
+\]
+so we get uniform sampling again.
+
+For $\alpha=2$, the probability becomes
+\[
+  p_2(\vec x\mid A)=
+  \frac{d_A(\vec x)^2}{\displaystyle\sum_{\vec y\in R}d_A(\vec y)^2},
+\]
+which is exactly \hyperref[sec:kmeanspp-sampling]{$k$-means++ sampling}.
+
+What happens as $\alpha$ grows? Suppose $\vec x^*$ is the unique
+farthest candidate. Dividing the numerator and denominator by
+$d_A(\vec x^*)^\alpha$ gives
+\[
+  p_\alpha(\vec x^*\mid A)=
+  \frac{1}{1+\displaystyle\sum_{\substack{\vec y\in R\\\vec y\neq\vec x^*}}
+    \left(\frac{d_A(\vec y)}{d_A(\vec x^*)}\right)^\alpha}
+  \;\longrightarrow\;1
+  \qquad\text{as }\alpha\to\infty.
+\]
+Each ratio inside the sum is smaller than $1$, so its power tends
+to $0$. The probability of choosing the farthest point therefore
+tends to $1$, while every other point's probability tends to $0$:
+we get farthest-first selection. If several points share the
+maximum distance, the limiting probability is divided equally
+among them, so we still choose a farthest point.
+
+Thus $k$-means++ favours distant points without always taking the
+single farthest one. It can still select an outlier. Once the
+centres have been chosen, we run the same Lloyd updates, as in
+Algorithm~\ref{alg:kmeanspp-lloyd}. The
+\hyperref[prop:kmeanspp-guarantee]{approximation guarantee} already
+holds after initialization and is preserved by these updates.
+
+\subsection{Solving $k$-means exactly on a line}
+\label{sec:kmeans-line-dp}
+
+We used Lloyd's updates on a line, but they still depend on the
+initial centres. Can we find the best partition directly? Order
+the input as $x_1\leq\cdots\leq x_n$. For centres arranged from
+left to right, nearest-centre regions are intervals separated by
+midpoints. Consequently, there is an optimal partition into
+contiguous blocks of this ordered sequence.
+
+We therefore only need to choose where the blocks end. Let us first
+find the cost of one block, then use it to build an optimal
+partition of a prefix.
+
+\begin{frameddefn}{Cost of a consecutive block}
+\label{def:kmeans-block-cost}
+For $1\leq a\leq b\leq n$, let
+\[
+  \mu_{a,b}=\frac{1}{b-a+1}\sum_{r=a}^{b}x_r,
+  \qquad
+  \operatorname{cost}(a,b)=\sum_{r=a}^{b}(x_r-\mu_{a,b})^2.
+\]
+This is the minimum one-centre cost of $\{x_a,\ldots,x_b\}$,
+because its mean is the best representative.
+\end{frameddefn}
+
+Let $D(j,i)$ be the minimum cost of splitting the first $i$ points
+into exactly $j$ non-empty clusters. Suppose the last cluster starts
+at $x_{\ell+1}$. Then it contains $x_{\ell+1},\ldots,x_i$, and
+the first $\ell$ points must use $j-1$ clusters:
+\begin{center}
+\begin{tikzpicture}[x=1cm,y=1cm]
+  \draw[gray] (0,0)--(11.5,0);
+  \hull{ClA}{(0.5,0)--(5.5,0)}
+  \hull{ClB}{(6.8,0)--(10.8,0)}
+  \foreach \x/\lab in {.5/1,1.5/2,5.5/\ell,6.8/{\ell+1},10.8/i}{
+    \node[clpt=black] at (\x,0) {};
+    \node[below=6pt] at (\x,0) {$x_{\lab}$};}
+  \node at (3.5,0) {$\cdots$};
+  \node at (8.8,0) {$\cdots$};
+  \node[text=ClA!80!black] at (3,0.65) {$D(j-1,\ell)$};
+  \node[text=ClB!80!black] at (8.8,0.65) {$\operatorname{cost}(\ell+1,i)$};
+\end{tikzpicture}
+\end{center}
+Trying every possible start of the last cluster gives the recurrence
+\[
+  D(j,i)=\min_{j-1\leq\ell<i}
+    \bigl\{D(j-1,\ell)+\operatorname{cost}(\ell+1,i)\bigr\},
+  \qquad 1\leq j\leq i.
+\]
+The base case is $D(0,0)=0$. Set $D(0,i)=+\infty$ for $i>0$
+and $D(j,i)=+\infty$ when $j>i$: there are not enough points for
+that many non-empty clusters. In particular,
+$D(1,i)=\operatorname{cost}(1,i)$ and $D(i,i)=0$.
+
+\subsubsection{Compute each block cost without rescanning its points}
+
+There are $O(kn)$ states, each trying at most $n$ cuts. To make
+the total time $O(kn^2)$, we need each block cost in $O(1)$ time.
+Define the prefix sums
+\[
+  S_i=\sum_{r=1}^{i}x_r,\qquad Q_i=\sum_{r=1}^{i}x_r^2,
+  \qquad S_0=Q_0=0.
+\]
+Expanding the squares around the mean gives
+\[
+  \operatorname{cost}(a,b)
+    =Q_b-Q_{a-1}-\frac{(S_b-S_{a-1})^2}{b-a+1}.
+\]
+The prefix sums take $O(n)$ time to build, and this expression
+uses a constant number of operations for each block.
+
+\Needspace{25\baselineskip}
+\begin{framedalgo}{Exact $k$-means on a line}
+\label{alg:kmeans-line-dp}
+\begin{algorithmic}[1]
+  \Function{LineKMeans}{$x_1,\ldots,x_n,k$}
+    \State Sort the points so that $x_1\leq\cdots\leq x_n$
+    \State Compute the prefix sums $S$ and $Q$
+    \State Initialize all entries of $D$ to $+\infty$; $D(0,0)\gets0$
+    \For{$j=1$ \textbf{to} $k$}
+      \For{$i=j$ \textbf{to} $n$}
+        \For{$\ell=j-1$ \textbf{to} $i-1$}
+          \State $v\gets D(j-1,\ell)+\operatorname{cost}(\ell+1,i)$
+          \If{$v<D(j,i)$}
+            \State $D(j,i)\gets v$; $\operatorname{cut}(j,i)\gets\ell$
+          \EndIf
+        \EndFor
+      \EndFor
+    \EndFor
+    \State Recover the blocks by following $\operatorname{cut}$ from $(k,n)$
+    \State \Return $D(k,n)$ and the blocks with their means
+  \EndFunction
+\end{algorithmic}
+\end{framedalgo}
+
+Assume $1\leq k\leq n$. Store a minimizing cut at each state.
+Starting at $(k,n)$, the last block is
+$x_{\operatorname{cut}(k,n)+1},\ldots,x_n$; then continue from
+$(k-1,\operatorname{cut}(k,n))$ to recover the preceding block.
+The time is $O(n\log n+kn^2)$ including sorting, and the tables
+use $O(kn)$ space. This is an exact algorithm, rather than a
+choice of initialization for Lloyd's method.
+
+\begin{framedexample}{Certifying the nine-point solutions}
+\label{ex:kmeans-nine-dp}
+Let us take the data of Example~\ref{ex:lloyd-nine-points} again:
+$U=\{2,3,4,10,11,12,20,25,30\}$. The dynamic program gives
+\[
+  D(2,9)=150,\qquad D(3,9)=54.
+\]
+For $k=2$, it chooses the blocks $\{2,3,4,10,11,12\}$ and
+$\{20,25,30\}$, with means $7$ and $25$; their costs are $100$
+and $50$. For $k=3$, it chooses $\{2,3,4\}$, $\{10,11,12\}$
+and $\{20,25,30\}$, with means $3,11,25$ and costs $2,2,50$.
+Thus the converged solutions of Examples~\ref{ex:lloyd-nine-points}
+and~\ref{ex:lloyd-nine-three} are optimal for these inputs.
+\end{framedexample}
+
+\endgroup
+
+\chapter{Matrices and projections}
+\label{ch:matrices-projections}
+
+\begingroup
+\tcbset{examplebox/.append style={unbreakable},
+  definitionbox/.append style={unbreakable}}
+
+Clustering groups data points into sets. We now look at another
+way to simplify a dataset: represent its points using fewer
+directions. Before projecting points, we need a way to describe
+the independent directions contained in a matrix.
+
+\section{Rank: how many independent directions?}
+
+One vector can sometimes be built from others. For example, if
+$\vec u_3=2\vec u_1+\vec u_2$, the third vector adds no independent
+direction. More generally, a linear combination has the form
+$a_1\vec u_1+\cdots+a_r\vec u_r$, with scalar coefficients $a_i$.
+
+\begin{frameddefn}{Linear independence}
+\label{def:linear-independence}
+Vectors $\vec u_1,\ldots,\vec u_r$ are linearly independent if
+\[
+  a_1\vec u_1+\cdots+a_r\vec u_r=\vec0
+  \quad\Longrightarrow\quad a_1=\cdots=a_r=0.
+\]
+\end{frameddefn}
+
+\begin{frameddefn}{Rank of a matrix}
+\label{def:matrix-rank}
+The rank of $A\in\R^{m\times d}$, written $\operatorname{rank}(A)$,
+is the maximum number of
+\hyperref[def:linear-independence]{linearly independent} columns of
+$A$. It also equals the maximum number of linearly independent rows.
+In particular, $\operatorname{rank}(A)\leq\min\{m,d\}$.
+\end{frameddefn}
+
+\begin{framedexample}{A column that adds no new direction}
+\label{ex:matrix-rank-two}
+Consider
+\[
+  A=\begin{pmatrix}3&9&15\\2&0&4\\1&2&4\end{pmatrix}
+    =\begin{pmatrix}\vec u_1&\vec u_2&\vec u_3\end{pmatrix}.
+\]
+The first two columns are independent: the second coordinate of
+$a\vec u_1+b\vec u_2=0$ gives $2a=0$, and then the first gives
+$9b=0$. But $\vec u_3=2\vec u_1+\vec u_2$, so the rank is $2$.
+Similarly, $\begin{pmatrix}1&2&3\\1&5&9\end{pmatrix}$ has rank $2$:
+its two rows are not multiples, and it cannot have more than two
+independent rows.
+\end{framedexample}
+
+\section{A dataset as a matrix}
+\label{sec:data-matrix}
+
+Suppose we have $m$ objects, each described by $d$ coordinates.
+Put one object in each row of a matrix $A\in\R^{m\times d}$.
+Write $A_{(i)}$ for its $i$-th row and $A^{(j)}$ for its $j$-th
+column. Often $m$ is much larger than $d$: many objects share the
+same list of features.
+\[
+  A=\begin{pmatrix}---&A_{(1)}&---\\
+                   ---&A_{(2)}&---\\
+                   &\vdots&\\
+                   ---&A_{(m)}&---\end{pmatrix}.
+\]
+This lets us apply the same linear operation to every data point
+through a single matrix multiplication.
+
+\subsection{Matrix multiplication as a sum of outer products}
+\label{sec:matrix-outer-products}
+
+We usually compute one entry of $AB$ by taking a row of $A$ and
+a column of $B$. There is another useful view: pair each column
+of $A$ with the matching row of $B$, and add the resulting matrices.
+
+For $\vec u\in\R^m$ and $\vec v\in\R^d$, the \emph{outer product}
+$\vec u\vec v^{\mathsf T}$ is an $m\times d$ matrix whose entry
+$(i,j)$ is $u_i v_j$. Every column is a multiple of $\vec u$, so
+it has rank $1$ when both vectors are non-zero, and rank $0$
+otherwise. For $A\in\R^{m\times r}$ and $B\in\R^{r\times d}$,
+\[
+  AB=\sum_{s=1}^{r}A^{(s)}B_{(s)}.
+\]
+Indeed, entry $(i,j)$ of the right-hand side is
+$\sum_{s=1}^{r}a_{is}b_{sj}$, exactly the usual product entry.
+
+\begin{framedexample}{Matrix multiplication by outer products}
+\label{ex:outer-product-sum}
+Take
+\[
+  A=\begin{pmatrix}1&-1&2&0\\2&0&8&1\\3&5&0&1\end{pmatrix},
+  \qquad
+  B=\begin{pmatrix}1&0\\3&6\\-1&0\\-2&5\end{pmatrix}.
+\]
+The product is $3\times2$. Pairing the four columns of $A$ with
+the four rows of $B$ gives
+\begin{align*}
+  AB&=\begin{pmatrix}1&0\\2&0\\3&0\end{pmatrix}
+      +\begin{pmatrix}-3&-6\\0&0\\15&30\end{pmatrix}\\
+    &\quad+\begin{pmatrix}-2&0\\-8&0\\0&0\end{pmatrix}
+      +\begin{pmatrix}0&0\\-2&5\\-2&5\end{pmatrix}\\
+    &=\begin{pmatrix}-4&-6\\-8&5\\16&35\end{pmatrix}.
+\end{align*}
+\end{framedexample}
+
+\section{Projecting onto one direction}
+\label{sec:projection-line}
+
+Instead of keeping every coordinate of a point, suppose we keep
+only its component along a chosen line through the origin.
+Let $\vec v\in\R^d$ be a unit vector along the line, so
+$\norm{\vec v}_2=1$, and let $\vec x\in\R^d$ be a column vector.
+The signed length of the projection is the
+\hyperref[sec:dot-product]{dot product}
+$t=\vec v^{\mathsf T}\vec x$. For non-zero $\vec x$, this is
+$\norm{\vec x}_2\cos\theta$, where $\theta$ is its angle with
+$\vec v$; the sign records which direction along the line we use.
+
+Multiplying that scalar by $\vec v$ gives the projected vector:
+\begin{frameddefn}{Orthogonal projection onto a line}
+\label{def:projection-line}
+For a unit column vector $\vec v$, the orthogonal projection of
+$\vec x$ onto the line spanned by $\vec v$ is
+\[
+  \vec y=\vec v(\vec v^{\mathsf T}\vec x)
+        =(\vec v\vec v^{\mathsf T})\vec x.
+\]
+\end{frameddefn}
+
+Why is it an orthogonal projection? Define the residual
+$\vec z=\vec x-\vec y$. Then
+\[
+  \vec v^{\mathsf T}\vec z
+    =\vec v^{\mathsf T}\vec x
+      -(\vec v^{\mathsf T}\vec v)\vec v^{\mathsf T}\vec x=0,
+\]
+because $\vec v^{\mathsf T}\vec v=1$. Thus $\vec x=\vec y+\vec z$
+splits the point into a component along the line and a component
+perpendicular to it. If $I_d$ denotes the $d\times d$ identity matrix,
+\[
+  \vec z=(I_d-\vec v\vec v^{\mathsf T})\vec x.
+\]
+The matrix $\vec v\vec v^{\mathsf T}$ has rank $1$; the residual
+lies in the $(d-1)$-dimensional subspace orthogonal to $\vec v$.
+
+\begin{framedexample}{A point and its orthogonal components}
+\label{ex:projection-diagonal}
+Take $\vec v=(1,1)^{\mathsf T}/\sqrt2$ and
+$\vec x=(3,1)^{\mathsf T}$. Then
+\[
+  \vec v^{\mathsf T}\vec x=2\sqrt2,\qquad
+  \vec y=\begin{pmatrix}2\\2\end{pmatrix},\qquad
+  \vec z=\begin{pmatrix}1\\-1\end{pmatrix}.
+\]
+\begin{center}
+\begin{tikzpicture}[x=1.25cm,y=1.25cm,>=Stealth]
+  \draw[gray!25,step=1] (-0.3,-1.3) grid (3.7,3.4);
+  \draw[->,gray] (-0.3,0)--(3.8,0) node[right] {$x_1$};
+  \draw[->,gray] (0,-1.3)--(0,3.6) node[above] {$x_2$};
+  \draw[PlotGreen!65,densely dashed] (-.25,-.25)--(3.4,3.4);
+  \draw[->,PlotGreen,very thick] (0,0)--(2,2)
+    node[left=3pt] {$\vec y=(2,2)$};
+  \draw[->,black,thick] (0,0)--(3,1)
+    node[right] {$\vec x=(3,1)$};
+  \draw[->,PlotBlue,thick] (2,2)--(3,1)
+    node[midway,above right] {$\vec z$};
+  \draw[->,PlotBlue,thick] (0,0)--(1,-1)
+    node[right] {$\vec z=(1,-1)$};
+  \draw[->,PlotGreen,thick] (0,0)--(.707,.707)
+    node[above left] {$\vec v$};
+  \draw[gray] (1.86,1.86)--(2,1.72)--(2.14,1.86);
+\end{tikzpicture}
+\end{center}
+The residual is perpendicular to the line: $(1,1)\cdot(1,-1)=0$.
+\end{framedexample}
+
+\subsection{Project all rows of a dataset}
+\label{sec:project-data-matrix}
+
+Our data matrix stores each point as a row, while the formula above
+uses a column. Transposing the projection gives
+\[
+  \vec y^{\mathsf T}
+   =(\vec v\vec v^{\mathsf T}\vec x)^{\mathsf T}
+   =\vec x^{\mathsf T}\vec v\vec v^{\mathsf T}.
+\]
+Therefore we multiply a data row on the right. For the whole matrix,
+\[
+\begin{aligned}
+  \underbrace{A\vec v}_{m\times1}
+     &\quad\text{contains the coordinates along the line},\\[6pt]
+  \underbrace{A\vec v\vec v^{\mathsf T}}_{m\times d}
+     &\quad\text{contains the projected points}.
+\end{aligned}
+\]
+The residual matrix is $A(I_d-\vec v\vec v^{\mathsf T})$.
+Every projected row lies on the same line, and every residual row
+is perpendicular to that line.
+
+\Needspace{14\baselineskip}
+\section{Projecting onto a subspace}
+\label{sec:projection-subspace}
+
+One direction may discard too much information. Suppose we keep
+$k$ independent directions instead, with $1\leq k\leq d$.
+We choose unit vectors $\vec v_1,\ldots,\vec v_k$ that are mutually
+perpendicular; such a set is called \emph{orthonormal}:
+\[
+  \vec v_i^{\mathsf T}\vec v_j=
+  \begin{cases}1,&i=j,\\0,&i\neq j.\end{cases}
+\]
+Their span is the set of all linear combinations of these vectors,
+a $k$-dimensional subspace. Put them in the columns of
+\[
+  V_k=\begin{pmatrix}\vert&&\vert\\
+    \vec v_1&\cdots&\vec v_k\\\vert&&\vert\end{pmatrix}
+    \in\R^{d\times k},\qquad V_k^{\mathsf T}V_k=I_k.
+\]
+For a row $A_{(i)}$, add its components along all $k$ directions:
+\[
+  \sum_{j=1}^{k}(A_{(i)}\vec v_j)\vec v_j^{\mathsf T}
+    =A_{(i)}\left(\sum_{j=1}^{k}\vec v_j\vec v_j^{\mathsf T}\right)
+    =A_{(i)}V_kV_k^{\mathsf T}.
+\]
+
+\begin{frameddefn}{Orthogonal projection onto a subspace}
+\label{def:projection-subspace}
+Let $V_k\in\R^{d\times k}$ have orthonormal columns. For a data
+matrix $A\in\R^{m\times d}$, its projection onto their span is
+\[
+  Y=AV_kV_k^{\mathsf T},
+  \qquad Z=A-Y=A(I_d-V_kV_k^{\mathsf T}).
+\]
+The $m\times k$ matrix $AV_k$ stores the coordinates in the chosen
+basis. The $m\times d$ matrix $Y$ stores those projected points in
+the original coordinates.
+\end{frameddefn}
+
+The residual rows lie in the orthogonal complement, which has
+dimension $d-k$. Indeed,
+\[
+  ZV_k=A(I_d-V_kV_k^{\mathsf T})V_k
+      =A(V_k-V_kI_k)=0.
+\]
+So each residual is perpendicular to every retained direction.
+The projected rows lie in a subspace of dimension $k$, although
+their matrix can have rank smaller than $k$ if the data use fewer
+directions.
+
+\begin{framedexample}{Keeping two coordinates in three dimensions}
+\label{ex:projection-plane}
+Take $\vec v_1=(1,0,0)^{\mathsf T}$ and
+$\vec v_2=(0,1,0)^{\mathsf T}$. Then
+\[
+  V_2=\begin{pmatrix}1&0\\0&1\\0&0\end{pmatrix},\qquad
+  V_2V_2^{\mathsf T}=\begin{pmatrix}1&0&0\\0&1&0\\0&0&0\end{pmatrix}.
+\]
+For the row $(2,3,4)$, the reduced coordinates are $(2,3)$, the
+projected point is $(2,3,0)$ and the residual is $(0,0,4)$.
+The projection lies in the coordinate plane; the residual lies
+along the perpendicular third axis.
+\end{framedexample}
 
 \endgroup
 
