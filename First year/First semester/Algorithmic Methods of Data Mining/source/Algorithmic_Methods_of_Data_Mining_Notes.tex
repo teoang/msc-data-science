@@ -6613,6 +6613,7 @@ problem then becomes: find a $k$-partition that minimizes
 The only choice left is the partition.
 
 \subsection{Points on a line}
+\label{sec:kmeans-line}
 
 For any $k$ and $d=1$ the problem is easy: it can be solved in
 polynomial time. The points now lie on a line, and a cluster is a run
@@ -6638,6 +6639,7 @@ gaps should we pick? In the picture the cuts fall where the points are
 far apart, and the long empty stretches seem to separate the groups.
 
 \subsubsection{First idea}
+\label{sec:kmeans-line-gaps}
 
 This suggests a first idea: cut at the $k-1$ largest distances between
 consecutive points. Does it work?
@@ -7929,33 +7931,138 @@ holds after initialization and is preserved by these updates.
 \subsection{Solving $k$-means exactly on a line}
 \label{sec:kmeans-line-dp}
 
-We used Lloyd's updates on a line, but they still depend on the
-initial centres. Can we find the best partition directly? Order
-the input as $x_1\leq\cdots\leq x_n$. For centres arranged from
-left to right, nearest-centre regions are intervals separated by
-midpoints. Consequently, there is an optimal partition into
-contiguous blocks of this ordered sequence.
+\hyperref[sec:kmeans-line]{On a line}, that is with $d=1$, we said that
+$k$-means can be solved in polynomial time, without saying how. The
+\hyperref[sec:kmeans-line-gaps]{first idea}, cutting at the largest
+gaps, was wrong, and \hyperref[sec:lloyd]{Lloyd's algorithm} depends on
+the initial centres.
 
-We therefore only need to choose where the blocks end. Let us first
-find the cost of one block, then use it to build an optimal
-partition of a prefix.
+We now give an exact algorithm: it always finds the partition with the
+smallest cost.
+
+\subsubsection{Clusters are blocks of consecutive points}
+
+Sort the points, so that $x_1\leq x_2\leq\cdots\leq x_n$. Each point
+goes to its nearest centre, and the border between two neighbouring
+centres is their midpoint. So each centre collects an interval of the
+line, and each cluster is a block of consecutive points. Choosing a
+partition therefore means choosing where the blocks end, that is,
+where to cut.
+
+How much does one block cost? Its best representative is its
+\hyperref[prop:k-means-one]{mean}, so:
 
 \begin{frameddefn}{Cost of a consecutive block}
 \label{def:kmeans-block-cost}
-For $1\leq a\leq b\leq n$, let
+For $1\leq a\leq b\leq n$, the block $x_a,\ldots,x_b$ has mean and
+cost
 \[
   \mu_{a,b}=\frac{1}{b-a+1}\sum_{r=a}^{b}x_r,
   \qquad
   \operatorname{cost}(a,b)=\sum_{r=a}^{b}(x_r-\mu_{a,b})^2.
 \]
-This is the minimum one-centre cost of $\{x_a,\ldots,x_b\}$,
-because its mean is the best representative.
 \end{frameddefn}
 
-Let $D(j,i)$ be the minimum cost of splitting the first $i$ points
-into exactly $j$ non-empty clusters. Suppose the last cluster starts
-at $x_{\ell+1}$. Then it contains $x_{\ell+1},\ldots,x_i$, and
-the first $\ell$ points must use $j-1$ clusters:
+\subsubsection{Building the partition one block at a time}
+
+How do we choose the cuts? Let us start from a small case: four points
+and $k=2$,
+\[
+  x_1=0,\qquad x_2=2,\qquad x_3=10,\qquad x_4=12 .
+\]
+With two clusters there is a single cut, and it can fall after $x_1$,
+after $x_2$ or after $x_3$:
+\begin{center}
+\begin{tikzpicture}[x=0.8cm]
+  % Same style as the other line pictures: grey regions for points
+  % still on their own, values above, thick black cuts.
+  \draw[gray] (-0.6,0) -- (12.6,0);
+  \foreach \x/\j in {0/1,2/2,10/3,12/4}{
+    \hull{gray}{(\x,0) circle (0.01)}
+    \node[clpt=white,label={[font=\small,label distance=4pt]below:$x_{\j}$}] at (\x,0) {};
+    \node[font=\scriptsize,gray!80!black] at (\x,0.42) {$\x$};}
+  \foreach \x/\j in {1/1,6/2,11/3}{
+    \draw[very thick] (\x,-0.4) -- (\x,0.4);
+    \node[font=\footnotesize,anchor=south] at (\x,0.55) {after $x_{\j}$};}
+\end{tikzpicture}
+\end{center}
+Each choice gives a first block and a last block, and its cost is the
+sum of the two block costs:
+\[
+\begin{aligned}
+  \text{after }x_1:&\quad \{0\},\ \{2,10,12\}: && 0+56=56,\\
+  \text{after }x_2:&\quad \{0,2\},\ \{10,12\}: && 2+2=4,\\
+  \text{after }x_3:&\quad \{0,2,10\},\ \{12\}: && 56+0=56.
+\end{aligned}
+\]
+The best cut is after $x_2$, with cost $4$.
+
+Look at what we did. The first block holds the first $\ell$ points in
+one cluster, and the last block holds the rest. With more clusters,
+the first $\ell$ points would themselves need several clusters, split
+in the best possible way. This suggests giving a name to the best
+split of a prefix: let $\OPT(j,i)$ be the cost of the optimal
+$j$-clustering of the first $i$ points $x_1,\ldots,x_i$. The answer we
+want is $\OPT(k,n)$, and in our case the three costs above are
+\[
+  \OPT(1,1)+\operatorname{cost}(2,4),\qquad
+  \OPT(1,2)+\operatorname{cost}(3,4),\qquad
+  \OPT(1,3)+\operatorname{cost}(4,4),
+\]
+whose minimum is $\OPT(2,4)=4$.
+
+We can arrange these values in a table, with a row for each number of
+clusters $j=1,\ldots,k$ and a column for each prefix $i=1,\ldots,n$.
+Some entries need no computation.
+\begin{itemize}
+  \item If $j\geq i$, there are at least as many clusters as points:
+    each point gets its own cluster, and the cost is $0$. These are the
+    entries on and below the diagonal.
+  \item If $j=1$, there is a single cluster and nothing to choose:
+    $\OPT(1,i)=\operatorname{cost}(1,i)$.
+\end{itemize}
+For our four points, the first row is
+\[
+\begin{aligned}
+  \OPT(1,1)&=0, &&\{0\},\\
+  \OPT(1,2)&=1^2+1^2=2, &&\{0,2\}\text{ with mean }1,\\
+  \OPT(1,3)&=4^2+2^2+6^2=56, &&\{0,2,10\}\text{ with mean }4,\\
+  \OPT(1,4)&=6^2+4^2+4^2+6^2=104, &&\{0,2,10,12\}\text{ with mean }6,
+\end{aligned}
+\]
+so the table starts as follows; only the two entries marked with a
+question mark need a real choice:
+
+% A k x n table of OPT(j,i): \dpcell{i}{j}{fill}{value}{cut}, then
+% \dpgrid draws the lines and the labels on top.
+\newcommand{\dpcell}[5]{%
+  \fill[#3] (#1-1,-#2+1) rectangle (#1,-#2);
+  \node at (#1-0.5,-#2+0.55) {$#4$};
+  \node[font=\scriptsize,gray!80!black,anchor=south east,inner sep=1.5pt]
+    at (#1,-#2) {#5};}
+\newcommand{\dpgrid}{%
+  \foreach \x in {0,...,4} \draw[gray!70] (\x,0) -- (\x,-2);
+  \foreach \y in {0,1,2} \draw[gray!70] (0,-\y) -- (4,-\y);
+  \foreach \i in {1,...,4}
+    \node[gray!80!black] at (\i-0.5,0.35) {$i=\i$};
+  \foreach \j in {1,2}
+    \node[anchor=east] at (-0.1,-\j+0.5) {$j=\j$};}
+\begin{center}
+\begin{tikzpicture}[x=1.45cm,y=0.95cm,font=\small]
+  \dpcell{1}{1}{gray!15}{0}{} \dpcell{2}{1}{ClC!15}{2}{}
+  \dpcell{3}{1}{ClC!15}{56}{} \dpcell{4}{1}{ClC!15}{104}{}
+  \dpcell{1}{2}{gray!15}{0}{} \dpcell{2}{2}{gray!15}{0}{}
+  \dpcell{3}{2}{white}{\mathbf ?}{} \dpcell{4}{2}{white}{\mathbf ?}{}
+  \dpgrid
+\end{tikzpicture}
+\end{center}
+
+How do we fill the remaining entries? The reasoning we used for the
+single cut works in general. Look at the last block of the first $i$
+points. If it starts at $x_{\ell+1}$, it contains
+$x_{\ell+1},\ldots,x_i$ and costs $\operatorname{cost}(\ell+1,i)$.
+The first $\ell$ points must then be split into $j-1$ clusters, and
+the best way to do it costs $\OPT(j-1,\ell)$:
 \begin{center}
 \begin{tikzpicture}[x=1cm,y=1cm]
   \draw[gray] (0,0)--(11.5,0);
@@ -7966,37 +8073,109 @@ the first $\ell$ points must use $j-1$ clusters:
     \node[below=6pt] at (\x,0) {$x_{\lab}$};}
   \node at (3.5,0) {$\cdots$};
   \node at (8.8,0) {$\cdots$};
-  \node[text=ClA!80!black] at (3,0.65) {$D(j-1,\ell)$};
+  \node[text=ClA!80!black] at (3,0.65) {$\OPT(j-1,\ell)$};
   \node[text=ClB!80!black] at (8.8,0.65) {$\operatorname{cost}(\ell+1,i)$};
 \end{tikzpicture}
 \end{center}
-Trying every possible start of the last cluster gives the recurrence
+We do not know where the last block starts, so we try every position
+and keep the best. Together with the two easy cases,
 \[
-  D(j,i)=\min_{j-1\leq\ell<i}
-    \bigl\{D(j-1,\ell)+\operatorname{cost}(\ell+1,i)\bigr\},
-  \qquad 1\leq j\leq i.
+  \OPT(j,i)=
+  \begin{cases}
+    0 & \text{if } j\geq i,\\[2pt]
+    \operatorname{cost}(1,i) & \text{if } j=1,\\[2pt]
+    \displaystyle\min_{\ell\in\{j-1,\ldots,i-1\}}
+      \bigl\{\OPT(j-1,\ell)+\operatorname{cost}(\ell+1,i)\bigr\}
+      & \text{otherwise.}
+  \end{cases}
 \]
-The base case is $D(0,0)=0$. Set $D(0,i)=+\infty$ for $i>0$
-and $D(j,i)=+\infty$ when $j>i$: there are not enough points for
-that many non-empty clusters. In particular,
-$D(1,i)=\operatorname{cost}(1,i)$ and $D(i,i)=0$.
 
-\subsubsection{Compute each block cost without rescanning its points}
+Each entry only needs the row above it, so we can fill the table one
+row at a time, from left to right. For our points,
+\[
+\begin{aligned}
+  \OPT(2,3)&=\min\{\,\underbrace{\OPT(1,1)+\operatorname{cost}(2,3)}_{0+32},\
+                 \underbrace{\OPT(1,2)+\operatorname{cost}(3,3)}_{2+0}\,\}=2,\\[2pt]
+  \OPT(2,4)&=\min\{\,\underbrace{\OPT(1,1)+\operatorname{cost}(2,4)}_{0+56},\
+                 \underbrace{\OPT(1,2)+\operatorname{cost}(3,4)}_{2+2},\
+                 \underbrace{\OPT(1,3)+\operatorname{cost}(4,4)}_{56+0}\,\}=4,
+\end{aligned}
+\]
+and the table is complete. Next to each computed value we also store
+its best cut $\ell$, written $\operatorname{cut}(j,i)$, shown as the
+small number:
+\begin{center}
+\begin{tikzpicture}[x=1.45cm,y=0.95cm,font=\small]
+  \dpcell{1}{1}{gray!15}{0}{} \dpcell{2}{1}{ClC!15}{2}{}
+  \dpcell{3}{1}{ClC!15}{56}{} \dpcell{4}{1}{ClC!15}{104}{}
+  \dpcell{1}{2}{gray!15}{0}{} \dpcell{2}{2}{gray!15}{0}{}
+  \dpcell{3}{2}{ClA!15}{2}{$\ell{=}2$}
+  \dpcell{4}{2}{ClA!15}{\mathbf 4}{$\ell{=}2$}
+  \dpgrid
+  % Recovery path: OPT(2,4), then OPT(1,2).
+  \draw[very thick,ClA!80!black,rounded corners=2pt] (3,-1) rectangle (4,-2);
+  \draw[very thick,ClA!80!black,rounded corners=2pt] (1,0) rectangle (2,-1);
+\end{tikzpicture}
+\end{center}
 
-There are $O(kn)$ states, each trying at most $n$ cuts. To make
-the total time $O(kn^2)$, we need each block cost in $O(1)$ time.
-Define the prefix sums
+The table tells us that the best $2$-clustering of our four points
+costs $4$, but not which clusters give this cost. How do we find them?
+
+Let us go back to how we obtained $\OPT(2,4)=4$. The minimum came
+from the cut $\ell=2$, that is, from
+$\OPT(1,2)+\operatorname{cost}(3,4)=2+2$. This sum already describes
+the solution. The term $\operatorname{cost}(3,4)$ says that the last
+cluster is $x_3,x_4$, that is $\{10,12\}$. The term $\OPT(1,2)$ says
+that the points before it, $x_1,x_2$, are split into one cluster in
+the best way. To find that split we look at the entry $\OPT(1,2)$.
+It lies in the first row, so all its points form a single block,
+$\{0,2\}$:
+\begin{center}
+\begin{tikzpicture}[x=0.6cm]
+  \draw[gray] (-0.8,0) -- (12.8,0);
+  \hull{ClA}{(0,0) -- (2,0)} \hull{ClC}{(10,0) -- (12,0)}
+  \foreach \x in {0,2} \node[clpt=ClA,label={[font=\small]below:$\x$}]
+    at (\x,0) {};
+  \foreach \x in {10,12} \node[clpt=ClC,label={[font=\small]below:$\x$}]
+    at (\x,0) {};
+\end{tikzpicture}
+\end{center}
+This is why we store the cut next to each value: it is the $\ell$
+that gave the minimum, so it tells us where the last block starts
+without computing the minimum again. In general, we start from
+$\OPT(k,n)$ and read $\ell=\operatorname{cut}(k,n)$. The last cluster
+is $x_{\ell+1},\ldots,x_n$, and the remaining points $x_1,\ldots,x_\ell$
+are split as in $\OPT(k-1,\ell)$, so we move to that entry and repeat.
+We stop at the first row, where the remaining points form a single
+block, or at an entry with $j\geq i$, where each remaining point is a
+block on its own.
+
+This is the same idea as for the
+\hyperref[prop:ed-recurrence]{edit distance}: we write a large problem
+through smaller ones, and store their solutions in a table instead of
+computing them again.
+
+\subsubsection{Each block cost in constant time}
+
+The table has about $kn$ entries, and each tries up to $n$ cuts: that
+is $O(kn^2)$ attempts. If computing $\operatorname{cost}(a,b)$ meant
+scanning the block, we would pay another factor $n$. Instead, as for
+\hyperref[prob:prefix-sums]{prefix sums}, we build two sums once, in
+$O(n)$ time:
 \[
   S_i=\sum_{r=1}^{i}x_r,\qquad Q_i=\sum_{r=1}^{i}x_r^2,
   \qquad S_0=Q_0=0.
 \]
-Expanding the squares around the mean gives
+For a block of $m$ points,
+\[
+  \sum(x-\mu)^2=\sum x^2-\frac{\bigl(\sum x\bigr)^2}{m},
+\]
+so
 \[
   \operatorname{cost}(a,b)
-    =Q_b-Q_{a-1}-\frac{(S_b-S_{a-1})^2}{b-a+1}.
+    =Q_b-Q_{a-1}-\frac{(S_b-S_{a-1})^2}{b-a+1},
 \]
-The prefix sums take $O(n)$ time to build, and this expression
-uses a constant number of operations for each block.
+which takes a constant number of operations.
 
 \Needspace{25\baselineskip}
 \begin{framedalgo}{Exact $k$-means on a line}
@@ -8005,45 +8184,27 @@ uses a constant number of operations for each block.
   \Function{LineKMeans}{$x_1,\ldots,x_n,k$}
     \State Sort the points so that $x_1\leq\cdots\leq x_n$
     \State Compute the prefix sums $S$ and $Q$
-    \State Initialize all entries of $D$ to $+\infty$; $D(0,0)\gets0$
-    \For{$j=1$ \textbf{to} $k$}
-      \For{$i=j$ \textbf{to} $n$}
+    \State $\OPT(j,i)\gets0$ for all $i\leq j$
+    \State $\OPT(1,i)\gets\operatorname{cost}(1,i)$ for $i=2,\ldots,n$
+    \For{$j=2$ \textbf{to} $k$}
+      \For{$i=j+1$ \textbf{to} $n$}
+        \State $\OPT(j,i)\gets+\infty$
         \For{$\ell=j-1$ \textbf{to} $i-1$}
-          \State $v\gets D(j-1,\ell)+\operatorname{cost}(\ell+1,i)$
-          \If{$v<D(j,i)$}
-            \State $D(j,i)\gets v$; $\operatorname{cut}(j,i)\gets\ell$
+          \State $v\gets\OPT(j-1,\ell)+\operatorname{cost}(\ell+1,i)$
+          \If{$v<\OPT(j,i)$}
+            \State $\OPT(j,i)\gets v$; $\operatorname{cut}(j,i)\gets\ell$
           \EndIf
         \EndFor
       \EndFor
     \EndFor
     \State Recover the blocks by following $\operatorname{cut}$ from $(k,n)$
-    \State \Return $D(k,n)$ and the blocks with their means
+    \State \Return $\OPT(k,n)$ and the blocks with their means
   \EndFunction
 \end{algorithmic}
 \end{framedalgo}
 
-Assume $1\leq k\leq n$. Store a minimizing cut at each state.
-Starting at $(k,n)$, the last block is
-$x_{\operatorname{cut}(k,n)+1},\ldots,x_n$; then continue from
-$(k-1,\operatorname{cut}(k,n))$ to recover the preceding block.
-The time is $O(n\log n+kn^2)$ including sorting, and the tables
-use $O(kn)$ space. This is an exact algorithm, rather than a
-choice of initialization for Lloyd's method.
-
-\begin{framedexample}{Certifying the nine-point solutions}
-\label{ex:kmeans-nine-dp}
-Let us take the data of Example~\ref{ex:lloyd-nine-points} again:
-$U=\{2,3,4,10,11,12,20,25,30\}$. The dynamic program gives
-\[
-  D(2,9)=150,\qquad D(3,9)=54.
-\]
-For $k=2$, it chooses the blocks $\{2,3,4,10,11,12\}$ and
-$\{20,25,30\}$, with means $7$ and $25$; their costs are $100$
-and $50$. For $k=3$, it chooses $\{2,3,4\}$, $\{10,11,12\}$
-and $\{20,25,30\}$, with means $3,11,25$ and costs $2,2,50$.
-Thus the converged solutions of Examples~\ref{ex:lloyd-nine-points}
-and~\ref{ex:lloyd-nine-three} are optimal for these inputs.
-\end{framedexample}
+Sorting takes $O(n\log n)$ and the table $O(kn^2)$, so the total time
+is $O(n\log n+kn^2)$, with $O(kn)$ space.
 
 \endgroup
 
@@ -8054,10 +8215,22 @@ and~\ref{ex:lloyd-nine-three} are optimal for these inputs.
 \tcbset{examplebox/.append style={unbreakable},
   definitionbox/.append style={unbreakable}}
 
-Clustering groups data points into sets. We now look at another
-way to simplify a dataset: represent its points using fewer
-directions. Before projecting points, we need a way to describe
-the independent directions contained in a matrix.
+Clustering simplifies a dataset by grouping its points. There is
+another way to simplify it: reduce the number of features that
+describe each point. Real data often has many features, but not all
+of them carry new information. If we record a person's height both in
+centimetres and in inches, the second feature tells us nothing new.
+Even when two features are not exact copies, they may move together
+so closely that one of them is almost redundant. Our goal in this
+chapter is Principal Component Analysis (PCA): a method that finds
+the few directions along which the data really varies and describes
+every point using only those.
+
+To get there, we need some tools from linear algebra. We will write a
+dataset as a matrix and look at points as vectors that we can project
+onto a direction. First, however, we need to answer a simpler
+question: how many of the columns of a matrix really carry new
+information?
 
 \section{Rank: how many independent directions?}
 
