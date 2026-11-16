@@ -8219,7 +8219,7 @@ groups, or one group with particular characteristics may matter to us,
 so we choose $k$ to make that group come out on its own. Other times
 we have to read $k$ from the data. Can we simply take the $k$ with the
 lowest cost? No: adding a cluster never increases the optimal cost.
-From the best $k$-partition we can always take a point from a cluster with at least two points and move it into a new
+From the best \hyperref[def:k-partition]{$k$-partition} we can always take a point from a cluster with at least two points and move it into a new
 cluster of its own: that point now costs $0$, and the rest of its old
 cluster costs no more than before, since its old representative is
 still available. With $k=n$ the cost even reaches $0$. The lowest cost
@@ -8744,7 +8744,8 @@ work?
 To repeat the construction, each direction must play the role of
 $\vec v$, so it must be a unit vector. We also want the directions
 not to overlap, so that each one measures something the others do
-not: we take them mutually perpendicular. Unit vectors
+not: we take them mutually perpendicular.
+\phantomsection\label{def:orthonormal}Unit vectors
 $\vec v_1,\ldots,\vec v_k$ that are mutually perpendicular form an
 \emph{orthonormal} set:
 \[
@@ -8904,7 +8905,7 @@ pieces, $(2,3,0)+(0,0,4)=(2,3,4)$, gives back the row itself.
 \definecolor{ClA}{HTML}{0072B2}
 
 In \hyperref[sec:projection-subspace]{Section 14.4} we learned to
-project a dataset onto any $k$ orthonormal directions, but we have not
+project a dataset onto any $k$ \hyperref[def:orthonormal]{orthonormal} directions, but we have not
 said which directions to choose. PCA keeps the directions along which
 the data spread the most, because those are the directions that tell
 the points apart. To make this precise, we first need a number that
@@ -8954,7 +8955,7 @@ For the first set, the squared distances from $3$ are $9,4,0,4,9$, with
 average $26/5=5.2$; for the second they are $1,0.25,0,0.25,1$, with
 average $2.5/5=0.5$.
 
-The variance can also be written without subtracting $\bar x$ inside the
+\phantomsection\label{eq:variance-mean-squares}The variance can also be written without subtracting $\bar x$ inside the
 sum:
 \[
 \begin{aligned}
@@ -8970,7 +8971,7 @@ sum:
 \end{aligned}
 \]
 
-What if the mean were $0$? Then the second term disappears. We can
+\phantomsection\label{sec:centring}What if the mean were $0$? Then the second term disappears. We can
 always get there by \emph{centring} the data: we subtract the mean
 from every number,
 \[
@@ -9008,39 +9009,41 @@ distances from $0$ are again $9,4,0,4,9$. So for centred data
 
 Now we move to our points $A_{(1)},\ldots,A_{(m)}$, the rows of the
 \hyperref[sec:data-matrix]{data matrix}, with $A_{(i)}\in\R^{1\times d}$.
-Their empirical mean is the row
+Their \hyperref[def:empirical-mean]{empirical mean} is the row
 \[
   \frac1m\sum_{i=1}^{m}A_{(i)},
 \]
 which is the centroid of the points, the
 \hyperref[prop:k-means-one]{best representative} of a single cluster.
 How do we measure the spread along a direction? Given a unit vector
-$\vec v\in\R^d$, every point has a coordinate along $\vec v$, the
-number $A_{(i)}\vec v$, as in
-\hyperref[sec:project-data-matrix]{Section 14.3.1}. These are $m$
-numbers on the line, and we take their variance, using the formula
-we have just found.
+$\vec v\in\R^d$, every point has a coordinate along $\vec v$, as in
+\hyperref[sec:project-data-matrix]{Section 14.3.1}:
+\[
+  t_i=A_{(i)}\vec v,\qquad i=1,\ldots,m .
+\]
+These are $m$ numbers on the line, and we take their
+\hyperref[def:empirical-variance]{empirical variance}.
 
 \begin{frameddefn}{Variance along a direction}
 \label{def:variance-direction}
 For a data matrix $A\in\R^{m\times d}$ and a unit vector
-$\vec v\in\R^d$, the \emph{variance of $A$ along $\vec v$} is
+$\vec v\in\R^d$, let $t_i=A_{(i)}\vec v$ and
+$\bar t=\frac1m\sum_{i=1}^{m}t_i$. The
+\emph{variance of $A$ along $\vec v$} is
 \[
-  \mathrm{Var}_{\vec v}(A)
-  =\frac1m\sum_{i=1}^{m}\Bigl(A_{(i)}\vec v
-     -\frac1m\sum_{l=1}^{m}A_{(l)}\vec v\Bigr)^2
-  =\frac1m\sum_{i=1}^{m}\bigl(A_{(i)}\vec v\bigr)^2
-   -\Bigl(\frac1m\sum_{i=1}^{m}A_{(i)}\vec v\Bigr)^2 .
+  \mathrm{Var}_{\vec v}(A)=\frac1m\sum_{i=1}^{m}(t_i-\bar t)^2
+  =\frac1m\sum_{i=1}^{m}t_i^2-\bar t^2 .
 \]
 \end{frameddefn}
 
-As in one dimension, the second term disappears if we centre the
-data. We subtract the centroid from every row, which moves the whole
-cloud of points so that its centroid lands at the origin. Then the
-mean of the coordinates along $\vec v$ is $0$ too:
+The second form is the one we
+\hyperref[eq:variance-mean-squares]{found in one dimension}. As there, the
+term $\bar t^2$ disappears if we \hyperref[sec:centring]{centre} the data. We subtract the
+centroid from every row, which moves the whole cloud of points so
+that its centroid lands at the origin. Then $\bar t$ is $0$ too:
 \[
 \begin{aligned}
-  \frac1m\sum_{i=1}^{m}A_{(i)}\vec v
+  \bar t=\frac1m\sum_{i=1}^{m}A_{(i)}\vec v
     &=\Bigl(\frac1m\sum_{i=1}^{m}A_{(i)}\Bigr)\vec v
       &&\quad\text{by distributivity},\\
     &=\vec 0^{\mathsf T}\vec v
@@ -9051,11 +9054,11 @@ mean of the coordinates along $\vec v$ is $0$ too:
 So for centred data
 \[
   \mathrm{Var}_{\vec v}(A)
-  =\frac1m\sum_{i=1}^{m}\bigl(A_{(i)}\vec v\bigr)^2
+  =\frac1m\sum_{i=1}^{m}t_i^2
   =\frac1m\norm{A\vec v}_2^2,
 \]
-because $A\vec v$ is the column of the coordinates $A_{(i)}\vec v$,
-and the sum of their squares is its squared length.
+because $A\vec v=(t_1,\ldots,t_m)^{\mathsf T}$ is the column of the
+coordinates, and the sum of their squares is its squared length.
 
 Different directions can give very different variances. Take six
 centred points stretched along the diagonal, and compare
@@ -9099,12 +9102,12 @@ $\mathrm{Var}_{\vec w}(A)\approx0.14$. Each direction sees only part
 of the spread. How much spread do the points have in total?
 
 To capture all of it, we take $d$ directions that cover the whole
-space: an orthonormal basis $\vec v_1,\ldots,\vec v_d$ of $\R^d$. Then
+space: an \hyperref[def:orthonormal]{orthonormal} basis $\vec v_1,\ldots,\vec v_d$ of $\R^d$. Then
 we add up the variances along them.
 
 \begin{frameddefn}{Total variance}
 \label{def:total-variance}
-Let $A\in\R^{m\times d}$ be centred and let $\vec v_1,\ldots,\vec v_d$
+Let $A\in\R^{m\times d}$ be \hyperref[sec:centring]{centred} and let $\vec v_1,\ldots,\vec v_d$
 be an orthonormal basis of $\R^d$. The \emph{total variance} of $A$ is
 \[
   \mathrm{Var}(A)=\sum_{j=1}^{d}\mathrm{Var}_{\vec v_j}(A)
@@ -9192,7 +9195,8 @@ it, the total variance of centred data is simply
 \section{The direction of largest variance}
 \label{sec:largest-variance}
 
-Which single direction keeps the most variance? For centred data
+Which single direction keeps the most variance? For centred data, the
+\hyperref[def:variance-direction]{variance along $\vec v$} is
 $\mathrm{Var}_{\vec v}(A)=\frac1m\norm{A\vec v}_2^2$, and $m$ does not
 depend on $\vec v$, so we look for the unit vector that makes
 $\norm{A\vec v}_2$ as large as possible. This maximum has a name.
