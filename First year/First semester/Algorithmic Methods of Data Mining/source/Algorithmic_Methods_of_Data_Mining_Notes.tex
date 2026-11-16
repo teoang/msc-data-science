@@ -8911,8 +8911,11 @@ the data spread the most, because those are the directions that tell
 the points apart. To make this precise, we first need a number that
 measures how spread out the data are.
 
-Let us start in one dimension, with numbers $x_1,\ldots,x_m\in\R$.
-Their natural centre is their average.
+\subsection{Mean and variance of numbers}
+\label{sec:mean-variance-numbers}
+
+Take numbers $x_1,\ldots,x_m\in\R$. Their natural centre is their
+average.
 
 \begin{frameddefn}{Empirical mean}
 \label{def:empirical-mean}
@@ -9006,6 +9009,9 @@ distances from $0$ are again $9,4,0,4,9$. So for centred data
   \frac1m\sum_{i=1}^{m}x_i^2=\frac1m\norm{\vec x}_2^2,
   \qquad\text{where } \vec x=(x_1,\ldots,x_m)^{\mathsf T}.
 \]
+
+\subsection{Variance of a dataset along a direction}
+\label{sec:variance-dataset-direction}
 
 Now we move to our points $A_{(1)},\ldots,A_{(m)}$, the rows of the
 \hyperref[sec:data-matrix]{data matrix}, with $A_{(i)}\in\R^{1\times d}$.
