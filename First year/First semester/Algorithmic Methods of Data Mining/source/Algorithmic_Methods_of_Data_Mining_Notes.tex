@@ -8533,14 +8533,29 @@ The residual is perpendicular to the line: $(1,1)\cdot(1,-1)=0$.
 \subsection{Project all rows of a dataset}
 \label{sec:project-data-matrix}
 
-Our data matrix stores each point as a row, while the formula above
-uses a column. Transposing the projection gives
+So far we have projected a single point. In practice we want to
+project a whole dataset, with one point per row of the
+\hyperref[sec:data-matrix]{data matrix} $A$. Can we do it with a
+single multiplication? There is one obstacle: the
+\hyperref[def:projection-line]{projection formula} takes
+the point as a column $\vec x$ and multiplies it on the left, while a
+row of $A$ is a row vector $\vec x^{\mathsf T}$. To get a formula for
+rows, we transpose both sides:
 \[
+\begin{aligned}
   \vec y^{\mathsf T}
-   =(\vec v\vec v^{\mathsf T}\vec x)^{\mathsf T}
-   =\vec x^{\mathsf T}\vec v\vec v^{\mathsf T}.
+    &=\bigl((\vec v\vec v^{\mathsf T})\,\vec x\bigr)^{\mathsf T}
+    &&\quad\text{since } \vec y=(\vec v\vec v^{\mathsf T})\,\vec x,\\
+    &=\vec x^{\mathsf T}(\vec v\vec v^{\mathsf T})^{\mathsf T}
+    &&\quad\text{since } (BC)^{\mathsf T}=C^{\mathsf T}B^{\mathsf T},\\
+    &=\vec x^{\mathsf T}\,\vec v\vec v^{\mathsf T}
+    &&\quad\text{since } (\vec v\vec v^{\mathsf T})^{\mathsf T}
+      =\vec v\vec v^{\mathsf T}.
+\end{aligned}
 \]
-Therefore we multiply a data row on the right. For the whole matrix,
+So a row is projected by multiplying it on the right by the same
+matrix $\vec v\vec v^{\mathsf T}$. Multiplying $A$ on the right by a
+matrix does this to every row at once, so for the whole dataset,
 \[
 \begin{aligned}
   \underbrace{A\vec v}_{m\times1}
@@ -8551,7 +8566,9 @@ Therefore we multiply a data row on the right. For the whole matrix,
 \]
 The residual matrix is $A(I_d-\vec v\vec v^{\mathsf T})$.
 
-What does this look like for a whole dataset? Take five rows of a
+What does this look like for a whole dataset?
+
+Take five rows of a
 matrix with $d=2$ and the diagonal direction
 $\vec v=(1,1)^{\mathsf T}/\sqrt2$. On the left, each row is moved
 perpendicularly onto the line, and all the projected rows
@@ -8600,65 +8617,172 @@ gives back the row itself.
 \section{Projecting onto a subspace}
 \label{sec:projection-subspace}
 
-One direction may discard too much information. Suppose we keep
-$k$ independent directions instead, with $1\leq k\leq d$.
-We choose unit vectors $\vec v_1,\ldots,\vec v_k$ that are mutually
-perpendicular; such a set is called \emph{orthonormal}:
+In \hyperref[sec:project-data-matrix]{Section 14.3.1} we projected
+the whole dataset onto a single direction $\vec v$: the column
+$A\vec v$ gave one coordinate per point, and $A\vec v\vec v^{\mathsf T}$
+gave the projected points. One coordinate per point, however, may
+discard too much information. If the points lie close to a plane in
+$\R^3$, for example, squeezing them onto a line loses one of the two
+directions along which they really spread. Can we keep $k$ directions
+at once, with $1\leq k\leq d$, and does the same construction still
+work?
+
+To repeat the construction, each direction must play the role of
+$\vec v$, so it must be a unit vector. We also want the directions
+not to overlap, so that each one measures something the others do
+not: we take them mutually perpendicular. Unit vectors
+$\vec v_1,\ldots,\vec v_k$ that are mutually perpendicular form an
+\emph{orthonormal} set:
 \[
   \vec v_i^{\mathsf T}\vec v_j=
   \begin{cases}1,&i=j,\\0,&i\neq j.\end{cases}
 \]
-Their span is the set of all linear combinations of these vectors,
-a $k$-dimensional subspace. Put them in the columns of
+Their span, the set of all their linear combinations, is a
+$k$-dimensional subspace: a line for $k=1$, a plane for $k=2$, and so
+on. We put the directions in the columns of
 \[
   V_k=\begin{pmatrix}\vert&&\vert\\
     \vec v_1&\cdots&\vec v_k\\\vert&&\vert\end{pmatrix}
-    \in\R^{d\times k},\qquad V_k^{\mathsf T}V_k=I_k.
+    \in\R^{d\times k}.
 \]
-For a row $A_{(i)}$, add its components along all $k$ directions:
+Entry $(i,j)$ of $V_k^{\mathsf T}V_k$ is row $i$ of $V_k^{\mathsf T}$
+times column $j$ of $V_k$, that is, $\vec v_i^{\mathsf T}\vec v_j$.
+So orthonormality says exactly that
 \[
-  \sum_{j=1}^{k}(A_{(i)}\vec v_j)\vec v_j^{\mathsf T}
-    =A_{(i)}\left(\sum_{j=1}^{k}\vec v_j\vec v_j^{\mathsf T}\right)
-    =A_{(i)}V_kV_k^{\mathsf T}.
+  V_k^{\mathsf T}V_k=I_k .
 \]
+
+How do we project a row $A_{(i)}$ onto the subspace? We project it
+onto each direction separately, as in
+\hyperref[sec:project-data-matrix]{Section 14.3.1}: its shadow on
+$\vec v_j$ is $(A_{(i)}\vec v_j)\,\vec v_j^{\mathsf T}$. Then we add
+the $k$ shadows. With $k=2$ in $\R^3$, the two shadows lie along
+$\vec v_1$ and $\vec v_2$, and their sum is the point of the plane
+right below $A_{(i)}$:
+\begin{center}
+\begin{tikzpicture}[x={(-0.5cm,-0.4cm)},y={(1.1cm,0cm)},z={(0cm,1cm)},
+    >=Stealth]
+  \fill[PlotGreen!8] (-0.6,-0.6,0)--(3.2,-0.6,0)--(3.2,4,0)--(-0.6,4,0)--cycle;
+  \draw[->,gray] (0,0,0)--(3.6,0,0);
+  \draw[->,gray] (0,0,0)--(0,4.4,0);
+  \draw[->,gray] (0,0,0)--(0,0,3);
+  \draw[->,PlotGreen,very thick] (0,0,0)--(1,0,0)
+    node[above left=-1pt] {$\vec v_1$};
+  \draw[->,PlotGreen,very thick] (0,0,0)--(0,1,0)
+    node[above=1pt] {$\vec v_2$};
+  \draw[->,PlotGreen!70!black,thick] (0,0,0)--(2.4,0,0)
+    node[left=2pt,font=\small] {$(A_{(i)}\vec v_1)\,\vec v_1^{\mathsf T}$};
+  \draw[->,PlotGreen!70!black,thick] (0,0,0)--(0,3,0)
+    node[above=2pt,font=\small] {$(A_{(i)}\vec v_2)\,\vec v_2^{\mathsf T}$};
+  \draw[PlotGreen!70!black,densely dotted] (2.4,0,0)--(2.4,3,0)--(0,3,0);
+  \draw[->,PlotGreen!70!black,very thick] (0,0,0)--(2.4,3,0);
+  \node[circle,fill=PlotGreen,inner sep=1.5pt,
+    label={[font=\small]below right:$A_{(i)}V_kV_k^{\mathsf T}$}] at (2.4,3,0) {};
+  \draw[PlotRed,densely dashed,thick] (2.4,3,2.4)--(2.4,3,0);
+  \draw[->,black,thick] (0,0,0)--(2.4,3,2.4)
+    node[above right] {$A_{(i)}$};
+\end{tikzpicture}
+\end{center}
+Written as a single product, the sum of the shadows is
+\[
+\begin{aligned}
+  \sum_{j=1}^{k}(A_{(i)}\vec v_j)\,\vec v_j^{\mathsf T}
+    &=\sum_{j=1}^{k}A_{(i)}(\vec v_j\vec v_j^{\mathsf T})
+      &&\quad\text{by associativity},\\
+    &=A_{(i)}\left(\sum_{j=1}^{k}\vec v_j\vec v_j^{\mathsf T}\right)
+      &&\quad\text{by distributivity},\\
+    &=A_{(i)}V_kV_k^{\mathsf T}
+      &&\quad\text{as a \hyperref[sec:matrix-outer-products]{sum of outer products}}.
+\end{aligned}
+\]
+In the last step, column $j$ of $V_k$ is $\vec v_j$ and row $j$ of
+$V_k^{\mathsf T}$ is $\vec v_j^{\mathsf T}$, so the product
+$V_kV_k^{\mathsf T}$ is the sum of the outer products
+$\vec v_j\vec v_j^{\mathsf T}$. For $k=1$ we get back
+$A_{(i)}\vec v\vec v^{\mathsf T}$. As in
+\hyperref[sec:project-data-matrix]{Section 14.3.1}, multiplying $A$ on
+the right does this to every row at once:
 
 \begin{frameddefn}{Orthogonal projection onto a subspace}
 \label{def:projection-subspace}
 Let $V_k\in\R^{d\times k}$ have orthonormal columns. For a data
-matrix $A\in\R^{m\times d}$, its projection onto their span is
+matrix $A\in\R^{m\times d}$,
 \[
-  Y=AV_kV_k^{\mathsf T},
-  \qquad Z=A-Y=A(I_d-V_kV_k^{\mathsf T}).
+\begin{aligned}
+  \underbrace{AV_k}_{m\times k}
+     &\quad\text{contains the coordinates along }
+       \vec v_1,\ldots,\vec v_k,\\[6pt]
+  \underbrace{Y=AV_kV_k^{\mathsf T}}_{m\times d}
+     &\quad\text{contains the projected points}.
+\end{aligned}
 \]
-The $m\times k$ matrix $AV_k$ stores the coordinates in the chosen
-basis. The $m\times d$ matrix $Y$ stores those projected points in
-the original coordinates.
+The residual matrix is $Z=A-Y=A(I_d-V_kV_k^{\mathsf T})$.
 \end{frameddefn}
 
-The residual rows lie in the orthogonal complement, which has
-dimension $d-k$. Indeed,
-\[
-  ZV_k=A(I_d-V_kV_k^{\mathsf T})V_k
-      =A(V_k-V_kI_k)=0.
-\]
-So each residual is perpendicular to every retained direction.
-The projected rows lie in a subspace of dimension $k$, although
-their matrix can have rank smaller than $k$ if the data use fewer
-directions.
+So $AV_k$ plays the role of $A\vec v$: each point is now described by
+$k$ numbers instead of $d$. And $Y$ plays the role of
+$A\vec v\vec v^{\mathsf T}$: the same points, written in the original
+$d$ coordinates.
 
-\begin{framedexample}{Keeping two coordinates in three dimensions}
-\label{ex:projection-plane}
-Take $\vec v_1=(1,0,0)^{\mathsf T}$ and
-$\vec v_2=(0,1,0)^{\mathsf T}$. Then
+Why is it an orthogonal projection? For a line, the residual was
+perpendicular to $\vec v$. Now we check that every residual row is
+perpendicular to every direction $\vec v_j$, that is, $ZV_k=0$:
+\[
+\begin{aligned}
+  ZV_k&=A(I_d-V_kV_k^{\mathsf T})\,V_k
+      &&\quad\text{since } Z=A(I_d-V_kV_k^{\mathsf T}),\\
+    &=A(V_k-V_kV_k^{\mathsf T}V_k)
+      &&\quad\text{by distributivity},\\
+    &=A(V_k-V_kI_k)
+      &&\quad\text{since } V_k^{\mathsf T}V_k=I_k,\\
+    &=A(V_k-V_k)
+      &&\quad\text{since } V_kI_k=V_k,\\
+    &=0.
+\end{aligned}
+\]
+Entry $(i,j)$ of $ZV_k$ is $Z_{(i)}\vec v_j$, so every residual row is
+perpendicular to every $\vec v_j$, and hence to the whole subspace.
+Thus $A_{(i)}=Y_{(i)}+Z_{(i)}$ splits each row into a component in the
+subspace and a component perpendicular to it. The matrix
+$V_kV_k^{\mathsf T}$ has rank $k$; the residual rows lie in the
+$(d-k)$-dimensional subspace orthogonal to
+$\vec v_1,\ldots,\vec v_k$.
+
+The projected rows lie in a subspace of dimension $k$, but they need
+not fill it. If every row of $A$ is a multiple of $\vec v_1$, for
+example, every projected row is a multiple of $\vec v_1$ too, and $Y$
+has rank $1$ even when $k=2$.
+
+Let us see all of this in $\R^3$, keeping the first two axes:
+$\vec v_1=(1,0,0)^{\mathsf T}$ and $\vec v_2=(0,1,0)^{\mathsf T}$. Then
 \[
   V_2=\begin{pmatrix}1&0\\0&1\\0&0\end{pmatrix},\qquad
-  V_2V_2^{\mathsf T}=\begin{pmatrix}1&0&0\\0&1&0\\0&0&0\end{pmatrix}.
+  V_2V_2^{\mathsf T}=\begin{pmatrix}1&0&0\\0&1&0\\0&0&0\end{pmatrix},
 \]
-For the row $(2,3,4)$, the reduced coordinates are $(2,3)$, the
-projected point is $(2,3,0)$ and the residual is $(0,0,4)$.
-The projection lies in the coordinate plane; the residual lies
-along the perpendicular third axis.
-\end{framedexample}
+so $V_2V_2^{\mathsf T}$ keeps the first two coordinates and sets the
+third to zero. What happens to the row $(2,3,4)$? Its coordinates
+along $\vec v_1$ and $\vec v_2$ are $(2,3,4)V_2=(2,3)$, its projected
+point is $(2,3,4)V_2V_2^{\mathsf T}=(2,3,0)$ and its residual is
+$(2,3,4)-(2,3,0)=(0,0,4)$:
+\begin{center}
+\begin{tikzpicture}[x={(-0.5cm,-0.4cm)},y={(1.1cm,0cm)},z={(0cm,0.75cm)},
+    >=Stealth]
+  \fill[PlotGreen!8] (-0.6,-0.6,0)--(2.8,-0.6,0)--(2.8,4,0)--(-0.6,4,0)--cycle;
+  \draw[->,gray] (0,0,0)--(3.2,0,0) node[below left] {$x_1$};
+  \draw[->,gray] (0,0,0)--(0,4.4,0) node[right] {$x_2$};
+  \draw[->,gray] (0,0,0)--(0,0,4.8) node[above] {$x_3$};
+  \draw[->,black,thick] (0,0,0)--(2,3,4)
+    node[above right] {$(2,3,4)$};
+  \draw[->,PlotGreen!70!black,very thick] (0,0,0)--(2,3,0)
+    node[below right] {$(2,3,0)$};
+  \draw[->,PlotRed,very thick] (2,3,0)--(2,3,4);
+  \draw[->,PlotRed,thick,densely dashed] (0,0,0)--(0,0,4)
+    node[left] {$(0,0,4)$};
+\end{tikzpicture}
+\end{center}
+The projection lies on the floor spanned by $\vec v_1$ and $\vec v_2$,
+and the residual is vertical, perpendicular to both. Adding the two
+pieces, $(2,3,0)+(0,0,4)=(2,3,4)$, gives back the row itself.
 
 \endgroup
 
