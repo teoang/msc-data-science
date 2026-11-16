@@ -318,6 +318,8 @@
 
 - [x] Empirical mean and variance, the mean-of-squares form, and centring the data.
 - [x] Variance of a dataset along a unit direction, and its form (1/m)||Av||² for centred data.
+- [x] Total variance over an orthonormal basis, its independence of the basis, and the Frobenius norm.
+- [x] The direction of largest variance and the spectral norm; eigenvalue–eigenvector pairs.
 
 </details>
 

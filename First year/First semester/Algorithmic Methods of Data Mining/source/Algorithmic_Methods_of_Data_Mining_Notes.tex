@@ -9094,6 +9094,161 @@ origin. Indeed $\mathrm{Var}_{\vec v}(A)\approx2.88$ and
 $\mathrm{Var}_{\vec w}(A)\approx0.14$: almost all the spread of
 these points is along $\vec v$.
 
+\section{Total variance}
+\label{sec:total-variance}
+
+Let us take the six centred points at the end of
+\hyperref[sec:variance-direction]{Section 14.5} again: along the
+diagonal $\vec v=(1,1)^{\mathsf T}/\sqrt2$ we found
+$\mathrm{Var}_{\vec v}(A)\approx2.88$, and along the perpendicular
+direction $\vec w=(1,-1)^{\mathsf T}/\sqrt2$ we found
+$\mathrm{Var}_{\vec w}(A)\approx0.14$. Each direction sees only part
+of the spread. How much spread do the points have in total?
+
+To capture all of it, we take $d$ directions that cover the whole
+space: an orthonormal basis $\vec v_1,\ldots,\vec v_d$ of $\R^d$. Then
+we add up the variances along them.
+
+\begin{frameddefn}{Total variance}
+\label{def:total-variance}
+Let $A\in\R^{m\times d}$ be centred and let $\vec v_1,\ldots,\vec v_d$
+be an orthonormal basis of $\R^d$. The \emph{total variance} of $A$ is
+\[
+  \mathrm{Var}(A)=\sum_{j=1}^{d}\mathrm{Var}_{\vec v_j}(A)
+  =\frac1m\sum_{j=1}^{d}\norm{A\vec v_j}_2^2 .
+\]
+\end{frameddefn}
+
+There are infinitely many orthonormal bases. So which one should we choose? Does it matter? Let us take two different bases,
+\[
+  B_1=\{\vec e_1,\vec e_2\}
+    =\Bigl\{\begin{pmatrix}1\\0\end{pmatrix},\begin{pmatrix}0\\1\end{pmatrix}\Bigr\},
+  \qquad
+  B_2=\{\vec v,\vec w\}
+    =\Bigl\{\tfrac1{\sqrt2}\begin{pmatrix}1\\1\end{pmatrix},\tfrac1{\sqrt2}\begin{pmatrix}1\\-1\end{pmatrix}\Bigr\},
+\]
+and compute the total variance of the six points with each:
+\[
+  \mathrm{Var}_{\vec e_1}(A)+\mathrm{Var}_{\vec e_2}(A)
+  =\frac{11.66}{6}+\frac{6.5}{6}\approx3.03,
+  \qquad
+  \mathrm{Var}_{\vec v}(A)+\mathrm{Var}_{\vec w}(A)
+  =\frac{17.3}{6}+\frac{0.86}{6}\approx3.03 .
+\]
+The two bases split the spread differently, but the total is the
+same. Why? The coordinates $A_{(i)}\vec v_1,\ldots,A_{(i)}\vec v_d$ of
+a point along an orthonormal basis are the lengths of perpendicular
+pieces that add up to the point, so by Pythagoras
+\[
+  \sum_{j=1}^{d}\bigl(A_{(i)}\vec v_j\bigr)^2=\norm{A_{(i)}}_2^2 .
+\]
+Adding over the points,
+\[
+  \mathrm{Var}(A)=\frac1m\sum_{j=1}^{d}\sum_{i=1}^{m}\bigl(A_{(i)}\vec v_j\bigr)^2
+  =\frac1m\sum_{i=1}^{m}\norm{A_{(i)}}_2^2,
+\]
+the average squared distance of the points from the origin, that is,
+from their centroid. Nothing in it depends on the basis.
+
+Since any basis works, we may as well take the simplest one: the
+canonical basis $\vec e_1,\ldots,\vec e_d$, where $\vec e_j$ has a $1$
+in position $j$ and $0$ elsewhere. What is $A\vec e_j$? Entry $i$ is
+row $i$ of $A$ times $\vec e_j$:
+\[
+  A_{(i)}\vec e_j=\sum_{l=1}^{d}A_{il}(\vec e_j)_l=A_{ij},
+\]
+because only the term $l=j$ survives. So $A\vec e_j$ is the $j$-th
+column of $A$:
+\[
+  \begin{pmatrix}
+    A_{11}&\cdots&A_{1j}&\cdots&A_{1d}\\
+    \vdots&&\vdots&&\vdots\\
+    A_{m1}&\cdots&A_{mj}&\cdots&A_{md}
+  \end{pmatrix}
+  \begin{pmatrix}0\\\vdots\\1\\\vdots\\0\end{pmatrix}
+  =\begin{pmatrix}A_{1j}\\\vdots\\A_{mj}\end{pmatrix}.
+\]
+Then the total variance adds up the squares of all the entries of
+$A$:
+\[
+\begin{aligned}
+  \mathrm{Var}(A)
+    &=\frac1m\sum_{j=1}^{d}\norm{A\vec e_j}_2^2
+      &&\quad\text{taking the canonical basis},\\
+    &=\frac1m\sum_{j=1}^{d}\left\|\begin{pmatrix}A_{1j}\\\vdots\\A_{mj}\end{pmatrix}\right\|_2^2
+      &&\quad\text{since } A\vec e_j \text{ is column } j,\\
+    &=\frac1m\sum_{j=1}^{d}\sum_{i=1}^{m}A_{ij}^2
+      &&\quad\text{squared length of a column}.
+\end{aligned}
+\]
+This sum of squares has a name.
+
+\begin{frameddefn}{Frobenius norm}
+\label{def:frobenius-norm}
+The \emph{Frobenius norm} of a matrix $A\in\R^{m\times d}$ is
+\[
+  \norm{A}_F=\sqrt{\sum_{i=1}^{m}\sum_{j=1}^{d}A_{ij}^2}.
+\]
+\end{frameddefn}
+
+It is the length of $A$ seen as one long vector of $md$ numbers. With
+it, the total variance of centred data is simply
+\[
+  \mathrm{Var}(A)=\frac1m\norm{A}_F^2 .
+\]
+
+\section{The direction of largest variance}
+\label{sec:largest-variance}
+
+Which single direction keeps the most variance? For centred data
+$\mathrm{Var}_{\vec v}(A)=\frac1m\norm{A\vec v}_2^2$, and $m$ does not
+depend on $\vec v$, so we look for the unit vector that makes
+$\norm{A\vec v}_2$ as large as possible:
+\[
+  \max_{\norm{\vec v}_2=1}\norm{A\vec v}_2 .
+\]
+
+\begin{frameddefn}{Spectral norm}
+\label{def:spectral-norm}
+The \emph{spectral norm} of a matrix $A\in\R^{m\times d}$ is
+\[
+  \norm{A}_2=\max_{\norm{\vec v}_2=1}\norm{A\vec v}_2 .
+\]
+\end{frameddefn}
+
+It measures how much $A$ can stretch a unit vector. For the six
+points, the diagonal $\vec v$ was a good guess but not the best one:
+the maximum is reached at $\vec v\approx(0.81,0.59)^{\mathsf T}$, a
+little below the diagonal, where the variance is
+$\norm{A}_2^2/m\approx2.95$ instead of $2.88$. How do we find this
+direction without trying them all? The tool we need is a classical
+object of linear algebra.
+
+\begin{frameddefn}{Eigenvalue and eigenvector}
+\label{def:eigenvector}
+Let $M\in\R^{d\times d}$ be a square matrix. A pair $(\lambda,\vec v)$,
+with $\lambda\in\R$ and $\vec v\in\R^d$, $\vec v\neq\vec 0$, is a
+(right) \emph{eigenvalue--eigenvector pair} of $M$ if
+\[
+  M\vec v=\lambda\vec v .
+\]
+\end{frameddefn}
+
+Multiplying by $M$ usually changes the direction of a vector. An
+eigenvector is special: $M$ only stretches it, by the factor
+$\lambda$, and leaves it on the same line. For example, with
+\[
+  M=\begin{pmatrix}2&1\\1&2\end{pmatrix},\qquad
+  M\begin{pmatrix}1\\1\end{pmatrix}=\begin{pmatrix}3\\3\end{pmatrix}
+    =3\begin{pmatrix}1\\1\end{pmatrix},\qquad
+  M\begin{pmatrix}1\\-1\end{pmatrix}=\begin{pmatrix}1\\-1\end{pmatrix}
+    =1\begin{pmatrix}1\\-1\end{pmatrix},
+\]
+so $(3,(1,1)^{\mathsf T})$ and $(1,(1,-1)^{\mathsf T})$ are
+eigenvalue--eigenvector pairs, while
+$M(1,0)^{\mathsf T}=(2,1)^{\mathsf T}$ is not on the line of
+$(1,0)^{\mathsf T}$.
+
 \endgroup
 
 \end{document}
