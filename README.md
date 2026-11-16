@@ -304,6 +304,21 @@
 - [x] Distance to a set of centres; k-means++ initialization by sampling in proportion to squared distance, with pseudocode and a worked example.
 - [x] The O(log k) approximation guarantee of k-means++ in expectation, preserved by Lloyd's updates.
 
+**10 November**
+
+- [x] One-dimensional Lloyd exercise on nine points: complete runs for k = 2 and k = 3, convergence, and the final centres 18 units apart for k = 2.
+- [x] Geometric limitations of k-means: different sizes, different densities, non-spherical shapes, and dependence on initialization.
+- [x] Random and farthest-first initialization, sensitivity to outliers, and the distance-exponent view of k-means++.
+- [x] Exact k-means on a line: consecutive blocks, dynamic programming, prefix-sum block costs, reconstruction, and O(kn²) time after sorting.
+- [x] Choosing the number of clusters: why the lowest cost always picks k = n, and the elbow method on a four-group example.
+- [x] Matrix rank, linear independence, data matrices, and matrix multiplication as a sum of outer products.
+- [x] Orthogonal projection onto a line and onto a subspace: reduced coordinates, projected data, and orthogonal residuals.
+
+**12 November**
+
+- [x] Empirical mean and variance, the mean-of-squares form, and centring the data.
+- [x] Variance of a dataset along a unit direction, and its form (1/m)||Av||² for centred data.
+
 </details>
 
 ## About
