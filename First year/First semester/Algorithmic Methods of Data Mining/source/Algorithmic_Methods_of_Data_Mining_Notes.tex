@@ -8208,7 +8208,7 @@ is $O(n\log n+kn^2)$, with $O(kn)$ space.
 
 \endgroup
 
-\chapter{Matrices and projections}
+\chapter{Principal Component Analysis}
 \label{ch:matrices-projections}
 
 \begingroup
@@ -8226,7 +8226,8 @@ chapter is Principal Component Analysis (PCA): a method that finds
 the few directions along which the data really varies and describes
 every point using only those.
 
-To get there, we need some tools from linear algebra. We will write a
+To get there, we need some tools from linear algebra, which we will
+recall without explaining them again. We will write a
 dataset as a matrix and look at points as vectors that we can project
 onto a direction. First, however, we need to answer a simpler
 question: how many of the columns of a matrix really carry new
@@ -8234,10 +8235,7 @@ information?
 
 \section{Rank: how many independent directions?}
 
-One vector can sometimes be built from others. For example, if
-$\vec u_3=2\vec u_1+\vec u_2$, the third vector adds no independent
-direction. More generally, a linear combination has the form
-$a_1\vec u_1+\cdots+a_r\vec u_r$, with scalar coefficients $a_i$.
+Let us recall some basic definitions from linear algebra.
 
 \begin{frameddefn}{Linear independence}
 \label{def:linear-independence}
@@ -8257,29 +8255,16 @@ $A$. It also equals the maximum number of linearly independent rows.
 In particular, $\operatorname{rank}(A)\leq\min\{m,d\}$.
 \end{frameddefn}
 
-\begin{framedexample}{A column that adds no new direction}
-\label{ex:matrix-rank-two}
-Consider
-\[
-  A=\begin{pmatrix}3&9&15\\2&0&4\\1&2&4\end{pmatrix}
-    =\begin{pmatrix}\vec u_1&\vec u_2&\vec u_3\end{pmatrix}.
-\]
-The first two columns are independent: the second coordinate of
-$a\vec u_1+b\vec u_2=0$ gives $2a=0$, and then the first gives
-$9b=0$. But $\vec u_3=2\vec u_1+\vec u_2$, so the rank is $2$.
-Similarly, $\begin{pmatrix}1&2&3\\1&5&9\end{pmatrix}$ has rank $2$:
-its two rows are not multiples, and it cannot have more than two
-independent rows.
-\end{framedexample}
-
 \section{A dataset as a matrix}
 \label{sec:data-matrix}
 
-Suppose we have $m$ objects, each described by $d$ coordinates.
-Put one object in each row of a matrix $A\in\R^{m\times d}$.
-Write $A_{(i)}$ for its $i$-th row and $A^{(j)}$ for its $j$-th
-column. Often $m$ is much larger than $d$: many objects share the
-same list of features.
+Suppose we have $m$ objects, each described by the same $d$
+features. We put one object in each row of a matrix
+$A\in\R^{m\times d}$, so that each column holds one feature. We will
+write $A_{(i)}$ for the $i$-th row of $A$, that is, the $i$-th
+object, and $A^{(j)}$ for its $j$-th column, that is, the values of
+the $j$-th feature. Usually $m$ is much larger than $d$: we have many
+more objects than features.
 \[
   A=\begin{pmatrix}---&A_{(1)}&---\\
                    ---&A_{(2)}&---\\
@@ -8298,9 +8283,26 @@ of $A$ with the matching row of $B$, and add the resulting matrices.
 
 For $\vec u\in\R^m$ and $\vec v\in\R^d$, the \emph{outer product}
 $\vec u\vec v^{\mathsf T}$ is an $m\times d$ matrix whose entry
-$(i,j)$ is $u_i v_j$. Every column is a multiple of $\vec u$, so
-it has rank $1$ when both vectors are non-zero, and rank $0$
-otherwise. For $A\in\R^{m\times r}$ and $B\in\R^{r\times d}$,
+$(i,j)$ is $u_i v_j$.
+
+For example, a column of length $3$ times a
+row of length $2$ gives a $3\times2$ matrix:
+\[
+  \def\cu#1{\textcolor[HTML]{0072B2}{#1}}%
+  \cu{\begin{pmatrix}1\\2\\3\end{pmatrix}}\begin{pmatrix}2&-1\end{pmatrix}
+  =\begin{pmatrix}\cu{1}\cdot2&\cu{1}\cdot(-1)\\
+                  \cu{2}\cdot2&\cu{2}\cdot(-1)\\
+                  \cu{3}\cdot2&\cu{3}\cdot(-1)\end{pmatrix}
+  =\begin{pmatrix}2&-1\\4&-2\\6&-3\end{pmatrix}.
+\]
+Column $j$ is $\textcolor[HTML]{0072B2}{\vec u}$ scaled by $v_j$:
+here $2\textcolor[HTML]{0072B2}{\vec u}$ and
+$-\textcolor[HTML]{0072B2}{\vec u}$. In the same way, row $i$ is $\vec v^{\mathsf T}$
+scaled by $u_i$. Since every column is a multiple of $\vec u$, the
+outer product has rank $1$ when both vectors are non-zero, and
+rank $0$ otherwise.
+
+For $A\in\R^{m\times r}$ and $B\in\R^{r\times d}$,
 \[
   AB=\sum_{s=1}^{r}A^{(s)}B_{(s)}.
 \]
@@ -8309,35 +8311,106 @@ $\sum_{s=1}^{r}a_{is}b_{sj}$, exactly the usual product entry.
 
 \begin{framedexample}{Matrix multiplication by outer products}
 \label{ex:outer-product-sum}
+\newcommand{\ca}[1]{\textcolor[HTML]{0072B2}{#1}}%
+\newcommand{\cb}[1]{\textcolor[HTML]{D55E00}{#1}}%
+\newcommand{\cc}[1]{\textcolor[HTML]{009E73}{#1}}%
+\newcommand{\cd}[1]{\textcolor[HTML]{CC79A7}{#1}}%
 Take
 \[
-  A=\begin{pmatrix}1&-1&2&0\\2&0&8&1\\3&5&0&1\end{pmatrix},
+  A=\begin{pmatrix}\ca{1}&\cb{-1}&\cc{2}&\cd{0}\\
+                   \ca{2}&\cb{0}&\cc{8}&\cd{1}\\
+                   \ca{3}&\cb{5}&\cc{0}&\cd{1}\end{pmatrix},
   \qquad
   B=\begin{pmatrix}1&0\\3&6\\-1&0\\-2&5\end{pmatrix}.
 \]
-The product is $3\times2$. Pairing the four columns of $A$ with
-the four rows of $B$ gives
+The product is $3\times2$. Pairing each column of $A$ with the
+matching row of $B$, each entry of the $s$-th term is an entry of
+column $s$ of $A$ times an entry of row $s$ of $B$:
+{\setlength{\arraycolsep}{3pt}%
 \begin{align*}
-  AB&=\begin{pmatrix}1&0\\2&0\\3&0\end{pmatrix}
-      +\begin{pmatrix}-3&-6\\0&0\\15&30\end{pmatrix}\\
-    &\quad+\begin{pmatrix}-2&0\\-8&0\\0&0\end{pmatrix}
-      +\begin{pmatrix}0&0\\-2&5\\-2&5\end{pmatrix}\\
-    &=\begin{pmatrix}-4&-6\\-8&5\\16&35\end{pmatrix}.
-\end{align*}
+  AB&=\begin{pmatrix}\ca{1}\cdot1&\ca{1}\cdot0\\
+                     \ca{2}\cdot1&\ca{2}\cdot0\\
+                     \ca{3}\cdot1&\ca{3}\cdot0\end{pmatrix}
+     +\begin{pmatrix}\cb{(-1)}\cdot3&\cb{(-1)}\cdot6\\
+                     \cb{0}\cdot3&\cb{0}\cdot6\\
+                     \cb{5}\cdot3&\cb{5}\cdot6\end{pmatrix}
+     +\begin{pmatrix}\cc{2}\cdot(-1)&\cc{2}\cdot0\\
+                     \cc{8}\cdot(-1)&\cc{8}\cdot0\\
+                     \cc{0}\cdot(-1)&\cc{0}\cdot0\end{pmatrix}
+     +\begin{pmatrix}\cd{0}\cdot(-2)&\cd{0}\cdot5\\
+                     \cd{1}\cdot(-2)&\cd{1}\cdot5\\
+                     \cd{1}\cdot(-2)&\cd{1}\cdot5\end{pmatrix}\\
+    &=\begin{pmatrix}1&0\\2&0\\3&0\end{pmatrix}
+     +\begin{pmatrix}-3&-6\\0&0\\15&30\end{pmatrix}
+     +\begin{pmatrix}-2&0\\-8&0\\0&0\end{pmatrix}
+     +\begin{pmatrix}0&0\\-2&5\\-2&5\end{pmatrix}
+     =\begin{pmatrix}-4&-6\\-8&5\\16&35\end{pmatrix}.
+\end{align*}}
 \end{framedexample}
 
 \section{Projecting onto one direction}
 \label{sec:projection-line}
 
 Instead of keeping every coordinate of a point, suppose we keep
-only its component along a chosen line through the origin.
-Let $\vec v\in\R^d$ be a unit vector along the line, so
-$\norm{\vec v}_2=1$, and let $\vec x\in\R^d$ be a column vector.
-The signed length of the projection is the
-\hyperref[sec:dot-product]{dot product}
-$t=\vec v^{\mathsf T}\vec x$. For non-zero $\vec x$, this is
-$\norm{\vec x}_2\cos\theta$, where $\theta$ is its angle with
-$\vec v$; the sign records which direction along the line we use.
+only its component along a chosen line through the origin. We can
+think of it as the shadow that the point casts on the line when the
+light falls perpendicular to the line.
+
+Let $\vec v\in\R^d$ be a unit
+vector along the line, so $\norm{\vec v}_2=1$, and let
+$\vec x\in\R^d$ be a column vector. The point, its shadow and the
+dashed segment between them form a right triangle:
+\begin{center}
+\begin{tikzpicture}[x=1.1cm,y=1.1cm,>=Stealth]
+  \draw[PlotGreen!65,densely dashed] (-0.6,0)--(4.4,0);
+  \draw[->,black,thick] (0,0)--(3.5,2) node[above right] {$\vec x$};
+  \draw[PlotRed,densely dashed,thick] (3.5,2)--(3.5,0);
+  \draw[gray] (3.3,0)--(3.3,0.2)--(3.5,0.2);
+  \draw[->,PlotGreen,very thick] (0,0)--(1,0)
+    node[below=2pt] {$\vec v$};
+  \draw (0.9,0) arc[start angle=0,end angle=29.7,radius=0.9];
+  \node at (1.25,0.3) {$\theta$};
+  \draw[decorate,decoration={brace,mirror,amplitude=5pt}]
+    (0,-0.45)--(3.5,-0.45)
+    node[midway,below=6pt] {$|t|=\norm{\vec x}_2\cos\theta$};
+\end{tikzpicture}
+\end{center}
+The side along the line has length $\norm{\vec x}_2\cos\theta$, where
+$\theta$ is the angle between $\vec x$ and $\vec v$. This length is
+just the \hyperref[sec:dot-product]{dot product}
+$t=\vec v^{\mathsf T}\vec x$. Why? The dot product gives the cosine
+of the angle, and $\norm{\vec v}_2=1$, so
+\[
+  \cos\theta=\frac{\vec v^{\mathsf T}\vec x}
+                  {\norm{\vec v}_2\norm{\vec x}_2}
+            =\frac{\vec v^{\mathsf T}\vec x}{\norm{\vec x}_2},
+  \qquad\text{that is,}\qquad
+  \norm{\vec x}_2\cos\theta=\vec v^{\mathsf T}\vec x .
+\]
+What if $\theta>90^\circ$? Then $\cos\theta<0$,
+so $t=\norm{\vec x}_2\cos\theta$ is negative. Geometrically, $\vec x$
+now points away from $\vec v$, and its shadow falls on the other
+side of the origin. The point $t\vec v$ is then a multiple of
+$\vec v$ with a negative coefficient, that is, it lies in the
+direction of $-\vec v$, and the length of the shadow is
+$|t|=-\norm{\vec x}_2\cos\theta$:
+\begin{center}
+\begin{tikzpicture}[x=1.1cm,y=1.1cm,>=Stealth]
+  \draw[PlotGreen!65,densely dashed] (-3,0)--(2,0);
+  \draw[->,black,thick] (0,0)--(-2.2,1.8) node[above left] {$\vec x$};
+  \draw[PlotRed,densely dashed,thick] (-2.2,1.8)--(-2.2,0);
+  \draw[gray] (-2,0)--(-2,0.2)--(-2.2,0.2);
+  \draw[->,PlotGreen,very thick] (0,0)--(1,0)
+    node[below=2pt] {$\vec v$};
+  \draw (0.6,0) arc[start angle=0,end angle=140.7,radius=0.6];
+  \node at (0.55,0.6) {$\theta$};
+  \node[circle,fill=PlotGreen,inner sep=1.5pt,
+    label={[font=\small,fill=white,inner sep=1pt]below left:$t\vec v$}] at (-2.2,0) {};
+  \draw[decorate,decoration={brace,amplitude=5pt}]
+    (0,-0.45)--(-2.2,-0.45)
+    node[midway,below=6pt] {$|t|=-\norm{\vec x}_2\cos\theta$};
+\end{tikzpicture}
+\end{center}
 
 Multiplying that scalar by $\vec v$ gives the projected vector:
 \begin{frameddefn}{Orthogonal projection onto a line}
@@ -8345,23 +8418,83 @@ Multiplying that scalar by $\vec v$ gives the projected vector:
 For a unit column vector $\vec v$, the orthogonal projection of
 $\vec x$ onto the line spanned by $\vec v$ is
 \[
-  \vec y=\vec v(\vec v^{\mathsf T}\vec x)
-        =(\vec v\vec v^{\mathsf T})\vec x.
+\begin{aligned}
+  \vec y&=t\,\vec v\\
+        &=(\vec v^{\mathsf T}\vec x)\,\vec v
+          &&\quad\text{since } t=\vec v^{\mathsf T}\vec x,\\
+        &=\vec v\,(\vec v^{\mathsf T}\vec x)
+          &&\quad\text{a scalar can stand on either side},\\
+        &=(\vec v\vec v^{\mathsf T})\,\vec x
+          &&\quad\text{by associativity of the matrix product}.
+\end{aligned}
 \]
+\begin{center}
+\begin{tikzpicture}[x=1.1cm,y=1.1cm,>=Stealth]
+  \draw[PlotGreen!65,densely dashed] (-0.6,0)--(4.4,0);
+  \draw[->,black,thick] (0,0)--(3.5,2) node[above right] {$\vec x$};
+  \draw[PlotRed,densely dashed,thick] (3.5,2)--(3.5,0);
+  \draw[gray] (3.3,0)--(3.3,0.2)--(3.5,0.2);
+  \draw[->,PlotGreen!70!black,very thick] (0,0)--(3.5,0)
+    node[below=3pt] {$\vec y=t\,\vec v$};
+  \draw[->,PlotGreen,very thick] (0,0)--(1,0)
+    node[below=2pt] {$\vec v$};
+\end{tikzpicture}
+\end{center}
 \end{frameddefn}
 
 Why is it an orthogonal projection? Define the residual
 $\vec z=\vec x-\vec y$. Then
 \[
+\begin{aligned}
   \vec v^{\mathsf T}\vec z
-    =\vec v^{\mathsf T}\vec x
-      -(\vec v^{\mathsf T}\vec v)\vec v^{\mathsf T}\vec x=0,
+    &=\vec v^{\mathsf T}(\vec x-\vec y)
+      &&\quad\text{since } \vec z=\vec x-\vec y,\\
+    &=\vec v^{\mathsf T}\vec x-\vec v^{\mathsf T}\vec y
+      &&\quad\text{by distributivity},\\
+    &=\vec v^{\mathsf T}\vec x
+      -\vec v^{\mathsf T}\vec v\,(\vec v^{\mathsf T}\vec x)
+      &&\quad\text{since } \vec y=\vec v\,(\vec v^{\mathsf T}\vec x),\\
+    &=\vec v^{\mathsf T}\vec x
+      -(\vec v^{\mathsf T}\vec v)(\vec v^{\mathsf T}\vec x)
+      &&\quad\text{by associativity},\\
+    &=\vec v^{\mathsf T}\vec x-\vec v^{\mathsf T}\vec x
+      &&\quad\text{since } \vec v^{\mathsf T}\vec v=\norm{\vec v}_2^2=1,\\
+    &=0.
+\end{aligned}
 \]
-because $\vec v^{\mathsf T}\vec v=1$. Thus $\vec x=\vec y+\vec z$
+So $\vec z$ is perpendicular to $\vec v$. Thus $\vec x=\vec y+\vec z$
 splits the point into a component along the line and a component
-perpendicular to it. If $I_d$ denotes the $d\times d$ identity matrix,
+perpendicular to it: we reach $\vec x$ by walking first along the
+line up to $\vec y$, then perpendicularly by $\vec z$.
+\begin{center}
+\begin{tikzpicture}[x=1.1cm,y=1.1cm,>=Stealth]
+  \draw[PlotGreen!65,densely dashed] (-0.6,0)--(4.4,0);
+  \draw[->,black,thick] (0,0)--(3.5,2) node[above right] {$\vec x$};
+  \draw[->,PlotGreen!70!black,very thick] (0,0)--(3.5,0)
+    node[midway,below=3pt] {$\vec y=t\,\vec v$};
+  \draw[->,PlotRed,very thick] (3.5,0)--(3.5,2)
+    node[midway,right] {$\vec z$};
+  \draw[gray] (3.3,0)--(3.3,0.2)--(3.5,0.2);
+  \draw[->,PlotRed,thick,densely dashed] (0,0)--(0,2)
+    node[left] {$\vec z$};
+  \draw[gray] (0,0.2)--(0.2,0.2)--(0.2,0);
+\end{tikzpicture}
+\end{center}
+The dashed copy of $\vec z$ starts at the origin: it is perpendicular
+to the line, like every residual.
+
+If $I_d$ denotes the $d\times d$ identity matrix,
 \[
-  \vec z=(I_d-\vec v\vec v^{\mathsf T})\vec x.
+\begin{aligned}
+  \vec z&=\vec x-\vec y
+    &&\quad\text{by definition of the residual},\\
+  &=\vec x-(\vec v\vec v^{\mathsf T})\,\vec x
+    &&\quad\text{since } \vec y=(\vec v\vec v^{\mathsf T})\,\vec x,\\
+  &=I_d\,\vec x-(\vec v\vec v^{\mathsf T})\,\vec x
+    &&\quad\text{since } I_d\,\vec x=\vec x,\\
+  &=(I_d-\vec v\vec v^{\mathsf T})\,\vec x
+    &&\quad\text{collecting } \vec x \text{ on the right}.
+\end{aligned}
 \]
 The matrix $\vec v\vec v^{\mathsf T}$ has rank $1$; the residual
 lies in the $(d-1)$-dimensional subspace orthogonal to $\vec v$.
@@ -8417,8 +8550,51 @@ Therefore we multiply a data row on the right. For the whole matrix,
 \end{aligned}
 \]
 The residual matrix is $A(I_d-\vec v\vec v^{\mathsf T})$.
+
+What does this look like for a whole dataset? Take five rows of a
+matrix with $d=2$ and the diagonal direction
+$\vec v=(1,1)^{\mathsf T}/\sqrt2$. On the left, each row is moved
+perpendicularly onto the line, and all the projected rows
+$A_{(i)}\vec v\vec v^{\mathsf T}$ lie on it. On the right we keep
+instead what the projection discards: each row is moved parallel to
+$\vec v$, and all the residual rows
+$A_{(i)}(I_d-\vec v\vec v^{\mathsf T})$ lie on the line through the
+origin perpendicular to $\vec v$.
+\begin{center}
+\begin{tikzpicture}[x=0.75cm,y=0.75cm,>=Stealth,
+    pt/.style={circle,fill=black,inner sep=1.3pt},
+    lab/.style={font=\scriptsize}]
+  \begin{scope}
+    \draw[->,gray] (-2.3,0)--(3.5,0);
+    \draw[->,gray] (0,-2.3)--(0,3.2);
+    \draw[PlotGreen!65,densely dashed] (-1.6,-1.6)--(2.8,2.8);
+    \draw[->,PlotGreen,very thick] (0,0)--(.707,.707);
+    \foreach \a/\b/\p/\i in {3/1/2/1,1/2.5/1.75/2,-1.5/0.5/-0.5/3,
+                             2/-1/0.5/4,0.5/-2/-0.75/5}{
+      \draw[PlotRed,densely dashed] (\a,\b)--(\p,\p);
+      \node[pt] at (\a,\b) {};
+      \node[pt,fill=PlotGreen] at (\p,\p) {};
+      \ifnum\i=3 \node[lab,anchor=east] at (\a-0.1,\b) {$A_{(\i)}$};\else \node[lab,anchor=west] at (\a+0.1,\b) {$A_{(\i)}$};\fi}
+    \node[font=\small] at (0.6,-2.9) {projections onto $\vec v$};
+  \end{scope}
+  \begin{scope}[xshift=7.5cm]
+    \draw[->,gray] (-2.3,0)--(3.5,0);
+    \draw[->,gray] (0,-2.3)--(0,3.2);
+    \draw[PlotGreen!65,densely dashed] (-1.6,-1.6)--(2.8,2.8);
+    \draw[PlotBlue!70] (-1.8,1.8)--(2.2,-2.2);
+    \foreach \a/\b/\p/\i in {3/1/2/1,1/2.5/1.75/2,-1.5/0.5/-0.5/3,
+                             2/-1/0.5/4,0.5/-2/-0.75/5}{
+      \draw[PlotBlue,densely dashed] (\a,\b)--(\a-\p,\b-\p);
+      \node[pt] at (\a,\b) {};
+      \node[pt,fill=PlotBlue] at (\a-\p,\b-\p) {};
+      \ifnum\i=3 \node[lab,anchor=east] at (\a-0.1,\b) {$A_{(\i)}$};\else \node[lab,anchor=west] at (\a+0.1,\b) {$A_{(\i)}$};\fi}
+    \node[font=\small] at (0.6,-2.9) {residuals};
+  \end{scope}
+\end{tikzpicture}
+\end{center}
 Every projected row lies on the same line, and every residual row
-is perpendicular to that line.
+lies on the line perpendicular to it. Adding the two pieces of a row
+gives back the row itself.
 
 \Needspace{14\baselineskip}
 \section{Projecting onto a subspace}
