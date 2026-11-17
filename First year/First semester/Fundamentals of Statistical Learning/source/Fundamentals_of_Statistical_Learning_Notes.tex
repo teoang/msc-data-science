@@ -121,6 +121,9 @@ Click a date to jump to the start of that lecture.
 \setcounter{chapter}{-1}
 \chapter{Common distributions}
 
+\section{Binomial distribution}\label{sec:binomial}
+% TODO: Introduce the Binomial distribution here.
+
 \section{Normal distribution}\label{sec:normal}
 
 Many phenomena in nature, like heights or measurement errors, pile up around
@@ -1538,7 +1541,7 @@ only needs $f_X$:
 Finally, the law computes moments, which by Definition~\ref{def:moments}
 are expected values of powers of $X$.
 
-\begin{framedexample}{Second moment of a Bernoulli}
+\begin{framedexample}{Second moment of a Bernoulli}\label{ex:bernoulli-second-moment}
 Let $X\sim\mathrm{Ber}(p)$, so $X=1$ with probability $p$ and $X=0$ with
 probability $1-p$. With $r(x)=x^2$,
 \[
@@ -2915,9 +2918,9 @@ Take two variables, $p=2$:
 \]
 Suppose we observe $X=x$. What do we now expect from $Y$? Knowing $x$
 changes the distribution of $Y$: it becomes the conditional distribution
-$F_{Y|X}(y\,|\,x)$, with density
+$F_{Y\mid X}(y\mid x)$, with density
 \[
-f_{Y|X}(y\,|\,x)=\frac{f_{X,Y}(x,y)}{f_X(x)} .
+f_{Y\mid X}(y\mid x)=\frac{f_{X,Y}(x,y)}{f_X(x)} .
 \]
 Like any distribution, it has a centre and a spread.
 
@@ -2925,52 +2928,52 @@ Like any distribution, it has a centre and a spread.
 The \textbf{conditional expectation} and the \textbf{conditional variance}
 of $Y$ given $X=x$ are
 \begin{gather*}
-\mathbb{E}(Y\,|\,X=x)=\int_{\mathbb{R}}y\,\mathrm{d}F_{Y|X}(y\,|\,x),\\
-\mathrm{Var}(Y\,|\,X=x)=\int_{\mathbb{R}}\big(y-\mathbb{E}(Y\,|\,X=x)\big)^2\,\mathrm{d}F_{Y|X}(y\,|\,x).
+\mathbb{E}(Y\mid X=x)=\int_{\mathbb{R}}y\,\mathrm{d}F_{Y\mid X}(y\mid x),\\
+\mathrm{Var}(Y\mid X=x)=\int_{\mathbb{R}}\big(y-\mathbb{E}(Y\mid X=x)\big)^2\,\mathrm{d}F_{Y\mid X}(y\mid x).
 \end{gather*}
 Both are numbers, which depend on $x$. Swapping the roles of $X$ and $Y$
-gives $\mathbb{E}(X\,|\,Y=y)$ and $\mathrm{Var}(X\,|\,Y=y)$.
+gives $\mathbb{E}(X\mid Y=y)$ and $\mathrm{Var}(X\mid Y=y)$.
 \end{frameddefn}
 
 Before we observe $X$, we do not know $x$. The number
-$\mathbb{E}(Y\,|\,X=x)$ then becomes a function of the random variable $X$.
+$\mathbb{E}(Y\mid X=x)$ then becomes a function of the random variable $X$.
 
 \begin{frameddefn}{Conditional expectation}\label{def:conditional}
-Let $r(x)=\mathbb{E}(Y\,|\,X=x)$. The \textbf{conditional expectation} of
+Let $r(x)=\mathbb{E}(Y\mid X=x)$. The \textbf{conditional expectation} of
 $Y$ given $X$ is the random variable
 \[
-\mathbb{E}(Y\,|\,X)=r(X).
+\mathbb{E}(Y\mid X)=r(X).
 \]
 \end{frameddefn}
 
-So $\mathbb{E}(Y\,|\,X=x)$ is a number, while $\mathbb{E}(Y\,|\,X)$ is a
+So $\mathbb{E}(Y\mid X=x)$ is a number, while $\mathbb{E}(Y\mid X)$ is a
 random variable with its own distribution. Since it is a random variable,
 we can take its expected value. What do we get?
 
 \begin{framedthm}{Law of total expectation}\label{thm:total-expectation}
 For random variables $X$ and $Y$,
 \[
-\mathbb{E}_Y(Y)=\mathbb{E}_X\big(\mathbb{E}_{Y|X}(Y\,|\,X)\big).
+\mathbb{E}_Y(Y)=\mathbb{E}_X\big(\mathbb{E}_{Y\mid X}(Y\mid X)\big).
 \]
 \end{framedthm}
 
 \begin{proof}[Proof (continuous case)]
-$\mathbb{E}(Y\,|\,X)=r(X)$ is a function of $X$, so by the
+$\mathbb{E}(Y\mid X)=r(X)$ is a function of $X$, so by the
 \hyperref[sec:lazy]{law of the lazy statistician}
 \[
-\mathbb{E}_X\big(\mathbb{E}(Y\,|\,X)\big)=\int_{\mathbb{R}}r(x)\,f_X(x)\,\mathrm{d}x
-=\int_{\mathbb{R}}\Big(\int_{\mathbb{R}}y\,f_{Y|X}(y\,|\,x)\,\mathrm{d}y\Big)f_X(x)\,\mathrm{d}x .
+\mathbb{E}_X\big(\mathbb{E}(Y\mid X)\big)=\int_{\mathbb{R}}r(x)\,f_X(x)\,\mathrm{d}x
+=\int_{\mathbb{R}}\Big(\int_{\mathbb{R}}y\,f_{Y\mid X}(y\mid x)\,\mathrm{d}y\Big)f_X(x)\,\mathrm{d}x .
 \]
 Bring $f_X(x)$ inside and use the conditional density:
 \[
-\underbrace{f_{Y|X}(y\,|\,x)\,f_X(x)}_{f_{X,Y}(x,y)}
+\underbrace{f_{Y\mid X}(y\mid x)\,f_X(x)}_{f_{X,Y}(x,y)}
 \quad\Longrightarrow\quad
-\mathbb{E}_X\big(\mathbb{E}(Y\,|\,X)\big)=\int_{\mathbb{R}}\int_{\mathbb{R}}y\,f_{X,Y}(x,y)\,\mathrm{d}y\,\mathrm{d}x .
+\mathbb{E}_X\big(\mathbb{E}(Y\mid X)\big)=\int_{\mathbb{R}}\int_{\mathbb{R}}y\,f_{X,Y}(x,y)\,\mathrm{d}y\,\mathrm{d}x .
 \]
 Swap the order of integration. The factor $y$ does not depend on $x$, so it
 comes out of the inner integral, which leaves the marginal density of $Y$:
 \[
-\mathbb{E}_X\big(\mathbb{E}(Y\,|\,X)\big)
+\mathbb{E}_X\big(\mathbb{E}(Y\mid X)\big)
 =\int_{\mathbb{R}}y\underbrace{\Big(\int_{\mathbb{R}}f_{X,Y}(x,y)\,\mathrm{d}x\Big)}_{f_Y(y)}\mathrm{d}y
 =\int_{\mathbb{R}}y\,f_Y(y)\,\mathrm{d}y=\mathbb{E}_Y(Y).
 \]
@@ -2980,14 +2983,14 @@ The law tells a story in two steps, the same as for the
 \hyperref[marginal]{hidden variables}: first $X$ is drawn from its
 distribution, then $Y$ is drawn given that value of $X$. To get the overall
 average of $Y$, we average the conditional averages
-$\mathbb{E}(Y\,|\,X=x)$, each weighted by how likely its $x$ is.
+$\mathbb{E}(Y\mid X=x)$, each weighted by how likely its $x$ is.
 
 A first consequence is a familiar rule for events.
 
 \begin{framedcor}{Law of total probability}\label{cor:total-probability}
 For any events $A$ and $B$,
 \[
-P(B)=P(B\,|\,A)\,P(A)+P(B\,|\,A^c)\,P(A^c).
+P(B)=P(B\mid A)\,P(A)+P(B\mid A^c)\,P(A^c).
 \]
 \end{framedcor}
 
@@ -3000,19 +3003,165 @@ Y=\mathbb{I}_B\sim\mathrm{Bern}\big(P(B)\big),
 so that $X=1$ if $A$ occurs and $X=0$ otherwise. Since
 \hyperref[cor:prob-expected]{probabilities are expected values},
 $\mathbb{E}(Y)=P(B)$. Given $X=1$, the event $A$ has occurred, so $Y=1$
-with probability $P(B\,|\,A)$; given $X=0$, with probability
-$P(B\,|\,A^c)$:
+with probability $P(B\mid A)$; given $X=0$, with probability
+$P(B\mid A^c)$:
 \[
-\mathbb{E}(Y\,|\,X=1)=P(B\,|\,A),\qquad
-\mathbb{E}(Y\,|\,X=0)=P(B\,|\,A^c).
+\mathbb{E}(Y\mid X=1)=P(B\mid A),\qquad
+\mathbb{E}(Y\mid X=0)=P(B\mid A^c).
 \]
-So $\mathbb{E}(Y\,|\,X)$ takes the value $P(B\,|\,A)$ with probability
-$P(A)$ and the value $P(B\,|\,A^c)$ with probability $P(A^c)$. The
+So $\mathbb{E}(Y\mid X)$ takes the value $P(B\mid A)$ with probability
+$P(A)$ and the value $P(B\mid A^c)$ with probability $P(A^c)$. The
 \hyperref[thm:total-expectation]{law of total expectation} gives
 \[
-P(B)=\mathbb{E}(Y)=\mathbb{E}\big(\mathbb{E}(Y\,|\,X)\big)
-=P(B\,|\,A)\,P(A)+P(B\,|\,A^c)\,P(A^c).
+P(B)=\mathbb{E}(Y)=\mathbb{E}\big(\mathbb{E}(Y\mid X)\big)
+=P(B\mid A)\,P(A)+P(B\mid A^c)\,P(A^c).
 \]
 \end{proof}
+
+\clearpage
+\lecturestart{11 November}
+
+\section{Sums of independent variables}\label{sec:sums-independent}
+
+We have seen how to compute the
+\hyperref[prop:linear-vector]{expected value} and the
+\hyperref[prop:var-linear]{variance of a linear combination}. Let us put
+these properties to work on familiar distributions, starting from a
+\hyperref[sec:binomial]{Binomial count}: how can we compute its mean and variance from the
+individual trials?
+
+\begin{framedexample}{A sum of independent Bernoulli variables}\label{ex:bernoulli-sum}
+Let us return to the familiar model of $n$ independent Bernoulli trials,
+$X_i\sim\mathrm{Ber}(p)$ for $i=1,\ldots,n$. Each $X_i$ records a success
+with $1$ and a failure with $0$, and the probability of success is the
+same $p$ in every trial.
+
+Collect the results in the random vector
+$\underline{X}=(X_1,\ldots,X_n)^{\mathsf T}$, and let
+$\underline{1}=(1,\ldots,1)^{\mathsf T}$ be the vector of $n$ ones. Their
+scalar product adds up the results:
+\[
+Y=\underline{1}^{\mathsf T}\underline{X}=\sum_{i=1}^nX_i.
+\]
+$Y$ is the number of successes in $n$ independent Bernoulli trials,
+each with success probability $p$.
+
+So our goal is to find $\mathbb{E}(Y)$ and $\mathrm{Var}(Y)$.
+
+We already know the distribution of this count:
+\[
+Y\sim\hyperref[sec:binomial]{\mathrm{Bin}(n,p)}.
+\]
+
+Viewed as a transformation of $\underline{X}$, taking the sum is
+many-to-one: different sequences can give the same total. For example,
+with $n=3$, the sequences $(1,1,0)$, $(1,0,1)$ and $(0,1,1)$ all give
+$Y=2$.
+
+\textbf{The expected value.} One way to compute the mean is to use the
+\hyperref[def:expected-value]{definition of expected value} directly
+with the known \hyperref[sec:binomial]{Binomial PMF} $p_Y$:
+\[
+\mathbb{E}(Y)=\sum_{y=0}^n y\,p_Y(y).
+\]
+We could now substitute $p_Y(y)$ and simplify a sum involving binomial
+coefficients.
+
+Can we reach the result directly from the individual
+trials? For each $X_i$, $\mathbb{E}(X_i)=0\cdot(1-p)+1\cdot p=p$, so
+\hyperref[prop:linear-vector]{linearity of the expected value} gives
+\[
+\mathbb{E}(Y)=\mathbb{E}\Big(\sum_{i=1}^nX_i\Big)
+=\sum_{i=1}^n\mathbb{E}(X_i)
+=\sum_{i=1}^n p=np.
+\]
+We expect $np$ successes on average across groups of $n$ trials.
+
+\textbf{The variance.} We now know the centre of the count. How much
+does it fluctuate around that centre? The trials are independent, so by
+the \hyperref[cor:var-independent]{variance of a sum of independent variables},
+\[
+\mathrm{Var}(Y)=\sum_{i=1}^n\mathrm{Var}(X_i).
+\]
+We only need the variance of one Bernoulli variable. Recall
+Example~\ref{ex:bernoulli-second-moment}: for $X\sim\mathrm{Ber}(p)$,
+$X^2=X$, so $\mathbb{E}(X^2)=p$. Each $X_i$ has this same distribution,
+and we have just found $\mathbb{E}(X_i)=p$. The
+\hyperref[prop:var-moments]{variance from the moments} therefore gives
+\[
+\mathrm{Var}(X_i)=\mathbb{E}(X_i^2)-\mathbb{E}(X_i)^2
+=p-p^2=p(1-p).
+\]
+There are $n$ equal contributions to the variance of $Y$, hence
+\[
+\mathrm{Var}(Y)=\sum_{i=1}^n p(1-p)=np(1-p).
+\]
+
+\textbf{The second moment.} Once we know the mean and the variance, we
+can also find $\mathbb{E}(Y^2)$. Rearranging the
+\hyperref[prop:var-moments]{same relation between variance and moments},
+\[
+\mathbb{E}(Y^2)=\mathrm{Var}(Y)+\mathbb{E}(Y)^2
+=np(1-p)+(np)^2.
+\]
+
+\textbf{What if the success probabilities differ?} So far every trial
+has had the same success probability $p$. Keep the trials independent,
+but now let trial $i$ have success probability $p_i$, so
+$X_i\sim\mathrm{Ber}(p_i)$. The sum $Y=\sum_{i=1}^nX_i$ still counts
+the successes, but in general it no longer has a
+\hyperref[sec:binomial]{Binomial distribution}. Can we still find its
+mean and variance?
+
+The calculations work in the same way, with a different contribution
+from each trial. Collect the success probabilities in the vector
+$\underline{p}=(p_1,\ldots,p_n)^{\mathsf T}$. By
+\hyperref[prop:linear-vector]{linearity of the expected value},
+\[
+\mathbb{E}(Y)=\sum_{i=1}^n\mathbb{E}(X_i)
+=\sum_{i=1}^n p_i=\underline{1}^{\mathsf T}\underline{p}.
+\]
+The trials are still independent, so by
+the \hyperref[cor:var-independent]{variance of a sum of independent variables},
+\[
+\mathrm{Var}(Y)=\sum_{i=1}^n\mathrm{Var}(X_i)
+=\sum_{i=1}^n p_i(1-p_i).
+\]
+
+\textbf{What if the trials are dependent?} Keep the marginal
+distributions $X_i\sim\mathrm{Ber}(p_i)$, but now drop independence.
+Which parts of the calculation still work?
+
+The mean only needs the individual means, because
+\hyperref[prop:linear-vector]{linearity of the expected value} does not
+require independence:
+\[
+\mathbb{E}(Y)=\sum_{i=1}^n\mathbb{E}(X_i)
+=\sum_{i=1}^n p_i.
+\]
+For the variance, we must use the full
+\hyperref[prop:var-linear]{variance of a linear combination}, with
+every coefficient equal to $1$:
+\[
+\mathrm{Var}(Y)=\sum_{i=1}^n p_i(1-p_i)
++2\sum_{1\le i<j\le n}\mathrm{Cov}(X_i,X_j).
+\]
+The individual variances are known, but the covariances need information
+about pairs of trials. By the
+\hyperref[def:covariance]{definition of covariance},
+\[
+\mathrm{Cov}(X_i,X_j)=\mathbb{E}(X_iX_j)-p_i p_j
+=P(X_i=1,X_j=1)-p_i p_j,
+\]
+because $X_iX_j$ is $1$ exactly when both trials succeed, and $0$
+otherwise. Knowing $p_i$ and $p_j$ tells us how likely each success is
+on its own, but not how likely the two are to occur together. Without
+that information about the joint distribution, the marginal success
+probabilities alone do not determine $\mathrm{Var}(Y)$.
+\end{framedexample}
+
+\begin{todobox}
+Finish the 11 November lecture.
+\end{todobox}
 
 \end{document}

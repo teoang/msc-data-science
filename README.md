@@ -179,6 +179,12 @@
 - [x] The covariance matrix and the variance of a linear combination; independent variables have zero covariance.
 - [x] Conditioning: conditional expectation and variance, the law of total expectation and the law of total probability.
 
+**11 November**
+
+- [x] A familiar Binomial count as a sum of independent Bernoulli variables: the many-to-one transformation.
+- [x] Mean, variance and second moment of a Binomial count from the individual Bernoulli trials.
+- [x] Different success probabilities and dependent trials: linearity of expectation, covariance terms and the need for the joint distribution.
+
 </details>
 
 <details>
