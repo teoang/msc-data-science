@@ -2527,6 +2527,7 @@ The \textbf{median absolute deviation} of $X$ is
 Like the median, it is barely moved by extreme values.
 
 \vspace{\baselineskip}
+\phantomsection\label{var-affine}%
 How does the variance react if we shift and rescale $X$? Recall from
 Proposition~\ref{prop:linear} that
 \[
@@ -2890,11 +2891,22 @@ so
 \]
 
 \begin{notebox}[The converse is false]
+\phantomsection\label{note:cov-converse}%
 A zero covariance does not imply independence. Let $X$ take the values
-$-1,0,1$ with probability $\tfrac13$ each, and $Y=X^2$. Then $Y$ is a
-function of $X$, so they are far from independent, yet
+$-1,0,1$ with probability $\tfrac13$ each, and $Y=X^2$. Then
+\begin{align*}
+\mathrm{Cov}(X,Y)
+&=\mathbb{E}(XY)-\mathbb{E}(X)\,\mathbb{E}(Y)
+&&\text{definition of covariance}\\
+&=\mathbb{E}(X^3)-\mathbb{E}(X)\,\mathbb{E}(X^2)
+&&Y=X^2\\
+&=\tfrac13\big((-1)^3+0^3+1^3\big)-\tfrac13\big((-1)+0+1\big)\,\mathbb{E}(X^2)
+&&\text{definition of }\mathbb{E}\\
+&=0-0\cdot\mathbb{E}(X^2)=0,
+\end{align*}
+yet $Y$ is a function of $X$, so they are far from independent:
 \[
-\mathrm{Cov}(X,Y)=\underbrace{\mathbb{E}(X^3)}_{0}-\underbrace{\mathbb{E}(X)}_{0}\,\mathbb{E}(X^2)=0 .
+P(X=0,\,Y=1)=0\ne\tfrac29=\underbrace{P(X=0)}_{1/3}\,\underbrace{P(Y=1)}_{2/3}.
 \]
 \end{notebox}
 
@@ -3163,5 +3175,310 @@ probabilities alone do not determine $\mathrm{Var}(Y)$.
 \begin{todobox}
 Finish the 11 November lecture.
 \end{todobox}
+
+\chapter{Dependence}\label{ch:dependence}
+\lecturestart{12 November}
+
+So far we have summarised one variable at a time: the expected value tells
+where $X$ sits, the variance how much it spreads. With two variables $X$
+and $Y$, however, the interesting question is often how they move
+together. When $X$ is large, does $Y$ tend to be large too? This is their
+dependence, and in this chapter we look for numbers that measure it.
+
+We already have a first candidate. In the
+\hyperref[def:covariance]{covariance matrix}, the entry for a pair of
+variables is their covariance. For $X$ and $Y$, with means $\mu_X$ and
+$\mu_Y$, we write
+\[
+\sigma_{X,Y}=\mathrm{Cov}(X,Y)
+=\mathbb{E}\big(\underbrace{(X-\mu_X)}_{\text{gap of }X}\,\underbrace{(Y-\mu_Y)}_{\text{gap of }Y}\big).
+\]
+The product of the two gaps is positive when $X$ and $Y$ fall on the same
+side of their means, and negative when they fall on opposite sides. So a
+positive covariance says that $X$ and $Y$ tend to be large together and
+small together, a negative one that when one is large the other tends to
+be small.
+
+\begin{framedexample}{The sign of the covariance}\label{ex:cov-sign}
+Each panel shows $60$ draws of a pair $(X,Y)$. The dashed lines mark
+$\mu_X$ and $\mu_Y$. A point is blue when its two gaps have the same sign,
+so their product is positive, and orange when the product is negative.
+\begin{center}
+\includegraphics[width=\linewidth]{assets/cov-sign.pdf}
+\end{center}
+\begin{enumerate}
+\item Hours of study $X$ and grade $Y$: when $X$ increases, $Y$ tends to
+increase. Most points are blue, and $\mathrm{Cov}(X,Y)>0$.
+\item Speed $X$ and travel time $Y$ over a fixed distance: when $X$
+increases, $Y$ tends to decrease. Most points are orange, and
+$\mathrm{Cov}(X,Y)<0$.
+\item No linear pattern: the blue and orange products cancel out, and
+$\mathrm{Cov}(X,Y)\approx0$. A relationship that is not linear may still
+be there, as for $Y=X^2$ in the note on
+\hyperref[note:cov-converse]{zero covariance}.
+\end{enumerate}
+\end{framedexample}
+
+How large is a large covariance, though? Multiply $X$ by a constant
+$c>0$. The mean becomes $c\,\mu_X$, so
+\[
+\mathrm{Cov}(cX,Y)=\mathbb{E}\big((cX-c\,\mu_X)(Y-\mu_Y)\big)=c\,\mathrm{Cov}(X,Y).
+\]
+With $c=100$ the data are exactly the same as before: we only write each
+value of $X$ in another unit, and in a scatter plot like those of
+Example~\ref{ex:cov-sign} the points would not move, only the numbers on
+the horizontal axis would change. Yet the covariance becomes $100$ times
+larger, although the link between $X$ and $Y$ has not changed at all. So
+the value of the covariance alone cannot tell us whether the link is
+strong or weak.
+
+To remove the units, we divide by the
+\hyperref[def:sd]{standard deviations} $\sigma_X$ and $\sigma_Y$, which
+grow by the same factors.
+
+\begin{frameddefn}{Correlation}\label{def:correlation}
+Let $X$ and $Y$ be random variables with means $\mu_X$ and $\mu_Y$ and
+standard deviations $\sigma_X>0$ and $\sigma_Y>0$. The \textbf{Pearson
+linear correlation coefficient} of $X$ and $Y$ is
+\[
+\rho_{X,Y}=\rho(X,Y)=\frac{\mathrm{Cov}(X,Y)}{\sqrt{\mathrm{Var}(X)\,\mathrm{Var}(Y)}}
+=\frac{\sigma_{X,Y}}{\sigma_X\,\sigma_Y}.
+\]
+\end{frameddefn}
+
+Let us check that the units are really gone. With $cX$ in place of $X$,
+the standard deviation becomes $c\,\sigma_X$, and
+\[
+\rho(cX,Y)=\frac{c\,\sigma_{X,Y}}{c\,\sigma_X\,\sigma_Y}=\rho(X,Y).
+\]
+
+As the properties we see next show, the covariance and the
+correlation measure how strong the \emph{linear} relationship between $X$
+and $Y$ is: how well a straight line describes the dependence of one
+variable on the other.
+
+\section{Properties of the correlation}\label{sec:corr-properties}
+
+We now know how to compute $\rho_{X,Y}$. Which values can it take, and how
+do we read them? Before listing its properties, we need one more tool.
+
+Dividing by $\sigma_X$ and $\sigma_Y$ suggests bringing $X$ and $Y$ to the
+same scale first. The \textbf{standardized versions} of $X$ and $Y$ are
+\[
+Z_X=\frac{X-\mu_X}{\sigma_X},\qquad Z_Y=\frac{Y-\mu_Y}{\sigma_Y}.
+\]
+Splitting the fraction, each is a shift and a rescaling of the original
+variable:
+\[
+Z_X=\underbrace{-\frac{\mu_X}{\sigma_X}}_{\alpha}+\underbrace{\frac{1}{\sigma_X}}_{\beta}\,X ,
+\]
+where $\alpha$ and $\beta$ are constants. The expected value of
+$\alpha+\beta X$ is $\alpha+\beta\,\mathbb{E}(X)$, by the
+\hyperref[prop:linear]{linear functions}, so
+\[
+\mathbb{E}(Z_X)=-\frac{\mu_X}{\sigma_X}+\frac{1}{\sigma_X}\,\underbrace{\mathbb{E}(X)}_{\mu_X}
+=-\frac{\mu_X}{\sigma_X}+\frac{\mu_X}{\sigma_X}=0 .
+\]
+The variance of $\alpha+\beta X$ is $\beta^2\,\mathrm{Var}(X)$, by the
+\hyperref[var-affine]{shift and rescaling}, so
+\[
+\mathrm{Var}(Z_X)=\Big(\frac{1}{\sigma_X}\Big)^2\,\underbrace{\mathrm{Var}(X)}_{\sigma_X^2}
+=\frac{\sigma_X^2}{\sigma_X^2}=1 .
+\]
+The same holds for $Z_Y$.
+
+\begin{framedprop}{Properties of the correlation}\label{prop:corr-properties}
+Let $X$ and $Y$ be random variables with means $\mu_X$ and $\mu_Y$,
+standard deviations $\sigma_X>0$ and $\sigma_Y>0$, and standardized
+versions $Z_X$ and $Z_Y$. Then:
+\begin{enumerate}
+\item $\rho_{X,Y}=\mathrm{Cov}(Z_X,Z_Y)$;
+\item $\mathrm{Cov}(X,Y)=\mathbb{E}(XY)-\mathbb{E}(X)\,\mathbb{E}(Y)$;
+\item if $X$ and $Y$ are independent, then $\rho_{X,Y}=\mathrm{Cov}(X,Y)=0$,
+and the converse is not true in general;
+\item $\rho_{X,Y}\in[-1,1]$;
+\item if $Y=\alpha+\beta X$ for some constants $\alpha$ and $\beta\ne0$, then
+\[
+\rho_{X,Y}=\begin{cases}+1&\text{if }\beta>0,\\-1&\text{if }\beta<0;\end{cases}
+\]
+conversely, if $|\rho_{X,Y}|=1$, then $Y=\alpha+\beta X$ almost surely for
+some constants $\alpha$ and $\beta$, with $\beta>0$ if $\rho_{X,Y}=+1$ and
+$\beta<0$ if $\rho_{X,Y}=-1$;
+\item for random variables $X_1,\ldots,X_p$ and constants
+$\alpha_1,\ldots,\alpha_p$,
+\[
+\mathrm{Var}\Big(\sum_{i=1}^p\alpha_iX_i\Big)
+=\sum_{i=1}^p\alpha_i^2\,\mathrm{Var}(X_i)+2\sum_{i<j}\alpha_i\alpha_j\,\mathrm{Cov}(X_i,X_j);
+\]
+for example, $\mathrm{Var}(X-Y)=\mathrm{Var}(X)+\mathrm{Var}(Y)-2\,\mathrm{Cov}(X,Y)$.
+\end{enumerate}
+\end{framedprop}
+
+\begin{proof}
+\textbf{(1)}
+\begin{align*}
+\rho_{X,Y}
+&=\frac{\sigma_{X,Y}}{\sigma_X\,\sigma_Y}
+&&\text{definition of correlation}\\
+&=\frac{\mathbb{E}\big((X-\mu_X)(Y-\mu_Y)\big)}{\sigma_X\,\sigma_Y}
+&&\text{definition of covariance}\\
+&=\mathbb{E}\Big(\frac{X-\mu_X}{\sigma_X}\cdot\frac{Y-\mu_Y}{\sigma_Y}\Big)
+&&\text{linearity, $\tfrac{1}{\sigma_X\sigma_Y}$ is a constant}\\
+&=\mathbb{E}(Z_XZ_Y)
+&&\text{definition of $Z_X$ and $Z_Y$}\\
+&=\mathbb{E}\big((Z_X-0)(Z_Y-0)\big)\\
+&=\mathbb{E}\big((Z_X-\mathbb{E}(Z_X))(Z_Y-\mathbb{E}(Z_Y))\big)
+&&\mathbb{E}(Z_X)=\mathbb{E}(Z_Y)=0\\
+&=\mathrm{Cov}(Z_X,Z_Y)
+&&\text{definition of covariance.}
+\end{align*}
+
+\textbf{(2)}
+\begin{align*}
+\mathrm{Cov}(X,Y)
+&=\mathbb{E}\big((X-\mu_X)(Y-\mu_Y)\big)
+&&\text{definition of covariance}\\
+&=\mathbb{E}\big(XY-\mu_YX-\mu_XY+\mu_X\mu_Y\big)
+&&\text{expanding the product}\\
+&=\mathbb{E}(XY)-\mu_Y\,\mathbb{E}(X)-\mu_X\,\mathbb{E}(Y)+\mu_X\mu_Y
+&&\text{linearity, the means are constants}\\
+&=\mathbb{E}(XY)-\mu_Y\mu_X-\mu_X\mu_Y+\mu_X\mu_Y
+&&\mathbb{E}(X)=\mu_X,\ \mathbb{E}(Y)=\mu_Y\\
+&=\mathbb{E}(XY)-\mu_X\mu_Y\\
+&=\mathbb{E}(XY)-\mathbb{E}(X)\,\mathbb{E}(Y).
+\end{align*}
+
+\textbf{(3)} Let $X$ and $Y$ be independent. Then
+\begin{align*}
+\mathrm{Cov}(X,Y)
+&=\mathbb{E}(XY)-\mathbb{E}(X)\,\mathbb{E}(Y)
+&&\text{property (2)}\\
+&=\mathbb{E}(X)\,\mathbb{E}(Y)-\mathbb{E}(X)\,\mathbb{E}(Y)
+&&\text{\hyperref[prop:product]{expected value of a product}}\\
+&=0,
+\end{align*}
+and
+\begin{align*}
+\rho_{X,Y}
+&=\frac{\mathrm{Cov}(X,Y)}{\sigma_X\,\sigma_Y}
+&&\text{definition of correlation}\\
+&=\frac{0}{\sigma_X\,\sigma_Y}=0 .
+\end{align*}
+The converse fails, as we have already shown with the
+\hyperref[note:cov-converse]{counterexample $Y=X^2$}.
+
+\textbf{(4)} We work with the standardized variables, which have
+variance $1$. On the one hand,
+\begin{align*}
+\mathrm{Var}(Z_X+Z_Y)
+&=\mathrm{Var}(Z_X)+\mathrm{Var}(Z_Y)+2\,\mathrm{Cov}(Z_X,Z_Y)
+&&\text{(6) with $\alpha_1=\alpha_2=1$}\\
+&=1+1+2\,\rho_{X,Y}
+&&\text{variances $1$, property (1)}\\
+&=2+2\,\rho_{X,Y}.
+\end{align*}
+On the other hand, a variance is never negative, so
+\[
+0\le2+2\,\rho_{X,Y}
+\quad\Longrightarrow\quad
+\rho_{X,Y}\ge-1 .
+\]
+In the same way, with $\alpha_1=1$ and $\alpha_2=-1$,
+\begin{align*}
+\mathrm{Var}(Z_X-Z_Y)
+&=\mathrm{Var}(Z_X)+\mathrm{Var}(Z_Y)-2\,\mathrm{Cov}(Z_X,Z_Y)
+&&\text{(6) with $\alpha_1=1$, $\alpha_2=-1$}\\
+&=1+1-2\,\rho_{X,Y}
+&&\text{variances $1$, property (1)}\\
+&=2-2\,\rho_{X,Y},
+\end{align*}
+and
+\[
+0\le2-2\,\rho_{X,Y}
+\quad\Longrightarrow\quad
+\rho_{X,Y}\le1 .
+\]
+Together, $-1\le\rho_{X,Y}\le1$.
+
+\textbf{(5)} Let $Y=\alpha+\beta X$ with $\beta\ne0$. First we need $Y-\mu_Y$
+and $\sigma_Y$.
+\begin{align*}
+Y-\mu_Y
+&=\alpha+\beta X-\mathbb{E}(\alpha+\beta X)
+&&\text{$Y=\alpha+\beta X$}\\
+&=\alpha+\beta X-(\alpha+\beta\,\mu_X)
+&&\text{\hyperref[prop:linear]{linear functions}}\\
+&=\beta\,(X-\mu_X).
+\end{align*}
+For $\sigma_Y$, the variance of $\alpha+\beta X$ is $\beta^2\,\mathrm{Var}(X)$, by the
+\hyperref[var-affine]{shift and rescaling}, so
+\[
+\sigma_Y=\sqrt{\mathrm{Var}(\alpha+\beta X)}=\sqrt{\beta^2\,\sigma_X^2}=|\beta|\,\sigma_X .
+\]
+Then
+\begin{align*}
+\rho_{X,Y}
+&=\frac{\mathbb{E}\big((X-\mu_X)(Y-\mu_Y)\big)}{\sigma_X\,\sigma_Y}
+&&\text{definitions of correlation and covariance}\\
+&=\frac{\mathbb{E}\big((X-\mu_X)\,\beta\,(X-\mu_X)\big)}{\sigma_X\,|\beta|\,\sigma_X}
+&&\text{$Y-\mu_Y=\beta\,(X-\mu_X)$, $\sigma_Y=|\beta|\,\sigma_X$}\\
+&=\frac{\beta\,\mathbb{E}\big((X-\mu_X)^2\big)}{|\beta|\,\sigma_X^2}
+&&\text{linearity, $\beta$ is a constant}\\
+&=\frac{\beta\,\sigma_X^2}{|\beta|\,\sigma_X^2}
+&&\text{definition of variance}\\
+&=\frac{\beta}{|\beta|}
+=\begin{cases}+1&\text{if }\beta>0,\\-1&\text{if }\beta<0.\end{cases}
+\end{align*}
+
+For the converse, we go back to the two variances of the proof of (4). Let
+$\rho_{X,Y}=-1$. Then
+\begin{align*}
+\mathrm{Var}(Z_X+Z_Y)
+&=2+2\,\rho_{X,Y}
+&&\text{proof of (4)}\\
+&=2-2=0 .
+\end{align*}
+A variable with variance $0$ is almost surely equal to its mean, by the
+\hyperref[prop:var-zero]{degeneracy} of the variance. The mean of
+$Z_X+Z_Y$ is $\mathbb{E}(Z_X)+\mathbb{E}(Z_Y)=0+0=0$, so almost surely
+\begin{align*}
+0&=Z_X+Z_Y\\
+&=\frac{X-\mu_X}{\sigma_X}+\frac{Y-\mu_Y}{\sigma_Y}
+&&\text{definition of $Z_X$, $Z_Y$}\\
+\Longleftrightarrow\quad
+Y&=\mu_Y-\frac{\sigma_Y}{\sigma_X}\,(X-\mu_X)
+&&\text{solving for $Y$}\\
+&=\underbrace{\Big(\mu_Y+\frac{\sigma_Y}{\sigma_X}\,\mu_X\Big)}_{\alpha}
++\underbrace{\Big(-\frac{\sigma_Y}{\sigma_X}\Big)}_{\beta<0}X .
+\end{align*}
+In the same way, let $\rho_{X,Y}=+1$. Then
+\begin{align*}
+\mathrm{Var}(Z_X-Z_Y)
+&=2-2\,\rho_{X,Y}
+&&\text{proof of (4)}\\
+&=2-2=0 .
+\end{align*}
+The mean of $Z_X-Z_Y$ is $\mathbb{E}(Z_X)-\mathbb{E}(Z_Y)=0-0=0$, so
+almost surely
+\begin{align*}
+0&=Z_X-Z_Y\\
+&=\frac{X-\mu_X}{\sigma_X}-\frac{Y-\mu_Y}{\sigma_Y}
+&&\text{definition of $Z_X$, $Z_Y$}\\
+\Longleftrightarrow\quad
+Y&=\mu_Y+\frac{\sigma_Y}{\sigma_X}\,(X-\mu_X)
+&&\text{solving for $Y$}\\
+&=\underbrace{\Big(\mu_Y-\frac{\sigma_Y}{\sigma_X}\,\mu_X\Big)}_{\alpha}
++\underbrace{\frac{\sigma_Y}{\sigma_X}}_{\beta>0}X .
+\end{align*}
+
+\textbf{(6)} is the \hyperref[prop:var-linear]{variance of a linear
+combination}. With $p=2$, $\alpha_1=1$ and $\alpha_2=-1$ it gives the
+example.
+\end{proof}
+
+Property~1 says that the correlation is the covariance of $X$ and $Y$ once
+both are brought to mean $0$ and variance $1$. It still depends on the
+marginal distributions of $X$ and $Y$, not only on how they are linked.
+The rank correlations we meet later look only at the link.
 
 \end{document}

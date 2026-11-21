@@ -579,3 +579,26 @@ segments(2, 0, 2, 1, col = orange, lwd = 6, lend = 1)
 text(2, 1, "P(X = 2) = 1", pos = 4, offset = .7, cex = .8, col = orange)
 text(2, .86, "E(X) = 2", pos = 4, offset = .7, cex = .8, col = ink)
 dev.off()
+
+# The sign of the covariance: the dashed lines mark the means, and each
+# point is coloured by the sign of the product of its two gaps.
+cov_panel <- function(x, y, main, xlab, ylab) {
+  plot(x, y, type = "n", xlab = xlab, ylab = ylab, xaxt = "n", yaxt = "n",
+       main = main, cex.main = 1, font.main = 1)
+  grid(col = grid_col)
+  abline(v = mean(x), h = mean(y), col = ink, lty = 2)
+  same <- (x - mean(x)) * (y - mean(y)) > 0
+  points(x, y, pch = 19, cex = .8, col = ifelse(same, blue, orange))
+}
+set.seed(12)
+pdf("assets/cov-sign.pdf", width = 8, height = 2.6,
+    family = "Helvetica", useDingbats = FALSE)
+par(mfrow = c(1, 3), mar = c(1.8, 1.8, 1.4, .6), mgp = c(.5, 0, 0), cex = .8)
+hours <- runif(60, 0, 10)
+cov_panel(hours, 18 + 1.2 * hours + rnorm(60, 0, 1.6), "(1)",
+          "hours of study", "grade")
+speed <- runif(60, 50, 130)
+cov_panel(speed, 300 / speed + rnorm(60, 0, .25), "(2)",
+          "speed", "travel time")
+cov_panel(rnorm(60), rnorm(60), "(3)", "X", "Y")
+dev.off()
