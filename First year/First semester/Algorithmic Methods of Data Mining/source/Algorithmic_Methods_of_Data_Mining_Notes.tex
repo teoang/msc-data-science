@@ -9215,7 +9215,8 @@ The \emph{spectral norm} of a matrix $A\in\R^{m\times d}$ is
 \]
 \end{frameddefn}
 
-It measures how much $A$ can stretch a unit vector. For the six
+It measures how much $A$ can stretch a unit vector.
+\phantomsection\label{par:best-direction-six}For the six
 points, the diagonal $\vec v$ was a good guess but not the best one:
 the maximum is reached at $\vec v\approx(0.81,0.59)^{\mathsf T}$, a
 little below the diagonal, where the variance is
@@ -9248,12 +9249,385 @@ eigenvalue--eigenvector pairs, while
 $M(1,0)^{\mathsf T}=(2,1)^{\mathsf T}$ is not on the line of
 $(1,0)^{\mathsf T}$.
 
-\endgroup
-
 \lecturestart{16 November}
 
+\section{Singular values and singular vectors}
+\label{sec:singular-vectors}
+
+At the end of \hyperref[sec:largest-variance]{Section 14.7} we met
+\hyperref[def:eigenvector]{eigenvectors}: for a square matrix
+$M\in\R^{d\times d}$, an eigenvector $\vec v$ satisfies
+$M\vec v=\lambda\vec v$, so $M$ only stretches it. Let us take the
+matrix of that example again, $M=\begin{pmatrix}2&1\\1&2\end{pmatrix}$:
+it sends $\vec x=(1,0)^{\mathsf T}$ to $M\vec x=(2,1)^{\mathsf T}$, off
+the line of $\vec x$, while it sends the eigenvector
+$\vec v=(1,1)^{\mathsf T}$ to $M\vec v=3\vec v$, on the same line:
+\begin{center}
+\begin{tikzpicture}[x=0.9cm,y=0.9cm,>=Stealth]
+  \draw[->,gray] (-0.6,0)--(3.6,0);
+  \draw[->,gray] (0,-0.6)--(0,3.6);
+  \draw[PlotGreen!65,densely dashed] (-0.5,-0.5)--(3.4,3.4);
+  \draw[->,PlotGreen!70!black,very thick] (0,0)--(3,3)
+    node[above left] {$M\vec v=3\vec v$};
+  \draw[->,PlotGreen,very thick] (0,0)--(1,1)
+    node[above left=-1pt] {$\vec v$};
+  \draw[->,black,thick] (0,0)--(1,0) node[below] {$\vec x$};
+  \draw[->,PlotRed,thick] (0,0)--(2,1) node[right] {$M\vec x$};
+\end{tikzpicture}
+\end{center}
+
+Our data matrix $A\in\R^{m\times d}$, however, is not necessarily square. For
+$\vec x\in\R^d$ the product $A\vec x$ lies in $\R^m$: the input and
+the output live in different spaces, so $A\vec v=\lambda\vec v$ makes
+no sense when $m\neq d$. What replaces eigenvectors for a rectangular
+matrix? We need two vectors instead of one: $\vec v\in\R^d$, where $A$
+takes its input, and $\vec u\in\R^m$, where it gives its output.
+
+\begin{frameddefn}{Singular value and singular vectors}
+\label{def:singular-triple}
+Let $A\in\R^{m\times d}$. A triple $(\sigma,\vec u,\vec v)$ with
+$\sigma\in\R$, $\vec u\in\R^m$ and $\vec v\in\R^d$ is a
+(\emph{singular value}, \emph{left singular vector},
+\emph{right singular vector}) triple of $A$ if
+\[
+  A\vec v=\sigma\vec u
+  \qquad\text{and}\qquad
+  A^{\mathsf T}\vec u=\sigma\vec v .
+\]
+\end{frameddefn}
+
+Both equalities compare vectors of the same space: in
+$A\vec v=\sigma\vec u$ both sides are in $\R^m$, and in
+$A^{\mathsf T}\vec u=\sigma\vec v$ both sides are in $\R^d$.
+Transposing the second one gives
+$\vec u^{\mathsf T}A=\sigma\vec v^{\mathsf T}$: the vector $\vec u$
+multiplies $A$ from the left and $\vec v$ from the right, hence the
+names.
+
+Is there a relation with eigenvectors? $A$ need not be square, but
+$A^{\mathsf T}A\in\R^{d\times d}$ always is.
+
+\begin{framedprop}{Right singular vectors are eigenvectors of $A^{\mathsf T}A$}
+\label{prop:singular-eigen}
+If $\vec v$ is a right singular vector of $A$ with singular value
+$\sigma$, then $\vec v$ is an eigenvector of $A^{\mathsf T}A$ with
+eigenvalue $\lambda=\sigma^2$.
+\end{framedprop}
+
+\begin{proof}
+\[
+\begin{aligned}
+  A^{\mathsf T}A\vec v
+    &=A^{\mathsf T}(A\vec v)
+      &&\quad\text{by associativity},\\
+    &=A^{\mathsf T}(\sigma\vec u)
+      &&\quad\text{since } A\vec v=\sigma\vec u,\\
+    &=\sigma\,A^{\mathsf T}\vec u
+      &&\quad\text{a scalar comes out of the product},\\
+    &=\sigma(\sigma\vec v)
+      &&\quad\text{since } A^{\mathsf T}\vec u=\sigma\vec v,\\
+    &=\sigma^2\vec v . &&\qedhere
+\end{aligned}
+\]
+\end{proof}
+
+\section{Singular value decomposition}
+\label{sec:svd}
+
+A matrix can have several singular triples. The central result says
+that $r$ of them, with orthonormal singular vectors, are enough to
+rebuild the whole matrix, where $r$ is its
+\hyperref[def:matrix-rank]{rank}.
+
+\begin{framedthm}{Singular value decomposition (SVD)}
+\label{thm:svd}
+Let $A\in\R^{m\times d}$ have rank $r$. Then there exist $r$ triples
+$(\sigma_i,\vec u_i,\vec v_i)$, $i=1,\ldots,r$, such that
+\[
+  \vec v_i^{\mathsf T}\vec v_j=
+  \begin{cases}1,&i=j,\\0,&i\neq j,\end{cases}
+  \qquad
+  \vec u_i^{\mathsf T}\vec u_j=
+  \begin{cases}1,&i=j,\\0,&i\neq j,\end{cases}
+  \qquad\text{and}\qquad
+  A=\sum_{i=1}^{r}\sigma_i\,\vec u_i\vec v_i^{\mathsf T}.
+\]
+\end{framedthm}
+
+\begin{proof}
 \begin{todobox}
-Write the 16 November lecture.
+Write the proof of the SVD.
 \end{todobox}
+\end{proof}
+
+Let us see some remarks.
+\begin{enumerate}
+\item \textbf{We always have nonnegative, sorted singular values.} Why can we
+take every $\sigma_i\geq0$? Suppose $\sigma_i<0$,
+and replace $\vec v_i$ with $-\vec v_i$. Then
+\[
+  A(-\vec v_i)=-\sigma_i\vec u_i,
+  \qquad
+  A^{\mathsf T}\vec u_i=\sigma_i\vec v_i=(-\sigma_i)(-\vec v_i),
+  \qquad
+  \sigma_i\,\vec u_i\vec v_i^{\mathsf T}
+    =(-\sigma_i)\,\vec u_i(-\vec v_i)^{\mathsf T},
+\]
+so $(-\sigma_i,\vec u_i,-\vec v_i)$ is again a triple, with the
+positive value $-\sigma_i$, and the sum does not change. By
+convention we also sort the triples so that
+\[
+  \sigma_1\geq\sigma_2\geq\cdots\geq\sigma_r>0 .
+\]
+
+\item \textbf{We always have exactly $r$ pieces.} Why does the theorem use exactly $r$ triples, as many as the rank of
+$A$? We now check that $r$ is the smallest possible number of pieces:
+with fewer, the sum could never give $A$. Each term
+$\sigma_i\vec u_i\vec v_i^{\mathsf T}$ is an
+\hyperref[sec:matrix-outer-products]{outer product}, an $m\times d$
+matrix of rank $1$:
+\[
+  A=\sigma_1
+    \underbrace{\begin{pmatrix}\vert\\\vec u_1\\\vert\end{pmatrix}}_{m\times1}
+    \underbrace{\begin{pmatrix}\text{---}\ \vec v_1^{\mathsf T}\ \text{---}\end{pmatrix}}_{1\times d}
+   +\sigma_2
+    \begin{pmatrix}\vert\\\vec u_2\\\vert\end{pmatrix}
+    \begin{pmatrix}\text{---}\ \vec v_2^{\mathsf T}\ \text{---}\end{pmatrix}
+   +\cdots+\sigma_r
+    \begin{pmatrix}\vert\\\vec u_r\\\vert\end{pmatrix}
+    \begin{pmatrix}\text{---}\ \vec v_r^{\mathsf T}\ \text{---}\end{pmatrix}.
+\]
+Adding two matrices of ranks $a$ and $b$ gives a matrix of rank at
+most $a+b$, so a sum of $k$ matrices of rank $1$ has rank at most $k$.
+With $k<r$ pieces the sum has rank less than $r$, so it cannot be $A$.
+The SVD uses exactly $r$ pieces, the fewest possible.
+
+\item \textbf{We can always write $A$ as one product of three matrices.} The same sum can be written as a single product of three matrices:
+\[
+\begin{aligned}
+  A&=\sum_{i=1}^{r}\sigma_i\,\vec u_i\vec v_i^{\mathsf T}\\
+   &=\sum_{i=1}^{r}\vec u_i\,\bigl(\sigma_i\vec v_i^{\mathsf T}\bigr)
+     &&\quad\text{moving the scalar},\\
+   &=\begin{pmatrix}\vert&&\vert\\\vec u_1&\cdots&\vec u_r\\\vert&&\vert\end{pmatrix}
+     \begin{pmatrix}\text{---}\ \sigma_1\vec v_1^{\mathsf T}\ \text{---}\\
+       \vdots\\
+       \text{---}\ \sigma_r\vec v_r^{\mathsf T}\ \text{---}\end{pmatrix}
+     &&\quad\text{as a \hyperref[sec:matrix-outer-products]{sum of outer products}},\\
+   &=\underbrace{\begin{pmatrix}\vert&&\vert\\\vec u_1&\cdots&\vec u_r\\\vert&&\vert\end{pmatrix}}_{U_r,\ m\times r}
+     \underbrace{\begin{pmatrix}\sigma_1&&0\\&\ddots&\\0&&\sigma_r\end{pmatrix}}_{\Sigma_r,\ r\times r}
+     \underbrace{\begin{pmatrix}\text{---}\ \vec v_1^{\mathsf T}\ \text{---}\\
+       \vdots\\
+       \text{---}\ \vec v_r^{\mathsf T}\ \text{---}\end{pmatrix}}_{V_r^{\mathsf T},\ r\times d}
+     &&\quad\Sigma_r \text{ scales row } i \text{ by } \sigma_i.
+\end{aligned}
+\]
+So
+\[
+  A=\sum_{i=1}^{r}\sigma_i\,\vec u_i\vec v_i^{\mathsf T}
+   =U_r\Sigma_rV_r^{\mathsf T},
+\]
+where $U_r$ has the left singular vectors as columns, $\Sigma_r$ is
+diagonal with the singular values, and $V_r$ has the right singular
+vectors as columns, like the matrix $V_k$ of
+\hyperref[sec:projection-subspace]{Section 14.4}.
+\end{enumerate}
+
+\section{The first right singular vector maximises the variance}
+\label{sec:first-singular-vector}
+
+Let us go back to the question of
+\hyperref[sec:largest-variance]{Section 14.7}. For centred data the
+variance along a unit vector $\vec v$ is
+$\frac1m\norm{A\vec v}_2^2$, so the direction of largest variance is
+the unit vector that makes $\norm{A\vec v}_2$ as large as possible,
+and the maximum is the \hyperref[def:spectral-norm]{spectral norm}
+$\norm{A}_2$. For the six centred points \hyperref[par:best-direction-six]{we claimed} that the best
+direction is $\vec v\approx(0.81,0.59)^{\mathsf T}$, but we had no way
+to find it other than trying. Does the SVD tell us where it is?
+
+\begin{framedthm}{The first right singular vector}
+\label{thm:first-singular-vector}
+Let $A=\sum_{i=1}^{r}\sigma_i\,\vec u_i\vec v_i^{\mathsf T}$ be an
+\hyperref[thm:svd]{SVD} of $A$, with
+$\sigma_1\geq\cdots\geq\sigma_r>0$. Then $\vec v_1$ maximises
+$\norm{A\vec v}_2$ over the unit vectors $\vec v\in\R^d$, and
+$\norm{A\vec v_1}_2=\sigma_1$. So $\norm{A}_2=\sigma_1$.
+\end{framedthm}
+
+\begin{proof}
+First we compute $\norm{A\vec v_1}_2$. It is easier to work with its
+square:
+\[
+\begin{aligned}
+  \norm{A\vec v_1}_2^2
+    &=(A\vec v_1)^{\mathsf T}(A\vec v_1)
+      &&\quad\text{squared length as a dot product},\\
+    &=\vec v_1^{\mathsf T}A^{\mathsf T}A\vec v_1
+      &&\quad\text{since } (A\vec v_1)^{\mathsf T}=\vec v_1^{\mathsf T}A^{\mathsf T},\\
+    &=\vec v_1^{\mathsf T}\bigl(\sigma_1^2\vec v_1\bigr)
+      &&\quad\text{since \hyperref[prop:singular-eigen]{$A^{\mathsf T}A\vec v_1=\sigma_1^2\vec v_1$}},\\
+    &=\sigma_1^2\,\vec v_1^{\mathsf T}\vec v_1
+      &&\quad\text{a scalar comes out of the product},\\
+    &=\sigma_1^2
+      &&\quad\text{since } \vec v_1 \text{ is a unit vector}.
+\end{aligned}
+\]
+So $\norm{A\vec v_1}_2=\sigma_1$. This is not enough yet: we must
+also show that no unit vector does better, that is,
+$\norm{A\vec v}_2\leq\sigma_1$ for every $\vec v$ with
+$\norm{\vec v}_2=1$.
+
+The vectors $\vec v_1,\ldots,\vec v_r$ are
+\hyperref[def:orthonormal]{orthonormal}. If $r<d$, we add vectors
+$\vec v_{r+1},\ldots,\vec v_d$ to get an orthonormal basis
+$\vec v_1,\ldots,\vec v_d$ of $\R^d$. Then any $\vec v$ can be written
+as $\vec v=\sum_{i=1}^{d}c_i\vec v_i$ for some numbers
+$c_1,\ldots,c_d$. What does $\norm{\vec v}_2=1$ say about them?
+\[
+\begin{aligned}
+  1=\vec v^{\mathsf T}\vec v
+    &=\Bigl(\sum_{i=1}^{d}c_i\vec v_i\Bigr)^{\mathsf T}
+      \Bigl(\sum_{j=1}^{d}c_j\vec v_j\Bigr)
+      &&\quad\text{writing } \vec v \text{ in the basis},\\
+    &=\sum_{i=1}^{d}\sum_{j=1}^{d}c_ic_j\,\vec v_i^{\mathsf T}\vec v_j
+      &&\quad\text{by distributivity},\\
+    &=\sum_{i=1}^{d}c_i^2
+      &&\quad\text{since } \vec v_i^{\mathsf T}\vec v_j=0 \text{ for } i\neq j
+        \text{ and } 1 \text{ for } i=j.
+\end{aligned}
+\]
+Now we compute $A\vec v$:
+\[
+\begin{aligned}
+  A\vec v
+    &=\Bigl(\sum_{k=1}^{r}\sigma_k\,\vec u_k\vec v_k^{\mathsf T}\Bigr)
+      \Bigl(\sum_{l=1}^{d}c_l\vec v_l\Bigr)
+      &&\quad\text{by the SVD},\\
+    &=\sum_{k=1}^{r}\sum_{l=1}^{d}\sigma_kc_l\,\vec u_k\bigl(\vec v_k^{\mathsf T}\vec v_l\bigr)
+      &&\quad\text{by distributivity and associativity},\\
+    &=\sum_{k=1}^{r}\sigma_kc_k\,\vec u_k
+      &&\quad\text{only the terms } l=k \text{ survive}.
+\end{aligned}
+\]
+The vectors $\vec u_1,\ldots,\vec u_r$ are orthonormal too, so the
+same computation as for $\vec v^{\mathsf T}\vec v$ gives its squared
+length:
+\[
+\begin{aligned}
+  \norm{A\vec v}_2^2
+    &=\Bigl(\sum_{k=1}^{r}\sigma_kc_k\,\vec u_k\Bigr)^{\mathsf T}
+      \Bigl(\sum_{l=1}^{r}\sigma_lc_l\,\vec u_l\Bigr)
+      &&\quad\text{squared length as a dot product},\\
+    &=\sum_{k=1}^{r}\sigma_k^2c_k^2
+      &&\quad\text{since } \vec u_k^{\mathsf T}\vec u_l=0 \text{ for } k\neq l
+        \text{ and } 1 \text{ for } k=l,\\
+    &\leq\sigma_1^2\sum_{k=1}^{r}c_k^2
+      &&\quad\text{since } \sigma_k\leq\sigma_1,\\
+    &\leq\sigma_1^2\sum_{k=1}^{d}c_k^2
+      &&\quad\text{adding the terms } c_{r+1}^2,\ldots,c_d^2\geq0,\\
+    &=\sigma_1^2
+      &&\quad\text{since } \sum_{k=1}^{d}c_k^2=1 .
+\end{aligned}
+\]
+So $\norm{A\vec v}_2\leq\sigma_1=\norm{A\vec v_1}_2$ for every unit
+vector $\vec v$.
+\end{proof}
+
+The direction of largest variance is therefore the first right
+singular vector $\vec v_1$, and the variance along it is
+$\sigma_1^2/m$. For the six points the SVD gives
+$\vec v_1\approx(0.81,0.59)^{\mathsf T}$ and $\sigma_1\approx4.21$, so
+the variance along $\vec v_1$ is $4.21^2/6\approx2.95$: the direction
+and the value of \hyperref[sec:largest-variance]{Section 14.7}.
+
+\section{The best rank-\texorpdfstring{$k$}{k} approximation}
+\label{sec:best-rank-k}
+
+When we \hyperref[def:projection-subspace]{project} the six points
+onto the line of $\vec v_1$, each row splits into its projection
+$A_{(i)}\vec v_1\vec v_1^{\mathsf T}$, on the line of $\vec v_1$, and
+its residual $A_{(i)}(I-\vec v_1\vec v_1^{\mathsf T})$, on the
+perpendicular line:
+\begin{center}
+\begin{tikzpicture}[x=1.2cm,y=1.2cm,>=Stealth]
+  \draw[->,gray] (-3,0)--(3,0);
+  \draw[->,gray] (0,-2.6)--(0,2.6);
+  \draw[PlotGreen!65,densely dashed] (-2.9*0.806,-2.9*0.592)--(2.9*0.806,2.9*0.592)
+    node[right,font=\small,PlotGreen!70!black]
+      {$A_{(i)}\vec v_1\vec v_1^{\mathsf T}$};
+  \draw[PlotRed!65,densely dashed] (1.6*0.592,-1.6*0.806)--(-2.4*0.592,2.4*0.806)
+    node[above,font=\small,PlotRed]
+      {$A_{(i)}(I-\vec v_1\vec v_1^{\mathsf T})$};
+  \draw[->,PlotGreen,very thick] (0,0)--(0.806,0.592)
+    node[above left=-1pt] {$\vec v_1$};
+  \foreach \a/\b in {-2.2/-1.6,-1.2/-1.1,-0.3/0.2,0.6/0.3,1.3/1.4,1.8/0.8}{
+    \pgfmathsetmacro{\p}{\a*0.806+\b*0.592}
+    \pgfmathsetmacro{\q}{-\a*0.592+\b*0.806}
+    \draw[gray,densely dotted] (\a,\b)--(\p*0.806,\p*0.592);
+    \draw[gray,densely dotted] (\a,\b)--(-\q*0.592,\q*0.806);
+    \fill[PlotGreen] (\p*0.806,\p*0.592) circle (1.8pt);
+    \fill[PlotRed] (-\q*0.592,\q*0.806) circle (1.8pt);
+    \fill (\a,\b) circle (1.8pt);}
+\end{tikzpicture}
+\end{center}
+The green points form the matrix $A\vec v_1\vec v_1^{\mathsf T}$, which
+has rank $1$, and they stay close to the black ones: the residuals are
+short. Replacing the data with the green points is like replacing $A$
+with a simpler matrix of rank $1$ that is close to it. Can we do the
+same with any $k$? Among all the matrices of rank at most $k$, which
+one is closest to $A$?
+
+We measure the distance between $A$ and another matrix
+$X\in\R^{m\times d}$ with the
+\hyperref[def:frobenius-norm]{Frobenius norm} of their difference:
+$\norm{A-X}_F^2$ adds up the squared differences of all the entries,
+that is, the squared distances between each point $A_{(i)}$ and its
+replacement $X_{(i)}$. The question is then
+\[
+  \min_{\substack{X\in\R^{m\times d}\\ \operatorname{rank}(X)\leq k}}
+  \norm{A-X}_F ,
+  \qquad k\leq d .
+\]
+
+\begin{framedthm}{Best rank-$k$ approximation}
+\label{thm:best-rank-k}
+Let $A=\sum_{i=1}^{r}\sigma_i\,\vec u_i\vec v_i^{\mathsf T}$ be an
+\hyperref[thm:svd]{SVD} of $A$, with
+$\sigma_1\geq\cdots\geq\sigma_r>0$, and let $k\leq r$. The matrix
+\[
+  A_k=\sum_{i=1}^{k}\sigma_i\,\vec u_i\vec v_i^{\mathsf T}
+\]
+attains the minimum of $\norm{A-X}_F$ over all the matrices
+$X\in\R^{m\times d}$ of rank at most $k$.
+\end{framedthm}
+
+\begin{todobox}Prove the best rank-$k$ approximation theorem.\end{todobox}
+
+We state this result without proof. In words, the SVD writes $A$ as
+a sum of rank-$1$ pieces sorted by size, and the best approximation
+of rank $k$ keeps the first $k$ of them, the ones with the largest
+singular values, and drops the rest:
+\[
+  A=\underbrace{\sigma_1\,\vec u_1\vec v_1^{\mathsf T}
+    +\cdots+\sigma_k\,\vec u_k\vec v_k^{\mathsf T}}_{A_k}
+    +\sigma_{k+1}\,\vec u_{k+1}\vec v_{k+1}^{\mathsf T}
+    +\cdots+\sigma_r\,\vec u_r\vec v_r^{\mathsf T}.
+\]
+As for $A$, the sum can be written as a product,
+$A_k=U_k\Sigma_kV_k^{\mathsf T}$, where $U_k$ and $V_k$ keep the
+first $k$ columns of $U_r$ and $V_r$ and $\Sigma_k$ keeps the first
+$k$ singular values. If $k\geq r$, there is nothing to drop: $A$
+itself has rank at most $k$, and $X=A$ gives distance $0$.
+
+For the six points and $k=1$, $A_1=\sigma_1\vec u_1\vec v_1^{\mathsf T}$.
+Since $A\vec v_1=\sigma_1\vec u_1$, this is
+$A_1=A\vec v_1\vec v_1^{\mathsf T}$: the rows of $A_1$ are exactly the
+green points of the figure, and
+$\norm{A-A_1}_F^2\approx0.46$ is the sum of the squared lengths of
+the residuals. Projecting onto the diagonal $\vec v$ instead left
+$0.86$, the $6\,\mathrm{Var}_{\vec w}(A)$ of
+\hyperref[sec:total-variance]{Section 14.6}.
+
+\endgroup
 
 \end{document}

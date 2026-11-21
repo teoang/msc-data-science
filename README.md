@@ -327,6 +327,13 @@
 - [x] Total variance over an orthonormal basis, its independence of the basis, and the Frobenius norm.
 - [x] The direction of largest variance and the spectral norm; eigenvalue–eigenvector pairs.
 
+**16 November**
+
+- [x] Singular values and left and right singular vectors; right singular vectors as eigenvectors of AᵀA.
+- [x] The singular value decomposition: nonnegative sorted singular values, a sum of rank-1 outer products, and the product U_r Σ_r V_rᵀ.
+- [x] The first right singular vector as the direction of largest variance: ‖A‖₂ = σ₁.
+- [x] The best rank-k approximation in Frobenius norm: A_k keeps the first k terms of the SVD.
+
 </details>
 
 ## About
