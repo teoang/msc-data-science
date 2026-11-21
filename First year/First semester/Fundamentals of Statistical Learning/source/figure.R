@@ -602,3 +602,18 @@ cov_panel(speed, 300 / speed + rnorm(60, 0, .25), "(2)",
           "speed", "travel time")
 cov_panel(rnorm(60), rnorm(60), "(3)", "X", "Y")
 dev.off()
+
+# Correlation is not transitive: hours worked, income and holidays
+set.seed(32)
+n_people <- 60
+hours <- round(runif(n_people, 20, 55))
+wealth <- rgamma(n_people, shape = 2, scale = 15)
+income <- 1.5 * hours + wealth + rnorm(n_people, 0, 2)
+holidays <- 7 + 0.1 * wealth - 0.1 * hours + rnorm(n_people, 0, .3)
+pdf("assets/corr-transitivity.pdf", width = 8, height = 2.6,
+    family = "Helvetica", useDingbats = FALSE)
+par(mfrow = c(1, 3), mar = c(1.8, 1.8, 1.4, .6), mgp = c(.5, 0, 0), cex = .8)
+cov_panel(hours, income, "(1)", "hours worked", "income")
+cov_panel(income, holidays, "(2)", "income", "weeks of holiday")
+cov_panel(hours, holidays, "(3)", "hours worked", "weeks of holiday")
+dev.off()

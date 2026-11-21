@@ -3481,4 +3481,99 @@ both are brought to mean $0$ and variance $1$. It still depends on the
 marginal distributions of $X$ and $Y$, not only on how they are linked.
 The rank correlations we meet later look only at the link.
 
+\section{Transitivity of the correlation}\label{sec:corr-transitivity}
+
+Suppose that $X$ and $Y$ are positively correlated, and that $Y$ and $Z$
+are positively correlated too. When $X$ is large, $Y$ tends to be large,
+and when $Y$ is large, $Z$ tends to be large. It seems natural to
+conclude that when $X$ is large, $Z$ tends to be large, so that $X$ and
+$Z$ are positively correlated as well. Is this true?
+
+Surprisingly, in general the answer is no. Let us see why with an example
+from everyday life.
+
+\begin{framedexample}{Hours worked, income and holidays}\label{ex:work-holidays}
+For $60$ people we record the hours worked per week $X$, the yearly income
+$Y$ and the weeks of holiday per year $Z$. Income has two ingredients: the
+pay for the hours worked and the money that comes from family wealth. As in
+Example~\ref{ex:cov-sign}, the dashed lines mark the means, and a point is
+blue when its two gaps have the same sign and orange otherwise.
+\begin{center}
+\includegraphics[width=\linewidth]{assets/corr-transitivity.pdf}
+\end{center}
+\begin{enumerate}
+\item Hours worked $X$ and income $Y$: who works more earns more, so most
+points are blue and $\rho_{X,Y}>0$.
+\item Income $Y$ and holidays $Z$: who has more money takes more holidays,
+so again most points are blue and $\rho_{Y,Z}>0$.
+\item Hours worked $X$ and holidays $Z$: who works more has less free
+time, so most points are orange and $\rho_{X,Z}<0$.
+\end{enumerate}
+\end{framedexample}
+
+\begin{framedexample}{Correlation is not transitive}\label{ex:corr-not-transitive}
+Let $U$, $V$ and $W$ be independent random variables with positive
+variances $\sigma_U^2$, $\sigma_V^2$ and $\sigma_W^2$, and let
+\[
+X=U+V,\qquad Y=W+V,\qquad Z=W-U .
+\]
+So $X$ and $Y$ share $V$, $Y$ and $Z$ share $W$, and $U$ enters $X$ with
+a plus sign and $Z$ with a minus sign. We show that
+\[
+\rho_{X,Y}>0,\qquad \rho_{Y,Z}>0,\qquad \rho_{X,Z}<0 .
+\]
+Write $u=U-\mu_U$, $v=V-\mu_V$ and $w=W-\mu_W$ for the gaps of $U$, $V$
+and $W$ from their means. They have mean $0$, and for two different ones,
+for example $u$ and $w$, independence gives
+$\mathbb{E}(u\,w)=\mathbb{E}(u)\,\mathbb{E}(w)=0$, by the
+\hyperref[prop:product]{expected value of a product}. By the
+\hyperref[prop:linear]{linear functions}, the gaps of $X$, $Y$ and $Z$
+are
+\[
+X-\mu_X=u+v,\qquad Y-\mu_Y=w+v,\qquad Z-\mu_Z=w-u .
+\]
+Then
+\begin{align*}
+\mathrm{Cov}(X,Y)
+&=\mathbb{E}\big((u+v)(w+v)\big)
+&&\text{definition of covariance}\\
+&=\mathbb{E}(u\,w)+\mathbb{E}(u\,v)+\mathbb{E}(v\,w)+\mathbb{E}(v^2)
+&&\text{expanding, linearity}\\
+&=0+0+0+\sigma_V^2
+&&\text{independence, definition of variance}\\
+&=\sigma_V^2>0 .
+\end{align*}
+In the same way,
+\begin{align*}
+\mathrm{Cov}(Y,Z)
+&=\mathbb{E}\big((w+v)(w-u)\big)
+&&\text{definition of covariance}\\
+&=\mathbb{E}(w^2)-\mathbb{E}(w\,u)+\mathbb{E}(v\,w)-\mathbb{E}(v\,u)
+&&\text{expanding, linearity}\\
+&=\sigma_W^2-0+0-0
+&&\text{independence, definition of variance}\\
+&=\sigma_W^2>0 ,
+\end{align*}
+and
+\begin{align*}
+\mathrm{Cov}(X,Z)
+&=\mathbb{E}\big((u+v)(w-u)\big)
+&&\text{definition of covariance}\\
+&=\mathbb{E}(u\,w)-\mathbb{E}(u^2)+\mathbb{E}(v\,w)-\mathbb{E}(v\,u)
+&&\text{expanding, linearity}\\
+&=0-\sigma_U^2+0-0
+&&\text{independence, definition of variance}\\
+&=-\sigma_U^2<0 .
+\end{align*}
+The \hyperref[def:correlation]{correlation} divides the covariance by
+positive standard deviations, so it has the same sign as the covariance:
+$\rho_{X,Y}>0$, $\rho_{Y,Z}>0$ and $\rho_{X,Z}<0$.
+\end{framedexample}
+
+So positive correlation does not pass from $X$ to $Z$ through $Y$. Yet the
+counterexample works only because the correlations are not too strong.
+If $X$ and $Y$ are almost the same variable, and so are $Y$ and $Z$, then
+$X$ and $Z$ should be almost the same variable too. To make this precise,
+we look at correlations from a geometric point of view.
+
 \end{document}
