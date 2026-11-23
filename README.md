@@ -185,6 +185,14 @@
 - [x] Mean, variance and second moment of a Binomial count from the individual Bernoulli trials.
 - [x] Different success probabilities and dependent trials: linearity of expectation, covariance terms and the need for the joint distribution.
 
+**12 November**
+
+- [x] Covariance and its sign; the correlation as a unit-free covariance.
+- [x] Properties of the correlation: standardized variables, ρ in [−1, 1], |ρ| = 1 if and only if Y is a linear function of X.
+- [x] Correlation is not transitive: hours worked, income and holidays.
+- [x] Geometry of the correlation: ρ as the cosine of an angle, positive correlation through a third variable, the constraint on three correlations.
+- [x] The variance–covariance matrix, the precision matrix, the spectral decomposition and the total variance as the sum of the eigenvalues.
+
 </details>
 
 <details>

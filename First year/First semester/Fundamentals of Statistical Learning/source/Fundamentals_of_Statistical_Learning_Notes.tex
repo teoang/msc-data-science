@@ -3511,69 +3511,281 @@ time, so most points are orange and $\rho_{X,Z}<0$.
 \end{enumerate}
 \end{framedexample}
 
-\begin{framedexample}{Correlation is not transitive}\label{ex:corr-not-transitive}
-Let $U$, $V$ and $W$ be independent random variables with positive
-variances $\sigma_U^2$, $\sigma_V^2$ and $\sigma_W^2$, and let
-\[
-X=U+V,\qquad Y=W+V,\qquad Z=W-U .
-\]
-So $X$ and $Y$ share $V$, $Y$ and $Z$ share $W$, and $U$ enters $X$ with
-a plus sign and $Z$ with a minus sign. We show that
-\[
-\rho_{X,Y}>0,\qquad \rho_{Y,Z}>0,\qquad \rho_{X,Z}<0 .
-\]
-Write $u=U-\mu_U$, $v=V-\mu_V$ and $w=W-\mu_W$ for the gaps of $U$, $V$
-and $W$ from their means. They have mean $0$, and for two different ones,
-for example $u$ and $w$, independence gives
-$\mathbb{E}(u\,w)=\mathbb{E}(u)\,\mathbb{E}(w)=0$, by the
-\hyperref[prop:product]{expected value of a product}. By the
-\hyperref[prop:linear]{linear functions}, the gaps of $X$, $Y$ and $Z$
-are
-\[
-X-\mu_X=u+v,\qquad Y-\mu_Y=w+v,\qquad Z-\mu_Z=w-u .
-\]
-Then
-\begin{align*}
-\mathrm{Cov}(X,Y)
-&=\mathbb{E}\big((u+v)(w+v)\big)
-&&\text{definition of covariance}\\
-&=\mathbb{E}(u\,w)+\mathbb{E}(u\,v)+\mathbb{E}(v\,w)+\mathbb{E}(v^2)
-&&\text{expanding, linearity}\\
-&=0+0+0+\sigma_V^2
-&&\text{independence, definition of variance}\\
-&=\sigma_V^2>0 .
-\end{align*}
-In the same way,
-\begin{align*}
-\mathrm{Cov}(Y,Z)
-&=\mathbb{E}\big((w+v)(w-u)\big)
-&&\text{definition of covariance}\\
-&=\mathbb{E}(w^2)-\mathbb{E}(w\,u)+\mathbb{E}(v\,w)-\mathbb{E}(v\,u)
-&&\text{expanding, linearity}\\
-&=\sigma_W^2-0+0-0
-&&\text{independence, definition of variance}\\
-&=\sigma_W^2>0 ,
-\end{align*}
-and
-\begin{align*}
-\mathrm{Cov}(X,Z)
-&=\mathbb{E}\big((u+v)(w-u)\big)
-&&\text{definition of covariance}\\
-&=\mathbb{E}(u\,w)-\mathbb{E}(u^2)+\mathbb{E}(v\,w)-\mathbb{E}(v\,u)
-&&\text{expanding, linearity}\\
-&=0-\sigma_U^2+0-0
-&&\text{independence, definition of variance}\\
-&=-\sigma_U^2<0 .
-\end{align*}
-The \hyperref[def:correlation]{correlation} divides the covariance by
-positive standard deviations, so it has the same sign as the covariance:
-$\rho_{X,Y}>0$, $\rho_{Y,Z}>0$ and $\rho_{X,Z}<0$.
-\end{framedexample}
-
 So positive correlation does not pass from $X$ to $Z$ through $Y$. Yet the
-counterexample works only because the correlations are not too strong.
+example works only because the correlations are not too strong.
 If $X$ and $Y$ are almost the same variable, and so are $Y$ and $Z$, then
 $X$ and $Z$ should be almost the same variable too. To make this precise,
 we look at correlations from a geometric point of view.
+
+\section{Geometry of the correlation}\label{sec:corr-geometry}
+
+How can a correlation be an angle? To keep things simple, take three
+discrete random variables $X$, $Y$ and $Z$ that take only finitely many
+values. A random variable is a function: it assigns a number to each
+outcome of the experiment. So $X$, $Y$ and $Z$ are all functions on a
+common finite set of outcomes, the sample space
+$\Omega=\{\omega_1,\ldots,\omega_k\}$. A function on $k$ outcomes is
+described completely by its $k$ values, so we can write $X$ as a vector of
+$\mathbb{R}^k$:
+\[
+X:\Omega\to\mathbb{R}
+\quad\longleftrightarrow\quad
+\underline{x}=\begin{pmatrix}x_1\\\vdots\\x_k\end{pmatrix}
+=\begin{pmatrix}X(\omega_1)\\\vdots\\X(\omega_k)\end{pmatrix},
+\]
+and in the same way $Y$ with $\underline{y}$ and $Z$ with $\underline{z}$.
+For simplicity again, let every outcome have the same probability
+$P(\{\omega_j\})=1/k$.
+
+We can also take the three means to be $0$. Shifting $X$ by a constant $a$
+shifts its mean by the same $a$, so the gap $X-\mu_X$ does not change, and
+neither do the covariance and the correlation, which are built from the
+gaps. So we may replace $X$ with $X-\mu_X$, and in the same way $Y$ and $Z$,
+and assume $\mathbb{E}(X)=\mathbb{E}(Y)=\mathbb{E}(Z)=0$.
+
+What does geometry tell us about two vectors? Recall from linear algebra
+the \emph{dot product} of $\underline{x}$ and $\underline{y}$ in
+$\mathbb{R}^k$, which depends on the lengths of the vectors and on the
+angle $\theta_{x,y}$ between them:
+\[
+\langle\underline{x},\underline{y}\rangle
+=\sum_{j=1}^k x_j\,y_j
+=\|\underline{x}\|\,\|\underline{y}\|\cos\theta_{x,y},
+\qquad
+\|\underline{x}\|=\sqrt{\langle\underline{x},\underline{x}\rangle}
+=\sqrt{\textstyle\sum_{j=1}^k x_j^2} .
+\]
+Now we write the correlation with these vectors. With mean $0$ the gaps
+are the variables themselves, so the covariance is $\mathbb{E}(XY)$ and the
+variances are $\mathbb{E}(X^2)$ and $\mathbb{E}(Y^2)$. Then
+\begin{align*}
+\rho_{X,Y}
+&=\frac{\mathbb{E}(XY)}{\sqrt{\mathbb{E}(X^2)}\,\sqrt{\mathbb{E}(Y^2)}}
+&&\text{\hyperref[def:correlation]{definition of correlation}, means $0$}\\
+&=\frac{\sum_{j}\frac1k\,X(\omega_j)\,Y(\omega_j)}
+{\sqrt{\sum_{j}\frac1k\,X(\omega_j)^2}\,\sqrt{\sum_{j}\frac1k\,Y(\omega_j)^2}}
+&&\text{\hyperref[def:expected-value]{definition of $\mathbb{E}$}, probability $\tfrac1k$}\\
+&=\frac{\sum_{j}x_j\,y_j}{\sqrt{\sum_{j}x_j^2}\,\sqrt{\sum_{j}y_j^2}}
+&&\text{$\tfrac1k$ cancels, $x_j=X(\omega_j)$, $y_j=Y(\omega_j)$}\\
+&=\frac{\langle\underline{x},\underline{y}\rangle}{\|\underline{x}\|\,\|\underline{y}\|}
+&&\text{dot product and lengths}\\
+&=\cos\theta_{x,y} .
+\end{align*}
+So the correlation of $X$ and $Y$ is the cosine of the angle between the
+two vectors, and $\rho_{X,Y}\in[-1,1]$ is now just the range of a cosine.
+The sign of the correlation tells us what kind of angle we have:
+\begin{center}
+\begin{tikzpicture}[>=Stealth,scale=1.1]
+  \foreach \ang/\lab/\name/\xs in {50/acute/{$\rho_{X,Y}>0$}/0,
+                                   90/right/{$\rho_{X,Y}=0$}/4,
+                                   135/obtuse/{$\rho_{X,Y}<0$}/8}{
+    \begin{scope}[xshift=\xs cm]
+      \draw[->,thick] (0,0)--(1.6,0) node[below] {$\underline{x}$};
+      \draw[->,thick] (0,0)--(\ang:1.6) node[above] {$\underline{y}$};
+      \draw (0.45,0) arc[start angle=0,end angle=\ang,radius=0.45];
+      \node at (0.4,-0.75) {\lab\ angle, \name};
+    \end{scope}}
+\end{tikzpicture}
+\end{center}
+At the two ends, $\rho_{X,Y}=+1$ means a zero angle, so the two vectors
+point the same way, and $\rho_{X,Y}=-1$ means a straight angle, so they
+point in opposite directions. In both cases $\underline{y}$ is a multiple
+of $\underline{x}$, as we found in \hyperref[prop:corr-properties]{property
+(5)}: $Y$ is a linear function of $X$.
+
+We worked with finitely many outcomes, all equally likely, only to keep the
+picture simple. The result holds for all random variables, once ``angle''
+is understood in an abstract sense, in the spaces of functions called
+Hilbert spaces.
+
+Let us go back to the question of
+\hyperref[sec:corr-transitivity]{transitivity}: if $X,Y$ and $Y,Z$ are
+positively correlated, must $X,Z$ be? With vectors, positive correlation
+means an acute angle. If the angle between $\underline{x}$ and
+$\underline{y}$ is small, and so is the angle between $\underline{y}$ and
+$\underline{z}$, then $\underline{x}$ and $\underline{z}$ cannot be far
+apart either, and their angle is acute too:
+\begin{center}
+\begin{tikzpicture}[>=Stealth,scale=1.3]
+  \draw[->,thick] (0,0)--(10:2) node[right] {$\underline{x}$};
+  \draw[->,thick] (0,0)--(40:2) node[above right] {$\underline{y}$};
+  \draw[->,thick] (0,0)--(70:2) node[above] {$\underline{z}$};
+  \draw (10:0.9) arc[start angle=10,end angle=40,radius=0.9];
+  \node at (25:1.3) {\small$\theta_{x,y}$};
+  \draw (40:1.4) arc[start angle=40,end angle=70,radius=1.4];
+  \node at (55:1.8) {\small$\theta_{y,z}$};
+\end{tikzpicture}
+\end{center}
+How small must the two angles be? Their sum must stay below a right angle,
+and this condition can be written with the correlations.
+
+\begin{framedprop}{Positive correlation through a third variable}\label{prop:corr-transitive}
+Let $\rho_{X,Y}>0$ and $\rho_{Y,Z}>0$, and suppose that
+\[
+\rho_{X,Y}^2+\rho_{Y,Z}^2>1 .
+\]
+Then $\rho_{X,Z}>0$.
+\end{framedprop}
+
+\begin{todobox}Prove this proposition: the proof was not given in class.\end{todobox}
+
+For example, $\rho_{X,Y}=\rho_{Y,Z}=0.9$ gives $0.81+0.81>1$, so $X$ and
+$Z$ must be positively correlated. With $\rho_{X,Y}=\rho_{Y,Z}=0.5$,
+instead, $0.25+0.25<1$, and the proposition says nothing: this is the
+situation of the \hyperref[ex:work-holidays]{hours worked, income and
+holidays}, where $\rho_{X,Z}$ was negative.
+
+More generally, the three correlations cannot be chosen freely: the three
+angles must fit together. The precise condition is the following.
+
+\begin{framedprop}{Three correlations}\label{prop:three-correlations}
+For any three random variables $X$, $Y$ and $Z$,
+\[
+\rho_{X,Y}^2+\rho_{Y,Z}^2+\rho_{X,Z}^2-1\leq2\,\rho_{X,Y}\,\rho_{Y,Z}\,\rho_{X,Z} .
+\]
+\end{framedprop}
+
+Let us see what it says with $\rho_{X,Y}=\rho_{Y,Z}=0.9$ again. Writing
+$r=\rho_{X,Z}$,
+\begin{align*}
+0.81+0.81+r^2-1\leq2\cdot0.9\cdot0.9\cdot r
+&\iff r^2-1.62\,r+0.62\leq0
+&&\text{rearranging}\\
+&\iff(r-0.62)(r-1)\leq0
+&&\text{roots $0.62$ and $1$}\\
+&\iff0.62\leq r\leq1 .
+\end{align*}
+So $\rho_{X,Z}$ is not only positive, it is at least $0.62$. Geometrically,
+$\cos\theta=0.9$ gives $\theta\approx25.8^\circ$, the largest possible
+angle between $\underline{x}$ and $\underline{z}$ is
+$2\theta\approx51.7^\circ$, and $\cos(2\theta)=2\cdot0.9^2-1=0.62$.
+
+\section{The variance--covariance matrix}\label{sec:var-cov-matrix}
+
+So far we have looked at two or three variables at a time. With a random
+vector $\underline{X}=(X_1,\ldots,X_p)^{\mathsf T}\in\mathbb{R}^p$ there are
+$p$ variances and many covariances. We already collected all of them in one
+matrix, the \hyperref[def:covariance]{covariance matrix}. Writing
+$\sigma_j^2=\mathrm{Var}(X_j)$ and $\sigma_{i,j}=\mathrm{Cov}(X_i,X_j)$, it
+is the $p\times p$ matrix
+\[
+\mathrm{Cov}(\underline{X})=\Sigma=
+\begin{pmatrix}
+\sigma_1^2&\sigma_{1,2}&\cdots&\sigma_{1,p}\\
+\sigma_{1,2}&\sigma_2^2&\cdots&\sigma_{2,p}\\
+\vdots&\vdots&\ddots&\vdots\\
+\sigma_{1,p}&\sigma_{2,p}&\cdots&\sigma_p^2
+\end{pmatrix},
+\]
+with the variances on the diagonal and the covariances off the diagonal.
+We saw that $\Sigma$ is symmetric. It has a second property: for every
+vector of constants $\underline{\alpha}\in\mathbb{R}^p$,
+\begin{align*}
+\underline{\alpha}^{\mathsf T}\,\Sigma\,\underline{\alpha}
+&=\mathrm{Var}\big(\underline{\alpha}^{\mathsf T}\underline{X}\big)
+&&\text{\hyperref[prop:var-linear]{variance of a linear combination}}\\
+&\geq0
+&&\text{a variance is never negative.}
+\end{align*}
+A symmetric matrix with $\underline{\alpha}^{\mathsf T}\Sigma\,\underline{\alpha}\geq0$
+for every $\underline{\alpha}$ is called \emph{positive semi-definite}. So
+every covariance matrix is symmetric and positive semi-definite.
+
+When $\Sigma$ can be inverted, its inverse also gets a name.
+
+\begin{frameddefn}{Precision matrix}\label{def:precision}
+If the covariance matrix $\Sigma$ of $\underline{X}$ is invertible, the
+\textbf{precision matrix} of $\underline{X}$ is
+\[
+\Lambda=\Sigma^{-1}.
+\]
+\end{frameddefn}
+
+A large variance means a spread-out variable, so a small precision. With
+$p=1$, $\Lambda=1/\sigma^2$.
+
+How is the variability of $\underline{X}$ shared among the directions of
+$\mathbb{R}^p$? To answer, we break $\Sigma$ into simpler pieces. Recall
+from linear algebra that a nonzero vector $\underline{u}$ is an
+\emph{eigenvector} of $\Sigma$, with \emph{eigenvalue} $\lambda$, if
+\[
+\Sigma\,\underline{u}=\lambda\,\underline{u},
+\]
+that is, $\Sigma$ only stretches $\underline{u}$ by the factor $\lambda$,
+without turning it. For a symmetric matrix the spectral theorem of linear
+algebra gives $p$ eigenvectors $\underline{u}_1,\ldots,\underline{u}_p$
+that are orthonormal: each has length $1$ and any two are perpendicular.
+Since $\Sigma$ is also positive semi-definite, its eigenvalues are never
+negative. Take an eigenvector $\underline{u}$ of length $1$, with
+eigenvalue $\lambda$:
+\begin{align*}
+\lambda
+&=\lambda\,\underline{u}^{\mathsf T}\underline{u}
+&&\text{$\underline{u}^{\mathsf T}\underline{u}=\|\underline{u}\|^2=1$}\\
+&=\underline{u}^{\mathsf T}(\lambda\,\underline{u})
+&&\text{$\lambda$ is a number}\\
+&=\underline{u}^{\mathsf T}\,\Sigma\,\underline{u}
+&&\text{$\Sigma\,\underline{u}=\lambda\,\underline{u}$}\\
+&\geq0
+&&\text{positive semi-definite.}
+\end{align*}
+
+\begin{framedprop}{Spectral decomposition}\label{prop:spectral}
+Let $\Sigma$ be the covariance matrix of $\underline{X}\in\mathbb{R}^p$,
+let $\lambda_1\geq\lambda_2\geq\cdots\geq\lambda_p\geq0$ be its eigenvalues
+in decreasing order, and let $\underline{u}_1,\ldots,\underline{u}_p$ be
+corresponding orthonormal eigenvectors. Then
+\[
+\Sigma=U\,D\,U^{\mathsf T},
+\qquad
+D=\mathrm{diag}(\lambda_1,\ldots,\lambda_p),
+\qquad
+U=\big[\,\underline{u}_1\,|\,\cdots\,|\,\underline{u}_p\,\big],
+\]
+and $U^{\mathsf T}U=I$.
+\end{framedprop}
+
+The columns of $U$ are the eigenvectors, so $U^{\mathsf T}U$ collects their
+dot products: $1$ on the diagonal, since each has length $1$, and $0$ off
+the diagonal, since any two are perpendicular. This gives $U^{\mathsf T}U=I$.
+
+What does the decomposition tell us about the variances? Add up the $p$
+variances, that is, the diagonal of $\Sigma$. The sum of the diagonal
+entries of a square matrix is its \emph{trace}, and the trace does not
+change if we move the first factor of a product to the end:
+$\mathrm{trace}(AB)=\mathrm{trace}(BA)$. This is the circularity of the
+trace.
+
+\begin{framedprop}{Total variance}\label{prop:total-variance}
+With the notation of the \hyperref[prop:spectral]{spectral decomposition},
+\[
+\sum_{j=1}^p\sigma_j^2=\sum_{j=1}^p\lambda_j .
+\]
+\end{framedprop}
+
+\begin{proof}
+\begin{align*}
+\sum_{j=1}^p\sigma_j^2
+&=\mathrm{trace}(\Sigma)
+&&\text{the variances are the diagonal of $\Sigma$}\\
+&=\mathrm{trace}\big(U\,D\,U^{\mathsf T}\big)
+&&\text{\hyperref[prop:spectral]{spectral decomposition}}\\
+&=\mathrm{trace}\big(U^{\mathsf T}U\,D\big)
+&&\text{circularity, with $A=U\,D$ and $B=U^{\mathsf T}$}\\
+&=\mathrm{trace}(D)
+&&\text{$U^{\mathsf T}U=I$}\\
+&=\sum_{j=1}^p\lambda_j
+&&\text{the diagonal of $D$.}\qedhere
+\end{align*}
+\end{proof}
+
+The \emph{total variance} of $\underline{X}$, the sum of the variances of its
+components, is therefore also the sum of the eigenvalues. The eigenvectors
+give $p$ perpendicular directions, and the eigenvalues say how the total
+variance is split among them. Indeed, the computation above shows that the
+variance along $\underline{u}_j$ is
+$\mathrm{Var}(\underline{u}_j^{\mathsf T}\underline{X})=\underline{u}_j^{\mathsf T}\Sigma\,\underline{u}_j=\lambda_j$:
+the direction of $\underline{u}_1$ carries the largest share $\lambda_1$,
+that of $\underline{u}_2$ the next one, and so on.
 
 \end{document}
