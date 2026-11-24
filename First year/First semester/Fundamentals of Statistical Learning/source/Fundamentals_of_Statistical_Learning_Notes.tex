@@ -3791,4 +3791,188 @@ $\mathrm{Var}(\underline{u}_j^{\mathsf T}\underline{X})=\underline{u}_j^{\mathsf
 the direction of $\underline{u}_1$ carries the largest share $\lambda_1$,
 that of $\underline{u}_2$ the next one, and so on.
 
+\clearpage
+\lecturestart{13 November}
+
+The entries of $\Sigma$ are covariances, so they have the same problem we
+met with a single \hyperref[def:covariance]{covariance}: they depend on the
+units of the variables. For a pair of variables we solved it by dividing by
+the two standard deviations, which gave the
+\hyperref[def:correlation]{correlation}. Can we do the same for all the
+pairs of $\underline{X}$ at once?
+
+Let $\mathrm{diag}(\Sigma)$ be the diagonal matrix of the variances, so that
+\[
+\mathrm{diag}(\Sigma)=
+\begin{pmatrix}
+\sigma_1^2&&\\
+&\ddots&\\
+&&\sigma_p^2
+\end{pmatrix},
+\qquad
+\big(\mathrm{diag}(\Sigma)\big)^{-1/2}=
+\begin{pmatrix}
+1/\sigma_1&&\\
+&\ddots&\\
+&&1/\sigma_p
+\end{pmatrix}.
+\]
+
+\begin{frameddefn}{Correlation matrix}\label{def:correlation-matrix}
+The \textbf{correlation matrix} of $\underline{X}$ is the matrix of the
+\hyperref[def:correlation]{Pearson correlation coefficients} between each
+pair of its components,
+\[
+\rho(\underline{X})=\mathrm{R}
+=\big(\mathrm{diag}(\Sigma)\big)^{-1/2}\,\Sigma\,\big(\mathrm{diag}(\Sigma)\big)^{-1/2}.
+\]
+\end{frameddefn}
+
+Why does this product give the correlations? Let us write it out:
+\begin{align*}
+\mathrm{R}
+&=\begin{pmatrix}
+1/\sigma_1&&\\
+&\ddots&\\
+&&1/\sigma_p
+\end{pmatrix}
+\begin{pmatrix}
+\sigma_1^2&\cdots&\sigma_{1,p}\\
+\vdots&\ddots&\vdots\\
+\sigma_{1,p}&\cdots&\sigma_p^2
+\end{pmatrix}
+\begin{pmatrix}
+1/\sigma_1&&\\
+&\ddots&\\
+&&1/\sigma_p
+\end{pmatrix}
+&&\text{definition}\\
+&=\begin{pmatrix}
+\sigma_1^2/\sigma_1&\cdots&\sigma_{1,p}/\sigma_1\\
+\vdots&\ddots&\vdots\\
+\sigma_{1,p}/\sigma_p&\cdots&\sigma_p^2/\sigma_p
+\end{pmatrix}
+\begin{pmatrix}
+1/\sigma_1&&\\
+&\ddots&\\
+&&1/\sigma_p
+\end{pmatrix}
+&&\text{row $i$ divided by $\sigma_i$}\\
+&=\begin{pmatrix}
+\dfrac{\sigma_1^2}{\sigma_1\,\sigma_1}&\cdots&\dfrac{\sigma_{1,p}}{\sigma_1\,\sigma_p}\\
+\vdots&\ddots&\vdots\\
+\dfrac{\sigma_{1,p}}{\sigma_p\,\sigma_1}&\cdots&\dfrac{\sigma_p^2}{\sigma_p\,\sigma_p}
+\end{pmatrix}
+&&\text{column $j$ divided by $\sigma_j$}\\
+&=\begin{pmatrix}
+1&\cdots&\rho_{X_1,X_p}\\
+\vdots&\ddots&\vdots\\
+\rho_{X_1,X_p}&\cdots&1
+\end{pmatrix}
+&&\text{\hyperref[def:correlation]{correlation}.}
+\end{align*}
+On the diagonal every variable is perfectly correlated with itself.
+
+\section{What the correlation does not see}\label{sec:corr-limits}
+
+We now have a number, $\rho$, that measures the linear dependence between
+two variables. How well can we read it from a picture of the data? Let us
+play a game: we are shown draws from a joint distribution and must guess
+its correlation.
+
+\begin{framedexample}{Guess the correlation}\label{ex:corr-guess}
+Each panel shows $1000$ draws of a pair $(X,Y)$.
+\begin{center}
+\includegraphics[width=.62\linewidth]{assets/corr-guess.pdf}
+\end{center}
+The correlations are $0.4$, $0.8$ and $1$ in the top row, and $-0.4$,
+$-0.8$ and $-1$ in the bottom row. The cloud with $\rho=0$ is the round
+one of panel~(3) of Example~\ref{ex:cov-sign}.
+\end{framedexample}
+
+The sign says whether the cloud goes up or down, and the closer $|\rho|$ is
+to $1$, the thinner the cloud around a line. At $\rho=\pm1$ the points lie
+exactly on a line, as
+\hyperref[prop:corr-properties]{property~(5)} says.
+
+Does a larger $\rho$ mean a steeper line, though?
+
+\begin{framedexample}{Lines with different slopes}\label{ex:corr-slopes}
+Each panel shows $200$ draws of a pair $(X,Y)$ that lie on a line.
+\begin{center}
+\includegraphics[width=\linewidth]{assets/corr-slopes.pdf}
+\end{center}
+In panel~(1) the line is flat: $Y$ is a constant. When $X$ changes,
+nothing happens to $Y$, so there is no relationship between the two. Here
+$\mathrm{Cov}(X,Y)=0$, and since $\sigma_Y=0$ the correlation is not even
+defined; it is usually reported as $0$.
+
+In panels~(2)--(4) the slopes are $0.2$, $0.5$ and $1$, yet in all three
+$\rho=1$. With negative slopes we would get $\rho=-1$ every time.
+\end{framedexample}
+
+So $\rho$ does not measure the slope: it only says how close the points are
+to a line, and whether the line goes up or down.
+
+What if the points are close to a curve instead of a line?
+
+\begin{framedexample}{Strong dependence, zero correlation}\label{ex:corr-nonlinear}
+Each panel shows $1000$ draws of a pair $(X,Y)$.
+\begin{center}
+\includegraphics[width=\linewidth]{assets/corr-nonlinear.pdf}
+\end{center}
+In every panel $\rho\approx0$. Yet in~(1) and~(2) knowing $X$ tells us
+$Y$ almost exactly, through a wave and a parabola, and in~(3) and~(4),
+a ring and a cross, it leaves only two possible values.
+\end{framedexample}
+
+The relationship is there and it is strong, but it is not
+\emph{linear}, and $\rho$ only sees linear relationships. This is the
+\hyperref[note:cov-converse]{counterexample $Y=X^2$} again, in several
+shapes.
+
+So far a small $|\rho|$ was hiding a strong dependence. Can a large
+$|\rho|$ mislead us too? It can, in the opposite way: it can show a link
+where there is none. Tyler Vigen collected many such \emph{spurious
+correlations} on his website,
+\href{https://www.tylervigen.com/spurious-correlations}{\emph{Spurious
+Correlations}}. The divorce rate in Maine moves together with the
+consumption of margarine; between 1999 and 2010 the satisfaction rating of
+a fast-food chain and the number of deaths by choking had a correlation of
+$85.6\%$. Nobody believes that one of these causes the other.
+
+\begin{framedexample}{Nicolas Cage and swimming pools}\label{ex:spurious-cage}
+For each year from 1999 to 2009, the chart shows the number of people in
+the United States who drowned by falling into a swimming pool, in blue,
+and the number of films in which Nicolas Cage appeared, in orange.
+\begin{center}
+\includegraphics[width=\linewidth]{assets/spurious-cage.pdf}
+\end{center}
+The two lines rise and fall together, as in 2003 and 2007, and the
+correlation between the two series is $0.666$. Yet Nicolas Cage's films do
+not push people into pools, and the drownings do not decide which films he
+makes. Among the thousands of yearly series that are published, some pairs
+move together just by chance, and searching through many pairs is bound to
+find them.
+\end{framedexample}
+
+The same mistake feeds conspiracy theories. During the Covid-19 pandemic, a
+map of the cases in the United States looked very similar to a map of the
+new 5G phone antennas, and some concluded that the antennas spread the
+virus. But a map of the Domino's pizza restaurants looks the same too: all
+three maps simply show where people live. Nobody concludes that pizza
+spreads the virus.
+
+What do these examples teach us? Two things.
+\begin{itemize}
+\item \textbf{Correlation is not causation}: $|\rho|\approx1$ does not
+mean that $X$ causes $Y$, or $Y$ causes $X$.
+\item \textbf{Zero correlation is not independence}: $|\rho|\approx0$ does
+not mean that $X$ and $Y$ are independent. We know that independent
+variables are uncorrelated, by
+\hyperref[prop:corr-properties]{property~(3)}, but not the converse.
+There is, however, one important case where uncorrelated variables must
+also be independent: the multivariate Normal, which we will meet later.
+\end{itemize}
+
 \end{document}

@@ -193,6 +193,13 @@
 - [x] Geometry of the correlation: ρ as the cosine of an angle, positive correlation through a third variable, the constraint on three correlations.
 - [x] The variance–covariance matrix, the precision matrix, the spectral decomposition and the total variance as the sum of the eigenvalues.
 
+**13 November**
+
+- [x] The correlation matrix.
+- [x] What the correlation does not see: guessing ρ from a cloud, slopes, nonlinear dependence with ρ = 0, spurious correlations; correlation is not causation, and zero correlation is not independence.
+- [ ] Observing versus setting a variable: confounders, ancestral sampling and the average treatment effect.
+- [ ] Conditional expectation strikes back: the best predictor, the regression function, the conditional median and the Bayes classifier.
+
 </details>
 
 <details>

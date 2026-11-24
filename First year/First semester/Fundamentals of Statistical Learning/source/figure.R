@@ -617,3 +617,79 @@ cov_panel(hours, income, "(1)", "hours worked", "income")
 cov_panel(income, holidays, "(2)", "income", "weeks of holiday")
 cov_panel(hours, holidays, "(3)", "hours worked", "weeks of holiday")
 dev.off()
+
+# Guess the correlation: clouds of draws with a given correlation
+scatter_panel <- function(x, y, main, cex = .35) {
+  plot(x, y, type = "n", xlab = "", ylab = "", xaxt = "n", yaxt = "n",
+       main = main, cex.main = 1, font.main = 1)
+  grid(col = grid_col)
+  points(x, y, pch = 19, cex = cex, col = blue)
+}
+set.seed(13)
+pdf("assets/corr-guess.pdf", width = 8, height = 4.6,
+    family = "Helvetica", useDingbats = FALSE)
+par(mfrow = c(2, 3), mar = c(.6, .6, 1.4, .6), cex = .8)
+for (k in 1:6) {
+  r <- c(.4, .8, 1, -.4, -.8, -1)[k]
+  x <- rnorm(1000)
+  scatter_panel(x, r * x + sqrt(1 - r^2) * rnorm(1000), sprintf("(%d)", k))
+}
+dev.off()
+
+# The correlation does not see the slope of the line
+pdf("assets/corr-slopes.pdf", width = 8, height = 2.2,
+    family = "Helvetica", useDingbats = FALSE)
+par(mfrow = c(1, 4), mar = c(.6, .6, 1.4, .6), cex = .8)
+x <- runif(200, -1, 1)
+for (k in 1:4) {
+  b <- c(0, .2, .5, 1)[k]
+  plot(x, b * x, type = "n", xlab = "", ylab = "", xaxt = "n", yaxt = "n",
+       ylim = c(-1.1, 1.1), main = sprintf("(%d)", k), cex.main = 1, font.main = 1)
+  grid(col = grid_col)
+  points(x, b * x, pch = 19, cex = .35, col = blue)
+}
+dev.off()
+
+# Strong dependence, zero correlation
+set.seed(14)
+n <- 1000
+u <- runif(n, -pi, pi)
+wave_y <- cos(2 * u) + rnorm(n, 0, .15)
+v <- runif(n, -1, 1)
+cup_y <- v^2 + rnorm(n, 0, .08)
+angle <- runif(n, 0, 2 * pi)
+radius <- 1 + rnorm(n, 0, .07)
+w <- runif(n, -1, 1)
+cross_y <- sample(c(-1, 1), n, TRUE) * w + rnorm(n, 0, .05)
+pdf("assets/corr-nonlinear.pdf", width = 8, height = 2.2,
+    family = "Helvetica", useDingbats = FALSE)
+par(mfrow = c(1, 4), mar = c(.6, .6, 1.4, .6), cex = .8)
+scatter_panel(u, wave_y, "(1)")
+scatter_panel(v, cup_y, "(2)")
+scatter_panel(radius * cos(angle), radius * sin(angle), "(3)")
+scatter_panel(w, cross_y, "(4)")
+dev.off()
+cat("nonlinear correlations:",
+    round(c(cor(u, wave_y), cor(v, cup_y),
+            cor(radius * cos(angle), radius * sin(angle)), cor(w, cross_y)), 3), "\n")
+
+# A spurious correlation (tylervigen.com): Nicolas Cage films and pool drownings
+years <- 1999:2009
+drownings <- c(109, 102, 102, 98, 85, 95, 96, 98, 123, 94, 102)
+cage_films <- c(2, 2, 2, 3, 1, 1, 2, 3, 4, 1, 4)
+pdf("assets/spurious-cage.pdf", width = 8, height = 2.8,
+    family = "Helvetica", useDingbats = FALSE)
+par(mar = c(2.2, 3.4, .6, 3.4), mgp = c(2.2, .5, 0), cex = .8, las = 1)
+plot(years, drownings, type = "n", xlab = "", ylab = "",
+     ylim = c(80, 125), xaxt = "n")
+grid(col = grid_col)
+axis(1, at = years)
+lines(years, drownings, col = blue, lwd = 2)
+points(years, drownings, pch = 19, col = blue)
+mtext("drownings in a pool", side = 2, line = 2.4, col = blue, las = 0, cex = .8)
+par(new = TRUE)
+plot(years, cage_films, type = "o", pch = 19, lwd = 2, col = orange,
+     axes = FALSE, xlab = "", ylab = "", ylim = c(0, 4.5))
+axis(4, at = 0:4)
+mtext("Nicolas Cage films", side = 4, line = 2.2, col = orange, las = 0, cex = .8)
+dev.off()
