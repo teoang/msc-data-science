@@ -349,6 +349,18 @@
 - [x] The first right singular vector as the direction of largest variance: ‖A‖₂ = σ₁.
 - [x] The best rank-k approximation in Frobenius norm: A_k keeps the first k terms of the SVD.
 
+**19 November**
+
+- [x] The best rank-k approximation as the projection A V_k V_kᵀ; the reduced dataset A V_k and the principal components.
+- [x] Normalization: centring, and scaling each column so that units do not matter.
+- [x] The queue ADT (FIFO): arrays, linked lists and circular arrays.
+- [x] The stack ADT (LIFO).
+- [x] Graphs: undirected and directed, weights, parallel links and self-loops, paths and cycles, connected components, degree, forests and trees, the diameter, adjacency lists and matrices.
+
+**23 November**
+
+- [x] Exploring a graph: breadth-first search with a queue and depth-first search with a stack, their running times with adjacency lists and matrices.
+
 </details>
 
 ## About
@@ -360,15 +372,3 @@ The LaTeX sources are included, but the shared style package is not: to compile 
 ## License
 
 Released under [CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/): you may share and adapt the notes with credit, for non-commercial use, under the same license. The Sapienza logo and figures from other sources belong to their owners. Full text in [LICENSE](LICENSE).
-**19 November**
-
-- [x] The best rank-k approximation as the projection A V_k V_kᵀ; the reduced dataset A V_k and the principal components.
-- [x] Normalization: centring, and scaling each column so that units do not matter.
-- [x] The queue ADT (FIFO): arrays, linked lists and circular arrays.
-- [x] The stack ADT (LIFO).
-- [x] Graphs: undirected and directed, weights, parallel links and self-loops, paths and cycles, connected components, degree, forests and trees, the diameter, adjacency lists and matrices.
-
-**20 November**
-
-- [ ] Lecture still to write.
-

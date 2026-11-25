@@ -9917,33 +9917,48 @@ it kept the front at position $1$. Instead, we let the front move: we
 keep two indices, \emph{first}, the position of the front, and
 \emph{last}, the position of the back. Here an array with $10$ slots,
 numbered $0,\ldots,9$, holds the queue $3,7,8,2,3$:
+\newcommand{\qarrayrow}[2]{% first slot, values
+  \foreach \i in {0,...,9}
+    \draw (\i-0.5,-0.3) rectangle (\i+0.5,0.3);
+  \foreach \v [count=\j from #1] in {#2} {
+    \draw[fill=PlotBlue!10] (\j-0.5,-0.3) rectangle (\j+0.5,0.3);
+    \node at (\j,0) {$\v$};}
+  \foreach \i in {0,...,9}
+    \node[above,font=\scriptsize,gray!80!black] at (\i,0.3) {$\i$};}
+\newcommand{\qarrayptr}[4][]{% style, slot, label, depth
+  \draw[->,thick,#1] (#2,-#4) node[below,font=\scriptsize,#1] {#3} -- (#2,-0.35);}
 \begin{center}
 \begin{tikzpicture}[font=\small,>=stealth,x=0.75cm,y=1cm]
-  \newcommand{\qrow}[4]{% y, first slot, values, label
-    \node[anchor=east] at (-0.7,#1) {#4};
-    \foreach \i in {0,...,9}
-      \draw (\i-0.5,#1-0.3) rectangle (\i+0.5,#1+0.3);
-    \foreach \v [count=\j from #2] in {#3} {
-      \draw[fill=PlotBlue!10] (\j-0.5,#1-0.3) rectangle (\j+0.5,#1+0.3);
-      \node at (\j,#1) {$\v$};}}
-  \qrow{0}{0}{3,7,8,2,3}{Start}
-  \foreach \i in {0,...,9} \node[above,font=\scriptsize,gray!80!black] at (\i,0.3) {$\i$};
-  \node[below,font=\scriptsize] at (0,-0.3) {first};
-  \node[below,font=\scriptsize] at (4,-0.3) {last};
-  \qrow{-1.5}{0}{3,7,8,2,3,6}{$\operatorname{enqueue}(6)$}
-  \draw[very thick,PlotGreen] (4.5,-1.8) rectangle (5.5,-1.2);
-  \node[below,font=\scriptsize] at (0,-1.8) {first};
-  \node[below,font=\scriptsize] at (5,-1.8) {last};
-  \qrow{-3}{1}{7,8,2,3,6}{$\operatorname{dequeue}()$}
-  \node[below,font=\scriptsize] at (1,-3.3) {first};
-  \node[below,font=\scriptsize] at (5,-3.3) {last};
+  \qarrayrow{0}{3,7,8,2,3}
+  \qarrayptr{0}{first}{0.9}
+  \qarrayptr{4}{last}{0.9}
 \end{tikzpicture}
 \end{center}
 To enqueue $6$, we write it in the slot after \emph{last} and move
-\emph{last} one place to the right. To dequeue, we return the element
-at \emph{first}, here $3$, and move \emph{first} one place to the
-right. The slot left behind is simply ignored. No element moves, so
-both operations take $\Theta(1)$ time.
+\emph{last} one place to the right:
+\begin{center}
+\begin{tikzpicture}[font=\small,>=stealth,x=0.75cm,y=1cm]
+  \qarrayrow{0}{3,7,8,2,3,6}
+  \draw[very thick,PlotGreen] (4.5,-0.3) rectangle (5.5,0.3);
+  \qarrayptr{0}{first}{0.9}
+  \qarrayptr[very thick,PlotGreen]{5}{last}{0.9}
+  \qarrayptr[dashed,black!45]{4}{old last}{1.5}
+\end{tikzpicture}
+\end{center}
+To dequeue, we return the element at \emph{first}, here $3$, and move
+\emph{first} one place to the right. The slot left behind is simply
+ignored:
+\begin{center}
+\begin{tikzpicture}[font=\small,>=stealth,x=0.75cm,y=1cm]
+  \qarrayrow{1}{7,8,2,3,6}
+  \node[black!45] at (0,0) {$3$};
+  \qarrayptr[very thick,PlotGreen]{1}{first}{0.9}
+  \qarrayptr[dashed,black!45]{0}{old first}{1.5}
+  \qarrayptr{5}{last}{0.9}
+  \node[PlotRed,anchor=east,overlay] at (-0.7,0) {returns $3$};
+\end{tikzpicture}
+\end{center}
+No element moves, so both operations take $\Theta(1)$ time.
 
 The queue drifts to the right as we use it. What happens when
 \emph{last} reaches slot $9$? The slots at the beginning, freed by
@@ -10154,7 +10169,36 @@ two nodes of $V'$.
 \end{frameddefn}
 
 We may choose $V'$ and $E'$ as we like, as long as we never keep an
-edge without its two ends. How do we move around a graph? We go from
+edge without its two ends. For example, on the right is a subgraph of
+the graph on the left:
+\begin{center}
+\begin{tikzpicture}[x=1cm,y=1cm]
+  \node[gnode] (1) at (0,0.8) {$1$};
+  \node[gnode] (2) at (1.5,0.8) {$2$};
+  \node[gnode] (3) at (0,-0.6) {$3$};
+  \node[gnode] (4) at (1.5,-0.6) {$4$};
+  \node[gnode] (5) at (3,0.1) {$5$};
+  \draw (1)--(2) (1)--(3) (2)--(3) (2)--(4) (3)--(4) (4)--(5) (2)--(5);
+  \node[font=\small] at (1.5,-1.4) {$G$};
+  \begin{scope}[xshift=5.5cm]
+    \node[gnode] (1) at (0,0.8) {$1$};
+    \node[gnode] (2) at (1.5,0.8) {$2$};
+    \node[gnode] (3) at (0,-0.6) {$3$};
+    \node[gnode] (4) at (1.5,-0.6) {$4$};
+    \node[gnode,draw=black!30,fill=none,text=black!40,dashed] (5) at (3,0.1) {$5$};
+    \draw (1)--(2) (2)--(3) (2)--(4);
+    \draw[black!30,dashed] (1)--(3) (3)--(4) (4)--(5) (2)--(5);
+    \node[font=\small] at (1.5,-1.4) {$G'$};
+  \end{scope}
+\end{tikzpicture}
+\end{center}
+$G'$ keeps the nodes $V'=\{1,2,3,4\}$ and the edges
+$E'=\{\{1,2\},\{2,3\},\{2,4\}\}$; what it drops is dashed. Removing
+node $5$ forces us to remove $\{2,5\}$ and $\{4,5\}$ too, since they
+would lose an end. The edges $\{1,3\}$ and $\{3,4\}$, instead, are
+dropped by choice: both their ends are still in $V'$.
+
+How do we move around a graph? We go from
 node to node along edges.
 
 \begin{frameddefn}{Path, simple path and cycle}\label{def:path}
@@ -10165,6 +10209,48 @@ node $u_k$. A path is \emph{simple} if each node appears in it only
 once. A \emph{cycle} is a path whose first and last nodes coincide,
 $u_0=u_k$, and which is otherwise simple.
 \end{frameddefn}
+
+Let us take the graph $G$ of the subgraph example again and draw one
+of each, in red, with arrows showing the direction of travel:
+\begin{center}
+\begin{tikzpicture}[x=0.85cm,y=0.85cm,>=Stealth,
+  walk/.style={->,very thick,PlotRed}]
+  \newcommand{\pathgraph}{%
+    \node[gnode] (1) at (0,0.8) {$1$};
+    \node[gnode] (2) at (1.5,0.8) {$2$};
+    \node[gnode] (3) at (0,-0.6) {$3$};
+    \node[gnode] (4) at (1.5,-0.6) {$4$};
+    \node[gnode] (5) at (3,0.1) {$5$};
+    \draw[black!30] (1)--(2) (1)--(3) (2)--(3) (2)--(4) (3)--(4)
+      (4)--(5) (2)--(5);}
+  \pathgraph
+  \draw[walk] (1)--(2);
+  \draw[walk] (2)--(3);
+  \draw[walk] (3)--(4);
+  \draw[walk] (4) to[bend right=25] (2);
+  \draw[walk] (2)--(5);
+  \node[font=\small,align=center] at (1.5,-1.6) {a path\\$1,2,3,4,2,5$};
+  \begin{scope}[xshift=4.6cm]
+    \pathgraph
+    \draw[walk] (1)--(2);
+    \draw[walk] (2)--(4);
+    \draw[walk] (4)--(5);
+    \node[font=\small,align=center] at (1.5,-1.6) {a simple path\\$1,2,4,5$};
+  \end{scope}
+  \begin{scope}[xshift=9.2cm]
+    \pathgraph
+    \draw[walk] (2)--(3);
+    \draw[walk] (3)--(4);
+    \draw[walk] (4)--(2);
+    \node[font=\small,align=center] at (1.5,-1.6) {a cycle\\$2,3,4,2$};
+  \end{scope}
+\end{tikzpicture}
+\end{center}
+We write a path by listing the nodes $u_0,u_1,\ldots,u_k$ it passes
+through. The first path goes from $1$ to $5$ but passes through $2$
+twice, so it is not simple. The second also goes from $1$ to $5$, and
+every node appears once. The third starts and ends at $2$, and no
+other node repeats.
 
 Can we always reach every node from every other? Not necessarily: in
 the first graph of \hyperref[sec:graph-definitions]{Section 16.1} no
@@ -10311,11 +10397,227 @@ nodes the matrix has $10^{12}$ entries, too many to store. The
 adjacency list writes only the edges that exist, each of them twice,
 once for each end, so it takes much less space.
 
-\lecturestart{20 November}
+\lecturestart{23 November}
 
 \begin{todobox}
-Write the 20 November lecture. Sources: Flavia's notes for this lecture
-are not in \texttt{references/} yet.
+This lecture is written from Gianmaria Romano's notes, because Flavia's
+notes for it are not in \texttt{references/} yet. Check it against
+them when they arrive.
 \end{todobox}
+
+\section{Exploring a graph}
+\label{sec:graph-exploration}
+
+We now know what a graph is and how to store it. What can we do with
+it? A first question is: starting from a node $s$, which nodes can we
+reach, and how far are they? To answer it, we \emph{explore} the
+graph: we visit its nodes one at a time, always moving along edges,
+and we remember which nodes we have already seen, so that we never
+visit a node twice. We assume the graph is undirected and that every
+node has a unique name, so we can tell the nodes apart.
+
+From $s$ we can only reach the nodes joined to $s$ by a path, that is,
+the nodes of the \hyperref[def:connected-component]{connected
+component} of $s$. If the graph is not connected, an exploration from
+$s$ never sees the other components.
+
+In which order do we visit the nodes? There are two natural choices.
+In this tree, starting from $0$, the left picture visits the nodes
+level by level, the right one goes as deep as possible along a branch
+before coming back:
+\begin{center}
+\begin{tikzpicture}[x=0.8cm,y=0.9cm,
+  ord/.style={font=\scriptsize,text=PlotBlue}]
+  \foreach \sx/\name/\o in {0/Level by level/{1,2,3,4,5,6,7},
+                            6.5/As deep as possible/{1,2,5,3,4,6,7}} {
+    \begin{scope}[xshift=\sx cm]
+      \node[gnode] (n0) at (0,0) {$0$};
+      \node[gnode] (n1) at (-1.5,-1.2) {$1$};
+      \node[gnode] (n2) at (1.5,-1.2) {$2$};
+      \node[gnode] (n3) at (-2.25,-2.4) {$3$};
+      \node[gnode] (n4) at (-0.75,-2.4) {$4$};
+      \node[gnode] (n5) at (0.75,-2.4) {$5$};
+      \node[gnode] (n6) at (2.25,-2.4) {$6$};
+      \draw (n0)--(n1) (n0)--(n2) (n1)--(n3) (n1)--(n4)
+            (n2)--(n5) (n2)--(n6);
+      \node[font=\small] at (0,-3.4) {\name};
+      \foreach \k [count=\i from 0] in \o {
+        \ifnum\i>2
+          \node[ord,below=0pt] at (n\i.south) {\k};
+        \else\ifnum\i=1
+          \node[ord,left=1pt] at (n\i.west) {\k};
+        \else
+          \node[ord,right=1pt] at (n\i.east) {\k};
+        \fi\fi}
+    \end{scope}
+  }
+\end{tikzpicture}
+\end{center}
+The small blue numbers give the order of the visits. The first order
+is called \emph{breadth-first search}, the second \emph{depth-first
+search}. Let us see both.
+
+\section{Breadth-first search}
+\label{sec:bfs}
+
+Breadth-first search (BFS) first visits $s$, then all the neighbours
+of $s$, then all the nodes at distance $2$, and so on. Each node must
+wait until all the nodes discovered before it have been visited: this
+is exactly the first in, first out rule of a
+\hyperref[def:queue-adt]{queue}. So we keep the discovered nodes that
+are still to be visited in a queue $Q$. While we are at it, we also
+record in $\mathit{dist}[v]$ the number of edges between $s$ and $v$.
+
+\Needspace{14\baselineskip}
+\begin{framedalgo}{Breadth-first search}\label{alg:bfs}
+\begin{algorithmic}[1]
+  \Function{BFS}{$G=(V,E)$, $s$}
+    \For{each $v\in V$}
+      \State $\mathit{explored}[v]\gets\mathrm{False}$
+      \State $\mathit{dist}[v]\gets+\infty$
+    \EndFor
+    \State $Q\gets$ an empty queue
+    \State $Q.\operatorname{enqueue}(s)$
+    \State $\mathit{explored}[s]\gets\mathrm{True}$
+    \State $\mathit{dist}[s]\gets0$
+    \While{$Q$ is not empty}
+      \State $v\gets Q.\operatorname{dequeue}()$
+      \For{each neighbour $u$ of $v$}
+        \If{not $\mathit{explored}[u]$}
+          \State $Q.\operatorname{enqueue}(u)$
+          \State $\mathit{explored}[u]\gets\mathrm{True}$
+          \State $\mathit{dist}[u]\gets\mathit{dist}[v]+1$
+        \EndIf
+      \EndFor
+    \EndWhile
+    \State \Return $\mathit{dist}$
+  \EndFunction
+\end{algorithmic}
+\end{framedalgo}
+
+We mark a node as explored as soon as we put it in the queue, so no
+node enters the queue twice. Line~7 does this for $s$ too; without it,
+$s$ would be discovered again from its own neighbours and would get
+$\mathit{dist}[s]=2$.
+
+Let us run BFS on the five-node graph of
+\hyperref[sec:graph-representation]{Section~16.7}, with edges
+\[
+  \{1,2\},\ \{1,4\},\ \{2,3\},\ \{2,4\},\ \{2,5\}
+\]
+and diameter $2$, starting from $s=1$. We read the neighbours in the order of the adjacency
+list. Which distances do we get?
+\begin{center}
+\small
+\begin{tabular}{llll}
+\hline
+Dequeued $v$ & Newly discovered $u$ & $\mathit{dist}[u]$ & $Q$, front to back\\
+\hline
+ & & $\mathit{dist}[1]=0$ & $1$\\
+$1$ & $2,4$ & $1$ & $2,4$\\
+$2$ & $3,5$ & $2$ & $4,3,5$\\
+$4$ & none & & $3,5$\\
+$3$ & none & & $5$\\
+$5$ & none & & empty\\
+\hline
+\end{tabular}
+\end{center}
+When $2$ is dequeued, its neighbours $1$ and $4$ are already explored,
+so only $3$ and $5$ enter the queue. The result, $\mathit{dist}[2]=
+\mathit{dist}[4]=1$ and $\mathit{dist}[3]=\mathit{dist}[5]=2$, matches
+the distances we found by looking at the picture. Why are they right?
+The queue holds the nodes in order of distance: all the nodes at
+distance $1$ leave it before the first node at distance $2$, and so
+on. So each node is discovered for the first time from a node as
+close to $s$ as possible.
+
+How long does BFS take? Every node enters and leaves the queue at most
+once, and when a node $v$ leaves we go through its neighbours. With an
+\hyperref[def:adjacency-list]{adjacency list}, the neighbours of $v$
+are exactly its list, of length $\deg(v)$. Over all the nodes, the
+lists have total length $2|E|$, since every edge appears in two lists.
+So BFS takes $O(|V|+|E|)$ time. With an
+\hyperref[def:adjacency-matrix]{adjacency matrix}, instead, to find
+the neighbours of $v$ we must read its whole row, $|V|$ entries, even
+if $v$ has only one neighbour, so BFS takes $O(|V|^2)$ time.
+
+\section{Depth-first search}
+\label{sec:dfs}
+
+Depth-first search (DFS) follows a path as far as it can. From the
+current node it moves to a neighbour not yet explored, from there to
+another one, and so on. When it reaches a node with no unexplored
+neighbours, it goes back to the last node that still has some, and
+continues from there. The node we continue from is always the one
+discovered most recently: this is the last in, first out rule of a
+\hyperref[def:stack-adt]{stack}. So DFS is BFS with a stack $S$ in
+place of the queue.
+
+\Needspace{18\baselineskip}
+\begin{framedalgo}{Depth-first search}\label{alg:dfs}
+\begin{algorithmic}[1]
+  \Function{DFS}{$G=(V,E)$, $s$}
+    \For{each $v\in V$}
+      \State $\mathit{explored}[v]\gets\mathrm{False}$
+    \EndFor
+    \State $S\gets$ an empty stack
+    \State $S.\operatorname{push}(s)$
+    \While{$S$ is not empty}
+      \State $v\gets S.\operatorname{pop}()$
+      \If{not $\mathit{explored}[v]$}
+        \State $\mathit{explored}[v]\gets\mathrm{True}$
+        \For{each neighbour $u$ of $v$}
+          \If{not $\mathit{explored}[u]$}
+            \State $S.\operatorname{push}(u)$
+          \EndIf
+        \EndFor
+      \EndIf
+    \EndWhile
+  \EndFunction
+\end{algorithmic}
+\end{framedalgo}
+
+Unlike BFS, here a node is marked as explored when it leaves the
+stack, not when it enters. So a node may be pushed several times, once
+from each neighbour visited before it, and line~8 skips the copies
+that come out after the first.
+
+\begin{notebox}[Correction to the source]
+In Gianmaria Romano's version, the inner loop sets
+$\mathit{explored}[u]\gets\mathrm{True}$ instead of pushing $u$. Then
+nothing but $s$ is ever pushed, and the search stops after visiting
+$s$. The algorithm above pushes $u$, as DFS requires.
+\end{notebox}
+
+Let us run DFS on the same graph, again from $s=1$:
+\begin{center}
+\small
+\begin{tabular}{lll}
+\hline
+Popped $v$ & Pushed & $S$, bottom to top\\
+\hline
+ & & $1$\\
+$1$ & $2,4$ & $2,4$\\
+$4$ & $2$ & $2,2$\\
+$2$ & $3,5$ & $2,3,5$\\
+$5$ & none & $2,3$\\
+$3$ & none & $2$\\
+$2$ & already explored & empty\\
+\hline
+\end{tabular}
+\end{center}
+The nodes are visited in the order $1,4,2,5,3$: from $1$ the search
+goes to $4$, then to $2$, then down to $5$, and only after coming back
+to $2$ does it visit $3$. The node $2$ is pushed twice, once from $1$
+and once from $4$; the second copy is popped at the end and skipped.
+
+Every node is visited once, and each visited node $v$ pushes at most
+$\deg(v)$ nodes, so at most $2|E|$ pushes and pops happen in total.
+With an adjacency list DFS takes $O(|V|+|E|)$ time, and with an
+adjacency matrix $O(|V|^2)$, exactly as BFS.
+
+Both searches visit the connected component of $s$, and nothing else.
+DFS is commonly used to find the connected components of a graph and
+to detect cycles.
 
 \end{document}
