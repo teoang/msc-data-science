@@ -3975,4 +3975,420 @@ There is, however, one important case where uncorrelated variables must
 also be independent: the multivariate Normal, which we will meet later.
 \end{itemize}
 
+\section{Observing and intervening}\label{sec:causation}
+
+Correlation is not causation, but then what is causation? Let us go back
+to the maps of the antennas and of the Covid cases. Both follow a third
+quantity, how many people live in an area, which acts on both. Can we
+write this situation with probability, and say precisely what it would
+mean for $X$ to cause $Y$?
+
+We have three variables:
+\begin{itemize}
+\item $X$, the possible cause we are interested in, such as the antennas
+or a medical treatment;
+\item $Y$, the response, such as the cases or the health of a patient;
+\item $\underline{U}$, other variables that act on both $X$ and $Y$, such
+as the population of an area. A variable of this kind is called a
+\textbf{confounder}.
+\end{itemize}
+As for the \hyperref[marginal]{hidden variables}, the product rule splits
+their joint distribution into a story in steps, one for each arrow of the
+graph on the left below:
+\[
+p(y,x,\underline{u})=p(\underline{u})\,p(x\mid\underline{u})\,p(y\mid x,\underline{u}).
+\]
+First $\underline{U}$ is drawn; then $X$, which depends on $\underline{U}$;
+then $Y$, which depends on both.
+
+\begin{framedexample}{Antennas, Covid cases and population}\label{ex:covid-5g}
+Let us take the maps of the antennas and of the Covid cases again. For
+each area of the United States, let
+\begin{itemize}
+\item $X$ be the number of 5G phone antennas, the possible cause;
+\item $Y$ be the number of Covid cases, the response;
+\item $U$ be the number of people who live there, the confounder.
+\end{itemize}
+Each factor of $p(y,x,u)=p(u)\,p(x\mid u)\,p(y\mid x,u)$ is one step of
+the story:
+\begin{enumerate}
+\item $p(u)$: first the area gets its population;
+\item $p(x\mid u)$: given the population, the phone companies decide how
+many antennas to install, and where more people live they install more;
+\item $p(y\mid x,u)$: given the population and the antennas, the virus
+spreads, and where more people live it finds more people to infect.
+\end{enumerate}
+So $U$ pushes both $X$ and $Y$ up, and $X$ and $Y$ are large together even
+if $p(y\mid x,u)$ does not depend on $x$ at all, that is, even if the
+antennas have no effect on the virus.
+\end{framedexample}
+
+\begin{center}
+\begin{tikzpicture}[>=Stealth,
+  var/.style={circle,draw,inner sep=1.5pt,minimum size=6mm},
+  fixed/.style={rectangle,draw,inner sep=2pt,minimum size=6mm}]
+  \node[var] (U) at (1.5,1.4) {$\underline{U}$};
+  \node[var] (X) at (0,0) {$X$};
+  \node[var] (Y) at (3,0) {$Y$};
+  \draw[->,thick] (U)--(X);
+  \draw[->,thick] (U)--(Y);
+  \draw[->,thick] (X)--(Y);
+  \node at (1.5,-.8) {observing};
+  \begin{scope}[xshift=6cm]
+  \node[var] (U2) at (1.5,1.4) {$\underline{U}$};
+  \node[fixed] (X2) at (0,0) {$x$};
+  \node[var] (Y2) at (3,0) {$Y$};
+  \draw[->,thick] (U2)--(Y2);
+  \draw[->,thick] (X2)--(Y2);
+  \node at (1.5,-.8) {intervening};
+  \end{scope}
+\end{tikzpicture}
+\end{center}
+
+The story in steps is also a recipe to simulate the data, called
+\emph{ancestral sampling}: we draw each variable after the ones it depends
+on.
+
+\begin{framedalgo}{Ancestral sampling, observing}\label{alg:ancestral-observe}
+For $m=1,\ldots,M$:
+\begin{enumerate}
+\item draw $\underline{u}_m\sim p(\underline{u})$;
+\item draw $x_m\sim p(x\mid\underline{u}_m)$;
+\item draw $y_m\sim p(y\mid\underline{u}_m,x_m)$.
+\end{enumerate}
+\end{framedalgo}
+
+Here we only watch: $X$ takes whatever value the confounder pushes it to.
+What if instead we \emph{set} $X$ ourselves, for example by installing an
+antenna, whatever $\underline{U}$ is? Then $\underline{U}$ no longer acts on $X$, and the
+arrow from $\underline{U}$ to $X$ disappears, as in the graph on the right.
+$X$ equals $x$ with probability $1$, which we write $\delta_x(X)$, and the
+joint distribution becomes
+\[
+p(y,x,\underline{u})=p(\underline{u})\,\delta_x(X)\,p(y\mid x,\underline{u}).
+\]
+
+\begin{framedalgo}{Ancestral sampling, intervening}\label{alg:ancestral-set}
+Set $X=x$. For $m=1,\ldots,M$:
+\begin{enumerate}
+\item draw $\underline{u}_m\sim p(\underline{u})$;
+\item draw $y_m\sim p(y\mid\underline{u}_m,x)$.
+\end{enumerate}
+\end{framedalgo}
+
+So there are two different questions we can ask about $Y$.
+
+\begin{frameddefn}{Conditioning by observation and by intervention}\label{def:observe-set}
+Having \emph{observed} $X=x$, how often is $Y=y$? This is
+\textbf{passive conditioning}, or conditioning by observation:
+\[
+p(y\mid\text{Observe }X=x)=\frac{p(y,x)}{p(x)} .
+\]
+Having \emph{set} $X=x$, how often is $Y=y$? This is \textbf{active
+conditioning}, or conditioning by intervention:
+\[
+p(y\mid\text{Set }X=x)=\int p(y\mid x,\underline{u})\,p(\underline{u})\,\mathrm{d}\underline{u} .
+\]
+\end{frameddefn}
+
+The first is the usual conditional distribution. Are the two the same?
+Let us write the first one through $\underline{U}$:
+\begin{align*}
+p(y\mid\text{Observe }X=x)
+&=\frac{\int p(y,x,\underline{u})\,\mathrm{d}\underline{u}}{p(x)}
+&&\text{integrate $\underline{U}$ out}\\
+&=\frac{\int p(\underline{u})\,p(x\mid\underline{u})\,p(y\mid x,\underline{u})\,\mathrm{d}\underline{u}}{p(x)}
+&&\text{product rule}\\
+&=\int p(y\mid x,\underline{u})\,\frac{p(x\mid\underline{u})\,p(\underline{u})}{p(x)}\,\mathrm{d}\underline{u}
+&&\text{$p(x)$ is constant in $\underline{u}$}\\
+&=\int p(y\mid x,\underline{u})\,p(\underline{u}\mid x)\,\mathrm{d}\underline{u}
+&&\text{Bayes' theorem}\\
+&\neq\int p(y\mid x,\underline{u})\,p(\underline{u})\,\mathrm{d}\underline{u}
+&&\text{in general}\\
+&=p(y\mid\text{Set }X=x)
+&&\text{\hyperref[def:observe-set]{intervention}.}
+\end{align*}
+Both average $p(y\mid x,\underline{u})$ over the confounder, but with
+different weights: observing uses $p(\underline{u}\mid x)$, setting uses
+$p(\underline{u})$. When we observe many antennas, we learn that the area
+is crowded, and a crowded area has many cases whatever the antennas do.
+When we install an antenna ourselves, we learn nothing about the
+population.
+
+\phantomsection\label{note:observe-equals-set}%
+So the two distributions are equal when the two weights are equal,
+\[
+p(\underline{u}\mid x)=p(\underline{u}),
+\]
+that is, when $X$ and $\underline{U}$ are independent: seeing $x$ tells us
+nothing about $\underline{U}$, and in the graph there is no arrow from
+$\underline{U}$ to $X$.
+
+\subsection{Causal estimands}\label{sec:causal-estimands}
+
+We now know how to describe an intervention. How do we turn it into a
+number that says whether a cause works, and how much? The language of
+causal effects comes from medicine, so from now on think of a drug.
+
+\noindent
+\begin{minipage}[c]{.3\linewidth}
+\centering
+\begin{tikzpicture}[>=Stealth,
+  var/.style={circle,draw,inner sep=1.5pt,minimum size=6mm}]
+  \node[var] (U) at (1.2,1.4) {$\underline{U}$};
+  \node[var] (X) at (0,0) {$X$};
+  \node[var] (Y) at (2.4,0) {$Y$};
+  \draw[->,thick] (U)--(X);
+  \draw[->,thick] (U)--(Y);
+  \draw[->,thick] (X)--(Y);
+\end{tikzpicture}
+\end{minipage}\hfill
+\begin{minipage}[c]{.66\linewidth}
+\begin{itemize}
+\item $X$ is the cause, the treatment, and for simplicity it is binary:
+$X=1$ if a patient takes the drug and $X=0$ if not;
+\item $Y$ is the response, for example $Y=1$ if the patient recovers and
+$Y=0$ if not;
+\item $\underline{U}$ are the confounders, for example how severe the
+illness is;
+\item an intervention is setting the value of $X$ ourselves, instead of
+only observing it.
+\end{itemize}
+\end{minipage}
+\medskip
+
+We want to answer the question ``does the drug work, and how much?'' with
+a single number. It concerns the whole population, not a single patient,
+like an expected value, and it measures an effect, not just an association.
+A number of this kind, which we want to learn from data, is called a
+\textbf{causal estimand}. There are many possible ones; the best known
+compares two interventions, ``everyone takes the drug'' and ``no one takes
+it''.
+
+\begin{frameddefn}{Average treatment effect}\label{def:ate}
+The \textbf{average treatment effect} (ATE) of $X$ on $Y$ is
+\[
+\psi=\mathbb{E}(Y\mid\text{Set }X=1)-\mathbb{E}(Y\mid\text{Set }X=0),
+\]
+where each expected value is taken under the distribution
+$p(y\mid\text{Set }X=x)$.
+\end{frameddefn}
+
+Think of two imaginary worlds with the same patients, so with the same
+confounders. In the first we give the drug to \emph{everyone}, in the
+second to \emph{no one}. $\mathbb{E}(Y\mid\text{Set }X=1)$ is the average
+response in the first world, $\mathbb{E}(Y\mid\text{Set }X=0)$ in the
+second, and $\psi$ is their difference. Since the two worlds differ only
+in the drug, $\psi$ is the effect of the drug alone. When $Y$ is binary,
+as in our example, \hyperref[cor:prob-expected]{its expected value is a
+probability}, $\mathbb{E}(Y\mid\text{Set }X=x)=P(Y=1\mid\text{Set }X=x)$, so
+$\psi$ is how much the drug raises the probability of recovering.
+
+In prediction and machine learning, instead, we usually look at a
+different quantity:
+\[
+\delta=\mathbb{E}(Y\mid\text{Observe }X=1)-\mathbb{E}(Y\mid\text{Observe }X=0),
+\]
+where the expected values are taken under the usual conditional
+distribution $p(y\mid x)$. This $\delta$ measures an \emph{association},
+not an effect. When are the two equal? When the treatment is assigned at
+random, for example by flipping a coin, $X$ does not depend on
+$\underline{U}$, so \hyperref[note:observe-equals-set]{$p(\underline{u}\mid x)=p(\underline{u})$} and
+$\psi=\delta$. This is called \emph{randomization}.
+
+We cannot always randomize, however, often for ethical reasons: if the
+illness is severe and the drug is believed to help, we cannot leave a
+seriously ill patient untreated because a coin said so.
+
+How do we solve this problem? We must work with observational data, and we need an assumption, called \textbf{no
+unmeasured confounding}: all the confounders $\underline{U}$ are observed
+together with $X$ and $Y$.
+
+In this ideal observational setup, can we still compute $\psi$? Let us
+rewrite each of its two terms with the definition of
+$p(y\mid\text{Set }X=x)$:
+\begin{align*}
+\mathbb{E}(Y\mid\text{Set }X=x)
+&=\int y\,\Big(\int p(y\mid x,\underline{u})\,p(\underline{u})\,\mathrm{d}\underline{u}\Big)\,\mathrm{d}y
+&&\text{definition of $p(y\mid\text{Set }X=x)$}\\
+&=\int\Big(\int y\,p(y\mid x,\underline{u})\,\mathrm{d}y\Big)\,p(\underline{u})\,\mathrm{d}\underline{u}
+&&\text{swap the integrals}\\
+&=\int\mu_x(\underline{u})\,p(\underline{u})\,\mathrm{d}\underline{u}
+&&\text{inner integral $=\mu_x(\underline{u})$,}
+\end{align*}
+where the inner integral is the
+\hyperref[def:conditional-x]{conditional expectation}
+\[
+\mu_x(\underline{u})=\mathbb{E}(Y\mid X=x,\underline{U}=\underline{u})
+=\int y\,p(y\mid x,\underline{u})\,\mathrm{d}y .
+\]
+Subtracting the term with $x=0$ from the one with $x=1$,
+\begin{align*}
+\psi
+&=\mathbb{E}(Y\mid\text{Set }X=1)-\mathbb{E}(Y\mid\text{Set }X=0)
+&&\text{\hyperref[def:ate]{average treatment effect}}\\
+&=\int\mu_1(\underline{u})\,p(\underline{u})\,\mathrm{d}\underline{u}
+-\int\mu_0(\underline{u})\,p(\underline{u})\,\mathrm{d}\underline{u}
+&&\text{the chain above, with $x=1$ and $x=0$}\\
+&=\int\big(\mu_1(\underline{u})-\mu_0(\underline{u})\big)\,p(\underline{u})\,\mathrm{d}\underline{u}.
+\end{align*}
+So $\psi$ is the difference between treated and untreated for each value
+of the confounders, averaged over the confounders. Everything in it
+depends only on $(Y,X,\underline{U})$, which we assumed observable: we can
+estimate it within a regression framework, possibly with very many
+confounders.
+
+\begin{todobox}
+Add the third part on causal estimands: it is missing from the lecture
+material.
+\end{todobox}
+
+\section{The best predictor}\label{sec:best-predictor}
+
+We have just seen that the effect of a cause can be estimated within a
+regression framework. What is regression, and what should a good
+predictor of $Y$ aim at? The \hyperref[def:conditional]{conditional
+expectation} comes back to answer.
+
+In \textbf{supervised learning} we observe pairs
+\[
+\begin{bmatrix}Y\\ \underline{X}\end{bmatrix}\sim p(y,\underline{x}),
+\]
+where $Y$ is the \textbf{response}, the quantity we want to predict, and
+$\underline{X}$ is the \textbf{feature vector}, the side information we
+use to predict it.
+
+By the product rule, the joint distribution splits in
+two ways:
+\[
+p(y,\underline{x})=p(y\mid\underline{x})\,p(\underline{x})
+\qquad\text{or}\qquad
+p(y,\underline{x})=p(\underline{x}\mid y)\,p(y).
+\]
+Methods that model the first factorization, focusing on
+$p(y\mid\underline{x})$, are called \textbf{discriminative}; methods that
+model the second, describing how the features are generated within each
+value of $y$, are called \textbf{generative}.
+
+Our goal is to find the best predictor of $Y$ as a function of
+$\underline{X}$, that is, a function $d(\underline{X})$. To say what
+``best'' means, we use the same two steps as in the
+\hyperref[sec:variational]{variational characterisations}:
+\begin{enumerate}
+\item pick a \hyperref[def:loss]{loss} $L\big(Y,d(\underline{X})\big)$,
+according to the nature of $Y$ and to the learning task;
+\item get its \hyperref[def:risk]{risk}, the expected loss over the joint
+distribution of $(Y,\underline{X})$:
+\[
+R(d)=\mathbb{E}_{(Y,\underline{X})}\,L\big(Y,d(\underline{X})\big).
+\]
+\end{enumerate}
+
+\begin{frameddefn}{Best predictor}\label{def:best-predictor}
+The \textbf{best predictor} of $Y$ given $\underline{X}$ is the function
+that minimises the risk among all functions of $\underline{X}$:
+\[
+d^*(\underline{X})=\operatorname*{arg\,min}_{\text{all }d(\underline{X})}R(d).
+\]
+\end{frameddefn}
+
+As for a single number, this is learning under perfect information: we
+assume we know $p(y,\underline{x})$. In practice we do not, but $d^*$ is
+the target a learning algorithm should try to reach. What is $d^*$ for
+the losses we know?
+
+\subsection{Square loss: the regression function}
+
+With the square loss, $L\big(Y,d(\underline{X})\big)=\big(Y-d(\underline{X})\big)^2$,
+the best predictor is the conditional expectation:
+\[
+d^*(\underline{X})=\mathbb{E}(Y\mid\underline{X}).
+\]
+Why? Once we fix $\underline{X}=\underline{x}$, we must predict $Y$ with a
+single number, and by the
+\hyperref[prop:mse]{variational characterisation of the expected value}
+the best one is the expected value of $Y$ under its distribution given
+$\underline{x}$, that is $\mathbb{E}(Y\mid\underline{X}=\underline{x})$.
+
+\begin{frameddefn}{Regression function}\label{def:regression-function}
+The function $r(\underline{x})=\mathbb{E}(Y\mid\underline{X}=\underline{x})$
+is called the \textbf{regression function}.
+\end{frameddefn}
+
+The regression function is the ideal learning target for a regression
+algorithm.
+
+\subsection{Abs loss: the conditional median}
+
+With the abs loss, $L\big(Y,d(\underline{X})\big)=\big|Y-d(\underline{X})\big|$,
+the same argument with the
+\hyperref[prop:mae]{variational characterisation of the median} gives the
+conditional median:
+\[
+d^*(\underline{X})=\mathrm{Med}(Y\mid\underline{X}).
+\]
+The idea extends to the other \hyperref[sec:median]{quantiles}: predicting
+a conditional quantile of $Y$ instead of its median is called
+\textbf{quantile regression}.
+
+\subsection{0-1 loss: the Bayes classifier}
+
+Now let $Y$ be not a real number but a label, $Y\in\{0,1\}$, with no
+restriction on $\underline{X}$. This is a binary \textbf{classification}
+task, and the natural loss is the 0-1 loss,
+\[
+L\big(Y,d(\underline{X})\big)=\mathbb{I}\big(Y\neq d(\underline{X})\big):
+\]
+we pay $0$ if we hit the label and $1$ otherwise. Its risk is the
+\textbf{probability of misclassification}:
+\[
+R(d)=\mathbb{E}\,\mathbb{I}\big(Y\neq d(\underline{X})\big)=P\big(Y\neq d(\underline{X})\big).
+\]
+Here $d(\underline{X})$ only takes the values $0$ and $1$: it is a
+\textbf{classifier}. Which one makes the fewest mistakes?
+
+Fix $\underline{X}=\underline{x}$. If we predict $1$, we are wrong with
+probability $P(Y=0\mid\underline{X}=\underline{x})$; if we predict $0$,
+with probability $P(Y=1\mid\underline{X}=\underline{x})$. So we should
+predict the label that is more likely given $\underline{x}$.
+
+\begin{frameddefn}{Bayes classifier}\label{def:bayes-classifier}
+The \textbf{Bayes classifier} is the best predictor under the 0-1 loss,
+\[
+d^*(\underline{x})=
+\begin{cases}
+1&\text{if }P(Y=1\mid\underline{X}=\underline{x})\geq\frac12,\\
+0&\text{otherwise,}
+\end{cases}
+\qquad\text{that is}\qquad
+d^*(\underline{x})=\mathbb{I}\Big(\mathbb{E}(Y\mid\underline{X}=\underline{x})\geq\tfrac12\Big).
+\]
+\end{frameddefn}
+
+The second form holds because $Y$ is binary, so
+\hyperref[cor:prob-expected]{its expected value is a probability}:
+$\mathbb{E}(Y\mid\underline{X}=\underline{x})=P(Y=1\mid\underline{X}=\underline{x})$.
+So the Bayes classifier only needs the
+\hyperref[def:regression-function]{regression function}: once we know it,
+we classify by checking whether it is above $\frac12$. In this sense
+classification is easier than regression.
+
+How can we compute $P(Y=1\mid\underline{X}=\underline{x})$? Write
+$\pi_1=P(Y=1)$ and $\pi_0=1-\pi_1$ for the probabilities of the two
+labels, and $p_1(\underline{x})=p(\underline{x}\mid Y=1)$ and
+$p_0(\underline{x})=p(\underline{x}\mid Y=0)$ for the distributions of the
+features within each label. Bayes' theorem gives
+\begin{align*}
+P(Y=1\mid\underline{X}=\underline{x})
+&=\frac{p_1(\underline{x})\,\pi_1}{p_1(\underline{x})\,\pi_1+p_0(\underline{x})\,\pi_0}
+&&\text{Bayes' theorem}\\
+&=\frac{1}{1+\dfrac{p_0(\underline{x})\,\pi_0}{p_1(\underline{x})\,\pi_1}}
+&&\text{divide by $p_1(\underline{x})\,\pi_1$.}
+\end{align*}
+This is at least $\frac12$ exactly when the ratio
+$p_0(\underline{x})\,\pi_0/\big(p_1(\underline{x})\,\pi_1\big)$ is at most
+$1$. So, to classify, it is enough to learn this ratio, which needs the
+densities $p_0$ and $p_1$ of the features within each label: in this
+sense classification is a problem of density estimation.
+
 \end{document}

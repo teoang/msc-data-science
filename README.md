@@ -197,8 +197,8 @@
 
 - [x] The correlation matrix.
 - [x] What the correlation does not see: guessing ρ from a cloud, slopes, nonlinear dependence with ρ = 0, spurious correlations; correlation is not causation, and zero correlation is not independence.
-- [ ] Observing versus setting a variable: confounders, ancestral sampling and the average treatment effect.
-- [ ] Conditional expectation strikes back: the best predictor, the regression function, the conditional median and the Bayes classifier.
+- [x] Observing versus setting a variable: confounders, ancestral sampling, conditioning by observation and by intervention, the average treatment effect and no unmeasured confounding.
+- [x] The best predictor: supervised learning, discriminative and generative methods, the regression function, the conditional median and quantile regression, the Bayes classifier and classification as density estimation.
 
 </details>
 
