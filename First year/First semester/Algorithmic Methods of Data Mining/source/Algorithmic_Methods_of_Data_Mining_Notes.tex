@@ -10396,8 +10396,8 @@ nodes:
 \begin{tikzpicture}[x=1cm,y=1cm]
   \node[gnode] (1) at (0,0.8) {$1$};
   \node[gnode] (2) at (1.5,0.8) {$2$};
-  \node[gnode] (3) at (0,-0.6) {$3$};
-  \node[gnode] (4) at (1.5,-0.6) {$4$};
+  \node[gnode] (3) at (1.5,-0.6) {$3$};
+  \node[gnode] (4) at (0,-0.6) {$4$};
   \node[gnode] (5) at (3,0.2) {$5$};
   \draw (1)--(2) (1)--(4) (2)--(3) (2)--(4) (2)--(5);
 \end{tikzpicture}
@@ -10540,41 +10540,76 @@ record in $\mathit{dist}[v]$ the number of edges between $s$ and $v$.
 \end{algorithmic}
 \end{framedalgo}
 
-We mark a node as explored as soon as we put it in the queue, so no
-node enters the queue twice. Line~7 does this for $s$ too; without it,
-$s$ would be discovered again from its own neighbours and would get
-$\mathit{dist}[s]=2$.
+We mark a node as explored as soon as it enters the queue, $s$
+included (line~7), so no node enters the queue twice.
 
-Let us run BFS on the five-node graph of
-\hyperref[sec:graph-representation]{Section~16.7}, with edges
-\[
-  \{1,2\},\ \{1,4\},\ \{2,3\},\ \{2,4\},\ \{2,5\}
-\]
-and diameter $2$, starting from $s=1$. We read the neighbours in the order of the adjacency
-list. Which distances do we get?
-\begin{center}
-\small
-\begin{tabular}{llll}
-\hline
-Dequeued $v$ & Newly discovered $u$ & $\mathit{dist}[u]$ & $Q$, front to back\\
-\hline
- & & $\mathit{dist}[1]=0$ & $1$\\
-$1$ & $2,4$ & $1$ & $2,4$\\
-$2$ & $3,5$ & $2$ & $4,3,5$\\
-$4$ & none & & $3,5$\\
-$3$ & none & & $5$\\
-$5$ & none & & empty\\
-\hline
-\end{tabular}
-\end{center}
-When $2$ is dequeued, its neighbours $1$ and $4$ are already explored,
-so only $3$ and $5$ enter the queue. The result, $\mathit{dist}[2]=
-\mathit{dist}[4]=1$ and $\mathit{dist}[3]=\mathit{dist}[5]=2$, matches
-the distances we found by looking at the picture. Why are they right?
-The queue holds the nodes in order of distance: all the nodes at
-distance $1$ leave it before the first node at distance $2$, and so
-on. So each node is discovered for the first time from a node as
-close to $s$ as possible.
+\newcommand{\trgraph}[3]{% node states 1..5, highlighted edges, labels
+  \begin{tikzpicture}[x=0.8cm,y=0.8cm,
+    u/.style={gnode},
+    w/.style={gnode,fill=yellow!45},
+    c/.style={gnode,fill=PlotRed!20,draw=PlotRed,very thick},
+    d/.style={gnode,fill=PlotBlue!30}]
+    \foreach \st [count=\i] in {#1} {
+      \ifcase\i\or\def\xy{(0,0.8)}\or\def\xy{(1.5,0.8)}\or
+        \def\xy{(1.5,-0.6)}\or\def\xy{(0,-0.6)}\or\def\xy{(3,0.1)}\fi
+      \node[\st] (n\i) at \xy {$\i$};}
+    \draw (n1)--(n2) (n1)--(n4) (n2)--(n3) (n2)--(n4) (n2)--(n5);
+    \if\relax\detokenize{#2}\relax\else
+      \foreach \x/\y in {#2} \draw[PlotRed,very thick] (n\x)--(n\y);\fi
+    \if\relax\detokenize{#3}\relax\else
+      \foreach \x/\l in {#3}
+        \node[font=\scriptsize,text=PlotBlue,above left=-3pt] at (n\x.north west) {\l};\fi
+  \end{tikzpicture}}
+\newcommand{\trbox}[2]{% name, items
+  \begin{tikzpicture}[x=0.5cm,y=0.5cm,baseline=(b.base)]
+    \node[anchor=east,font=\small] (b) at (-0.1,0) {#1};
+    \if\relax\detokenize{#2}\relax
+      \node[anchor=west,font=\small] at (0,0) {empty};
+    \else
+      \foreach \v [count=\j from 0] in {#2} {
+        \draw[fill=yellow!45] (\j,-0.5) rectangle (\j+1,0.5);
+        \node at (\j+0.5,0) {$\v$};}
+    \fi
+  \end{tikzpicture}}
+\newcommand{\trstep}[6]{% states, edges, labels, box name, box items, text
+  \par\noindent
+  \begin{minipage}[c]{0.4\textwidth}\centering
+    \trgraph{#1}{#2}{#3}\\[2pt]\trbox{#4}{#5}
+  \end{minipage}\hfill
+  \begin{minipage}[c]{0.56\textwidth}\small #6\end{minipage}
+  \par\medskip}
+
+Let us run BFS on the five-node graph we used for the
+\hyperref[def:adjacency-list]{adjacency list}, starting from $s=1$,
+and read the neighbours in the order of the list. In the drawings, a
+white node is still unseen, a yellow one is waiting in the queue, the
+red one is the node just dequeued, and a blue one is done. The small
+blue numbers are the distances found so far, and the red edges are the
+ones that discover a new node.
+
+\medskip
+\trstep{w,u,u,u,u}{}{1/0}{$Q$:}{1}
+  {\textbf{Start.} Enqueue $s=1$, mark it explored, set
+   $\mathit{dist}[1]=0$.}
+\trstep{c,w,u,w,u}{1/2,1/4}{1/0,2/1,4/1}{$Q$:}{2,4}
+  {\textbf{Dequeue $1$.} Its neighbours $2$ and $4$ are new: enqueue
+   them at distance $0+1=1$.}
+\trstep{d,c,w,w,w}{2/3,2/5}{1/0,2/1,4/1,3/2,5/2}{$Q$:}{4,3,5}
+  {\textbf{Dequeue $2$.} Its neighbours $1$ and $4$ are already
+   explored; $3$ and $5$ are new: enqueue them at distance $1+1=2$.}
+\trstep{d,d,w,c,w}{}{1/0,2/1,4/1,3/2,5/2}{$Q$:}{3,5}
+  {\textbf{Dequeue $4$.} Its neighbours $1$ and $2$ are explored:
+   nothing to add.}
+\trstep{d,d,c,d,w}{}{1/0,2/1,4/1,3/2,5/2}{$Q$:}{5}
+  {\textbf{Dequeue $3$.} Its only neighbour, $2$, is explored.}
+\trstep{d,d,d,d,c}{}{1/0,2/1,4/1,3/2,5/2}{$Q$:}{}
+  {\textbf{Dequeue $5$.} Nothing new, and the queue is empty: BFS
+   stops.}
+
+Why are the distances right? The queue holds the nodes in order of
+distance: all the nodes at distance $1$ leave it before the first
+node at distance $2$, and so on. So each node is discovered from a
+node as close to $s$ as possible.
 
 How long does BFS take? Every node enters and leaves the queue at most
 once, and when a node $v$ leaves we go through its neighbours.
@@ -10624,32 +10659,35 @@ place of the queue.
 \end{algorithmic}
 \end{framedalgo}
 
-Unlike BFS, here a node is marked as explored when it leaves the
-stack, not when it enters. So a node may be pushed several times, once
-from each neighbour visited before it, and line~8 skips the copies
-that come out after the first.
+Unlike BFS, a node is marked as explored when it leaves the stack,
+not when it enters. So a node may be pushed more than once, and
+line~8 skips the copies that come out after the first.
 
-Let us run DFS on the same graph, again from $s=1$:
-\begin{center}
-\small
-\begin{tabular}{lll}
-\hline
-Popped $v$ & Pushed & $S$, bottom to top\\
-\hline
- & & $1$\\
-$1$ & $2,4$ & $2,4$\\
-$4$ & $2$ & $2,2$\\
-$2$ & $3,5$ & $2,3,5$\\
-$5$ & none & $2,3$\\
-$3$ & none & $2$\\
-$2$ & already explored & empty\\
-\hline
-\end{tabular}
-\end{center}
-The nodes are visited in the order $1,4,2,5,3$: from $1$ the search
-goes to $4$, then to $2$, then down to $5$, and only after coming back
-to $2$ does it visit $3$. The node $2$ is pushed twice, once from $1$
-and once from $4$; the second copy is popped at the end and skipped.
+Let us run DFS on the same graph, again from $s=1$. The colours are
+as for BFS, with the stack in place of the queue (its top is on the
+right), and the small blue numbers now give the order of the visits.
+
+\medskip
+\trstep{w,u,u,u,u}{}{}{$S$:}{1}
+  {\textbf{Start.} Push $s=1$.}
+\trstep{c,w,u,w,u}{1/2,1/4}{1/1}{$S$:}{2,4}
+  {\textbf{Pop $1$.} It is new: visit it, and push its unexplored
+   neighbours $2$ and $4$.}
+\trstep{d,w,u,c,u}{4/2}{1/1,4/2}{$S$:}{2,2}
+  {\textbf{Pop $4$}, the top. Visit it and push its unexplored
+   neighbour $2$, which is now in the stack twice.}
+\trstep{d,c,w,d,w}{2/3,2/5}{1/1,4/2,2/3}{$S$:}{2,3,5}
+  {\textbf{Pop $2$.} Visit it and push $3$ and $5$: the search goes
+   deeper from $2$ instead of finishing $1$'s neighbours.}
+\trstep{d,d,w,d,c}{}{1/1,4/2,2/3,5/4}{$S$:}{2,3}
+  {\textbf{Pop $5$.} Visit it; its only neighbour, $2$, is explored.
+   Dead end: back to the next node on the stack.}
+\trstep{d,d,c,d,d}{}{1/1,4/2,2/3,5/4,3/5}{$S$:}{2}
+  {\textbf{Pop $3$.} Visit it; nothing to push.}
+\trstep{d,d,d,d,d}{}{1/1,4/2,2/3,5/4,3/5}{$S$:}{}
+  {\textbf{Pop $2$.} This is the second copy, and $2$ is already
+   explored: skip it. The stack is empty: DFS stops, after visiting
+   $1,4,2,5,3$.}
 
 Every node is visited once, and each visited node $v$ pushes at most
 $\deg(v)$ nodes, so at most $2|E|$ pushes and pops happen in total.
