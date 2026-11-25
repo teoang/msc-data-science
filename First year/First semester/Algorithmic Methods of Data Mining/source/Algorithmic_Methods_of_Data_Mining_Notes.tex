@@ -10201,13 +10201,22 @@ dropped by choice: both their ends are still in $V'$.
 How do we move around a graph? We go from
 node to node along edges.
 
-\begin{frameddefn}{Path, simple path and cycle}\label{def:path}
+\begin{frameddefn}{Path}\label{def:path}
 A \emph{path} is a sequence of edges
 $\{u_0,u_1\},\{u_1,u_2\},\ldots,\{u_{k-1},u_k\}$, in which each edge
 starts where the previous one ends; it goes from the node $u_0$ to the
-node $u_k$. A path is \emph{simple} if each node appears in it only
-once. A \emph{cycle} is a path whose first and last nodes coincide,
-$u_0=u_k$, and which is otherwise simple.
+node $u_k$.
+\end{frameddefn}
+
+\begin{frameddefn}{Simple path}\label{def:simple-path}
+A \hyperref[def:path]{path} is \emph{simple} if each node appears in
+it only once.
+\end{frameddefn}
+
+\begin{frameddefn}{Cycle}\label{def:cycle}
+A \emph{cycle} is a \hyperref[def:path]{path} whose first and last
+nodes coincide, $u_0=u_k$, and which is otherwise
+\hyperref[def:simple-path]{simple}.
 \end{frameddefn}
 
 Let us take the graph $G$ of the subgraph example again and draw one
@@ -10256,11 +10265,15 @@ Can we always reach every node from every other? Not necessarily: in
 the first graph of \hyperref[sec:graph-definitions]{Section 16.1} no
 edge reaches $v_5$.
 
-\begin{frameddefn}{Connected graph and connected components}
-\label{def:connected-component}
+\begin{frameddefn}{Connected graph}\label{def:connected-graph}
 An undirected graph is \emph{connected} if there is a path between
-any two of its nodes, and \emph{disconnected} otherwise. A
-\emph{connected component} is a connected subgraph that no other node
+any two of its nodes, and \emph{disconnected} otherwise.
+\end{frameddefn}
+
+\begin{frameddefn}{Connected component}
+\label{def:connected-component}
+A \emph{connected component} is a
+\hyperref[def:connected-graph]{connected} subgraph that no other node
 can join while staying connected.
 \end{frameddefn}
 
@@ -10283,12 +10296,20 @@ the right, and no path joins them:
 \section{Neighbours and degree}
 \label{sec:graph-degree}
 
-\begin{frameddefn}{Neighbours and degree}\label{def:degree}
+\begin{frameddefn}{Neighbours}\label{def:neighbours}
 Two nodes $v_1$ and $v_2$ are \emph{neighbours} if they are joined by
-an edge. The \emph{degree} of a node is the number of its neighbours.
-In a directed graph, a node has an \emph{out-degree}, the number of
-arcs that leave it, and an \emph{in-degree}, the number of arcs that
-enter it.
+an edge.
+\end{frameddefn}
+
+\begin{frameddefn}{Degree}\label{def:degree}
+The \emph{degree} of a node is the number of its
+\hyperref[def:neighbours]{neighbours}.
+\end{frameddefn}
+
+\begin{frameddefn}{Out-degree and in-degree}\label{def:in-out-degree}
+In a directed graph, the \emph{out-degree} of a node is the number of
+arcs that leave it, and its \emph{in-degree} is the number of arcs
+that enter it.
 \end{frameddefn}
 
 Let us draw again the \hyperref[def:directed-graph]{directed graph}
@@ -10320,9 +10341,14 @@ out-degree $1$ and in-degree $2$.
 \section{Forests and trees}
 \label{sec:forests-trees}
 
-\begin{frameddefn}{Forest and tree}\label{def:tree}
-A \emph{forest} is a graph that contains no cycles, that is, an
-\emph{acyclic} graph. A \emph{tree} is a connected acyclic graph.
+\begin{frameddefn}{Forest}\label{def:forest}
+A \emph{forest} is a graph that contains no
+\hyperref[def:cycle]{cycles}, that is, an \emph{acyclic} graph.
+\end{frameddefn}
+
+\begin{frameddefn}{Tree}\label{def:tree}
+A \emph{tree} is a \hyperref[def:connected-graph]{connected}
+\hyperref[def:forest]{acyclic} graph.
 \end{frameddefn}
 
 Each connected component of a forest is connected and acyclic, so it
@@ -10351,10 +10377,14 @@ How far apart can two nodes of a graph be? We measure the distance
 between two nodes by the number of edges of the shortest path between
 them.
 
-\begin{frameddefn}{Distance and diameter}\label{def:diameter}
+\begin{frameddefn}{Distance}\label{def:distance}
 In a connected graph, the \emph{distance} between two nodes is the
-number of edges of a shortest path between them. The \emph{diameter}
-of the graph is the largest distance between two of its nodes.
+number of edges of a shortest path between them.
+\end{frameddefn}
+
+\begin{frameddefn}{Diameter}\label{def:diameter}
+The \emph{diameter} of a connected graph is the largest
+\hyperref[def:distance]{distance} between two of its nodes.
 \end{frameddefn}
 
 \section{Representing a graph}
@@ -10547,12 +10577,14 @@ on. So each node is discovered for the first time from a node as
 close to $s$ as possible.
 
 How long does BFS take? Every node enters and leaves the queue at most
-once, and when a node $v$ leaves we go through its neighbours. With an
-\hyperref[def:adjacency-list]{adjacency list}, the neighbours of $v$
+once, and when a node $v$ leaves we go through its neighbours.
+
+With an \hyperref[def:adjacency-list]{adjacency list}, the neighbours of $v$
 are exactly its list, of length $\deg(v)$. Over all the nodes, the
 lists have total length $2|E|$, since every edge appears in two lists.
-So BFS takes $O(|V|+|E|)$ time. With an
-\hyperref[def:adjacency-matrix]{adjacency matrix}, instead, to find
+So BFS takes $O(|V|+|E|)$ time.
+
+With an \hyperref[def:adjacency-matrix]{adjacency matrix}, instead, to find
 the neighbours of $v$ we must read its whole row, $|V|$ entries, even
 if $v$ has only one neighbour, so BFS takes $O(|V|^2)$ time.
 
@@ -10596,13 +10628,6 @@ Unlike BFS, here a node is marked as explored when it leaves the
 stack, not when it enters. So a node may be pushed several times, once
 from each neighbour visited before it, and line~8 skips the copies
 that come out after the first.
-
-\begin{notebox}[Correction to the source]
-In Gianmaria Romano's version, the inner loop sets
-$\mathit{explored}[u]\gets\mathrm{True}$ instead of pushing $u$. Then
-nothing but $s$ is ever pushed, and the search stops after visiting
-$s$. The algorithm above pushes $u$, as DFS requires.
-\end{notebox}
 
 Let us run DFS on the same graph, again from $s=1$:
 \begin{center}
