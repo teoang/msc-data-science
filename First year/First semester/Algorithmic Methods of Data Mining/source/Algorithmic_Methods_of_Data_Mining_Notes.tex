@@ -54,6 +54,11 @@
 \newcommand{\pqinsertop}[1]{\cul{ListInsert}{\operatorname{insert}(#1)}}
 \newcommand{\pqpeekop}[1]{\cul{ListGet}{\operatorname{peek#1}()}}
 \newcommand{\pqextractop}[1]{\cul{ListRemove}{\operatorname{extract#1}()}}
+% Queues and stacks reuse the insertion and removal colours.
+\newcommand{\qenqueueop}[1]{\cul{ListInsert}{\operatorname{enqueue}(#1)}}
+\newcommand{\qdequeueop}{\cul{ListRemove}{\operatorname{dequeue}()}}
+\newcommand{\spushop}[1]{\cul{ListInsert}{\operatorname{push}(#1)}}
+\newcommand{\spopop}{\cul{ListRemove}{\operatorname{pop}()}}
 
 % Yellow lecture banner with the same space above and below it. A heading
 % or a box right after the banner adds its own space, so that much is taken back.
@@ -310,7 +315,7 @@ involves.
 \end{center}
 \end{framedexample}
 
-\subsection{Ordered data and graph data}
+\subsection{Ordered data and graph data}\label{sec:ordered-graph-data}
 
 In \emph{ordered data} the order of the entries is essential. A genomic
 sequence such as \texttt{GGTTCCGCTTCA}\ldots{} is an ordered string of
@@ -9628,6 +9633,689 @@ the residuals. Projecting onto the diagonal $\vec v$ instead left
 $0.86$, the $6\,\mathrm{Var}_{\vec w}(A)$ of
 \hyperref[sec:total-variance]{Section 14.6}.
 
+\lecturestart{19 November}
+
+\section{Reducing the data to \texorpdfstring{$k$}{k} coordinates}
+\label{sec:reduce-k-coordinates}
+
+The \hyperref[thm:best-rank-k]{best rank-$k$ approximation} $A_k$
+replaces every point with a point close to it, but each new point
+still has $d$ coordinates. In
+\hyperref[sec:projection-subspace]{Section 14.4}, instead, projecting
+onto $k$ orthonormal directions gave us two things: the projected
+points $AV_kV_k^{\mathsf T}$ and, more importantly, their $k$
+coordinates $AV_k$. Is $A_k$ a projection too? For $k=1$ we found
+$A_1=A\vec v_1\vec v_1^{\mathsf T}$. Let us take
+$V_k=(\vec v_1\ \cdots\ \vec v_k)$, the first $k$ right singular
+vectors as columns, and check that the same holds for every $k$:
+\[
+\begin{aligned}
+  AV_kV_k^{\mathsf T}
+    &=A\sum_{i=1}^{k}\vec v_i\vec v_i^{\mathsf T}
+      &&\quad\text{as a \hyperref[sec:matrix-outer-products]{sum of outer products}},\\
+    &=\sum_{i=1}^{k}(A\vec v_i)\,\vec v_i^{\mathsf T}
+      &&\quad\text{by distributivity and associativity},\\
+    &=\sum_{i=1}^{k}\sigma_i\,\vec u_i\vec v_i^{\mathsf T}
+      &&\quad\text{since } A\vec v_i=\sigma_i\vec u_i,\\
+    &=A_k .
+\end{aligned}
+\]
+So the best rank-$k$ approximation is the
+\hyperref[def:projection-subspace]{projection} of the data onto the
+first $k$ right singular vectors. Their coordinates form the matrix
+\[
+  AV_k=\begin{pmatrix}
+    A_{(1)}V_k\\ A_{(2)}V_k\\ \vdots\\ A_{(m)}V_k
+  \end{pmatrix}\in\R^{m\times k},
+\]
+whose row $i$ describes point $i$ with $k$ numbers instead of $d$.
+This smaller matrix is the reduced dataset that PCA produces, and the
+directions $\vec v_1,\ldots,\vec v_k$ are the \emph{principal
+components}.
+
+We measured the error with the Frobenius norm. The same matrix $A_k$
+is also the best one for the
+\hyperref[def:spectral-norm]{spectral norm}: it minimises
+$\norm{A-X}_2$ over all the matrices $X$ of rank at most $k$. We
+state this without proof as well.
+
+\section{Normalization}
+\label{sec:normalization}
+
+Before computing the SVD, we have to prepare the data. The first step
+we already know: everything we said about variance assumed
+\hyperref[sec:centring]{centred} data. So we subtract the centroid
+$\vec c=\frac1m\sum_{i=1}^{m}A_{(i)}$ from every row:
+\[
+  A=\begin{pmatrix}
+    \text{---}\ A_{(1)}\ \text{---}\\ \vdots\\ \text{---}\ A_{(m)}\ \text{---}
+  \end{pmatrix}
+  \quad\longrightarrow\quad
+  \begin{pmatrix}
+    \text{---}\ A_{(1)}-\vec c\ \text{---}\\ \vdots\\
+    \text{---}\ A_{(m)}-\vec c\ \text{---}
+  \end{pmatrix}.
+\]
+
+Is centring enough? Each column of $A$ is a feature measured in its
+own unit, and the unit is our choice. Take five people with weight
+$55,62,70,78,85$ kg and height $160,168,172,180,190$ cm. After
+centring, the weights are $-15,-8,0,8,15$ and the heights are
+$-14,-6,-2,6,16$: both features spread over similar ranges, and the
+direction of largest variance is
+$\vec v_1\approx(0.72,0.69)^{\mathsf T}$, close to the diagonal. Now
+we write the weight in grams instead of kilograms. The weights become
+$-15000,-8000,0,8000,15000$, the heights do not change, and the cloud
+is stretched a thousand times along the weight axis:
+\begin{center}
+\begin{tikzpicture}[x=0.12cm,y=0.12cm,>=Stealth]
+  \draw[->,gray] (-20,0)--(20,0) node[right,black,font=\small] {$w$ (kg)};
+  \draw[->,gray] (0,-18)--(0,20) node[above,black,font=\small] {$h$ (cm)};
+  \foreach \a/\b in {-15/-14,-8/-6,0/-2,8/6,15/16}
+    \fill (\a,\b) circle (1.8pt);
+  \draw[->,PlotGreen,very thick] (0,0)--(7.2,6.9)
+    node[above left=-1pt] {$\vec v_1$};
+  \begin{scope}[xshift=7cm]
+    \draw[->,gray] (-20,0)--(20,0) node[right,black,font=\small] {$w$ (g)};
+    \draw[->,gray] (0,-18)--(0,20) node[above,black,font=\small] {$h$ (cm)};
+    \foreach \a in {-15,-8,0,8,15}
+      \fill (\a,0) circle (1.8pt);
+    \node[font=\scriptsize,gray!80!black] at (-15,-3) {$-15000$};
+    \node[font=\scriptsize,gray!80!black] at (15,-3) {$15000$};
+    \draw[->,PlotGreen,very thick] (0,0)--(10,0)
+      node[above=1pt] {$\vec v_1$};
+  \end{scope}
+\end{tikzpicture}
+\end{center}
+On the right the horizontal axis is compressed by a factor of $1000$
+to fit the page, so the heights, which vary by only a few units,
+flatten onto the axis. Now
+$\vec v_1\approx(1.00,0.00)^{\mathsf T}$: the direction of largest
+variance follows the weight alone and ignores the height. Nothing
+changed in the people, only in the unit, yet PCA gives a different
+answer.
+
+To remove the effect of the units, we bring every column to the same
+scale. After centring, we divide each entry by the size of its
+column:
+
+\begin{frameddefn}{Scaling the columns}
+\label{def:column-scaling}
+Let $A\in\R^{m\times d}$ be centred. Scaling replaces every entry
+$A_{ij}$ with
+\[
+  \frac{A_{ij}}{\sqrt{\dfrac1m\displaystyle\sum_{l=1}^{m}A_{lj}^2}} .
+\]
+\end{frameddefn}
+
+For centred data, the denominator is the square root of the
+\hyperref[def:empirical-variance]{empirical variance} of column $j$,
+so after scaling every column has variance $1$. Why does this remove
+the unit? Measuring a feature in grams instead of kilograms multiplies
+every entry of its column by $1000$; the denominator is multiplied by
+$\sqrt{1000^2}=1000$ as well, and the ratio does not change. In the
+example the weights and the heights are divided by about $10.75$ and
+$10.28$, and after scaling
+$\vec v_1\approx(0.71,0.71)^{\mathsf T}$ whether we started from
+kilograms or from grams.
+
 \endgroup
+
+\chapter{Data structures, part 2}\label{ch:data-structures-2}
+
+The \hyperref[def:list-adt]{list ADT} lets us read, insert and remove
+an element at any position. Many tasks need much less. Think of people
+waiting at a counter: they arrive one at a time, and they are served
+in the order in which they arrived. Nobody is inserted in the middle,
+and nobody is served out of turn. For tasks like this, two operations
+are enough, and with only two operations we can hope to make both of
+them fast.
+
+\section{The queue ADT}
+\label{sec:queue-adt}
+
+\begin{frameddefn}{Queue (ADT)}\label{def:queue-adt}
+A \emph{queue} $Q$ stores a sequence of elements and supports two
+operations:
+\begin{enumerate}
+  \item \qenqueueop{x}: insert $x$ into the queue;
+  \item \qdequeueop: remove and return the oldest element still in
+    the queue.
+\end{enumerate}
+\end{frameddefn}
+
+The element that leaves is always the one that entered first, so a
+queue is also called a FIFO structure: \emph{first in, first out}.
+Elements enter at one end, the back, and leave from the other, the
+front. For example:
+\begin{center}
+\small
+\renewcommand{\arraystretch}{1.35}
+\begin{tabular}{lcl}
+\hline
+Operation & Returns & Queue, front to back\\
+\hline
+\qenqueueop{3} & & $3$\\
+\qenqueueop{7} & & $3,7$\\
+\qenqueueop{6} & & $3,7,6$\\
+\qdequeueop & $3$ & $7,6$\\
+\qenqueueop{8} & & $7,6,8$\\
+\qdequeueop & $7$ & $6,8$\\
+\qdequeueop & $6$ & $8$\\
+\hline
+\end{tabular}
+\end{center}
+
+As for lists, the ADT says what the operations do, not how. How do we
+implement a queue?
+
+\subsection{A queue in an array}
+
+The first idea is to store the queue in an
+\hyperref[def:array]{array}, with the front at position $1$. Then
+\qenqueueop{x} writes $x$ in the first free slot after the last
+element, which takes $\Theta(1)$ time. \qdequeueop, however, removes
+the element at position $1$, so all the others must shift one place
+to the left, as in \listremoveop{1}. Let us take the queue $3,7,6$
+from the example and dequeue:
+\begin{center}
+\begin{tikzpicture}[font=\small,>=stealth,x=0.9cm,y=1cm]
+  \node[anchor=east] at (-0.7,0) {Before};
+  \foreach \v [count=\i] in {3,7,6} {
+    \draw[fill=PlotBlue!10] (\i-1.5,-0.3) rectangle (\i-0.5,0.3);
+    \node at (\i-1,0) {$\v$};
+    \node[above] at (\i-1,0.3) {$\i$};
+  }
+  \foreach \i in {4,...,8} \draw (\i-1.5,-0.3) rectangle (\i-0.5,0.3);
+  \node[anchor=east] at (-0.7,-1.5) {After};
+  \foreach \v [count=\i] in {7,6} {
+    \draw[fill=PlotBlue!10] (\i-1.5,-1.8) rectangle (\i-0.5,-1.2);
+    \node at (\i-1,-1.5) {$\v$};
+  }
+  \foreach \i in {3,...,8} \draw (\i-1.5,-1.8) rectangle (\i-0.5,-1.2);
+  \foreach \i in {1,2}
+    \draw[->,PlotBlue,thick] (\i,-0.4) -- (\i-1,-1.1);
+  \draw[->,PlotRed,thick] (-0.3,-0.4) -- (-0.75,-0.75) node[left] {$3$ out};
+\end{tikzpicture}
+\end{center}
+With $n$ elements in the queue, each \qdequeueop{} moves $n-1$ of
+them, so it takes $\Theta(n)$ time.
+
+\subsection{A queue in a linked list}
+
+Can we avoid the shifting? In a
+\hyperref[def:singly-linked-list]{singly linked list} we keep a
+reference to the first node, the front, and one to the last node,
+the back:
+\begin{center}
+\begin{tikzpicture}[font=\small,>=stealth,
+  cell/.style={draw,rounded corners,fill=PlotBlue!10,
+    minimum width=1.4cm,minimum height=0.75cm}]
+  \node[cell] (a) at (0,0) {$3\mid\bullet$};
+  \node[cell] (b) at (2.8,0) {$7\mid\bullet$};
+  \node[cell] (c) at (5.6,0) {$6\mid\bullet$};
+  \node (nil) at (7.6,0) {$\varnothing$};
+  \draw[->,thick] (a) -- (b);
+  \draw[->,thick] (b) -- (c);
+  \draw[->,thick] (c) -- (nil);
+  \node (first) at (0,1.2) {first};
+  \node (last) at (5.6,1.2) {last};
+  \draw[->,thick] (first) -- (a);
+  \draw[->,thick] (last) -- (c);
+\end{tikzpicture}
+\end{center}
+\qdequeueop{} removes the first node: we move the reference
+\emph{first} to the next node, and $7$ automatically becomes the
+front, without moving any element:
+\begin{center}
+\begin{tikzpicture}[font=\small,>=stealth,
+  cell/.style={draw,rounded corners,fill=PlotBlue!10,
+    minimum width=1.4cm,minimum height=0.75cm}]
+  \node[cell,fill=none,draw=black!35,text=black!45] (a) at (0,0) {$3\mid\bullet$};
+  \node[cell] (b) at (2.8,0) {$7\mid\bullet$};
+  \node[cell] (c) at (5.6,0) {$6\mid\bullet$};
+  \node (nil) at (7.6,0) {$\varnothing$};
+  \draw[->,thick,black!35] (a) -- (b);
+  \draw[->,thick] (b) -- (c);
+  \draw[->,thick] (c) -- (nil);
+  \node (first) at (2.8,1.2) {first};
+  \node (last) at (5.6,1.2) {last};
+  \draw[->,very thick,PlotGreen] (first) -- (b);
+  \draw[->,thick] (last) -- (c);
+  \draw[->,dashed,black!45] (0,1.2) node[above,black!45] {old first} -- (a);
+  \node[PlotRed,below=0.25cm of a] {returns $3$};
+\end{tikzpicture}
+\end{center}
+\qenqueueop{x} creates a node for $x$, links it after the node that
+\emph{last} points to, and moves \emph{last} to the new node. For
+\qenqueueop{8}:
+\begin{center}
+\begin{tikzpicture}[font=\small,>=stealth,
+  cell/.style={draw,rounded corners,fill=PlotBlue!10,
+    minimum width=1.4cm,minimum height=0.75cm}]
+  \node[cell] (b) at (0,0) {$7\mid\bullet$};
+  \node[cell] (c) at (2.8,0) {$6\mid\bullet$};
+  \node[cell,fill=PlotGreen!15] (d) at (5.6,0) {$8\mid\bullet$};
+  \node (nil) at (7.6,0) {$\varnothing$};
+  \draw[->,thick] (b) -- (c);
+  \draw[->,very thick,PlotGreen] (c) -- (d);
+  \draw[->,thick] (d) -- (nil);
+  \node (first) at (0,1.2) {first};
+  \node (last) at (5.6,1.2) {last};
+  \draw[->,thick] (first) -- (b);
+  \draw[->,very thick,PlotGreen] (last) -- (d);
+  \draw[->,dashed,black!45] (2.8,1.2) node[above,black!45] {old last} -- (c);
+\end{tikzpicture}
+\end{center}
+Both operations change a constant number of references, so both take
+$\Theta(1)$ time.
+
+\subsection{A circular array}
+
+Can we get the same costs with an array? The array was slow because
+it kept the front at position $1$. Instead, we let the front move: we
+keep two indices, \emph{first}, the position of the front, and
+\emph{last}, the position of the back. Here an array with $10$ slots,
+numbered $0,\ldots,9$, holds the queue $3,7,8,2,3$:
+\begin{center}
+\begin{tikzpicture}[font=\small,>=stealth,x=0.75cm,y=1cm]
+  \newcommand{\qrow}[4]{% y, first slot, values, label
+    \node[anchor=east] at (-0.7,#1) {#4};
+    \foreach \i in {0,...,9}
+      \draw (\i-0.5,#1-0.3) rectangle (\i+0.5,#1+0.3);
+    \foreach \v [count=\j from #2] in {#3} {
+      \draw[fill=PlotBlue!10] (\j-0.5,#1-0.3) rectangle (\j+0.5,#1+0.3);
+      \node at (\j,#1) {$\v$};}}
+  \qrow{0}{0}{3,7,8,2,3}{Start}
+  \foreach \i in {0,...,9} \node[above,font=\scriptsize,gray!80!black] at (\i,0.3) {$\i$};
+  \node[below,font=\scriptsize] at (0,-0.3) {first};
+  \node[below,font=\scriptsize] at (4,-0.3) {last};
+  \qrow{-1.5}{0}{3,7,8,2,3,6}{$\operatorname{enqueue}(6)$}
+  \draw[very thick,PlotGreen] (4.5,-1.8) rectangle (5.5,-1.2);
+  \node[below,font=\scriptsize] at (0,-1.8) {first};
+  \node[below,font=\scriptsize] at (5,-1.8) {last};
+  \qrow{-3}{1}{7,8,2,3,6}{$\operatorname{dequeue}()$}
+  \node[below,font=\scriptsize] at (1,-3.3) {first};
+  \node[below,font=\scriptsize] at (5,-3.3) {last};
+\end{tikzpicture}
+\end{center}
+To enqueue $6$, we write it in the slot after \emph{last} and move
+\emph{last} one place to the right. To dequeue, we return the element
+at \emph{first}, here $3$, and move \emph{first} one place to the
+right. The slot left behind is simply ignored. No element moves, so
+both operations take $\Theta(1)$ time.
+
+The queue drifts to the right as we use it. What happens when
+\emph{last} reaches slot $9$? The slots at the beginning, freed by
+the earlier dequeues, are empty, so we continue from slot $0$: after
+slot $N-1$ comes slot $0$ again, like Pac-Man leaving the screen on
+the right and reappearing on the left. In formulas, with $N$ slots,
+the slot after $i$ is $(i+1)\bmod N$. It is as if the array were
+closed into a ring:
+\begin{center}
+\begin{tikzpicture}[font=\small,>=stealth]
+  \foreach \i/\v in {0/2,1/6,2/,3/,4/,5/3,6/7,7/8} {
+    \pgfmathsetmacro{\a}{90-\i*45}
+    \pgfmathsetmacro{\b}{\a-45}
+    \ifx\v\empty
+      \draw (\a:1) arc (\a:\b:1) -- (\b:1.7) arc (\b:\a:1.7) -- cycle;
+    \else
+      \draw[fill=PlotBlue!10] (\a:1) arc (\a:\b:1) -- (\b:1.7) arc (\b:\a:1.7) -- cycle;
+      \node at (\a-22.5:1.35) {$\v$};
+    \fi
+    \node[font=\scriptsize,gray!80!black] at (\a-22.5:1.95) {$\i$};
+  }
+  \draw[<-,thick] (202.5:1.75) -- (202.5:2.6) node[left] {first};
+  \draw[<-,thick] (22.5:1.75) -- (22.5:2.6) node[right] {last};
+\end{tikzpicture}
+\end{center}
+Here $N=8$ and the queue is $3,7,8,2,6$: it starts at slot $5$ and,
+after slot $7$, continues at slots $0$ and $1$. As long as the queue
+never holds more than $N$ elements, the ring has room for it.
+
+\section{The stack ADT}
+\label{sec:stack-adt}
+
+A queue serves the oldest element first. Sometimes we want the
+opposite: think of a pile of plates, where we always put a plate on
+top and always take the one on top, the last one we put down.
+
+\begin{frameddefn}{Stack (ADT)}\label{def:stack-adt}
+A \emph{stack} $S$ stores a sequence of elements and supports two
+operations:
+\begin{enumerate}
+  \item \spushop{x}: insert $x$ on the top of the stack;
+  \item \spopop: remove and return the element on the top of the
+    stack.
+\end{enumerate}
+\end{frameddefn}
+
+The element that leaves is always the one that entered last, so a
+stack is also called a LIFO structure: \emph{last in, first out}. For
+example:
+\begin{center}
+\small
+\renewcommand{\arraystretch}{1.35}
+\begin{tabular}{lcl}
+\hline
+Operation & Returns & Stack, bottom to top\\
+\hline
+\spushop{3} & & $3$\\
+\spushop{4} & & $3,4$\\
+\spushop{-1} & & $3,4,-1$\\
+\spushop{3} & & $3,4,-1,3$\\
+\spopop & $3$ & $3,4,-1$\\
+\spushop{5} & & $3,4,-1,5$\\
+\spopop & $5$ & $3,4,-1$\\
+\spopop & $-1$ & $3,4$\\
+\hline
+\end{tabular}
+\end{center}
+Unlike a queue, a stack inserts and removes at the same end, the top.
+
+\chapter{Graphs}\label{ch:graphs}
+
+\tikzset{gnode/.style={circle,draw,fill=PlotBlue!10,inner sep=1.5pt,
+  minimum size=6mm,font=\small}}
+
+In \hyperref[sec:ordered-graph-data]{graph data}, objects are nodes and
+relations between them are edges: pages and the links between them,
+people and their friendships, cities and the roads that connect them.
+Such a collection of objects and relations is also called a
+\emph{network}. Sometimes a relation goes both ways, like a friendship;
+sometimes it has a direction, like a link from one page to another. So
+we need two kinds of graph.
+
+\section{Undirected and directed graphs}
+\label{sec:graph-definitions}
+
+\begin{frameddefn}{Undirected graph}\label{def:undirected-graph}
+An \emph{undirected graph} $G=(V,E)$ consists of a set $V$ of
+\emph{nodes} and a set $E=\{e_1,\ldots,e_m\}$ of \emph{edges}. Each
+edge is an unordered pair of nodes,
+\[
+  e_j=\{v_j^1,v_j^2\},\qquad v_j^1,v_j^2\in V .
+\]
+\end{frameddefn}
+
+For example, with $V=\{v_1,v_2,v_3,v_4,v_5\}$ and
+$E=\bigl\{\{v_1,v_2\},\{v_3,v_4\},\{v_1,v_3\},\{v_2,v_4\}\bigr\}$ we
+can draw the graph with a circle for each node and a line for each
+edge:
+\begin{center}
+\begin{tikzpicture}[x=1cm,y=1cm]
+  \node[gnode] (1) at (0,1.2) {$v_1$};
+  \node[gnode] (2) at (1.6,0.9) {$v_2$};
+  \node[gnode] (3) at (1.2,-0.4) {$v_3$};
+  \node[gnode] (4) at (-0.8,0) {$v_4$};
+  \node[gnode] (5) at (-0.6,-1.2) {$v_5$};
+  \draw (1)--(2) (3)--(4) (1)--(3) (2)--(4);
+\end{tikzpicture}
+\end{center}
+Only the pairs matter, not where we place the circles. Node $v_5$
+belongs to no edge, but it is still a node of the graph.
+
+The same objects have many names, depending on the field of the paper
+we are reading: a node is also a \emph{vertex}, a \emph{site} or an
+\emph{actor}, and an edge is also a \emph{link}, a \emph{bond}, a
+\emph{relationship} or a \emph{tie}.
+
+When the relation has a direction, the pairs become ordered.
+
+\begin{frameddefn}{Directed graph}\label{def:directed-graph}
+A \emph{directed graph} $G=(V,A)$ consists of a set $V$ of nodes and
+a set $A=\{a_1,\ldots,a_m\}$ of \emph{arcs}. Each arc is an ordered
+pair of nodes,
+\[
+  a_j=(v_j^1,v_j^2),\qquad v_j^1,v_j^2\in V ,
+\]
+which goes from $v_j^1$ to $v_j^2$.
+\end{frameddefn}
+
+We draw an arc as an arrow. With $V=\{v_1,\ldots,v_5\}$ and
+\[
+  A=\{(v_1,v_5),(v_5,v_4),(v_4,v_5),(v_2,v_3),(v_2,v_1)\}:
+\]
+\begin{center}
+\begin{tikzpicture}[x=1cm,y=1cm,>=Stealth]
+  \node[gnode] (1) at (0,1.3) {$v_1$};
+  \node[gnode] (2) at (1.5,0.9) {$v_2$};
+  \node[gnode] (3) at (2.1,-0.2) {$v_3$};
+  \node[gnode] (4) at (-0.9,0) {$v_4$};
+  \node[gnode] (5) at (0,-1.2) {$v_5$};
+  \draw[->,thick] (1)--(5);
+  \draw[->,thick] (5) to[bend left=20] (4);
+  \draw[->,thick] (4) to[bend left=20] (5);
+  \draw[->,thick] (2)--(3);
+  \draw[->,thick] (2)--(1);
+\end{tikzpicture}
+\end{center}
+The arcs $(v_5,v_4)$ and $(v_4,v_5)$ are different: they join the same
+two nodes in opposite directions.
+
+\section{Weights, parallel links and self-loops}
+\label{sec:graph-variants}
+
+Not all relations are equally strong: two people may meet every day
+or once a year, and a road may be short or long. In a \emph{weighted}
+graph, each edge, each node, or both, carries a number, its
+\emph{weight}; a graph without weights is \emph{unweighted}. In a
+drawing we can show the weight with the thickness of an edge or the
+size of a node:
+\begin{center}
+\begin{tikzpicture}[x=1cm,y=1cm]
+  \node[gnode,minimum size=5mm] (a) at (0,0.9) {};
+  \node[gnode,minimum size=7mm] (b) at (1.1,0.2) {};
+  \node[gnode,minimum size=6mm] (c) at (0.1,-0.6) {};
+  \draw[line width=2.5pt] (a)--(c);
+  \draw[thick] (a)--(b);
+  \draw (b)--(c);
+  \node[font=\small] at (0.5,-1.4) {weighted edges};
+  \begin{scope}[xshift=3.5cm]
+    \node[gnode,minimum size=4mm] (d) at (0,0.5) {};
+    \node[gnode,minimum size=9mm] (e) at (1.4,0.5) {};
+    \node[gnode,minimum size=5mm] (f) at (0.2,-0.5) {};
+    \draw (d)--(e) (f)--(e);
+    \node[font=\small] at (0.7,-1.4) {weighted nodes};
+  \end{scope}
+\end{tikzpicture}
+\end{center}
+
+The definitions above use sets of edges, so each pair appears at most
+once. Some networks, however, have \emph{parallel links}, several
+edges between the same two nodes, for example two different roads
+between the same two cities, and \emph{self-loops}, edges from a node
+to itself:
+\begin{center}
+\begin{tikzpicture}[x=1cm,y=1cm]
+  \node[gnode] (a) at (0,0) {};
+  \node[gnode] (b) at (1.6,0) {};
+  \draw (a) to[bend left=25] (b);
+  \draw (a)--(b);
+  \draw (a) to[bend right=25] (b);
+  \node[font=\small] at (0.8,-0.9) {parallel links};
+  \node[gnode] (c) at (4,0) {};
+  \node[gnode] (d) at (5.2,0) {};
+  \draw (c)--(d);
+  \draw (d) to[out=30,in=-30,looseness=8] (d);
+  \node[font=\small] at (4.6,-0.9) {a self-loop};
+\end{tikzpicture}
+\end{center}
+
+\section{Subgraphs, paths and connected components}
+\label{sec:graph-paths}
+
+Inside a graph we often look at a part of it.
+
+\begin{frameddefn}{Subgraph}\label{def:subgraph}
+A \emph{subgraph} of $G=(V,E)$ is a graph $G'=(V',E')$ with
+$V'\subseteq V$ and $E'\subseteq E$, where every edge of $E'$ joins
+two nodes of $V'$.
+\end{frameddefn}
+
+We may choose $V'$ and $E'$ as we like, as long as we never keep an
+edge without its two ends. How do we move around a graph? We go from
+node to node along edges.
+
+\begin{frameddefn}{Path, simple path and cycle}\label{def:path}
+A \emph{path} is a sequence of edges
+$\{u_0,u_1\},\{u_1,u_2\},\ldots,\{u_{k-1},u_k\}$, in which each edge
+starts where the previous one ends; it goes from the node $u_0$ to the
+node $u_k$. A path is \emph{simple} if each node appears in it only
+once. A \emph{cycle} is a path whose first and last nodes coincide,
+$u_0=u_k$, and which is otherwise simple.
+\end{frameddefn}
+
+Can we always reach every node from every other? Not necessarily: in
+the first graph of \hyperref[sec:graph-definitions]{Section 16.1} no
+edge reaches $v_5$.
+
+\begin{frameddefn}{Connected graph and connected components}
+\label{def:connected-component}
+An undirected graph is \emph{connected} if there is a path between
+any two of its nodes, and \emph{disconnected} otherwise. A
+\emph{connected component} is a connected subgraph that no other node
+can join while staying connected.
+\end{frameddefn}
+
+The graph below is disconnected: it has two connected components, the
+larger one on the left, with a cycle, and the edge $\{v_1,v_2\}$ on
+the right, and no path joins them:
+\begin{center}
+\begin{tikzpicture}[x=1cm,y=1cm]
+  \node[gnode] (a) at (0,0.8) {};
+  \node[gnode] (b) at (1.3,0.8) {};
+  \node[gnode] (c) at (0.5,0) {};
+  \node[gnode] (d) at (1.3,-0.8) {};
+  \draw (a)--(b)--(d)--(c)--(a) (c)--(b);
+  \node[gnode] (v1) at (3,-0.7) {$v_1$};
+  \node[gnode] (v2) at (3,0.7) {$v_2$};
+  \draw (v1)--(v2);
+\end{tikzpicture}
+\end{center}
+
+\section{Neighbours and degree}
+\label{sec:graph-degree}
+
+\begin{frameddefn}{Neighbours and degree}\label{def:degree}
+Two nodes $v_1$ and $v_2$ are \emph{neighbours} if they are joined by
+an edge. The \emph{degree} of a node is the number of its neighbours.
+In a directed graph, a node has an \emph{out-degree}, the number of
+arcs that leave it, and an \emph{in-degree}, the number of arcs that
+enter it.
+\end{frameddefn}
+
+In the \hyperref[def:directed-graph]{directed graph} of
+\hyperref[sec:graph-definitions]{Section 16.1}, for example, $v_2$ has
+out-degree $2$ and in-degree $0$, and $v_5$ has out-degree $1$ and
+in-degree $2$.
+
+\section{Forests and trees}
+\label{sec:forests-trees}
+
+\begin{frameddefn}{Forest and tree}\label{def:tree}
+A \emph{forest} is a graph that contains no cycles, that is, an
+\emph{acyclic} graph. A \emph{tree} is a connected acyclic graph.
+\end{frameddefn}
+
+Each connected component of a forest is connected and acyclic, so it
+is a tree: a forest is a collection of trees, and a forest with more
+than one tree is disconnected. How can we recognise a tree? Three
+properties of an undirected graph are involved, and any two of them
+are enough.
+
+\begin{framedthm}{Characterisation of trees}\label{thm:tree}
+Let $G=(V,E)$ be an undirected graph with $n=|V|$ nodes and $m=|E|$
+edges, and consider the properties
+\begin{enumerate}
+  \item $G$ is connected;
+  \item $G$ is acyclic;
+  \item $m=n-1$.
+\end{enumerate}
+If any two of them hold, then the third holds too, and $G$ is a tree.
+\end{framedthm}
+
+\begin{todobox}Prove the characterisation of trees.\end{todobox}
+
+\section{The diameter}
+\label{sec:diameter}
+
+How far apart can two nodes of a graph be? We measure the distance
+between two nodes by the number of edges of the shortest path between
+them.
+
+\begin{frameddefn}{Distance and diameter}\label{def:diameter}
+In a connected graph, the \emph{distance} between two nodes is the
+number of edges of a shortest path between them. The \emph{diameter}
+of the graph is the largest distance between two of its nodes.
+\end{frameddefn}
+
+\section{Representing a graph}
+\label{sec:graph-representation}
+
+How do we store a graph in a computer? Take this graph with five
+nodes:
+\begin{center}
+\begin{tikzpicture}[x=1cm,y=1cm]
+  \node[gnode] (1) at (0,0.8) {$1$};
+  \node[gnode] (2) at (1.5,0.8) {$2$};
+  \node[gnode] (3) at (0,-0.6) {$3$};
+  \node[gnode] (4) at (1.5,-0.6) {$4$};
+  \node[gnode] (5) at (3,0.2) {$5$};
+  \draw (1)--(2) (1)--(4) (2)--(3) (2)--(4) (2)--(5);
+\end{tikzpicture}
+\end{center}
+Every two nodes are at distance at most $2$: for example, $3$ and $5$
+are not neighbours, but $3,2,5$ joins them. So its
+\hyperref[def:diameter]{diameter} is $2$.
+
+\begin{frameddefn}{Adjacency list}\label{def:adjacency-list}
+The \emph{adjacency list} of a graph stores, for each node, the list
+of its neighbours.
+\end{frameddefn}
+
+For the graph above:
+\begin{center}
+\begin{tabular}{l}
+$1:\ 2,4$\\
+$2:\ 1,3,4,5$\\
+$3:\ 2$\\
+$4:\ 1,2$\\
+$5:\ 2$
+\end{tabular}
+\end{center}
+
+\begin{frameddefn}{Adjacency matrix}\label{def:adjacency-matrix}
+The \emph{adjacency matrix} of a graph with nodes $1,\ldots,n$ is the
+matrix $A\in\{0,1\}^{n\times n}$ with $A_{ij}=1$ if $\{i,j\}$ is an
+edge and $A_{ij}=0$ otherwise.
+\end{frameddefn}
+
+For the same graph:
+\[
+  A=\begin{pmatrix}
+    0&1&0&1&0\\
+    1&0&1&1&1\\
+    0&1&0&0&0\\
+    1&1&0&0&0\\
+    0&1&0&0&0
+  \end{pmatrix}.
+\]
+The graph is undirected, so $\{i,j\}$ and $\{j,i\}$ are the same edge
+and the matrix is symmetric: $A_{ij}=A_{ji}$.
+
+Which one should we use? The adjacency matrix always has $n^2$
+entries. Real graphs, however, are usually \emph{sparse}: each node
+has only a few neighbours, so most entries are $0$. With a million
+nodes the matrix has $10^{12}$ entries, too many to store. The
+adjacency list writes only the edges that exist, each of them twice,
+once for each end, so it takes much less space.
+
+\lecturestart{20 November}
+
+\begin{todobox}
+Write the 20 November lecture. Sources: Flavia's notes for this lecture
+are not in \texttt{references/} yet.
+\end{todobox}
 
 \end{document}
