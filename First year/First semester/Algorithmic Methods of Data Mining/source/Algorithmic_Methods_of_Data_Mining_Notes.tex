@@ -10291,10 +10291,31 @@ arcs that leave it, and an \emph{in-degree}, the number of arcs that
 enter it.
 \end{frameddefn}
 
-In the \hyperref[def:directed-graph]{directed graph} of
-\hyperref[sec:graph-definitions]{Section 16.1}, for example, $v_2$ has
-out-degree $2$ and in-degree $0$, and $v_5$ has out-degree $1$ and
-in-degree $2$.
+Let us draw again the \hyperref[def:directed-graph]{directed graph}
+with arcs $(v_1,v_5),(v_5,v_4),(v_4,v_5),(v_2,v_3),(v_2,v_1)$, and
+count the arcs at $v_2$ and at $v_5$:
+\begin{center}
+\begin{tikzpicture}[x=1cm,y=1cm,>=Stealth]
+  \node[gnode] (1) at (0,1.3) {$v_1$};
+  \node[gnode] (2) at (1.5,0.9) {$v_2$};
+  \node[gnode] (3) at (2.1,-0.2) {$v_3$};
+  \node[gnode] (4) at (-0.9,0) {$v_4$};
+  \node[gnode] (5) at (0,-1.2) {$v_5$};
+  \draw[->,very thick,PlotRed] (1)--(5);
+  \draw[->,very thick,PlotGreen!70!black] (5) to[bend left=20] (4);
+  \draw[->,very thick,PlotRed] (4) to[bend left=20] (5);
+  \draw[->,very thick,PlotGreen!70!black] (2)--(3);
+  \draw[->,very thick,PlotGreen!70!black] (2)--(1);
+  \node[right=4pt,font=\scriptsize,align=left] at (2.east)
+    {out-degree $2$\\in-degree $0$};
+  \node[right=4pt,font=\scriptsize,align=left] at (5.east)
+    {out-degree $1$\\in-degree $2$};
+\end{tikzpicture}
+\end{center}
+Arcs leaving $v_2$ or $v_5$ are green, arcs entering them are red. Two
+arcs leave $v_2$ and none enters it, so $v_2$ has out-degree $2$ and
+in-degree $0$. One arc leaves $v_5$ and two enter it, so $v_5$ has
+out-degree $1$ and in-degree $2$.
 
 \section{Forests and trees}
 \label{sec:forests-trees}
@@ -10398,12 +10419,6 @@ adjacency list writes only the edges that exist, each of them twice,
 once for each end, so it takes much less space.
 
 \lecturestart{23 November}
-
-\begin{todobox}
-This lecture is written from Gianmaria Romano's notes, because Flavia's
-notes for it are not in \texttt{references/} yet. Check it against
-them when they arrive.
-\end{todobox}
 
 \section{Exploring a graph}
 \label{sec:graph-exploration}
