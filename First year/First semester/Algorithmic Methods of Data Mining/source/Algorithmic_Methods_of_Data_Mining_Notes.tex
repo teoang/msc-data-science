@@ -10698,4 +10698,175 @@ Both searches visit the connected component of $s$, and nothing else.
 DFS is commonly used to find the connected components of a graph and
 to detect cycles.
 
+\lecturestart{26 November}
+
+\section{Shortest paths in a weighted graph}
+\label{sec:shortest-paths}
+
+BFS finds the \hyperref[def:distance]{distance} from $s$ to every
+node, counting the edges of a path. In a
+\hyperref[sec:graph-variants]{weighted graph}, however, the edges are
+not all equal: if the weights are lengths of roads, a path with many
+short edges may be shorter than a path with a single long one. So we
+measure a path by the sum of the weights of its edges.
+
+\begin{frameddefn}{Length of a path}\label{def:path-length}
+In a weighted graph, where the edge $\{u,v\}$ has weight $l_{u,v}\geq0$,
+the \emph{length} of a \hyperref[def:path]{path} is the sum of the
+weights of its edges. A \emph{shortest path} from $s$ to $v$ is a path
+from $s$ to $v$ of smallest length.
+\end{frameddefn}
+
+Take this graph:
+\begin{center}
+\begin{tikzpicture}[x=1.05cm,y=0.9cm,
+  w/.style={font=\scriptsize,fill=white,inner sep=1pt}]
+  \foreach \i/\x/\y in {1/2.3/8.9,2/1.2/7.3,3/3.7/7.3,4/2.5/5.7,
+      5/0.6/5.6,6/4.6/6.0,7/1.75/3.8,8/0.6/2.2,9/4.5/4.1,10/6.4/4.6,
+      11/3.2/1.6,12/5.6/2.3}
+    \node[gnode] (\i) at (\x,\y) {$\i$};
+  \draw (1)--(9) node[w,pos=0.62] {$10$};
+  \draw (4)--(5) node[w,pos=0.3] {$1$};
+  \foreach \a/\b/\l in {1/2/1,1/3/4,1/4/7,2/5/2,2/7/3,3/4/3,
+      3/6/2,4/7/5,4/9/3,6/9/6,6/10/7,9/10/4,7/9/2,9/11/7,9/12/6,
+      10/12/4,5/8/2,7/8/6,7/11/6,8/11/9,11/12/3}
+    \draw (\a)--(\b) node[w,pos=0.5] {$\l$};
+\end{tikzpicture}
+\end{center}
+What is the shortest path from $1$ to $9$? The edge $\{1,9\}$ goes
+there directly, with length $10$. The path $1,2,7,9$ uses three edges
+but has length $1+3+2=6$, so it is shorter. BFS, which counts edges,
+would choose the direct edge.
+
+\subsection{Can we still use BFS?}
+
+Let us look at a smaller weighted graph:
+\begin{center}
+\begin{tikzpicture}[x=1cm,y=1cm,
+  w/.style={font=\scriptsize,fill=white,inner sep=1pt}]
+  \node[gnode] (1) at (0.5,2.4) {$1$};
+  \node[gnode] (2) at (1.8,1.6) {$2$};
+  \node[gnode] (3) at (-0.3,1.4) {$3$};
+  \node[gnode] (4) at (0.8,0.4) {$4$};
+  \node[gnode] (5) at (1.8,-0.8) {$5$};
+  \foreach \a/\b/\l in {1/2/3,1/3/3,3/4/2,2/4/2,4/5/1,2/5/2}
+    \draw (\a)--(\b) node[w,pos=0.5] {$\l$};
+  \draw (1) to[out=0,in=0,looseness=1.6] node[w,pos=0.5] {$5$} (5);
+\end{tikzpicture}
+\end{center}
+Can we turn it into an unweighted graph, so that BFS gives the
+shortest paths? Yes: we replace each edge of weight $w$ with a path of
+$w$ edges, adding $w-1$ new nodes in the middle. For example, an edge
+of weight $3$ becomes
+\begin{center}
+\begin{tikzpicture}[x=1cm,y=1cm,
+  w/.style={font=\scriptsize,fill=white,inner sep=1pt},
+  sm/.style={circle,draw,fill=white,minimum size=3mm,inner sep=0pt}]
+  \node[gnode] (a) at (0,0) {$u$};
+  \node[gnode] (b) at (1.6,0) {$v$};
+  \draw (a)--(b) node[w,pos=0.5] {$3$};
+  \node at (2.6,0) {$\longrightarrow$};
+  \node[gnode] (c) at (3.6,0) {$u$};
+  \node[sm] (m1) at (4.6,0) {};
+  \node[sm] (m2) at (5.6,0) {};
+  \node[gnode] (d) at (6.6,0) {$v$};
+  \draw (c)--(m1)--(m2)--(d);
+\end{tikzpicture}
+\end{center}
+Now a path of length $\ell$ in the weighted graph becomes a path of
+$\ell$ edges, so the distances found by BFS are exactly the lengths of
+the shortest paths. It works, but it is very expensive: every edge
+adds as many nodes as its weight, so an edge of weight $1000$ alone
+adds $999$ nodes. We need something smarter.
+
+\section{Dijkstra's algorithm}
+\label{sec:dijkstra}
+
+Dijkstra's algorithm works on the weighted graph directly. For every
+node $v$ it keeps $\mathit{len}[v]$, the length of the shortest path
+from $s$ to $v$ found so far, and a set of \emph{unexplored} nodes,
+whose $\mathit{len}$ may still decrease. At the start only the
+neighbours of $s$ have a finite $\mathit{len}$, the weight of their
+edge from $s$. Then, at each step, the algorithm takes the unexplored
+node $v$ with the smallest $\mathit{len}$, declares it explored, and
+checks whether going through $v$ gives a shorter path to its
+unexplored neighbours.
+
+\Needspace{19\baselineskip}
+\begin{framedalgo}{Dijkstra}\label{alg:dijkstra}
+\begin{algorithmic}[1]
+  \Function{Dijkstra}{$G=(V,E)$, $s$}
+    \For{each $v\in V$}
+      \State $\mathit{len}[v]\gets+\infty$
+    \EndFor
+    \State $\mathit{len}[s]\gets0$
+    \State $\mathit{unexplored}\gets V\setminus\{s\}$
+    \For{each $\{s,v\}\in E$}
+      \State $\mathit{len}[v]\gets l_{s,v}$
+    \EndFor
+    \While{$\mathit{unexplored}\neq\varnothing$}
+      \State $v\gets\arg\min_{u\in\mathit{unexplored}}\mathit{len}[u]$
+      \State $\mathit{unexplored}\gets\mathit{unexplored}\setminus\{v\}$
+      \For{each $\{v,u\}\in E$ with $u\in\mathit{unexplored}$}
+        \If{$\mathit{len}[v]+l_{v,u}<\mathit{len}[u]$}
+          \State $\mathit{len}[u]\gets\mathit{len}[v]+l_{v,u}$
+        \EndIf
+      \EndFor
+    \EndWhile
+    \State \Return $\mathit{len}$
+  \EndFunction
+\end{algorithmic}
+\end{framedalgo}
+
+Let us run it on the twelve-node graph from $s=1$. At the start
+$\mathit{len}[2]=1$, $\mathit{len}[3]=4$, $\mathit{len}[4]=7$,
+$\mathit{len}[9]=10$, and all the others are $+\infty$. Each row
+shows the node taken and the values of $\mathit{len}$ that decrease;
+when two nodes tie, we take the one with the smaller name.
+\begin{center}
+\small
+\begin{tabular}{cll}
+\hline
+Step & Taken $v$ & Updates\\
+\hline
+$1$ & $2$, $\mathit{len}=1$ & $\mathit{len}[5]=1+2=3$, $\mathit{len}[7]=1+3=4$\\
+$2$ & $5$, $\mathit{len}=3$ & $\mathit{len}[4]=3+1=4$, $\mathit{len}[8]=3+2=5$\\
+$3$ & $3$, $\mathit{len}=4$ & $\mathit{len}[6]=4+2=6$\\
+$4$ & $4$, $\mathit{len}=4$ & $\mathit{len}[9]=4+3=7$\\
+$5$ & $7$, $\mathit{len}=4$ & $\mathit{len}[9]=4+2=6$, $\mathit{len}[11]=4+6=10$\\
+$6$ & $8$, $\mathit{len}=5$ & none\\
+$7$ & $6$, $\mathit{len}=6$ & $\mathit{len}[10]=6+7=13$\\
+$8$ & $9$, $\mathit{len}=6$ & $\mathit{len}[10]=6+4=10$, $\mathit{len}[12]=6+6=12$\\
+$9$ & $10$, $\mathit{len}=10$ & none\\
+$10$ & $11$, $\mathit{len}=10$ & none\\
+$11$ & $12$, $\mathit{len}=12$ & none\\
+\hline
+\end{tabular}
+\end{center}
+The shortest path to $9$ has length $6$, as we found by hand.
+$\mathit{len}[9]$ went down three times: $10$ with the direct edge,
+$7$ through $4$, and $6$ through $7$.
+
+How long does it take? The loop runs $n=|V|$ times. If we look for the
+minimum by scanning all the unexplored nodes, each step costs $O(n)$,
+and over the whole run every edge is checked a constant number of
+times, so the total is $O(n^2+m)$, with $m=|E|$. If we keep the
+unexplored nodes in a \hyperref[def:binary-min-heap]{min-heap} keyed
+by $\mathit{len}$, taking the minimum and lowering a key both cost
+$O(\log n)$, and the total is $O((n+m)\log n)$.
+
+\section{Spanning trees}
+\label{sec:spanning-trees}
+
+\begin{frameddefn}{Spanning tree}\label{def:spanning-tree}
+A \emph{spanning tree} of a graph $G$ is a
+\hyperref[def:subgraph]{subgraph} of $G$ that contains all the nodes
+of $G$ and is a \hyperref[def:tree]{tree}.
+\end{frameddefn}
+
+\begin{todobox}
+The lecture goes on with finding the minimum spanning tree. The notes
+of 26 November stop here.
+\end{todobox}
+
 \end{document}

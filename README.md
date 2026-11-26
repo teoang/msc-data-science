@@ -380,6 +380,13 @@
 
 - [x] Exploring a graph: breadth-first search with a queue and depth-first search with a stack, their running times with adjacency lists and matrices.
 
+**26 November**
+
+- [x] Shortest paths in a weighted graph: the length of a path, and why splitting the edges to use BFS is too expensive.
+- [x] Dijkstra's algorithm and its running time, without and with a heap.
+- [x] Spanning trees.
+- [ ] The minimum spanning tree.
+
 </details>
 
 ## About
