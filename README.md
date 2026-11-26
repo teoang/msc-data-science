@@ -200,6 +200,25 @@
 - [x] Observing versus setting a variable: confounders, ancestral sampling, conditioning by observation and by intervention, the average treatment effect and no unmeasured confounding.
 - [x] The best predictor: supervised learning, discriminative and generative methods, the regression function, the conditional median and quantile regression, the Bayes classifier and classification as density estimation.
 
+**18 November**
+
+- [x] The multivariate Normal: density, properties, marginals and conditionals, the bivariate case.
+- [x] Uncorrelated Normal components are independent; level sets for different covariance matrices and correlations.
+- [ ] Standardizing a multivariate Normal.
+- [x] Beyond linear correlation: partial correlation and the precision matrix, weak and strong correlations, Kendall's τ, Spearman's ρ and distance correlation.
+
+**19 November**
+
+- [ ] Statistical inference: the sampling distribution of an algorithm, the frequentist and the Bayesian view.
+
+**20 November**
+
+- [ ] Point estimation: the quadratic loss and the mean squared error.
+
+**25 November**
+
+- [ ] Probability tools for averages: modes of convergence, the law of large numbers, the central limit theorem and exact results.
+
 </details>
 
 <details>

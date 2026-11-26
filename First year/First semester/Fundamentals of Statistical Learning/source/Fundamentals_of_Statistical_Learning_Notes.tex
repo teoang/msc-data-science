@@ -4391,4 +4391,542 @@ $1$. So, to classify, it is enough to learn this ratio, which needs the
 densities $p_0$ and $p_1$ of the features within each label: in this
 sense classification is a problem of density estimation.
 
+\clearpage
+\lecturestart{18 November}
+
+\section{The multivariate Normal}\label{ch:mvn}
+
+We know that if $X$ and $Y$ are independent, then $\mathrm{Cov}(X,Y)=0$,
+but that the converse fails in general, as the
+\hyperref[note:cov-converse]{counterexample $Y=X^2$} shows. We also said
+that there is one important case where $\mathrm{Cov}(X,Y)=0$ always implies
+independence: the multivariate Normal.
+What is it, and why does it behave so well?
+
+\subsection{From one to many dimensions}\label{sec:mvn}
+
+\noindent
+\begin{minipage}[c]{.42\linewidth}
+\centering
+\includegraphics[width=\linewidth]{assets/normal-bell-recall.pdf}
+\end{minipage}\hfill
+\begin{minipage}[c]{.54\linewidth}
+Let us start from what we know. For $X\sim N(\mu,\sigma^2)$, the
+\hyperref[def:normal]{Normal density} is a constant times an exponential:
+\[
+f_X(x)\propto\exp\Big\{-\frac{1}{2\sigma^2}(x-\mu)^2\Big\},
+\]
+where $\propto$ means ``proportional to'': equal up to a constant that does
+not depend on $x$, and only makes the total area equal to $1$.
+\end{minipage}
+\medskip
+
+The shape of the bell is all in the exponent, the squared distance of $x$
+from $\mu$ measured in units of $\sigma^2$.
+
+How do we write the same shape for a random vector
+$\underline{X}\in\mathbb{R}^p$, with mean vector $\underline{\mu}$ and
+\hyperref[sec:var-cov-matrix]{covariance matrix} $\Sigma$? We rewrite the
+exponent so that it makes sense for vectors:
+\[
+\frac{1}{\sigma^2}(x-\mu)^2=(x-\mu)\,(\sigma^2)^{-1}(x-\mu)
+\quad\longrightarrow\quad
+(\underline{x}-\underline{\mu})^{\mathsf T}\,\Sigma^{-1}\,(\underline{x}-\underline{\mu}).
+\]
+The variance becomes the covariance matrix, its inverse the
+\hyperref[def:precision]{precision matrix}, and the square becomes a
+product of a row vector, a matrix and a column vector, which is again a
+single number.
+
+\begin{frameddefn}{Multivariate Normal distribution}\label{def:mvn}
+A random vector $\underline{X}\in\mathbb{R}^p$ has a \textbf{multivariate
+Normal distribution} with mean $\underline{\mu}$ and covariance matrix
+$\Sigma$, written $\underline{X}\sim N_p(\underline{\mu},\Sigma)$, if its
+density is
+\[
+f_{\underline{X}}(\underline{x})=\frac{1}{(2\pi)^{p/2}\sqrt{\det(\Sigma)}}
+\exp\Big\{-\frac12(\underline{x}-\underline{\mu})^{\mathsf T}\,\Sigma^{-1}\,(\underline{x}-\underline{\mu})\Big\},
+\qquad\underline{x}\in\mathbb{R}^p.
+\]
+\end{frameddefn}
+
+With $p=1$, $\Sigma=\sigma^2$ and $\det(\Sigma)=\sigma^2$, so the constant
+is $1/\sqrt{2\pi\sigma^2}$ and we get back the
+\hyperref[def:normal]{Normal density}.
+
+Where is the density highest? The point where a density, or a PMF, takes
+its largest value is called the \textbf{mode}, written
+$\mathrm{Mode}(\underline{X})$: it is the most likely value, the top of
+the graph. For the bell $N(\mu,\sigma^2)$ the top is at $\mu$, so the mode
+and the expected value coincide; for a skewed distribution they may not.
+
+\begin{framedprop}{Properties of the multivariate Normal}\label{prop:mvn-properties}
+Let $\underline{X}\sim N_p(\underline{\mu},\Sigma)$. Then:
+\begin{enumerate}
+\item the mode and the expected value coincide:
+$\mathrm{Mode}(\underline{X})=\mathbb{E}(\underline{X})=\underline{\mu}$;
+\item $\mathrm{Cov}(\underline{X})=\Sigma$;
+\item all the marginal distributions are Normal;
+\item all the conditional distributions are Normal.
+\end{enumerate}
+\end{framedprop}
+
+\begin{todobox}
+Prove this proposition: the proof was not given in class.
+\end{todobox}
+
+\subsubsection{Marginals and conditionals}\label{sec:mvn-marginals}
+
+Which Normals are the marginals and the conditionals? Split the vector into
+two blocks, the first $q$ components and the other $p-q$:
+\[
+\underline{X}=\begin{pmatrix}\underline{X}_1\\ \underline{X}_2\end{pmatrix},
+\qquad
+\underline{\mu}=\begin{pmatrix}\underline{\mu}_1\\ \underline{\mu}_2\end{pmatrix},
+\qquad
+\Sigma=\begin{pmatrix}\Sigma_{11}&\Sigma_{12}\\ \Sigma_{21}&\Sigma_{22}\end{pmatrix},
+\]
+where $\Sigma_{11}$ is $q\times q$, $\Sigma_{22}$ is
+$(p-q)\times(p-q)$, and $\Sigma_{12}=\Sigma_{21}^{\mathsf T}$ holds the
+covariances between the two blocks.
+
+\begin{framedprop}{Marginals and conditionals of a multivariate Normal}\label{prop:mvn-marginals}
+Let $\underline{X}\sim N_p(\underline{\mu},\Sigma)$, split as above. Then
+the marginals are
+\[
+\underline{X}_1\sim N_q(\underline{\mu}_1,\Sigma_{11}),
+\qquad
+\underline{X}_2\sim N_{p-q}(\underline{\mu}_2,\Sigma_{22}),
+\]
+and the conditional of the first block given the second is
+\[
+(\underline{X}_1\mid\underline{X}_2=\underline{x}_2)\sim N_q(\underline{\mu}_{1\mid2},\Sigma_{1\mid2}),
+\]
+with
+\[
+\underline{\mu}_{1\mid2}=\underline{\mu}_1+\Sigma_{12}\Sigma_{22}^{-1}(\underline{x}_2-\underline{\mu}_2),
+\qquad
+\Sigma_{1\mid2}=\Sigma_{11}-\Sigma_{12}\Sigma_{22}^{-1}\Sigma_{21}.
+\]
+\end{framedprop}
+
+\begin{todobox}
+Prove this proposition: the proof was not given in class.
+\end{todobox}
+
+The marginals are the obvious ones: we just keep the block of
+$\underline{\mu}$ and of $\Sigma$ that belongs to the variables we look at.
+
+The conditional is more interesting. Its mean moves away from
+$\underline{\mu}_1$ in proportion to how far $\underline{x}_2$ is from its
+own mean, through the covariances $\Sigma_{12}$. Its covariance is smaller
+than $\Sigma_{11}$, since knowing $\underline{X}_2$ removes part of the
+uncertainty, but it does not depend on the observed value
+$\underline{x}_2$.
+
+\subsubsection{The bivariate case}\label{sec:mvn-bivariate}
+
+With $p=2$ everything can be written out. Let
+$(X_1,X_2)^{\mathsf T}\sim N_2(\underline{\mu},\Sigma)$, where $\rho$ is
+the \hyperref[def:correlation]{correlation} between $X_1$ and $X_2$:
+\[
+\underline{\mu}=\begin{pmatrix}\mu_1\\ \mu_2\end{pmatrix},
+\qquad
+\Sigma=\begin{pmatrix}\sigma_1^2&\rho\,\sigma_1\sigma_2\\ \rho\,\sigma_1\sigma_2&\sigma_2^2\end{pmatrix}.
+\]
+Then the joint density is
+\begin{multline*}
+f(x_1,x_2)=\frac{1}{2\pi\sigma_1\sigma_2\sqrt{1-\rho^2}}\\
+\cdot\exp\bigg\{-\frac{1}{2(1-\rho^2)}\bigg[\frac{(x_1-\mu_1)^2}{\sigma_1^2}+\frac{(x_2-\mu_2)^2}{\sigma_2^2}
+-\frac{2\rho(x_1-\mu_1)(x_2-\mu_2)}{\sigma_1\sigma_2}\bigg]\bigg\},
+\end{multline*}
+and, by \hyperref[prop:mvn-marginals]{the conditionals}, with $q=1$,
+\[
+(X_1\mid X_2=x_2)\sim N\Big(\mu_1+\rho\,\frac{\sigma_1}{\sigma_2}(x_2-\mu_2),\ (1-\rho^2)\,\sigma_1^2\Big).
+\]
+The larger $|\rho|$, the more $x_2$ shifts the mean of $X_1$, and the
+more it shrinks its variance. With $\rho=0$, knowing $x_2$ changes nothing.
+
+\subsection{Uncorrelated means independent}\label{sec:mvn-independence}
+
+We can now see why the multivariate Normal is special. Take $p=2$ and
+suppose the two components are uncorrelated, $\rho=0$:
+\[
+\begin{pmatrix}X_1\\ X_2\end{pmatrix}\sim N_2\bigg(\begin{pmatrix}\mu_1\\ \mu_2\end{pmatrix},
+\begin{pmatrix}\sigma_1^2&0\\ 0&\sigma_2^2\end{pmatrix}\bigg).
+\]
+Is $(X_1,X_2)$ also independent? Let us look at the density:
+\begin{align*}
+f(x_1,x_2)
+&\propto\exp\Big\{-\frac12(\underline{x}-\underline{\mu})^{\mathsf T}\,\Sigma^{-1}\,(\underline{x}-\underline{\mu})\Big\}
+&&\text{\hyperref[def:mvn]{multivariate Normal}}\\
+&=\exp\Big\{-\frac12\Big[\frac{(x_1-\mu_1)^2}{\sigma_1^2}+\frac{(x_2-\mu_2)^2}{\sigma_2^2}\Big]\Big\}
+&&\text{$\Sigma^{-1}=\mathrm{diag}(1/\sigma_1^2,1/\sigma_2^2)$}\\
+&=\exp\Big\{-\frac{(x_1-\mu_1)^2}{2\sigma_1^2}\Big\}\cdot\exp\Big\{-\frac{(x_2-\mu_2)^2}{2\sigma_2^2}\Big\}
+&&\text{$e^{a+b}=e^a\,e^b$}\\
+&\propto f_{X_1}(x_1)\,f_{X_2}(x_2)
+&&\text{\hyperref[def:normal]{Normal densities}.}
+\end{align*}
+The joint density splits into a function of $x_1$ times a function of
+$x_2$, the two Normal marginals, so $X_1$ and $X_2$ are independent.
+
+The same argument works in any dimension: a diagonal $\Sigma$ makes the
+exponent a sum over the components, and the density a product.
+
+\begin{framedprop}{Uncorrelated Normal components are independent}\label{prop:mvn-independence}
+If $\underline{X}$ is jointly multivariate Normal, any two or more of its
+components that are uncorrelated are also independent. Hence any pairwise
+independent subset of its components is independent.
+\end{framedprop}
+
+The word \emph{jointly} matters. Two variables that are each Normal on
+their own, and uncorrelated, need not be independent: the vector they form
+must be multivariate Normal.
+
+\subsection{The shape of the covariance matrix}\label{sec:mvn-shapes}
+
+How does $\Sigma$ change the shape of the density? Let us look at the
+bivariate case, centred at $\underline{\mu}=\underline{0}$, and draw the
+\emph{level sets}: the curves where the density takes the same value.
+There are four typical cases.
+
+\begin{framedexample}{Four covariance matrices}\label{ex:mvn-sigma-cases}
+Each panel shows the level sets of a centred bivariate Normal.
+\begin{center}
+\includegraphics[width=\linewidth]{assets/mvn-sigma-cases.pdf}
+\end{center}
+\begin{enumerate}
+\item $\Sigma=I$: every variance is $\sigma_j^2=1$ and every covariance is
+$\sigma_{i,j}=0$, so the components are independent, by
+\hyperref[prop:mvn-independence]{the proposition above}. The level sets
+are circles.
+\item $\Sigma=\sigma^2 I$, here with $\sigma^2=2$: all the variances are
+equal to $\sigma^2$ and the covariances are $0$. The level sets are still
+circles, only larger. This case and the previous one are called
+\textbf{isotropic}: the density looks the same in every direction.
+\item $\Sigma=\mathrm{diag}(\sigma_1^2,\sigma_2^2)$, here with
+$\sigma_1^2=2$ and $\sigma_2^2=0.5$: the variances differ, the covariances
+are still $0$. The level sets are ellipses with axes along the coordinate
+axes.
+\item $\Sigma$ ``full'', here with $\sigma_1^2=\sigma_2^2=1$ and
+$\sigma_{1,2}=0.6$: the covariances are not $0$. The level sets are
+ellipses tilted along a diagonal.
+\end{enumerate}
+\end{framedexample}
+
+Where do the axes of the ellipses come from? Let us take the
+\hyperref[prop:spectral]{spectral decomposition} $\Sigma=U\,D\,U^{\mathsf T}$
+again. The eigenvectors $\underline{u}_j$, the columns of $U$, give the
+directions of the axes, and the eigenvalues $\lambda_j$, on the diagonal of
+$D$, the \hyperref[prop:total-variance]{variance along each of them}. In
+cases (1)--(3) $\Sigma$ is already diagonal, so $U=I$ and the axes are the
+coordinate axes; in case (4) $U$ turns them.
+
+What happens to the ellipses as the correlation changes?
+
+\begin{framedexample}{Level sets for different correlations}\label{ex:mvn-rho}
+Each panel shows the level sets of a bivariate Normal with
+$\underline{\mu}=\underline{0}$, unit variances and correlation $\rho$:
+\[
+\Sigma=\begin{pmatrix}1&\rho\\ \rho&1\end{pmatrix}.
+\]
+\begin{center}
+\includegraphics[width=\linewidth]{assets/mvn-rho.pdf}
+\end{center}
+The correlations are $\rho=0$, $0.5$, $0.9$ and $-0.9$. The eigenvectors
+of $\Sigma$ are $(1,1)^{\mathsf T}$ and $(1,-1)^{\mathsf T}$, with
+eigenvalues $1+\rho$ and $1-\rho$: the ellipses lie along the diagonals,
+and the larger $|\rho|$, the longer and thinner they are. With $\rho=0.9$
+the variances along the two axes are $1.9$ and $0.1$.
+\end{framedexample}
+
+These are the clouds of Example~\ref{ex:corr-guess}, seen from above: the
+level sets of the density give the shape of the cloud of draws.
+
+\subsection{Standardizing a multivariate Normal}\label{sec:mvn-standardize}
+
+For a single Normal we know how to remove the location and the scale: by
+\hyperref[prop:standardization]{standardization},
+\[
+Z=\frac{X-\mu}{\sigma}\sim N(0,1).
+\]
+How do we do the same for a multivariate Normal, when the scale is a whole
+matrix $\Sigma$?
+
+\begin{todobox}
+Finish the 18 November lecture: how to standardize a multivariate Normal.
+\end{todobox}
+
+\section{Beyond linear correlation}\label{ch:beyond-linear}
+
+Let us look back at the \hyperref[def:correlation]{Pearson correlation}.
+For a random vector $\underline{X}=(X_1,\ldots,X_p)^{\mathsf T}$ with
+joint distribution $F_{\underline{X}}$,
+\[
+\rho(X_i,X_j)=\frac{\mathrm{Cov}(X_i,X_j)}{\mathrm{SD}(X_i)\,\mathrm{SD}(X_j)},
+\qquad
+\mathrm{Cov}(X_i,X_j)=\mathbb{E}(X_iX_j)-\mathbb{E}(X_i)\,\mathbb{E}(X_j).
+\]
+It is a \textbf{marginal linear correlation}: \emph{marginal}, because it
+looks at two components at a time and ignores the others, and
+\emph{linear}, because it only sees straight-line relationships. Each word
+points to a way of going further:
+\begin{itemize}
+\item a \textbf{partial} correlation, which takes the other components
+into account;
+\item a \textbf{nonlinear} correlation, which also sees curved
+relationships;
+\item correlations for data that do not live in $\mathbb{R}^p$, sometimes
+called non-Euclidean data.
+\end{itemize}
+
+\subsection{Partial correlation}\label{sec:partial-correlation}
+
+In \hyperref[sec:causation]{observing and intervening} we met
+\hyperref[ex:covid-5g]{confounders}: variables that act on both $X$ and
+$Y$. If $X$ and $Y$ both depend linearly on a random vector
+$\underline{Z}$, their correlation $\rho_{X,Y}$ may be misleading: part of
+it, or all of it, comes from $\underline{Z}$. Can we measure the
+association between $X$ and $Y$ that is left once the effect of
+$\underline{Z}$ is removed?
+
+The idea is to take out of $X$ the part that $\underline{Z}$ explains, and
+the same for $Y$, and then correlate what is left. The part of $X$ that
+$\underline{Z}$ explains linearly is its best linear predictor from
+$\underline{Z}$, the \textbf{projection} of $X$ onto the linear span of
+$\underline{Z}$:
+\[
+\Pi_{\underline{Z}}(X)=\widehat{\underline{\beta}}^{\mathsf T}\underline{Z},
+\qquad
+\widehat{\underline{\beta}}=\operatorname*{arg\,min}_{\text{all }\underline{\beta}}\mathbb{E}\big(X-\underline{\beta}^{\mathsf T}\underline{Z}\big)^2 .
+\]
+This is the linear regression of $X$ on $\underline{Z}$: the
+\hyperref[def:best-predictor]{best predictor} under the square loss, among
+the linear functions of $\underline{Z}$ only. Setting the derivative with
+respect to $\underline{\beta}$ to zero,
+\begin{align*}
+\underline{0}
+&=\frac{\partial}{\partial\underline{\beta}}\,\mathbb{E}\big(X-\underline{\beta}^{\mathsf T}\underline{Z}\big)^2
+=-2\,\mathbb{E}\big((X-\underline{\beta}^{\mathsf T}\underline{Z})\,\underline{Z}\big)
+&&\text{derivative inside $\mathbb{E}$}\\
+&\iff
+\mathbb{E}(\underline{Z}\,\underline{Z}^{\mathsf T})\,\underline{\beta}=\mathbb{E}(X\,\underline{Z})
+&&\text{linearity of $\mathbb{E}$}\\
+&\iff
+\widehat{\underline{\beta}}=\big(\mathbb{E}(\underline{Z}\,\underline{Z}^{\mathsf T})\big)^{-1}\,\mathbb{E}(X\,\underline{Z}).
+\end{align*}
+What is left of $X$ and of $Y$ are the \textbf{residuals}
+\[
+\varepsilon_X=X-\Pi_{\underline{Z}}(X),
+\qquad
+\varepsilon_Y=Y-\Pi_{\underline{Z}}(Y).
+\]
+
+\begin{frameddefn}{Partial correlation}\label{def:partial-correlation}
+The \textbf{partial correlation} between $X$ and $Y$ given
+$\underline{Z}$ is the Pearson correlation between their residuals:
+\[
+\rho_{X,Y\mid\underline{Z}}=\rho(\varepsilon_X,\varepsilon_Y).
+\]
+\end{frameddefn}
+
+In the \hyperref[sec:corr-geometry]{geometry of the correlation}, where
+variables are vectors and $\rho$ is the cosine of an angle, the projection
+is the shadow of $X$ on the plane spanned by $\underline{Z}$, and the
+residual is the part of $X$ perpendicular to that plane. So the partial
+correlation is the cosine of the angle between the two residuals, both
+perpendicular to the plane of $\underline{Z}$.
+
+Do we have to compute the residuals every time? No: all the partial
+correlations can be read from the \hyperref[def:precision]{precision
+matrix}.
+
+\begin{framedprop}{Partial correlations and the precision matrix}\label{prop:partial-precision}
+Let $\underline{X}=(X_1,\ldots,X_p)^{\mathsf T}$ have precision matrix
+$\Lambda=\Sigma^{-1}$, and let $\rho^{(P)}_{j,k}$ be the partial correlation
+between $X_j$ and $X_k$ given all the other components. Then the matrix
+$\mathrm{R}^{(P)}$ of partial correlations has entries
+\[
+\mathrm{R}^{(P)}_{j,k}=-\frac{\Lambda_{j,k}}{\sqrt{\Lambda_{j,j}}\,\sqrt{\Lambda_{k,k}}}.
+\]
+With a single confounder $Z$, this gives
+\[
+\rho_{X,Y\mid Z}=\frac{\rho_{X,Y}-\rho_{X,Z}\,\rho_{Y,Z}}{\sqrt{1-\rho_{X,Z}^2}\,\sqrt{1-\rho_{Y,Z}^2}}.
+\]
+\end{framedprop}
+
+\begin{todobox}
+Prove this proposition: the proof was not given in class.
+\end{todobox}
+
+So a zero in the precision matrix means a zero partial correlation: the
+two components are not linearly related once all the others are taken
+into account.
+
+\begin{framedexamplepart}{ex:covid-5g}{2}{Antennas, Covid cases and population}
+Let us take Example~\ref{ex:covid-5g} again: the antennas $X$ and the
+Covid cases $Y$ are correlated only because the population $Z$ acts on
+both. Suppose that $\rho_{X,Y}=0.5$, while $\rho_{X,Z}=\rho_{Y,Z}=0.7$.
+How much of the link between antennas and cases is left once we remove
+the population?
+\[
+\rho_{X,Y\mid Z}=\frac{0.5-0.7\cdot0.7}{\sqrt{1-0.49}\,\sqrt{1-0.49}}
+=\frac{0.01}{0.51}\approx0.02 .
+\]
+Almost nothing: the correlation of $0.5$ came from the population.
+\end{framedexamplepart}
+
+\subsection{Nonlinear correlations}\label{sec:nonlinear-correlation}
+
+The Pearson correlation is blind to curved relationships, as the wave,
+the parabola, the ring and the cross of
+Example~\ref{ex:corr-nonlinear} showed. What do we want from a better
+measure? Two levels are useful.
+\begin{itemize}
+\item A \textbf{weak correlation} is $0$ when $X$ and $Y$ are independent,
+but may also be $0$ when they are not, like $\rho$.
+\item A \textbf{strong correlation} is $0$ \emph{if and only if} $X$ and
+$Y$ are independent.
+\end{itemize}
+
+\subsubsection{Kendall's \texorpdfstring{$\tau$}{tau}}
+
+Take two independent draws $(X,Y)$ and $(X',Y')$ from the same joint
+distribution $F_{X,Y}$; $(X',Y')$ is called an \emph{independent copy} of
+$(X,Y)$. The two pairs are \textbf{concordant} if they are ordered the
+same way in both coordinates, $(X-X')(Y-Y')>0$, and \textbf{discordant}
+otherwise.
+
+\begin{frameddefn}{Kendall's $\tau$}\label{def:kendall}
+\textbf{Kendall's $\tau$} is the probability of a concordant pair minus
+the probability of a discordant one:
+\[
+\tau(X,Y)=P(\text{concordant})-P(\text{discordant})
+=\mathbb{E}\Big(\mathrm{sign}\big((X-X')(Y-Y')\big)\Big).
+\]
+\end{frameddefn}
+
+The second form holds because the sign is $+1$ on concordant pairs and
+$-1$ on discordant ones: so $\tau$ is an expected value too. It only looks
+at the \emph{order} of the values, not at their size, so it does not
+change if we transform $X$ and $Y$ with increasing functions. Taking as
+transformations the CDFs $F_X$ and $F_Y$, we see that $\tau$ does not
+depend on the marginal distributions of $X$ and $Y$, only on how they are
+linked.
+
+Kendall's $\tau$ is still a weak correlation: $\tau=0$ does not imply
+that $X$ and $Y$ are independent. It can, however, be turned into a strong
+correlation.
+
+\subsubsection{Spearman's \texorpdfstring{$\rho$}{rho}}
+
+Another way to look only at the order of the values is to replace each
+variable by its CDF,
+\[
+Z_X=F_X(X),\qquad Z_Y=F_Y(Y).
+\]
+$Z_X$ is the fraction of the population below $X$, so it says where $X$
+ranks, from $0$ to $1$.
+
+\begin{frameddefn}{Spearman's $\rho$}\label{def:spearman}
+\textbf{Spearman's $\rho$} is the Pearson correlation of the transformed
+variables:
+\[
+\rho^{(S)}(X,Y)=\rho(Z_X,Z_Y).
+\]
+\end{frameddefn}
+
+Like $\tau$, and unlike $\rho$, it does not depend on the marginals of $X$
+and $Y$, only on how they are linked.
+
+\subsubsection{Distance correlation}
+
+Kendall's $\tau$ and Spearman's $\rho$ still only see increasing or
+decreasing relationships. A strong correlation must see every kind of
+dependence. The best known one is built from distances between draws.
+
+\begin{frameddefn}{Distance correlation}\label{def:distance-correlation}
+Let $(\underline{X},\underline{Y})$, $(\underline{X}',\underline{Y}')$
+and $(\underline{X}'',\underline{Y}'')$ be independent copies. The squared
+\textbf{distance covariance} of $\underline{X}$ and $\underline{Y}$ is
+\[
+\gamma^2(\underline{X},\underline{Y})
+=\mathrm{Cov}\big(\|\underline{X}-\underline{X}'\|,\|\underline{Y}-\underline{Y}'\|\big)
+-2\,\mathrm{Cov}\big(\|\underline{X}-\underline{X}'\|,\|\underline{Y}-\underline{Y}''\|\big),
+\]
+and the squared \textbf{distance correlation} is
+\[
+\rho^2_{d}(\underline{X},\underline{Y})
+=\frac{\gamma^2(\underline{X},\underline{Y})}{\sqrt{\gamma^2(\underline{X},\underline{X})}\,\sqrt{\gamma^2(\underline{Y},\underline{Y})}}.
+\]
+\end{frameddefn}
+
+The first covariance asks whether pairs of draws that are far apart in
+$\underline{X}$ are also far apart in $\underline{Y}$. The second one
+subtracts what we would see anyway, comparing the distance in
+$\underline{X}$ with a distance in $\underline{Y}$ taken from an unrelated
+draw.
+
+\begin{framedthm}{Distance correlation is strong}\label{thm:dcor-strong}
+$\rho_d(\underline{X},\underline{Y})\in[0,1]$, and
+$\rho_d(\underline{X},\underline{Y})=0$ if and only if $\underline{X}$ and
+$\underline{Y}$ are independent.
+\end{framedthm}
+
+Two more features make it flexible. The vectors $\underline{X}$ and
+$\underline{Y}$ may have different dimensions, and the Euclidean norm
+$\|\cdot\|$ can be replaced by any other suitable distance: this is how
+the idea extends to data that do not live in $\mathbb{R}^p$.
+
+\begin{framedexamplepart}{ex:corr-nonlinear}{2}{Strong dependence, zero correlation}
+Let us take the four clouds of Example~\ref{ex:corr-nonlinear} again: a
+wave, a parabola, a ring and a cross, each made of $1000$ draws, where
+$X$ and $Y$ are strongly dependent but $\rho\approx0$. Do the other
+measures see the dependence?
+\begin{center}
+\begin{tabular}{@{}lcccc@{}}
+\toprule
+& (1) wave & (2) parabola & (3) ring & (4) cross\\
+\midrule
+Pearson $\rho$ & $0.00$ & $-0.02$ & $0.06$ & $-0.01$\\
+Kendall's $\tau$ & $-0.02$ & $-0.02$ & $0.01$ & $0.00$\\
+distance correlation $\rho_d$ & $0.24$ & $0.47$ & $0.21$ & $0.26$\\
+\bottomrule
+\end{tabular}
+\end{center}
+Kendall's $\tau$, a weak correlation, is as blind as $\rho$: none of the
+four relationships goes steadily up or down. The distance correlation, a
+strong one, is clearly positive in every panel. For comparison, two
+independent standard Normal samples of the same size give
+$\rho_d\approx0.05$, not exactly $0$ because we only have a finite sample.
+\end{framedexamplepart}
+
+\chapter{Statistical inference}\label{ch:inference}
+\lecturestart{19 November}
+
+\begin{todobox}
+Write the 19 November lecture: the sampling distribution of an algorithm,
+the frequentist and the Bayesian view. Sources: \texttt{my-scribbles/My
+scribbles - 2026\_11\_19.pdf}.
+\end{todobox}
+
+\clearpage
+\lecturestart{20 November}
+
+\begin{todobox}
+Write the 20 November lecture: point estimation, the quadratic loss and
+the mean squared error. Sources: \texttt{10) Lezione 20 novembre 2026.pdf}
+and \texttt{my-scribbles/My scribbles - 2026\_11\_20.pdf}.
+\end{todobox}
+
+\clearpage
+\lecturestart{25 November}
+
+\begin{todobox}
+Write the 25 November lecture: probability tools for averages, the modes
+of convergence, the law of large numbers, the central limit theorem and
+exact results. Source: \texttt{11) Lezione 25 novembre 2026
+(temporary).pdf}.
+\end{todobox}
+
 \end{document}

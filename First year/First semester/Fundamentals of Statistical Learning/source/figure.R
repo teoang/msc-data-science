@@ -693,3 +693,50 @@ plot(years, cage_films, type = "o", pch = 19, lwd = 2, col = orange,
 axis(4, at = 0:4)
 mtext("Nicolas Cage films", side = 4, line = 2.2, col = orange, las = 0, cex = .8)
 dev.off()
+
+# Bivariate Normal densities: contour plots for several covariance matrices
+dnorm2 <- function(x, y, s) {
+  q <- (s[2, 2] * x^2 - 2 * s[1, 2] * x * y + s[1, 1] * y^2) / det(s)
+  exp(-q / 2) / (2 * pi * sqrt(det(s)))
+}
+contour_panel <- function(s, main) {
+  g <- seq(-3.2, 3.2, length.out = 161)
+  z <- outer(g, g, dnorm2, s = s)
+  plot(NA, xlim = range(g), ylim = range(g), xlab = "", ylab = "",
+       xaxt = "n", yaxt = "n", main = main, cex.main = 1, font.main = 1)
+  grid(col = grid_col)
+  abline(h = 0, v = 0, col = grid_col)
+  contour(g, g, z, add = TRUE, drawlabels = FALSE, nlevels = 7, col = blue, lwd = 1.2)
+}
+pdf("assets/mvn-sigma-cases.pdf", width = 8, height = 2.3,
+    family = "Helvetica", useDingbats = FALSE)
+par(mfrow = c(1, 4), mar = c(.4, .4, 1.4, .4), cex = .8, pty = "s")
+contour_panel(diag(2), "(1)")
+contour_panel(diag(c(2, 2)), "(2)")
+contour_panel(diag(c(2, .5)), "(3)")
+contour_panel(matrix(c(1, .6, .6, 1), 2), "(4)")
+dev.off()
+pdf("assets/mvn-rho.pdf", width = 8, height = 2.3,
+    family = "Helvetica", useDingbats = FALSE)
+par(mfrow = c(1, 4), mar = c(.4, .4, 1.4, .4), cex = .8, pty = "s")
+for (k in 1:4) {
+  r <- c(0, .5, .9, -.9)[k]
+  contour_panel(matrix(c(1, r, r, 1), 2), sprintf("(%d)", k))
+}
+dev.off()
+
+# Recall of the univariate Normal bell before the multivariate Normal
+pdf("assets/normal-bell-recall.pdf", width = 3.2, height = 2.1,
+    family = "Helvetica", useDingbats = FALSE)
+par(mar = c(2, .4, .4, .4), mgp = c(1.2, .3, 0), cex = .9, tcl = -.2)
+x <- seq(-3.4, 3.4, length.out = 400)
+plot(x, dnorm(x), type = "n", xlab = "", ylab = "", yaxt = "n", bty = "n",
+     xaxt = "n", ylim = c(0, .43))
+grid(col = grid_col)
+polygon(c(x, rev(x)), c(dnorm(x), rep(0, length(x))), col = adjustcolor(blue, .15), border = NA)
+lines(x, dnorm(x), col = blue, lwd = 2)
+segments(0, 0, 0, dnorm(0), col = ink, lty = 2)
+arrows(0, dnorm(1), 1, dnorm(1), length = .06, code = 3, col = orange)
+text(.5, dnorm(1), expression(sigma), pos = 3, col = orange)
+axis(1, at = c(-1, 0, 1), labels = expression(mu - sigma, mu, mu + sigma))
+dev.off()
