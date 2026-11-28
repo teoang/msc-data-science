@@ -384,8 +384,7 @@
 
 - [x] Shortest paths in a weighted graph: the length of a path, and why splitting the edges to use BFS is too expensive.
 - [x] Dijkstra's algorithm and its running time, without and with a heap.
-- [x] Spanning trees.
-- [ ] The minimum spanning tree.
+- [x] Spanning trees and minimum spanning trees.
 
 </details>
 
