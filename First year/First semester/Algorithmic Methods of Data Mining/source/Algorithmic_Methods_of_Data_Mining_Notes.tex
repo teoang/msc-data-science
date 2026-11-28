@@ -10784,13 +10784,9 @@ adds $999$ nodes. We need something smarter.
 
 Dijkstra's algorithm works on the weighted graph directly. For every
 node $v$ it keeps $\mathit{len}[v]$, the length of the shortest path
-from $s$ to $v$ found so far, and a set of \emph{unexplored} nodes,
-whose $\mathit{len}$ may still decrease. At the start only the
-neighbours of $s$ have a finite $\mathit{len}$, the weight of their
-edge from $s$. Then, at each step, the algorithm takes the unexplored
-node $v$ with the smallest $\mathit{len}$, declares it explored, and
-checks whether going through $v$ gives a shorter path to its
-unexplored neighbours.
+from $s$ to $v$ found so far. At each step it takes the unexplored node
+with the smallest $\mathit{len}$, marks it explored, and checks whether
+going through it shortens the paths to its unexplored neighbours.
 
 \Needspace{19\baselineskip}
 \begin{framedalgo}{Dijkstra}\label{alg:dijkstra}
@@ -10818,42 +10814,122 @@ unexplored neighbours.
 \end{algorithmic}
 \end{framedalgo}
 
-Let us run it on the twelve-node graph from $s=1$. At the start
-$\mathit{len}[2]=1$, $\mathit{len}[3]=4$, $\mathit{len}[4]=7$,
-$\mathit{len}[9]=10$, and all the others are $+\infty$. Each row
-shows the node taken and the values of $\mathit{len}$ that decrease;
-when two nodes tie, we take the one with the smaller name.
-\begin{center}
-\small
-\begin{tabular}{cll}
-\hline
-Step & Taken $v$ & Updates\\
-\hline
-$1$ & $2$, $\mathit{len}=1$ & $\mathit{len}[5]=1+2=3$, $\mathit{len}[7]=1+3=4$\\
-$2$ & $5$, $\mathit{len}=3$ & $\mathit{len}[4]=3+1=4$, $\mathit{len}[8]=3+2=5$\\
-$3$ & $3$, $\mathit{len}=4$ & $\mathit{len}[6]=4+2=6$\\
-$4$ & $4$, $\mathit{len}=4$ & $\mathit{len}[9]=4+3=7$\\
-$5$ & $7$, $\mathit{len}=4$ & $\mathit{len}[9]=4+2=6$, $\mathit{len}[11]=4+6=10$\\
-$6$ & $8$, $\mathit{len}=5$ & none\\
-$7$ & $6$, $\mathit{len}=6$ & $\mathit{len}[10]=6+7=13$\\
-$8$ & $9$, $\mathit{len}=6$ & $\mathit{len}[10]=6+4=10$, $\mathit{len}[12]=6+6=12$\\
-$9$ & $10$, $\mathit{len}=10$ & none\\
-$10$ & $11$, $\mathit{len}=10$ & none\\
-$11$ & $12$, $\mathit{len}=12$ & none\\
-\hline
-\end{tabular}
-\end{center}
-The shortest path to $9$ has length $6$, as we found by hand.
-$\mathit{len}[9]$ went down three times: $10$ with the direct edge,
-$7$ through $4$, and $6$ through $7$.
+\newcommand{\djgraph}[3]{% node states 1..12, edges that lower len, len labels
+  \begin{tikzpicture}[x=0.78cm,y=0.62cm,
+    u/.style={gnode},
+    w/.style={gnode,fill=yellow!45},
+    c/.style={gnode,fill=PlotRed!20,draw=PlotRed,very thick},
+    d/.style={gnode,fill=PlotBlue!30},
+    wt/.style={font=\tiny,fill=white,inner sep=0.5pt}]
+    \foreach \i/\x/\y in {1/2.3/8.9,2/1.2/7.3,3/3.7/7.3,4/2.5/5.7,
+        5/0.6/5.6,6/4.6/6.0,7/1.75/3.8,8/0.6/2.2,9/4.5/4.1,10/6.4/4.6,
+        11/3.2/1.6,12/5.6/2.3}
+      \coordinate (p\i) at (\x,\y);
+    \foreach \st [count=\i] in {#1}
+      \node[\st] (n\i) at (p\i) {$\i$};
+    \foreach \a/\b in {1/2,1/3,1/4,1/9,2/5,2/7,3/4,3/6,4/5,4/7,4/9,6/9,
+        6/10,9/10,7/9,9/11,9/12,10/12,5/8,7/8,7/11,8/11,11/12}
+      \draw[gray] (n\a)--(n\b);
+    \if\relax\detokenize{#2}\relax\else
+      \foreach \a/\b in {#2} \draw[PlotRed,very thick] (n\a)--(n\b);\fi
+    \path (n1)--(n9) node[wt,pos=0.62] {$10$};
+    \path (n4)--(n5) node[wt,pos=0.3] {$1$};
+    \foreach \a/\b/\l in {1/2/1,1/3/4,1/4/7,2/5/2,2/7/3,3/4/3,3/6/2,
+        4/7/5,4/9/3,6/9/6,6/10/7,9/10/4,7/9/2,9/11/7,9/12/6,10/12/4,
+        5/8/2,7/8/6,7/11/6,8/11/9,11/12/3}
+      \path (n\a)--(n\b) node[wt,pos=0.5] {$\l$};
+    \foreach \x/\l in {#3} {
+      \ifcase\x\or\def\dd{west/east}\or\def\dd{west/east}\or
+        \def\dd{east/west}\or\def\dd{east/west}\or\def\dd{west/east}\or
+        \def\dd{north/south}\or\def\dd{west/east}\or\def\dd{west/east}\or
+        \def\dd{south/north}\or\def\dd{east/west}\or
+        \def\dd{south/north}\or\def\dd{east/west}\fi
+      \foreach \da/\db in \dd
+        \node[font=\scriptsize,text=PlotBlue,inner sep=1pt,anchor=\db]
+          at (n\x.\da) {$\mathbf{\l}$};}
+  \end{tikzpicture}}
+\newcommand{\djstep}[4]{% states, edges, labels, text
+  \par\noindent
+  \begin{minipage}[c]{0.5\textwidth}\centering
+    \djgraph{#1}{#2}{#3}
+  \end{minipage}\hfill
+  \begin{minipage}[c]{0.46\textwidth}\small #4\end{minipage}
+  \par\medskip}
 
-How long does it take? The loop runs $n=|V|$ times. If we look for the
-minimum by scanning all the unexplored nodes, each step costs $O(n)$,
-and over the whole run every edge is checked a constant number of
-times, so the total is $O(n^2+m)$, with $m=|E|$. If we keep the
-unexplored nodes in a \hyperref[def:binary-min-heap]{min-heap} keyed
-by $\mathit{len}$, taking the minimum and lowering a key both cost
-$O(\log n)$, and the total is $O((n+m)\log n)$.
+Let us run it on the twelve-node graph from $s=1$. White: still at
+$+\infty$; yellow: unexplored with a finite $\mathit{len}$; red: the
+node just taken; blue: explored. The blue numbers are the values of
+$\mathit{len}$, and the red edges are the ones that just lowered one.
+On a tie we take the smaller name.
+
+\medskip
+\djstep{d,w,w,w,u,u,u,u,w,u,u,u}{1/2,1/3,1/4,1/9}
+  {1/0,2/1,3/4,4/7,9/10}
+  {\textbf{Start.} $\mathit{len}[1]=0$; each neighbour of $1$ gets the
+   weight of its edge.}
+\djstep{d,c,w,w,w,u,w,u,w,u,u,u}{2/5,2/7}
+  {1/0,2/1,3/4,4/7,5/3,7/4,9/10}
+  {\textbf{Take $2$} ($\mathit{len}=1$).\\
+   $5$: $1+2=3$.\\
+   $7$: $1+3=4$.}
+\djstep{d,d,w,w,c,u,w,w,w,u,u,u}{5/4,5/8}
+  {1/0,2/1,3/4,4/4,5/3,7/4,8/5,9/10}
+  {\textbf{Take $5$} ($\mathit{len}=3$).\\
+   $4$: $3+1=4<7$.\\
+   $8$: $3+2=5$.}
+\djstep{d,d,c,w,d,w,w,w,w,u,u,u}{3/6}
+  {1/0,2/1,3/4,4/4,5/3,6/6,7/4,8/5,9/10}
+  {\textbf{Take $3$} ($\mathit{len}=4$, tied with $4$ and $7$).\\
+   $6$: $4+2=6$.\\
+   $4$: $4+3=7$, no gain.}
+\djstep{d,d,d,c,d,w,w,w,w,u,u,u}{4/9}
+  {1/0,2/1,3/4,4/4,5/3,6/6,7/4,8/5,9/7}
+  {\textbf{Take $4$} ($\mathit{len}=4$).\\
+   $9$: $4+3=7<10$.\\
+   $7$: $4+5=9$, no gain.}
+\djstep{d,d,d,d,d,w,c,w,w,u,w,u}{7/9,7/11}
+  {1/0,2/1,3/4,4/4,5/3,6/6,7/4,8/5,9/6,11/10}
+  {\textbf{Take $7$} ($\mathit{len}=4$).\\
+   $9$: $4+2=6<7$.\\
+   $11$: $4+6=10$.\\
+   $8$: $10$, no gain.}
+\djstep{d,d,d,d,d,w,d,c,w,u,w,u}{}
+  {1/0,2/1,3/4,4/4,5/3,6/6,7/4,8/5,9/6,11/10}
+  {\textbf{Take $8$} ($\mathit{len}=5$).\\
+   $11$: $5+9=14$, no gain.}
+\djstep{d,d,d,d,d,c,d,d,w,w,w,u}{6/10}
+  {1/0,2/1,3/4,4/4,5/3,6/6,7/4,8/5,9/6,10/13,11/10}
+  {\textbf{Take $6$} ($\mathit{len}=6$, tied with $9$).\\
+   $10$: $6+7=13$.\\
+   $9$: $12$, no gain.}
+\djstep{d,d,d,d,d,d,d,d,c,w,w,w}{9/10,9/12}
+  {1/0,2/1,3/4,4/4,5/3,6/6,7/4,8/5,9/6,10/10,11/10,12/12}
+  {\textbf{Take $9$} ($\mathit{len}=6$).\\
+   $10$: $6+4=10<13$.\\
+   $12$: $6+6=12$.\\
+   $11$: $13$, no gain.}
+\djstep{d,d,d,d,d,d,d,d,d,c,w,w}{}
+  {1/0,2/1,3/4,4/4,5/3,6/6,7/4,8/5,9/6,10/10,11/10,12/12}
+  {\textbf{Take $10$} ($\mathit{len}=10$, tied with $11$).\\
+   $12$: $14$, no gain.}
+\djstep{d,d,d,d,d,d,d,d,d,d,c,w}{}
+  {1/0,2/1,3/4,4/4,5/3,6/6,7/4,8/5,9/6,10/10,11/10,12/12}
+  {\textbf{Take $11$} ($\mathit{len}=10$).\\
+   $12$: $13$, no gain.}
+\djstep{d,d,d,d,d,d,d,d,d,d,d,c}{}
+  {1/0,2/1,3/4,4/4,5/3,6/6,7/4,8/5,9/6,10/10,11/10,12/12}
+  {\textbf{Take $12$} ($\mathit{len}=12$). No node is left unexplored:
+   stop.}
+
+So $\mathit{len}[9]=6$, the path $1,2,7,9$ we found by hand.
+
+How long does it take? The loop runs $n=|V|$ times, and over the whole
+run every edge is checked a constant number of times. Scanning the
+unexplored nodes for the minimum costs $O(n)$ per step, so the total
+is $O(n^2+m)$, with $m=|E|$. With a
+\hyperref[def:binary-min-heap]{min-heap} keyed by $\mathit{len}$,
+taking the minimum and lowering a key cost $O(\log n)$, and the total
+is $O((n+m)\log n)$.
 
 \section{Spanning trees}
 \label{sec:spanning-trees}
@@ -10863,6 +10939,43 @@ A \emph{spanning tree} of a graph $G$ is a
 \hyperref[def:subgraph]{subgraph} of $G$ that contains all the nodes
 of $G$ and is a \hyperref[def:tree]{tree}.
 \end{frameddefn}
+
+In a weighted graph, different spanning trees can weigh very
+differently. Which one is the cheapest?
+
+\begin{frameddefn}{Minimum spanning tree}\label{def:mst}
+In a connected weighted graph, the \emph{weight} of a spanning tree is
+the sum of the weights of its edges. A \emph{minimum spanning tree}
+(MST) is a spanning tree of smallest weight.
+\end{frameddefn}
+
+\newcommand{\stgraph}[2]{% red tree edges, caption
+  \begin{tikzpicture}[x=1cm,y=1cm,
+    w/.style={font=\scriptsize,fill=white,inner sep=1pt}]
+    \node[gnode] (1) at (0.5,2.4) {$1$};
+    \node[gnode] (2) at (1.8,1.6) {$2$};
+    \node[gnode] (3) at (-0.3,1.4) {$3$};
+    \node[gnode] (4) at (0.8,0.4) {$4$};
+    \node[gnode] (5) at (1.8,-0.8) {$5$};
+    \foreach \a/\b in {1/2,1/3,3/4,2/4,4/5,2/5}
+      \draw[gray,dashed] (\a)--(\b);
+    \draw[gray,dashed] (1) to[out=0,in=0,looseness=1.6] (5);
+    \foreach \a/\b in {#1} {
+      \ifnum\a\b=15
+        \draw[PlotRed,very thick] (1) to[out=0,in=0,looseness=1.6] (5);
+      \else \draw[PlotRed,very thick] (\a)--(\b);\fi}
+    \foreach \a/\b/\l in {1/2/3,1/3/3,3/4/2,2/4/2,4/5/1,2/5/2}
+      \path (\a)--(\b) node[w,pos=0.5] {$\l$};
+    \path (1) to[out=0,in=0,looseness=1.6] node[w,pos=0.5] {$5$} (5);
+    \node[font=\small] at (0.9,-1.6) {#2};
+  \end{tikzpicture}}
+
+Let us go back to the five-node graph we used to ask whether BFS still
+works. Both trees below reach all five nodes with four edges:
+\begin{center}
+\stgraph{1/5,1/2,1/3,3/4}{a spanning tree, weight $13$}\hspace{2cm}
+\stgraph{4/5,3/4,2/4,1/2}{an MST, weight $8$}
+\end{center}
 
 \begin{todobox}
 The lecture goes on with finding the minimum spanning tree. The notes
